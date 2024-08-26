@@ -13,6 +13,19 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import express from 'express';
 import { dbConnection } from './config';
+import { ApolloServerErrorCode } from '@apollo/server/errors'
+
+
+
+const formatError = (formattedError: any, error: any) => {
+    return {
+        ...formattedError,
+        message: formattedError.message,
+        extensions: {
+            stacktrace: null
+        }
+    }
+}
 
 
 export const app: express.Express = express();
@@ -36,6 +49,7 @@ export const httpServer = createServer(app);
     const serverCleanup = useServer({ schema }, wsServer)
     const server: ApolloServer = new ApolloServer({
         schema,
+        formatError,
         plugins: [
             ApolloServerPluginDrainHttpServer({ httpServer }),
             {
