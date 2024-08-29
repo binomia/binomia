@@ -4,92 +4,66 @@ import { UsersController } from '../controllers'
 const type = () => {
     return `
         input UserInput {
-            full_name: String
+            fullName: String
             username: String
             email: String
             dni: String
             sex: String
             address: String
             dob: String
-            dni_expire_date: String
+            dniExpiration: String
         }
 
-        type Users {
+        type UserType {
             id: Int
-            full_name: String
+            fullName: String
             username: String
             email: String
             dni: String
             sex: String
             address: String
             dob: String
-            dni_expire_date: String
-            created_at: String
-            updated_at: String
-        }
-
-        type OnlyUsers {
-            id: Int
-            full_name: String
-            username: String
-            email: String
-            dni: String
-            sex: String
-            address: String
-            dob: String
-            dni_expire_date: String
-            created_at: String
-            updated_at: String
-        }
-
-        type SingleUserType {
-            error: Boolean
-            message: String
-            data: Users
-        }
-
-        type MultipleUsersType {
-            error: Boolean
-            message: String
-            data: [Users]
+            dniExpiration: String
+            createdAt: String
+            updatedAt: String
         }
     `
 }
 
 const query = () => {
     return `
-        users(page: Int!, pageSize: Int!): [Users]
-        user(uuid: String!): SingleUserType
-        searchUsers(search: UserInput!, limit: Int): MultipleUsersType
+        users(page: Int!, pageSize: Int!): [UserType]
+        user(uuid: String!): UserType
+        searchUsers(search: UserInput!, limit: Int): [UserType]
     `
 }
 
 const mutation = () => {
     return `            
-        createUser(data: UserInput!): SingleUserType 
-        updateUser(uuid: String!, data: UserInput!): SingleUserType
+        createUser(data: UserInput!): UserType 
+        updateUser(uuid: String!, data: UserInput!): UserType
         sendMessage(message: String): String
     `
 }
 
 const subscription = () => {
     return `
-        userCreated: SingleUserType
-        userUpdated: SingleUserType
+        userCreated: UserType
+        userUpdated: UserType
         messageReceived: String
     `
 }
 
-const { users, user } = UsersController
+const { users, user, createUser, searchUsers } = UsersController
 const resolvers = {
     query: {
         users,
         user,
-        // searchUsers
+        searchUsers
     },
 
     mutation: {
-        // createUser,
+        createUser,
         // updateUser
     },
 

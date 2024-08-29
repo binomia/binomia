@@ -12,7 +12,7 @@ export const dbConnection = async () => {
     try {
         db.authenticate()
         db.sync()
-        console.log('\nDatabase connection has been established successfully.');
+        // console.log('\nDatabase connection has been established successfully.');
     } catch (error) {
         console.log('\nUnable to connect to the database:', error);
     }

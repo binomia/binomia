@@ -1,10 +1,8 @@
-
 import { createServer } from 'http';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { makeExecutableSchema } from '@graphql-tools/schema';
-import { Request, Response, NextFunction } from 'express';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 
@@ -18,9 +16,24 @@ import os from "os";
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import express from 'express';
+import { errorCode } from './src/errors';
+import { GraphQLError } from "graphql";
+
+
 
 const app: express.Express = express();
 const httpServer = createServer(app);
+
+const formatError = (formattedError: any, error: unknown) => {
+    throw new GraphQLError(formattedError.message, {
+        extensions: {
+            code: formattedError.extensions.code || 'INTERNAL_SERVER_ERROR',
+            http: {
+                status: errorCode[formattedError.extensions.code] || 500
+            }
+        }   
+    })
+}
 
 (async () => {
     app.get('/seed', async (_, res) => {
@@ -40,6 +53,7 @@ const httpServer = createServer(app);
     const serverCleanup = useServer({ schema }, wsServer)
     const server: ApolloServer = new ApolloServer({
         schema,
+        formatError,
         plugins: [
             ApolloServerPluginDrainHttpServer({ httpServer }),
             {
@@ -50,8 +64,9 @@ const httpServer = createServer(app);
                         }
                     }
                 }
-            }
-        ]
+            },
+        ],
+
     })
 
     await server.start()
@@ -60,9 +75,7 @@ const httpServer = createServer(app);
         cors(),
         bodyParser.json(),
         expressMiddleware(server, {
-            context: async ({ req, res }) => {
-                return { req, res }
-            }
+            context: async ({ req, res }) => ({ req, res })
         })
     )
 

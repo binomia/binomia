@@ -13,25 +13,33 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import express from 'express';
 import { dbConnection } from './config';
-import { ApolloServerErrorCode } from '@apollo/server/errors'
+import { GraphQLError } from 'graphql';
+import { errorCode } from './errors';
+
 
 
 
 const formatError = (formattedError: any, error: any) => {
-    return {
-        ...formattedError,
-        message: formattedError.message,
-        extensions: {
-            stacktrace: null
-        }
-    }
+    const formattedErrors = error
+    formattedErrors.extensions = {}
+    formattedErrors.http = { http: { status: errorCode[formattedError.extensions.code] } }
+
+    throw formattedErrors
 }
 
 
 export const app: express.Express = express();
 export const httpServer = createServer(app);
 
+
+
+
 (async () => {
+    app.use("/", (_req, _res, next) => {
+        console.log("worker: ", cluster.worker?.id);
+        next()
+    })
+
     app.get('/seed', async (_, res) => {
         res.json({
             status: 'success',
@@ -70,6 +78,7 @@ export const httpServer = createServer(app);
         cors(),
         bodyParser.json(),
         expressMiddleware(server)
+
     )
 
     const PORT = process.env.PORT || 3000

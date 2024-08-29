@@ -36,17 +36,9 @@ const getGqlBody = (fieldNodes: any[], schema: string) => {
 }
 
 export const getQueryResponseFields = (fieldNodes: any[], name: string, isGlobal: boolean = false, isAll: boolean = false) => {
-    let fields: any = {}
     const selections = fieldNodes[0].selectionSet?.selections;
-
-    for (let i = 0; i < selections.length; i++) {
-        if (selections[i].name.value === "data") {
-            const body = getGqlBody(selections[i].selectionSet.selections, name)
-            fields = body
-            break;
-        }
-    }
-
+    const fields = getGqlBody(selections, name)
+    
     return fields
 }
 

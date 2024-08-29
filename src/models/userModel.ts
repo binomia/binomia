@@ -3,7 +3,7 @@ import { db } from "../config";
 
 
 const UsersModel = db.define('users', {
-    full_name: {
+    fullName: {
         type: STRING,
         allowNull: false
     },
@@ -31,12 +31,11 @@ const UsersModel = db.define('users', {
         type: DATE,
         allowNull: false
     },
-    dni_expire_date: {
+    dniExpiration: {
         type: DATE,
         allowNull: false
     }
-
-}, { timestamps: true, underscored: true })
+})
 
 
 
