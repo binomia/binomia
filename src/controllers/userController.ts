@@ -1,11 +1,13 @@
-import { UsersModel } from '../models'
+import { AccountModel, UsersModel } from '../models'
 import { Op } from 'sequelize'
 import { getQueryResponseFields, formatCedula } from '../helpers'
+import { SESSION_SECRET_SECRET_KEY } from '../constants'
 import { GraphQLError } from 'graphql';
 import { UserJoiSchema } from '../joi';
 import { UserModelType } from '../types';
 import { Request, Response } from "express"
-
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 export class UsersController {
     static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, _context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -20,8 +22,12 @@ export class UsersController {
                 limit,
                 offset,
                 attributes: fields['users'],
+                include: [{
+                    model: AccountModel,
+                    as: 'accounts',
+                    attributes: fields['accounts']
+                }]
             })
-
 
             return users
 
@@ -29,7 +35,6 @@ export class UsersController {
             throw new GraphQLError(error.message);
         }
     }
-
 
     static user = async (_: unknown, { dni }: { dni: string }, __: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
@@ -47,7 +52,6 @@ export class UsersController {
             throw new GraphQLError(error.message);
         }
     }
-
 
     static searchUsers = async (_: any, { search, limit }: { search: UserModelType, limit: number }, __: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
@@ -97,8 +101,55 @@ export class UsersController {
             else if (userExists?.dataValues.email === validatedData.email)
                 throw new GraphQLError('A user with email: ' + validatedData.email + ' already exists');
 
-            const user = await UsersModel.create(validatedData)
-            return user
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(validatedData.password, salt);
+
+            const user = await UsersModel.create(Object.assign({}, validatedData, {
+                password: hashedPassword
+            }))
+
+            const account = await AccountModel.create({
+                userId: user.dataValues.id,
+                currency: "DOP",
+            })
+
+            return {
+                ...user.dataValues,
+                accounts: [account]
+            }
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
+    static login = async (_: unknown, { email, password }: { email: string, password: string }, { res, req }: { res: any, req: any }) => {
+        try {
+            const validatedData: UserModelType = await UserJoiSchema.login.validateAsync({ email, password })
+
+            const user = await UsersModel.findOne({
+                where: { email }
+            })
+
+            if (!user)
+                throw new GraphQLError(`Not found user with email: ${validatedData.email}`);
+
+            const isMatch = await bcrypt.compare(password, user.dataValues.password);
+            if (!isMatch)
+                throw new GraphQLError('Incorrect password');
+
+
+            // Generate a JWT
+            const token = jwt.sign({
+                userId: user.dataValues.id,
+                sid: req.session.id
+            }, SESSION_SECRET_SECRET_KEY, { expiresIn: '1h' });
+
+            req.session.jwtToken = token
+
+            // console.log({ token });
+
+            return token
 
         } catch (error: any) {
             throw new GraphQLError(error.message);

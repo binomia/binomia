@@ -1,4 +1,7 @@
+import { SESSION_SECRET_SECRET_KEY } from '../constants';
 import bcrypt from 'bcryptjs';
+import { GraphQLError } from 'graphql';
+import jwt from 'jsonwebtoken';
 
 
 const getGqlBody = (fieldNodes: any[], schema: string) => {
@@ -7,16 +10,10 @@ const getGqlBody = (fieldNodes: any[], schema: string) => {
     }
 
     const gqlSchemas = [
-        "fine",
-        "fines",
-        "finesType",
-        "officer",
-        "officers",
         "user",
         "users",
-        "vehicle",
-        "vehicles",
-        "reports"
+        "account",
+        "accounts",
     ];
 
     fieldNodes.forEach((item: any) => {
@@ -38,7 +35,7 @@ const getGqlBody = (fieldNodes: any[], schema: string) => {
 export const getQueryResponseFields = (fieldNodes: any[], name: string, isGlobal: boolean = false, isAll: boolean = false) => {
     const selections = fieldNodes[0].selectionSet?.selections;
     const fields = getGqlBody(selections, name)
-    
+
     return fields
 }
 
@@ -93,4 +90,25 @@ export const generateUUID = (): string => {
         return inputString.toString();
         // throw new Error("Invalid input string length");
     }
+}
+
+
+export const checkForProtectedRequests = (req: any) => {
+    const token = req.headers.authorization || '';
+    req.user = null
+
+    if (!token)
+        throw new GraphQLError('Unauthorized access')
+
+
+    jwt.verify(token.split(' ')[1], SESSION_SECRET_SECRET_KEY, (err: any, decoded: any) => {
+        if (err)
+            throw new GraphQLError("Unauthorized access")
+
+
+        if (decoded.sid !== req.session.id)
+            throw new GraphQLError("Unauthorized access")
+
+        req.jwtData = decoded
+    })
 }

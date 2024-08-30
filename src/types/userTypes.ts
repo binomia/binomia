@@ -2,6 +2,8 @@ export type UserModelType = {
     id?: number
     fullName: string
     username: string
+    password: string
+    imageUrl: string
     email: string
     dni: string
     sex: string

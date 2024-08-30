@@ -1,0 +1,1 @@
+export const SESSION_SECRET_SECRET_KEY = process.env.SESSION_SECRET_SECRET_KEY || 'secret'

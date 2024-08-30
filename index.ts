@@ -1,3 +1,4 @@
+import "dotenv/config"
 import { createServer } from 'http';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
@@ -5,6 +6,11 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
+import session, { } from 'express-session';
+import SequelizeStore from 'connect-session-sequelize';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+
 
 // Temporary
 import { typeDefs } from './src/gql'
@@ -18,11 +24,21 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import { errorCode } from './src/errors';
 import { GraphQLError } from "graphql";
+import { AccountModel, UsersModel } from './src/models';
+import { SESSION_SECRET_SECRET_KEY } from "./src/constants";
 
 
 
 const app: express.Express = express();
 const httpServer = createServer(app);
+
+// Define the session model
+const Store = SequelizeStore(session.Store)
+const SessionStore = new Store({
+    db
+});
+SessionStore.sync();
+
 
 const formatError = (formattedError: any, error: unknown) => {
     throw new GraphQLError(formattedError.message, {
@@ -31,15 +47,37 @@ const formatError = (formattedError: any, error: unknown) => {
             http: {
                 status: errorCode[formattedError.extensions.code] || 500
             }
-        }   
+        }
     })
 }
 
+
 (async () => {
+    app.use(
+        session({
+            secret: SESSION_SECRET_SECRET_KEY, // Replace with your own secret
+            store: SessionStore,
+            resave: false, // Don't resave session if unmodified
+            saveUninitialized: false, // Don't create session until something stored
+            cookie: {
+                secure: false,
+                maxAge: 1000 * 60 * 15
+            }
+        })
+    );
+
+
+
     app.get('/seed', async (_, res) => {
-        res.json({
-            status: 'success',
-            message: 'Hello World!'
+        await UsersModel.findAll({
+            include: [{
+                model: AccountModel,
+                as: 'accounts'
+            }]
+        }).then((users) => {
+            res.json({ users })
+        }).catch((err) => {
+            console.log(err);
         })
     })
 

@@ -6,6 +6,8 @@ const type = () => {
         input UserInput {
             fullName: String
             username: String
+            password: String
+            imageUrl: String
             email: String
             dni: String
             sex: String
@@ -18,6 +20,24 @@ const type = () => {
             id: Int
             fullName: String
             username: String
+            imageUrl: String
+            email: String
+            password: String
+            dni: String
+            sex: String
+            address: String
+            dob: String
+            dniExpiration: String
+            createdAt: String
+            updatedAt: String
+            accounts: [OnlyAccountType]
+        }
+
+        type OnlyUserType {
+            id: Int
+            fullName: String
+            username: String
+            imageUrl: String
             email: String
             dni: String
             sex: String
@@ -43,6 +63,7 @@ const mutation = () => {
         createUser(data: UserInput!): UserType 
         updateUser(uuid: String!, data: UserInput!): UserType
         sendMessage(message: String): String
+        login(email: String!, password: String!): String
     `
 }
 
@@ -54,7 +75,7 @@ const subscription = () => {
     `
 }
 
-const { users, user, createUser, searchUsers } = UsersController
+const { users, user, createUser, searchUsers, login } = UsersController
 const resolvers = {
     query: {
         users,
@@ -64,7 +85,7 @@ const resolvers = {
 
     mutation: {
         createUser,
-        // updateUser
+        login
     },
 
     subscription: {

@@ -11,7 +11,15 @@ const UsersModel = db.define('users', {
         type: STRING,
         allowNull: false
     },
+    imageUrl: {
+        type: STRING,
+        allowNull: true
+    },
     email: {
+        type: STRING,
+        allowNull: false
+    },
+    password: {
         type: STRING,
         allowNull: false
     },
