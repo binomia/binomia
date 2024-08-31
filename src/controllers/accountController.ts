@@ -1,12 +1,6 @@
 import { AccountModel, UsersModel } from '../models'
-import { getQueryResponseFields, formatCedula } from '../helpers'
+import { getQueryResponseFields } from '../helpers'
 import { GraphQLError } from 'graphql';
-import { UserJoiSchema } from '../joi';
-import { CurrencyType, UserModelType } from '../types';
-import { Request, Response } from "express"
-import { Op } from 'sequelize';
-import short from 'short-uuid';
-
 
 export class AccountController {
     static accounts = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, _context: any, { fieldNodes }: { fieldNodes: any }) => {

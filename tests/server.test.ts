@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { app } from "../src/app";
+import { app } from "..";
 import supertest from 'supertest';
 
 describe('Seerver Test:', () => {

@@ -1,6 +1,6 @@
 import { AccountModel, UsersModel } from '../models'
 import { Op } from 'sequelize'
-import { getQueryResponseFields, formatCedula, checkForProtectedRequests } from '../helpers'
+import { getQueryResponseFields, checkForProtectedRequests } from '../helpers'
 import { SESSION_SECRET_SECRET_KEY } from '../constants'
 import { GraphQLError } from 'graphql';
 import { UserJoiSchema } from '../joi';

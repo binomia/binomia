@@ -9,7 +9,6 @@ import { useServer } from 'graphql-ws/lib/use/ws';
 import session, { } from 'express-session';
 import SequelizeStore from 'connect-session-sequelize';
 
-// Temporary
 import { typeDefs } from './src/gql'
 import { resolvers } from './src/gql'
 import { db } from './src/config';
@@ -26,10 +25,8 @@ import { SESSION_SECRET_SECRET_KEY } from "./src/constants";
 
 
 
-const app: express.Express = express();
+export const app: express.Express = express();
 const httpServer = createServer(app);
-
-
 
 
 const formatError = (formattedError: any, error: unknown) => {
