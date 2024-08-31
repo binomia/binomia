@@ -1,29 +1,28 @@
-import { DATE, INTEGER, STRING, TEXT } from "sequelize";
-import AccountModel from "./accountModel";
-import UsersModel from "./userModel";
-import { db } from "../config";
+import { DATE, STRING, JSONB } from "sequelize"
+import AccountModel from "./accountModel"
+import UsersModel from "./userModel"
+import { db } from "../config"
 
 
-AccountModel.belongsTo(UsersModel, { foreignKey: 'userId' })
+const SessionModel = db.define('sessions', {
+	sid: {
+		type: STRING,
+		primaryKey: true
+	},
+	jwtToken: STRING,
+	expires: DATE,
+	data: JSONB
+})
+
+
+AccountModel.belongsTo(UsersModel)
 UsersModel.hasMany(AccountModel)
 
-
-
-// Define the Session model
-const SessionModel = db.define('Session', {
-    sid: {
-      type: STRING,
-      primaryKey: true,
-    },
-    userId: INTEGER,
-    jwtToken: TEXT, // Field to store the JWT
-    expires: DATE,
-    data: TEXT,
-});
-
+SessionModel.belongsTo(UsersModel)
+UsersModel.hasMany(SessionModel)
 
 export {
-    UsersModel,
-    SessionModel,
-    AccountModel
+	UsersModel,
+	SessionModel,
+	AccountModel
 }

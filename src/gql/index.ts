@@ -31,12 +31,9 @@ export const resolvers = {
     Query: {
         ...userGQL.resolvers.query,
         ...accountGQL.resolvers.query,
-        hello: (_: any, args: any, { req }: { req: any }, info: any, path: any, error: any, dir: any) => {
+        hello: async () => {
             try {
-                checkForProtectedRequests(req);
-
-                console.log(req.jwtData);
-                
+                // checkForProtectedRequests(req);
                 return 'hello'
             } catch (error: any) {
                 throw new Error(error)

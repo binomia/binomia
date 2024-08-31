@@ -8,9 +8,6 @@ import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 import session, { } from 'express-session';
 import SequelizeStore from 'connect-session-sequelize';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-
 
 // Temporary
 import { typeDefs } from './src/gql'
@@ -24,7 +21,7 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import { errorCode } from './src/errors';
 import { GraphQLError } from "graphql";
-import { AccountModel, UsersModel } from './src/models';
+import { SessionModel, UsersModel } from './src/models';
 import { SESSION_SECRET_SECRET_KEY } from "./src/constants";
 
 
@@ -32,12 +29,7 @@ import { SESSION_SECRET_SECRET_KEY } from "./src/constants";
 const app: express.Express = express();
 const httpServer = createServer(app);
 
-// Define the session model
-const Store = SequelizeStore(session.Store)
-const SessionStore = new Store({
-    db
-});
-SessionStore.sync();
+
 
 
 const formatError = (formattedError: any, error: unknown) => {
@@ -53,6 +45,31 @@ const formatError = (formattedError: any, error: unknown) => {
 
 
 (async () => {
+    await db.authenticate().then(() => {
+        console.log('\nDatabase connection has been established successfully.');
+        db.sync()
+
+    }).catch((err) => {
+        console.log('\nUnable to connect to the database:', err);
+    })
+
+    // Define the session model
+    const Store = SequelizeStore(session.Store)
+    const SessionStore = new Store({
+        db,
+        table: "sessions",
+        tableName: 'sessions',
+        extendDefaultFields(_defaults, session) {
+            return {
+                sid: session.id || null,
+                jwtToken: session.jwtToken,
+                userId: session.userId || null,
+                expires: session.expires,
+                data: session.cookie,
+            };
+        },
+    });
+
     app.use(
         session({
             secret: SESSION_SECRET_SECRET_KEY, // Replace with your own secret
@@ -60,8 +77,7 @@ const formatError = (formattedError: any, error: unknown) => {
             resave: false, // Don't resave session if unmodified
             saveUninitialized: false, // Don't create session until something stored
             cookie: {
-                secure: false,
-                maxAge: 1000 * 60 * 15
+                secure: false
             }
         })
     );
@@ -71,8 +87,8 @@ const formatError = (formattedError: any, error: unknown) => {
     app.get('/seed', async (_, res) => {
         await UsersModel.findAll({
             include: [{
-                model: AccountModel,
-                as: 'accounts'
+                model: SessionModel,
+                as: 'sessions',
             }]
         }).then((users) => {
             res.json({ users })
@@ -113,17 +129,13 @@ const formatError = (formattedError: any, error: unknown) => {
         cors(),
         bodyParser.json(),
         expressMiddleware(server, {
-            context: async ({ req, res }) => ({ req, res })
+            context: async ({ req, res }) => {
+                console.log(req.baseUrl);
+                
+                return { req, res }
+            }
         })
     )
-
-    await db.authenticate().then(() => {
-        console.log('\nDatabase connection has been established successfully.');
-        db.sync()
-
-    }).catch((err) => {
-        console.log('\nUnable to connect to the database:', err);
-    })
 
     const PORT = process.env.PORT || 3000
     if (process.env.PRODUCTION_OR_DEVELOPMENT_MODE === "development") {

@@ -1,0 +1,22 @@
+version: "3"
+services: 
+  # main-front-end:
+  main-back-end:
+    image: main-back-end
+    build: .
+    ports:
+      - 3000:3000
+    env_file: .env
+    depends_on:
+      - postgres
+    volumes:
+      - .:/app
+      - /node_modules
+    command: npm start
+
+  # postgres:
+  postgres:
+    image: postgres
+    ports:
+      - 5432:5432
+    env_file: .env

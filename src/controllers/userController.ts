@@ -1,6 +1,6 @@
 import { AccountModel, UsersModel } from '../models'
 import { Op } from 'sequelize'
-import { getQueryResponseFields, formatCedula } from '../helpers'
+import { getQueryResponseFields, formatCedula, checkForProtectedRequests } from '../helpers'
 import { SESSION_SECRET_SECRET_KEY } from '../constants'
 import { GraphQLError } from 'graphql';
 import { UserJoiSchema } from '../joi';
@@ -10,8 +10,9 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
 export class UsersController {
-    static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, _context: any, { fieldNodes }: { fieldNodes: any }) => {
+    static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
+            checkForProtectedRequests(context.req);
             const fields = getQueryResponseFields(fieldNodes, 'users', false, true)
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
@@ -143,11 +144,13 @@ export class UsersController {
             const token = jwt.sign({
                 userId: user.dataValues.id,
                 sid: req.session.id
-            }, SESSION_SECRET_SECRET_KEY, { expiresIn: '1h' });
+            }, SESSION_SECRET_SECRET_KEY, { expiresIn: '1h'  }); // change expiresIn to 10 seconds for testing
 
             req.session.jwtToken = token
+            req.session.userId = user.dataValues.id
 
-            // console.log({ token });
+            console.log(req.session);
+            
 
             return token
 

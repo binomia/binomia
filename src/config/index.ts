@@ -1,8 +1,15 @@
 import { Sequelize } from "sequelize";
 
+// export const db = new Sequelize({
+//     dialect: "sqlite",
+//     storage: "db.sqlite",
+//     logging: false
+// })
 export const db = new Sequelize({
-    dialect: "sqlite",
-    storage: "db.sqlite",
+    dialect: "postgres",
+    database: "postgres",
+    username: "brayhandeaza",
+    password: "postgres",
     logging: false
 })
 

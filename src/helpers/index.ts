@@ -95,6 +95,10 @@ export const generateUUID = (): string => {
 
 export const checkForProtectedRequests = (req: any) => {
     const token = req.headers.authorization || '';
+
+    console.log(req.headers);
+    
+
     req.user = null
 
     if (!token)
@@ -104,7 +108,6 @@ export const checkForProtectedRequests = (req: any) => {
     jwt.verify(token.split(' ')[1], SESSION_SECRET_SECRET_KEY, (err: any, decoded: any) => {
         if (err)
             throw new GraphQLError("Unauthorized access")
-
 
         if (decoded.sid !== req.session.id)
             throw new GraphQLError("Unauthorized access")
