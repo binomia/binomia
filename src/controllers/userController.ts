@@ -1,10 +1,10 @@
-import { AccountModel, UsersModel } from '../models'
+import { AccountModel, UsersModel } from '@/models'
 import { Op } from 'sequelize'
-import { getQueryResponseFields, checkForProtectedRequests } from '../helpers'
-import { SESSION_SECRET_SECRET_KEY } from '../constants'
+import { getQueryResponseFields, checkForProtectedRequests } from '@/helpers'
+import { SESSION_SECRET_SECRET_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
-import { UserJoiSchema } from '../joi';
-import { UserModelType } from '../types';
+import { UserJoiSchema } from '@/joi';
+import { UserModelType } from '@/types';
 import { Request, Response } from "express"
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -12,7 +12,7 @@ import bcrypt from 'bcrypt';
 export class UsersController {
     static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            checkForProtectedRequests(context.req);
+            await checkForProtectedRequests(context.req);
             const fields = getQueryResponseFields(fieldNodes, 'users', false, true)
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
@@ -139,18 +139,17 @@ export class UsersController {
             if (!isMatch)
                 throw new GraphQLError('Incorrect password');
 
-
             // Generate a JWT
             const token = jwt.sign({
                 userId: user.dataValues.id,
                 sid: req.session.id
-            }, SESSION_SECRET_SECRET_KEY, { expiresIn: '1h'  }); // change expiresIn to 10 seconds for testing
+            }, SESSION_SECRET_SECRET_KEY, { expiresIn: '1h' }); // change expiresIn to 10 seconds for testing
 
-            req.session.jwtToken = token
+            req.session.jwt = token
             req.session.userId = user.dataValues.id
 
             console.log(req.session);
-            
+
 
             return token
 

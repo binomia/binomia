@@ -1,4 +1,4 @@
-import { db } from "../config";
+import { db } from "@/config";
 import { STRING, DECIMAL } from "sequelize";
 import short from 'short-uuid';
 

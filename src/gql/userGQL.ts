@@ -1,4 +1,4 @@
-import { UsersController } from '../controllers'
+import { UsersController } from '@/controllers'
 
 
 const type = () => {

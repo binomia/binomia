@@ -1,5 +1,5 @@
-import { AccountModel, UsersModel } from '../models'
-import { getQueryResponseFields } from '../helpers'
+import { AccountModel, UsersModel } from '@/models'
+import { getQueryResponseFields } from '@/helpers'
 import { GraphQLError } from 'graphql';
 
 export class AccountController {

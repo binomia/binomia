@@ -1,5 +1,5 @@
 import { DATE, STRING } from "sequelize";
-import { db } from "../config";
+import { db } from "@/config";
 
 
 const UsersModel = db.define('users', {

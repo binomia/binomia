@@ -1,5 +1,5 @@
 import { DATE, STRING, JSONB } from "sequelize"
-import { db } from "../config"
+import { db } from "@/config"
 
 
 const SessionModel = db.define('sessions', {

@@ -1,4 +1,4 @@
-import { AccountController } from '../controllers'
+import { AccountController } from '@/controllers'
 
 
 const type = () => {

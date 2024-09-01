@@ -1,4 +1,5 @@
-import { SESSION_SECRET_SECRET_KEY } from '../constants';
+import { SessionModel } from '@/models';
+import { SESSION_SECRET_SECRET_KEY } from '@/constants';
 import bcrypt from 'bcryptjs';
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
@@ -93,16 +94,17 @@ export const generateUUID = (): string => {
 }
 
 
-export const checkForProtectedRequests = (req: any) => {
+export const checkForProtectedRequests = async (req: any) => {
     const token = req.headers.authorization || '';
-
-    console.log(req.headers);
-    
 
     req.user = null
 
+
+
     if (!token)
         throw new GraphQLError('Unauthorized access')
+
+
 
 
     jwt.verify(token.split(' ')[1], SESSION_SECRET_SECRET_KEY, (err: any, decoded: any) => {
@@ -112,6 +114,26 @@ export const checkForProtectedRequests = (req: any) => {
         if (decoded.sid !== req.session.id)
             throw new GraphQLError("Unauthorized access")
 
+
+        const sessionExists = async () => {
+            const session = await SessionModel.findOne({
+                where: {
+                    sid: req.session.id
+                }
+            })
+
+
+            if (!session || session.dataValues.jwt !== token.split(' ')[1])
+                throw new GraphQLError("Unauthorized access")
+
+            // console.log({
+            //     sid: req.session.id,
+            //     session: session?.dataValues,
+            //     decoded
+            // });
+        }
+
+        sessionExists()
         req.jwtData = decoded
     })
 }

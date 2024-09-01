@@ -20,8 +20,9 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import { errorCode } from './src/errors';
 import { GraphQLError } from "graphql";
-import { SessionModel, UsersModel } from './src/models';
+import { SessionModel, UsersModel, CardsModel } from './src/models';
 import { SESSION_SECRET_SECRET_KEY } from "./src/constants";
+import { Sequelize } from "sequelize";
 
 
 
@@ -56,13 +57,15 @@ const formatError = (formattedError: any, error: unknown) => {
         db,
         table: "sessions",
         tableName: 'sessions',
-        extendDefaultFields(_defaults, session) {
+        extendDefaultFields(defaults, session) {
             return {
-                sid: session.id || null,
-                jwtToken: session.jwtToken,
-                userId: session.userId || null,
+                sid: session.id,
+                jwt: session.jwt,
+                userId: session.userId,
                 expires: session.expires,
-                data: session.cookie,
+                data: {
+                    hello: 'world',
+                },
             };
         },
     });
@@ -71,6 +74,7 @@ const formatError = (formattedError: any, error: unknown) => {
         session({
             secret: SESSION_SECRET_SECRET_KEY, // Replace with your own secret
             store: SessionStore,
+            rolling: true,
             resave: false, // Don't resave session if unmodified
             saveUninitialized: false, // Don't create session until something stored
             cookie: {
@@ -83,10 +87,16 @@ const formatError = (formattedError: any, error: unknown) => {
 
     app.get('/seed', async (_, res) => {
         await UsersModel.findAll({
-            include: [{
-                model: SessionModel,
-                as: 'sessions',
-            }]
+            include: [
+                {
+                    model: SessionModel,
+                    as: 'sessions',
+                },
+                {
+                    model: CardsModel,
+                    as: 'cards',
+                }
+            ]
         }).then((users) => {
             res.json({ users })
         }).catch((err) => {
@@ -128,7 +138,7 @@ const formatError = (formattedError: any, error: unknown) => {
         expressMiddleware(server, {
             context: async ({ req, res }) => {
                 console.log(req.baseUrl);
-                
+
                 return { req, res }
             }
         })

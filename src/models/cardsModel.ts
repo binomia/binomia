@@ -1,5 +1,5 @@
 import { STRING, TEXT } from "sequelize"
-import { db } from "../config"
+import { db } from "@/config"
 
 
 const CardsModel = db.define('cards', {

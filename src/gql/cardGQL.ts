@@ -1,4 +1,4 @@
-import { CardsController } from '../controllers'
+import { CardsController } from '@/controllers'
 
 
 const type = () => {
@@ -40,7 +40,8 @@ const query = () => {
 }
 
 const mutation = () => {
-    return `            
+    return `  
+        createCard(data: CardInput!): CardType          
     `
 }
 
@@ -54,7 +55,7 @@ const resolvers = {
         // 
     },
     mutation: {
-        // createCard
+        createCard
     },
     subscription: {
         // 
@@ -62,7 +63,7 @@ const resolvers = {
 }
 
 export default {
-    // type,
+    type,
     query,
     mutation,
     subscription,

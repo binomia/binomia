@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "nodemon index.ts",
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register index.ts",
     "test": "jest --watchAll"
   },
   "dependencies": {
