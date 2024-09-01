@@ -13,6 +13,7 @@ export const typeDefs = `
     type Query {
         ${userGQL.query()}
         ${accountGQL.query()}
+        ${cardGQL.query()}
     }
 
 
@@ -31,7 +32,9 @@ export const typeDefs = `
 export const resolvers = {
     Query: {
         ...userGQL.resolvers.query,
-        ...accountGQL.resolvers.query
+        ...accountGQL.resolvers.query,
+        ...cardGQL.resolvers.query
+
     },
 
     Mutation: {
