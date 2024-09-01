@@ -36,7 +36,9 @@ export const resolvers = {
 
     Mutation: {
         ...userGQL.resolvers.mutation,
-        ...accountGQL.resolvers.mutation
+        ...accountGQL.resolvers.mutation,
+        ...cardGQL.resolvers.mutation
+
     },
 
     Subscription: {

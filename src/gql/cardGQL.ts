@@ -21,6 +21,14 @@ const type = () => {
             updatedAt: String
         }
 
+        type CreateCardTypeResponse {
+            id: Int
+            data: String
+            user: OnlyUserType
+            createdAt: String
+            updatedAt: String
+        }
+
         type OnlyCardType {
             id: Int
             cardNumber: String
@@ -35,13 +43,12 @@ const type = () => {
 
 
 const query = () => {
-    return `
-    `
+    return ``
 }
 
 const mutation = () => {
     return `  
-        createCard(data: CardInput!): CardType          
+        createCard(data: CardInput!): CreateCardTypeResponse       
     `
 }
 

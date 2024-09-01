@@ -3,6 +3,7 @@ import { SESSION_SECRET_SECRET_KEY } from '@/constants';
 import bcrypt from 'bcryptjs';
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
+import { SessionModelType } from '@/types';
 
 
 const getGqlBody = (fieldNodes: any[], schema: string) => {
@@ -15,6 +16,8 @@ const getGqlBody = (fieldNodes: any[], schema: string) => {
         "users",
         "account",
         "accounts",
+        "card",
+        "cards",
     ];
 
     fieldNodes.forEach((item: any) => {
@@ -95,45 +98,27 @@ export const generateUUID = (): string => {
 
 
 export const checkForProtectedRequests = async (req: any) => {
-    const token = req.headers.authorization || '';
+    try {
+        const token = req.headers.authorization || '';
+        if (!token)
+            throw new GraphQLError('Unauthorized access')
 
-    req.user = null
+        const jwtToken = token.split(' ')[1];
+        jwt.verify(jwtToken, SESSION_SECRET_SECRET_KEY, (err: any, decoded: any) => {
+            if (err)
+                throw new GraphQLError("Unauthorized access: " + err)
 
-
-
-    if (!token)
-        throw new GraphQLError('Unauthorized access')
-
-
-
-
-    jwt.verify(token.split(' ')[1], SESSION_SECRET_SECRET_KEY, (err: any, decoded: any) => {
-        if (err)
-            throw new GraphQLError("Unauthorized access")
-
-        if (decoded.sid !== req.session.id)
-            throw new GraphQLError("Unauthorized access")
-
-
-        const sessionExists = async () => {
-            const session = await SessionModel.findOne({
-                where: {
-                    sid: req.session.id
-                }
-            })
-
-
-            if (!session || session.dataValues.jwt !== token.split(' ')[1])
+            else if (decoded.sid !== req.session.id || decoded.userId !== req.session.userId)
                 throw new GraphQLError("Unauthorized access")
 
-            // console.log({
-            //     sid: req.session.id,
-            //     session: session?.dataValues,
-            //     decoded
-            // });
-        }
+            else if (jwtToken !== req.session.jwt)
+                throw new Error("Unauthorized access")
 
-        sessionExists()
-        req.jwtData = decoded
-    })
+
+            req.jwtData = decoded
+        })
+
+    } catch (error) {
+        throw new GraphQLError("Unauthorized access")
+    }
 }

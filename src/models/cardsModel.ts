@@ -1,13 +1,19 @@
-import { STRING, TEXT } from "sequelize"
+import { INTEGER, STRING, TEXT, DataType, DataTypes } from "sequelize"
 import { db } from "@/config"
 
 
 const CardsModel = db.define('cards', {
-    sid: {
-        type: STRING,
-        primaryKey: true
-    },
-    data: TEXT
+    
+    data: TEXT,
+    userId: {
+        type: INTEGER,
+        key: 'userId',
+        unique: true,
+        references: {
+            model: 'users',
+            key: 'id'
+        }
+    }
 })
 
 
