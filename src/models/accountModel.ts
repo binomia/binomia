@@ -2,6 +2,7 @@ import { db } from "@/config";
 import { STRING, DECIMAL } from "sequelize";
 import short from 'short-uuid';
 
+
 const AccountModel = db.define('accounts', {
     balance: {
         type: DECIMAL,

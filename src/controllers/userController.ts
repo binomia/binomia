@@ -8,6 +8,9 @@ import { UserModelType } from '@/types';
 import { Request, Response } from "express"
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { Cryptography } from '@/helpers/cryptography';
+import short from 'short-uuid';
+
 
 export class UsersController {
     static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -112,6 +115,7 @@ export class UsersController {
             const account = await AccountModel.create({
                 userId: user.dataValues.id,
                 currency: "DOP",
+
             })
 
             return {
