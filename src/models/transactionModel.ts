@@ -1,9 +1,13 @@
 import { STRING, JSONB, DECIMAL } from "sequelize"
 import { db } from "@/config"
-
+import short from "short-uuid"
 
 
 const TransactionsModel = db.define('transactions', {
+	transactionId: {
+		type: STRING,
+		defaultValue: () => `${short.generate()}${short.generate()}`
+	},
 	amount: {
 		type: DECIMAL,
 		allowNull: false

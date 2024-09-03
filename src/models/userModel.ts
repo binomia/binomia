@@ -1,7 +1,6 @@
 import { DATE, STRING } from "sequelize";
 import { db } from "@/config";
 
-
 const UsersModel = db.define('users', {
     fullName: {
         type: STRING,

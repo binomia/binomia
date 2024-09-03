@@ -1,9 +1,7 @@
-import { INTEGER, STRING, TEXT, DataType, DataTypes } from "sequelize"
+import { INTEGER, TEXT } from "sequelize"
 import { db } from "@/config"
 
-
 const CardsModel = db.define('cards', {
-    
     data: TEXT,
     userId: {
         type: INTEGER,

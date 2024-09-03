@@ -23,7 +23,7 @@ const type = () => {
         }
 
         type TransactionType {
-            id: Int
+            transactionId: String
             amount: Float
             deliveredAmount: Float
             balanceAfterTransaction: Float
@@ -42,13 +42,13 @@ const type = () => {
         }
 
         type TransactionLocationType {
-            lat: Float
-            lng: Float
+            latitude: Float
+            longitude: Float
         }   
 
 
         type OnlyTransactionType {
-            id: Int
+            transactionId: String
             amount: Float
             deliveredAmount: Float
             balanceAfterTransaction: Float

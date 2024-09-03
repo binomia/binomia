@@ -2,6 +2,7 @@ import { AccountModel, UsersModel, TransactionsModel } from '@/models'
 import { checkForProtectedRequests, getQueryResponseFields } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { Op } from 'sequelize';
+import { TransactionJoiSchema } from '@/joi/transactionJoiSchema';
 
 export class TransactionsController {
     static transactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -33,6 +34,25 @@ export class TransactionsController {
             })
 
             return transactions
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
+    static createTransaction = async (_: unknown, { data }: { data: any }, context: any) => {
+        try {
+            await checkForProtectedRequests(context.req);
+            const validatedData = TransactionJoiSchema.createTransaction.validate(data)
+
+
+            const transaction = await TransactionsModel.create({
+                senderId: context.req.jwtData.userId,
+                receiverId: data.receiverId,
+                amount: data.amount
+            })
+
+
 
         } catch (error: any) {
             throw new GraphQLError(error.message);

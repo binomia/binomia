@@ -11,7 +11,7 @@ const type = () => {
         }
 
         type CardType {
-            id: Int
+            id:  Int
             cardNumber: String
             cvv: String
             expirationDate: String
@@ -22,7 +22,7 @@ const type = () => {
         }
 
         type CardTypeResponse {
-            id: Int
+            id:  Int
             data: String
             user: OnlyUserType
             createdAt: String
@@ -30,7 +30,7 @@ const type = () => {
         }
 
         type OnlyCardType {
-            id: Int
+            id:  Int
             cardNumber: String
             cvv: String
             expirationDate: String

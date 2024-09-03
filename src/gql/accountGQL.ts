@@ -14,7 +14,7 @@ const type = () => {
         }
 
         type OnlyAccountType {
-            id: Int
+            id:  Int
             balance: Float
             status: String
             sendLimit: Float
@@ -27,7 +27,7 @@ const type = () => {
         }
 
         type AccountType {
-            id: Int
+            id:  Int
             balance: Float
             status: String
             sendLimit: Float

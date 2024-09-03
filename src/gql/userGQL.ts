@@ -17,7 +17,7 @@ const type = () => {
         }
 
         type UserType {
-            id: Int
+            id:  Int
             fullName: String
             username: String
             imageUrl: String
@@ -36,7 +36,7 @@ const type = () => {
         }
 
         type OnlyUserType {
-            id: Int
+            id:  Int
             fullName: String
             username: String
             imageUrl: String
@@ -55,7 +55,7 @@ const type = () => {
 const query = () => {
     return `
         users(page: Int!, pageSize: Int!): [UserType]
-        user(uuid: String!): UserType
+        user(uuid:  Int!): UserType
         searchUsers(search: UserInput!, limit: Int): [UserType]
     `
 }
@@ -63,7 +63,7 @@ const query = () => {
 const mutation = () => {
     return `            
         createUser(data: UserInput!): UserType 
-        updateUser(uuid: String!, data: UserInput!): UserType
+        updateUser(uuid:  Int!, data: UserInput!): UserType
         sendMessage(message: String): String
         login(email: String!, password: String!): String
     `

@@ -23,6 +23,7 @@ import { GraphQLError } from "graphql";
 import { SessionModel, UsersModel, CardsModel, TransactionsModel } from './src/models';
 import { SESSION_SECRET_SECRET_KEY } from "./src/constants";
 import { Op, Sequelize } from "sequelize";
+import { seedDatabase } from "seed";
 
 
 
@@ -86,28 +87,31 @@ const formatError = (formattedError: any, error: unknown) => {
 
 
     app.get('/seed', async (_, res) => {
-        await TransactionsModel.findAll({
-            where: {
-                [Op.or]: [
-                    {
-                        senderId: 1
-                    },
-                    {
-                        receiverId: 1
-                    }
-                ]
-            },
-            include: [
-                {
-                    model: UsersModel,
-                    as: "sender"
-                }
-            ]
-        }).then((users) => {
-            res.json({ users })
-        }).catch((err) => {
-            console.log(err);
-        })
+        // await TransactionsModel.findAll({
+        //     where: {
+        //         [Op.or]: [
+        //             {
+        //                 senderId: 1
+        //             },
+        //             {
+        //                 receiverId: 1
+        //             }
+        //         ]
+        //     },
+        //     include: [
+        //         {
+        //             model: UsersModel,
+        //             as: "sender"
+        //         }
+        //     ]
+        // }).then((users) => {
+        //     res.json({ users })
+        // }).catch((err) => {
+        //     console.log(err);
+        // })
+        await seedDatabase()
+
+        res.json({ success: true })
     })
 
 
@@ -143,7 +147,7 @@ const formatError = (formattedError: any, error: unknown) => {
         bodyParser.json(),
         expressMiddleware(server, {
             context: async ({ req, res }) => {
-                console.log(req.baseUrl);
+                console.log(req.session.id);
 
                 return { req, res }
             }
