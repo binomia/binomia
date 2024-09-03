@@ -12,7 +12,7 @@ SessionModel.belongsTo(UsersModel)
 UsersModel.hasMany(SessionModel)
 
 CardsModel.belongsTo(UsersModel)
-UsersModel.hasMany(CardsModel)
+UsersModel.hasOne(CardsModel)
 
 TransactionsModel.belongsTo(UsersModel, { foreignKey: 'senderId', targetKey: 'id', as: 'sender' })
 TransactionsModel.belongsTo(UsersModel, { foreignKey: 'receiverId', targetKey: 'id', as: 'receiver' })

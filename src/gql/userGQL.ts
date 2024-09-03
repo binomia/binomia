@@ -32,7 +32,7 @@ const type = () => {
             updatedAt: String
             accounts: [OnlyAccountType]
             transactions: [OnlyTransactionType]
-            cards: OnlyCardType
+            card: OnlyCardType
         }
 
         type OnlyUserType {

@@ -26,7 +26,7 @@ export class UsersController {
                 include: [
                     {
                         model: CardsModel,
-                        as: 'cards',
+                        as: 'card',
                     },
                     {
                         model: AccountModel,
@@ -50,7 +50,11 @@ export class UsersController {
                 ]
             })
 
+            
+            
             const response: any[] = users.map((user: any) => {
+                console.log(user.dataValues.cards);
+
                 const txs = user.dataValues.incomingTransactions.concat(user.dataValues.outgoingTransactions)
                 return Object.assign({}, user.dataValues, {
                     transactions: txs

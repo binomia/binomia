@@ -147,8 +147,6 @@ const formatError = (formattedError: any, error: unknown) => {
         bodyParser.json(),
         expressMiddleware(server, {
             context: async ({ req, res }) => {
-                console.log(req.session.id);
-
                 return { req, res }
             }
         })
