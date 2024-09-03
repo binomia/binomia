@@ -4,6 +4,10 @@ import { db } from "@/config"
 
 
 const TransactionsModel = db.define('transactions', {
+	amount: {
+		type: DECIMAL,
+		allowNull: false
+	},
 	deliveredAmount: {
 		type: DECIMAL,
 		allowNull: false

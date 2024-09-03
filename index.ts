@@ -20,9 +20,9 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import { errorCode } from './src/errors';
 import { GraphQLError } from "graphql";
-import { SessionModel, UsersModel, CardsModel } from './src/models';
+import { SessionModel, UsersModel, CardsModel, TransactionsModel } from './src/models';
 import { SESSION_SECRET_SECRET_KEY } from "./src/constants";
-import { Sequelize } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 
 
 
@@ -86,15 +86,21 @@ const formatError = (formattedError: any, error: unknown) => {
 
 
     app.get('/seed', async (_, res) => {
-        await UsersModel.findAll({
+        await TransactionsModel.findAll({
+            where: {
+                [Op.or]: [
+                    {
+                        senderId: 1
+                    },
+                    {
+                        receiverId: 1
+                    }
+                ]
+            },
             include: [
                 {
-                    model: SessionModel,
-                    as: 'sessions',
-                },
-                {
-                    model: CardsModel,
-                    as: 'cards',
+                    model: UsersModel,
+                    as: "sender"
                 }
             ]
         }).then((users) => {

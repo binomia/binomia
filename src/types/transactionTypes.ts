@@ -1,4 +1,4 @@
-export type CardModelType = {
+export type TransactionModelType = {
     id: number
     senderId: number
     recipientId: number

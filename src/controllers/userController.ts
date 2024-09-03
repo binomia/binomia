@@ -1,4 +1,4 @@
-import { AccountModel, UsersModel } from '@/models'
+import { AccountModel, UsersModel, TransactionsModel, CardsModel } from '@/models'
 import { Op } from 'sequelize'
 import { getQueryResponseFields, checkForProtectedRequests } from '@/helpers'
 import { SESSION_SECRET_SECRET_KEY } from '@/constants'
@@ -8,8 +8,6 @@ import { UserModelType } from '@/types';
 import { Request, Response } from "express"
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { Cryptography } from '@/helpers/cryptography';
-import short from 'short-uuid';
 
 
 export class UsersController {
@@ -25,15 +23,41 @@ export class UsersController {
             const users = await UsersModel.findAll({
                 limit,
                 offset,
-                attributes: fields['users'],
-                include: [{
-                    model: AccountModel,
-                    as: 'accounts',
-                    attributes: fields['accounts']
-                }]
+                include: [
+                    {
+                        model: CardsModel,
+                        as: 'cards',
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'accounts',
+                        attributes: fields['accounts']
+                    },
+                    {
+                        model: TransactionsModel,
+                        limit,
+                        order: [['createdAt', 'DESC']],
+                        as: 'incomingTransactions',
+                        isMultiAssociation: true
+                    },
+                    {
+                        model: TransactionsModel,
+                        limit,
+                        order: [['createdAt', 'DESC']],
+                        as: 'outgoingTransactions',
+
+                    }
+                ]
             })
 
-            return users
+            const response: any[] = users.map((user: any) => {
+                const txs = user.dataValues.incomingTransactions.concat(user.dataValues.outgoingTransactions)
+                return Object.assign({}, user.dataValues, {
+                    transactions: txs
+                })
+            })
+
+            return response
 
         } catch (error: any) {
             throw new GraphQLError(error.message);

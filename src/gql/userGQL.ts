@@ -31,6 +31,8 @@ const type = () => {
             createdAt: String
             updatedAt: String
             accounts: [OnlyAccountType]
+            transactions: [OnlyTransactionType]
+            cards: OnlyCardType
         }
 
         type OnlyUserType {

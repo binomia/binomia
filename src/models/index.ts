@@ -16,9 +16,8 @@ UsersModel.hasMany(CardsModel)
 
 TransactionsModel.belongsTo(UsersModel, { foreignKey: 'senderId', targetKey: 'id', as: 'sender' })
 TransactionsModel.belongsTo(UsersModel, { foreignKey: 'receiverId', targetKey: 'id', as: 'receiver' })
-UsersModel.hasMany(TransactionsModel, { foreignKey: 'senderId', sourceKey: 'id', as: 'sender' })
-UsersModel.hasMany(TransactionsModel, { foreignKey: 'receiverId', sourceKey: 'id', as: 'receiver' })
-
+UsersModel.hasMany(TransactionsModel, { foreignKey: 'receiverId', sourceKey: 'id', as: 'incomingTransactions' })
+UsersModel.hasMany(TransactionsModel, { foreignKey: 'senderId', sourceKey: 'id', as: 'outgoingTransactions' })
 
 export {
 	UsersModel,

@@ -18,6 +18,8 @@ const getGqlBody = (fieldNodes: any[], schema: string) => {
         "accounts",
         "card",
         "cards",
+        "receiver",
+        "sender",
     ];
 
     fieldNodes.forEach((item: any) => {
