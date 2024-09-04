@@ -1,7 +1,7 @@
 export type TransactionModelType = {
     id: number
     senderId: number
-    recipientId: number
+    receiverId: number
     deliveredAmount: number
     balanceAfterTransaction: number
     balanceBeforeTransaction: number
@@ -12,10 +12,28 @@ export type TransactionModelType = {
     description: string
     status: string
     location: {
-        lat: number
-        lng: number
+        latitude: number
+        longitude: number
     }
     signature: string
     createdAt: string
     updatedAt: string
+}
+
+export interface TransactionAuthorizationType extends TransactionModelType {
+    amount: number
+}
+
+
+
+export type TransactionCreateType = {
+    amount: number
+    currency: string
+    description: string
+    transactionType: string
+    receiver: string
+    location: {
+        latitude: number
+        longitude: number
+    }
 }

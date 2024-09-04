@@ -1,13 +1,14 @@
 import { AccountModel, UsersModel, TransactionsModel, CardsModel } from '@/models'
 import { Op } from 'sequelize'
 import { getQueryResponseFields, checkForProtectedRequests } from '@/helpers'
-import { SESSION_SECRET_SECRET_KEY } from '@/constants'
+import { SESSION_SECRET_SECRET_KEY, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
 import { UserJoiSchema } from '@/joi';
 import { UserModelType } from '@/types';
 import { Request, Response } from "express"
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { Cryptography } from '@/helpers/cryptography';
 
 
 export class UsersController {
@@ -30,8 +31,8 @@ export class UsersController {
                     },
                     {
                         model: AccountModel,
-                        as: 'accounts',
-                        attributes: fields['accounts']
+                        as: 'account',
+                        attributes: fields['account']
                     },
                     {
                         model: TransactionsModel,
@@ -50,8 +51,8 @@ export class UsersController {
                 ]
             })
 
-            
-            
+
+
             const response: any[] = users.map((user: any) => {
                 console.log(user.dataValues.cards);
 
@@ -68,17 +69,66 @@ export class UsersController {
         }
     }
 
-    static user = async (_: unknown, { dni }: { dni: string }, __: any, { fieldNodes }: { fieldNodes: any }) => {
+    static user = async (_: unknown, ___: any, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            const fields = getQueryResponseFields(fieldNodes, 'user', false, true)
+            await checkForProtectedRequests(context.req);
+            const fields = getQueryResponseFields(fieldNodes, 'user')
+            
             const user = await UsersModel.findOne({
                 where: {
-                    dni
+                    id: context.req.jwtData.userId
                 },
-                attributes: fields['user']
+                attributes: fields['user'],
+                include: [
+                    {
+                        model: CardsModel,
+                        as: 'card'
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'account',
+                        attributes: fields['account'],
+                        include: [
+                            {
+                                model: TransactionsModel,
+                                limit: 10,
+                                order: [['createdAt', 'DESC']],
+                                as: 'incomingTransactions',
+                                attributes: fields['transactions']
+                            },
+                            {
+                                model: TransactionsModel,
+                                limit: 10,
+                                order: [['createdAt', 'DESC']],
+                                as: 'outgoingTransactions',
+                                attributes: fields['transactions']
+                            }
+                        ]
+                    }
+                ]
             })
 
-            return user
+            if (!user) return null
+
+            const incomingTransactions = user.dataValues.account.dataValues.incomingTransactions
+            const outgoingTransactions = user.dataValues.account.dataValues.outgoingTransactions
+
+            const transactions = incomingTransactions.concat(outgoingTransactions)
+
+            const account = user.dataValues.account.dataValues
+            account.transactions = transactions
+
+            const cardEncrypted = user.dataValues.card.dataValues
+            const decryptedCardData = await Cryptography.decrypt(cardEncrypted.data)
+            const card = Object.assign({}, cardEncrypted, JSON.parse(decryptedCardData))
+
+            if (card.data)
+                delete card.data
+
+            return Object.assign({}, user.dataValues, {
+                account,
+                card
+            })
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -122,16 +172,23 @@ export class UsersController {
 
             const userExists = await UsersModel.findOne({
                 where: {
-                    [Op.or]: [{ dni: validatedData.dni }, { email: validatedData.email }]
+                    [Op.or]: [
+                        { dni: validatedData.dni },
+                        { email: validatedData.email },
+                        { username: validatedData.username }
+                    ]
                 },
-                attributes: ['dni', "email"]
+                attributes: ['dni', "email", "username"]
             })
 
             if (userExists?.dataValues.dni === validatedData.dni)
                 throw new GraphQLError(`A user with dni: ${validatedData.dni} already exists`);
 
-            else if (userExists?.dataValues.email === validatedData.email)
+            if (userExists?.dataValues.email === validatedData.email)
                 throw new GraphQLError('A user with email: ' + validatedData.email + ' already exists');
+
+            if (userExists?.dataValues.username === validatedData.username)
+                throw new GraphQLError('A user with username: ' + validatedData.username + ' already exists');
 
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(validatedData.password, salt);
@@ -175,13 +232,15 @@ export class UsersController {
             const token = jwt.sign({
                 userId: user.dataValues.id,
                 sid: req.session.id
-            }, SESSION_SECRET_SECRET_KEY, { expiresIn: '1h' }); // change expiresIn to 10 seconds for testing
+            }, ZERO_ENCRYPTION_KEY);
+
+            
+
 
             req.session.jwt = token
             req.session.userId = user.dataValues.id
 
             console.log(req.session);
-
 
             return token
 

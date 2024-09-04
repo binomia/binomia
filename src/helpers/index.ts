@@ -1,9 +1,7 @@
-import { SessionModel } from '@/models';
-import { SESSION_SECRET_SECRET_KEY } from '@/constants';
+import { ZERO_ENCRYPTION_KEY } from '@/constants';
 import bcrypt from 'bcryptjs';
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
-import { SessionModelType } from '@/types';
 
 
 const getGqlBody = (fieldNodes: any[], schema: string) => {
@@ -20,6 +18,8 @@ const getGqlBody = (fieldNodes: any[], schema: string) => {
         "cards",
         "receiver",
         "sender",
+        "transactions",
+        "transaction"
     ];
 
     fieldNodes.forEach((item: any) => {
@@ -106,7 +106,7 @@ export const checkForProtectedRequests = async (req: any) => {
             throw new GraphQLError('Unauthorized access')
 
         const jwtToken = token.split(' ')[1];
-        jwt.verify(jwtToken, SESSION_SECRET_SECRET_KEY, (err: any, decoded: any) => {
+        jwt.verify(jwtToken, ZERO_ENCRYPTION_KEY, (err: any, decoded: any) => {
             if (err)
                 throw new GraphQLError("Unauthorized access: " + err)
 

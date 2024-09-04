@@ -20,7 +20,7 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import { errorCode } from './src/errors';
 import { GraphQLError } from "graphql";
-import { SessionModel, UsersModel, CardsModel, TransactionsModel } from './src/models';
+import { SessionModel, UsersModel, CardsModel, TransactionsModel, AccountModel } from './src/models';
 import { SESSION_SECRET_SECRET_KEY } from "./src/constants";
 import { Op, Sequelize } from "sequelize";
 import { seedDatabase } from "seed";
@@ -87,30 +87,40 @@ const formatError = (formattedError: any, error: unknown) => {
 
 
     app.get('/seed', async (_, res) => {
-        // await TransactionsModel.findAll({
+        // await UsersModel.findOne({
         //     where: {
-        //         [Op.or]: [
-        //             {
-        //                 senderId: 1
-        //             },
-        //             {
-        //                 receiverId: 1
-        //             }
-        //         ]
+        //         id: 2
         //     },
         //     include: [
         //         {
-        //             model: UsersModel,
-        //             as: "sender"
+        //             model: AccountModel,
+        //             as: 'account',
+        //             include: [
+        //                 {
+        //                     model: TransactionsModel,
+        //                     limit: 10,
+        //                     order: [['createdAt', 'DESC']],
+        //                     as: 'incomingTransactions',
+        //                     isMultiAssociation: true
+        //                 },
+        //                 {
+        //                     model: TransactionsModel,
+        //                     limit: 10,
+        //                     order: [['createdAt', 'DESC']],
+        //                     as: 'outgoingTransactions',
+
+        //                 }
+        //             ]
         //         }
         //     ]
         // }).then((users) => {
-        //     res.json({ users })
+
+        //     res.json(users)
         // }).catch((err) => {
         //     console.log(err);
         // })
-        await seedDatabase()
 
+        await seedDatabase()
         res.json({ success: true })
     })
 

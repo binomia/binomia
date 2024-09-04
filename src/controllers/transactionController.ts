@@ -3,56 +3,66 @@ import { checkForProtectedRequests, getQueryResponseFields } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { Op } from 'sequelize';
 import { TransactionJoiSchema } from '@/joi/transactionJoiSchema';
+import { TransactionCreateType, TransactionModelType, TransactionAuthorizationType } from '@/types';
+import { authServer } from '@/rpc';
+import { Cryptography } from '@/helpers/cryptography';
+import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 
 export class TransactionsController {
-    static transactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
-        try {
-            await checkForProtectedRequests(context.req);
-            const fields = getQueryResponseFields(fieldNodes, 'transactions')
-
-            const _pageSize = pageSize > 50 ? 50 : pageSize
-            const offset = (page - 1) * _pageSize;
-            const limit = _pageSize;
-
-            const transactions = await TransactionsModel.findAll({
-                limit,
-                offset,
-                attributes: fields['transactions'],
-                where: {
-                    [Op.or]: [
-                        { senderId: context.req.jwtData.userId },
-                        { receiverId: context.req.jwtData.userId }
-                    ]
-                },
-                include: [
-                    {
-                        model: UsersModel,
-                        as: "receiver",
-                        attributes: fields['receiver']
-                    }
-                ]
-            })
-
-            return transactions
-
-        } catch (error: any) {
-            throw new GraphQLError(error.message);
-        }
-    }
-
     static createTransaction = async (_: unknown, { data }: { data: any }, context: any) => {
         try {
             await checkForProtectedRequests(context.req);
-            const validatedData = TransactionJoiSchema.createTransaction.validate(data)
+            const validatedData: TransactionCreateType = await TransactionJoiSchema.createTransaction.validateAsync(data)
+
+            const dataToHash = await Cryptography.hash(JSON.stringify({
+                receiver: validatedData.receiver,
+                amount: validatedData.amount,
+                transactionType: validatedData.transactionType,
+                currency: validatedData.currency,
+                description: validatedData.description,
+                location: validatedData.location
+            }))
+
+            const hash = await Cryptography.hash(JSON.stringify({
+                hash: dataToHash,
+                ZERO_ENCRYPTION_KEY,
+                ZERO_SIGN_PRIVATE_KEY,
+            }))
+
+            const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+            const transactionAuthorization: TransactionAuthorizationType = await authServer("authorizeTransaction", Object.assign(validatedData, {
+                userId: context.req.jwtData.userId,
+                signature
+            }));
+
+            console.log({ transactionAuthorization });
 
 
-            const transaction = await TransactionsModel.create({
-                senderId: context.req.jwtData.userId,
-                receiverId: data.receiverId,
-                amount: data.amount
+            const senderAccount = await AccountModel.findOne({
+                where: { id: transactionAuthorization.senderId }
+            })
+
+            const recieverAccount = await AccountModel.findOne({
+                where: { id: transactionAuthorization.receiverId }
             })
 
 
+            if (!senderAccount || !recieverAccount)
+                throw new GraphQLError("sender or reciever account not found");
+
+
+            const transaction = await TransactionsModel.create({ ...transactionAuthorization })
+
+
+            await senderAccount.update({
+                balance: senderAccount.dataValues.balance - transactionAuthorization.amount
+            })
+
+            await recieverAccount.update({
+                balance: recieverAccount.dataValues.balance + transactionAuthorization.amount
+            })
+
+            return transaction
 
         } catch (error: any) {
             throw new GraphQLError(error.message);

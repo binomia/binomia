@@ -1,31 +1,46 @@
 import { db } from "@/config";
-import { STRING, DECIMAL } from "sequelize";
+import { STRING, FLOAT } from "sequelize";
 import short from 'short-uuid';
 
 
 const AccountModel = db.define('accounts', {
     balance: {
-        type: DECIMAL,
+        type: FLOAT,
         allowNull: false,
-        defaultValue: 0
+        defaultValue: 0.0
     },
     status: {
         type: STRING,
         allowNull: false,
         defaultValue: "active"
     },
+    sentAmount: {
+        type: FLOAT,
+        allowNull: false,
+        defaultValue: 0.0
+    },
     sendLimit: {
-        type: DECIMAL,
+        type: FLOAT,
         allowNull: false,
         defaultValue: 50e3
     },
     receiveLimit: {
-        type: DECIMAL,
+        type: FLOAT,
         allowNull: false,
         defaultValue: 50e3
     },
+    receivedAmount: {
+        type: FLOAT,
+        allowNull: false,
+        defaultValue: 0.0
+    },
+    withdrawAmount: {
+        type: FLOAT,
+        allowNull: false,
+        defaultValue: 0.0
+    },
     withdrawLimit: {
-        type: DECIMAL,
+        type: FLOAT,
         allowNull: false,
         defaultValue: 50e3
     },

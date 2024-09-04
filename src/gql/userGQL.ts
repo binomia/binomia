@@ -30,8 +30,7 @@ const type = () => {
             dniExpiration: String
             createdAt: String
             updatedAt: String
-            accounts: [OnlyAccountType]
-            transactions: [OnlyTransactionType]
+            account: AccountTypeWithTransactions
             card: OnlyCardType
         }
 
@@ -54,8 +53,7 @@ const type = () => {
 
 const query = () => {
     return `
-        users(page: Int!, pageSize: Int!): [UserType]
-        user(uuid:  Int!): UserType
+        user: UserType
         searchUsers(search: UserInput!, limit: Int): [UserType]
     `
 }
@@ -80,7 +78,6 @@ const subscription = () => {
 const { users, user, createUser, searchUsers, login } = UsersController
 const resolvers = {
     query: {
-        users,
         user,
         searchUsers
     },
@@ -91,16 +88,7 @@ const resolvers = {
     },
 
     subscription: {
-        // userCreated: {
-        //     subscribe: async (_: unknown) => {
-        //         return pubsub.asyncIterator(REDIS_TRIGGER.USER_CREATED);
-        //     }
-        // },
-        // userUpdated: {
-        //     subscribe: async (_: unknown) => {
-        //         return pubsub.asyncIterator(REDIS_TRIGGER.USER_UPDATED);
-        //     }
-        // }
+     
     }
 }
 

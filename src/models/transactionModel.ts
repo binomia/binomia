@@ -14,23 +14,23 @@ const TransactionsModel = db.define('transactions', {
 	},
 	deliveredAmount: {
 		type: DECIMAL,
-		allowNull: false
+		allowNull: false,
+		defaultValue: 0
 	},
 	balanceAfterTransaction: {
 		type: DECIMAL,
-		allowNull: false
+		allowNull: false,
+		defaultValue: 0
 	},
 	balanceBeforeTransaction: {
 		type: DECIMAL,
-		allowNull: false
+		allowNull: false,
+		defaultValue: 0
 	},
 	voidedAmount: {
 		type: DECIMAL,
-		allowNull: false
-	},
-	refundedAmount: {
-		type: DECIMAL,
-		allowNull: false
+		allowNull: false,
+		defaultValue: 0
 	},
 	transactionType: {
 		type: STRING,
@@ -46,7 +46,8 @@ const TransactionsModel = db.define('transactions', {
 	},
 	status: {
 		type: STRING,
-		allowNull: false
+		allowNull: false,
+		defaultValue: "pending"
 	},
 	location: {
 		type: JSONB,

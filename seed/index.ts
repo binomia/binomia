@@ -1,10 +1,27 @@
-import { TransactionsModel } from '@/models';
+import { TransactionsModel, UsersModel } from '@/models';
 import { faker } from '@faker-js/faker';
 import short from 'short-uuid';
 
+const createUsers = async () => {
+    for (let i = 0; i < 10; i++) {
+        await UsersModel.create({
+            fullName: faker.person.fullName(),
+            username: faker.internet.userName(),
+            password: faker.internet.password(),
+            imageUrl: faker.image.avatar(),
+            email: faker.internet.email(),
+            dni: faker.database.mongodbObjectId(),
+            sex: faker.person.sex(),
+            address: faker.location.streetAddress(),
+            dob: faker.date.birthdate(),
+            dniExpiration: faker.date.future()
+        })
+    }
+}
+
 
 const createTransactions = async () => {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 1; i++) {
         const amount = faker.number.int({ min: 1, max: 1000 })
         await TransactionsModel.create({
             amount,
@@ -22,8 +39,8 @@ const createTransactions = async () => {
                 longitude: faker.location.longitude()
             },
             signature: faker.database.mongodbObjectId(),
-            senderId: faker.number.int({ min: 1, max: 2 }),
-            receiverId: faker.number.int({ min: 1, max: 2 }),
+            senderId: 1,
+            receiverId: 2
         })
     }
 }
@@ -33,5 +50,6 @@ const createTransactions = async () => {
 
 
 export const seedDatabase = async () => {
+    // await createUsers()
     await createTransactions()
 }

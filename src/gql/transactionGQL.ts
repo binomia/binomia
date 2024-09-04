@@ -5,20 +5,16 @@ import { TransactionsController } from '@/controllers'
 const type = () => {
     return `
         input TransactionLocationInput {
-            lat: Float
-            lng: Float
+            latitude: Float
+            longitude: Float
         }
         input TransactionInput {
+            receiver: String
+            signature: String
             amount: Float
-            deliveredAmount: Float
-            balanceAfterTransaction: Float
-            balanceBeforeTransaction: Float
-            voidedAmount: Float
-            refundedAmount: Float
             transactionType: String
             currency: String
             description: String
-            status: String
             location: TransactionLocationInput
         }
 
@@ -29,13 +25,12 @@ const type = () => {
             balanceAfterTransaction: Float
             balanceBeforeTransaction: Float
             voidedAmount: Float
-            refundedAmount: Float
             transactionType: String
             currency: String
             description: String
             status: String
-            sender: OnlyUserType
-            receiver: OnlyUserType
+            sender: AccountTypeWithUser
+            receiver: AccountTypeWithUser
             location: TransactionLocationType
             createdAt: String
             updatedAt: String
@@ -54,7 +49,6 @@ const type = () => {
             balanceAfterTransaction: Float
             balanceBeforeTransaction: Float
             voidedAmount: Float
-            refundedAmount: Float
             transactionType: String
             currency: String
             description: String
@@ -69,26 +63,26 @@ const type = () => {
 
 const query = () => {
     return `
-        transactions(page: Int!, pageSize: Int!): [TransactionType]
         transaction: TransactionType
     `
 }
 
 const mutation = () => {
-    return ``
+    return `
+        createTransaction(data: TransactionInput!): TransactionType
+    `
 }
 
 const subscription = () => {
     return ``
 }
 
-const {  transactions } = TransactionsController
+const {  createTransaction } = TransactionsController
 const resolvers = {
     query: {
-        transactions
     },
     mutation: {
-        //
+        createTransaction
     },
     subscription: {
         // 

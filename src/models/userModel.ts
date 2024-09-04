@@ -8,7 +8,8 @@ const UsersModel = db.define('users', {
     },
     username: {
         type: STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     imageUrl: {
         type: STRING,
@@ -16,7 +17,8 @@ const UsersModel = db.define('users', {
     },
     email: {
         type: STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     password: {
         type: STRING,
@@ -24,7 +26,8 @@ const UsersModel = db.define('users', {
     },
     dni: {
         type: STRING,
-        allowNull: false
+        allowNull: false,
+        unique: true
     },
     sex: {
         type: STRING,
