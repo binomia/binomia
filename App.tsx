@@ -1,32 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import * as Network from 'expo-network';
-import { useEffect } from 'react';
-import * as Device from 'expo-device';
-import * as Application from 'expo-application';
+import { LogBox, StyleSheet, StatusBar } from 'react-native';
+import { useCallback } from 'react';
+import { SessionContextProvider } from './contexts';
+import { ApolloProvider } from '@apollo/client';
+import { NativeBaseProvider, View } from "native-base";
+import { theme } from './themes';
+import { apolloClient } from './apollo';
+import * as SplashScreen from 'expo-splash-screen';
+import {Navigation} from './navigation';
+
+
+LogBox.ignoreAllLogs();
+// SplashScreen.preventAutoHideAsync();
 
 export default function App() {
 
-	useEffect(() => {
-		(async () => {
-			const status = await Application.getIosIdForVendorAsync();
-			console.log({status});
-		})()
-	},[])
+	const onLayoutRootView = useCallback(async () => {
+		const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+		await delay(3000); // Wait for 5 seconds
+		await SplashScreen.hideAsync();
+
+	}, []);
 
 	return (
-		<View style={styles.container}>
-			<Text>Open up App.tsx to start working on your app!</Text>
-			<StatusBar style="auto" />
-		</View>
+		<ApolloProvider client={apolloClient}>
+			<NativeBaseProvider theme={theme}>
+				<SessionContextProvider>
+					<View onLayout={onLayoutRootView} style={styles.container}>
+						<StatusBar barStyle="light-content" />
+						<Navigation />
+					</View>
+				</SessionContextProvider>
+			</NativeBaseProvider>
+		</ApolloProvider>
 	);
 }
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#fff',
-		alignItems: 'center',
-		justifyContent: 'center',
 	},
 });
