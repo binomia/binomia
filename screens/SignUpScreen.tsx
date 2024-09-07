@@ -1,45 +1,24 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Button } from 'react-native';
-import { useContext, useEffect } from 'react';
-import * as Application from 'expo-application';
-import { SessionContext } from '../contexts';
-import { VStack } from 'native-base';
-import LoginComponent from '../components/signup/LoginComponent';
+import { StyleSheet, Text, View } from 'react-native'
+import React, { useState } from 'react'
 
+import LoginComponent from '../components/signup/LoginComponent'
+import RegisterComponent from '../components/signup/RegisterComponent'
+import { VStack } from 'native-base'
 
-
-
-const SignUpScreen: React.FC = (): JSX.Element => {
-    const { onLogin, jwt, onLogout }: any = useContext(SessionContext);
-
-    useEffect(() => {
-        (async () => {
-            const status = await Application.getIosIdForVendorAsync();
-            console.log({ status, jwt });
-        })()
-    }, [])
-
-
+const SignUpContainer: React.FC = (): JSX.Element => {
+    const [isLogin, setIsLogin] = useState<boolean>(true)
     return (
-        <VStack variant={"body"} justifyContent={"center"} alignItems={"center"}>
-            {jwt ?
-                <Button title="Logout" onPress={onLogout} />
-                :
-                <LoginComponent />
-            }
-        </VStack>
-
-    );
+        isLogin ?
+            <VStack variant={"body"} justifyContent={"space-between"} alignItems={"center"}>
+                <LoginComponent isLogin={isLogin} setIsLogin={setIsLogin} />
+            </VStack>
+            :
+            <VStack variant={"body"} justifyContent={"space-between"}>
+                <RegisterComponent isLogin={isLogin} setIsLogin={setIsLogin} />
+            </VStack>
+    )
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});
+export default SignUpContainer
 
-
-export default SignUpScreen
+const styles = StyleSheet.create({})

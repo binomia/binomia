@@ -5,6 +5,7 @@ import colors from "../colors";
 export const theme = extendTheme({
     colors: {
         lightGray: "#2C2C2C",
+        darkGray: "#1E1E1E",
         mainGreen: "#1D9B48",
     },
     components: {
@@ -14,7 +15,7 @@ export const theme = extendTheme({
                     w: "100%",
                     h: "100%",
                     px: "15px",
-                    bg: "#1E1E1E",
+                    bg: "darkGray",
                     flex: 1
                 }
             }
@@ -22,7 +23,7 @@ export const theme = extendTheme({
         Input: {
             variants: {
                 input: {
-                    bg: "#2C2C2C",
+                    bg: "lightGray",
                     keyboardAppearance: 'dark',
                     px: "20px",
                     h: "55px",

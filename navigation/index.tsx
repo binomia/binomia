@@ -6,11 +6,16 @@ import { useContext } from 'react';
 import { SessionPropsType } from '../types';
 import { SessionContext } from '../contexts';
 import { Button } from 'react-native';
+import { HStack } from 'native-base';
 
 const HomeScreen: React.FC = () => {
+    const { onLogout } = useContext<SessionPropsType>(SessionContext);
+
 
     return (
-        <Button title="Logout" />
+        <HStack bg={"black"} variant={"body"} alignItems={"center"} flex={1}>
+            <Button onPress={onLogout} title="Logout" />
+        </HStack>
     )
 }
 
@@ -47,7 +52,7 @@ export const Navigation: React.FC = () => {
     return (
         jwt ?
             <HomeNavigationTab />
-            : 
+            :
             <SignUpStack />
     )
 }

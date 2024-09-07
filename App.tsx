@@ -10,7 +10,7 @@ import {Navigation} from './navigation';
 
 
 LogBox.ignoreAllLogs();
-// SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync();
 
 export default function App() {
 

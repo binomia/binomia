@@ -49,24 +49,35 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
 
     const onLogout = async () => {
-        await remove("jwt");
-        await Updates.reloadAsync();
+        try {
+            await remove("jwt");
+            await Updates.reloadAsync();
+            
+        } catch (error) {
+            console.log({ error });
+        }
     }
 
 
     const onLogin = async ({ email, password }: { email: string, password: string }) => {
-        const data = await login({
-            variables: { email, password }
-        });
+        try {
+            console.log({ email, password });
 
-        if (data.data.login) {
-            await save("jwt", data.data.login)
-            await Updates.reloadAsync();
+            const data = await login({
+                variables: { email, password }
+            });
 
-            return data.data.login
+            if (data.data.login) {
+                await save("jwt", data.data.login)
+                await Updates.reloadAsync();
+
+                return data.data.login
+            }
+
+            return ""
+        } catch (error) {
+            console.log({ error });
         }
-
-        return ""
     }
 
 
