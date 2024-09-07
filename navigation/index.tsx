@@ -1,10 +1,9 @@
 import * as React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import SignUpStack from './SignUpStack';
+import SignUpStack from '@/navigation/SignUpStack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useContext } from 'react';
-import { SessionPropsType } from '../types';
-import { SessionContext } from '../contexts';
+import { SessionPropsType } from '@/types';
+import { SessionContext } from '@/contexts';
 import { Button } from 'react-native';
 import { HStack } from 'native-base';
 
@@ -34,13 +33,11 @@ const HomeNavigationTab: React.FC = () => {
     }
 
     return (
-        <NavigationContainer>
-            <Tab.Navigator screenOptions={tabBarStyles} >
-                <Tab.Group screenOptions={{ headerShown: false }} >
-                    <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true }} name='Inicio' component={HomeScreen} />
-                </Tab.Group>
-            </Tab.Navigator>
-        </NavigationContainer>
+        <Tab.Navigator screenOptions={tabBarStyles} >
+            <Tab.Group screenOptions={{ headerShown: false }} >
+                <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true }} name='Inicio' component={HomeScreen} />
+            </Tab.Group>
+        </Tab.Navigator>
     )
 }
 

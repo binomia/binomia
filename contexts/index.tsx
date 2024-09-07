@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
-import { SessionContextType, SessionPropsType } from "../types";
+import { SessionContextType, SessionPropsType } from "@/types";
 import { useMutation } from '@apollo/client';
-import { SessionApolloQueries } from "../apollo/query/sessionQuery";
+import { SessionApolloQueries } from "@/apollo/query/sessionQuery";
 import * as SecureStore from 'expo-secure-store';
 import * as Updates from 'expo-updates';
 

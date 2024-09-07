@@ -1,12 +1,11 @@
 import { useContext, useRef, useState } from 'react';
 import { VStack, Input, Heading, HStack, Text } from 'native-base';
 import { StyleSheet, SafeAreaView, TouchableOpacity, View } from 'react-native';
-import Button from '../global/Button';
-import { SessionContext } from '../../contexts';
-import { SessionPropsType } from '../../types';
+import { Button } from '@/components';
+import { SessionContext } from '@/contexts';
+import { SessionPropsType } from '@/types';
 import PagerView from 'react-native-pager-view';
 
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 type Props = {
     isLogin: boolean
@@ -32,7 +31,7 @@ const RegisterComponent: React.FC<Props> = ({ isLogin, setIsLogin }): JSX.Elemen
                             <Heading size={"xl"} mb={"10px"} color={"white"}>Crear Nueva Cuenta</Heading>
                         </HStack>
                         <HStack mt={"20px"} w={"100%"} alignItems={"flex-start"}>
-                            <Heading size={"xs"}  color={"white"}>Correo*</Heading>
+                            <Heading size={"xs"} color={"white"}>Correo*</Heading>
                         </HStack>
                         <Input
                             variant={"input"}

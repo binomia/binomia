@@ -1,14 +1,18 @@
 export default {
+    mainGreen: '#1D9B48',
+    lightGray: "#2C2C2C",
+    darkGray: "#1E1E1E",
+
+
+    white: '#FFFFFF',
     primaryBlack: '#1E1E1E',
     placeholderTextColor: '#535353',
     primaryBlue: '#007AFF',
     placeholder: '#2C2C2C',
-    lightGray: '#F0F0F0',
     lightBlue: 'rgba(25, 123, 210, 0.1)',
     blue: "rgba(25, 123, 210, 1)",
     lightSkyGray: '#EAECED',
     lightRed: '#fbecf1',
-    white: '#FFFFFF',
     gray: '#cccccc',
     red: "#D2416E",
     lightGreen: '#e7f7f7',

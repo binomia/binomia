@@ -1,11 +1,9 @@
 import { StyleSheet } from 'react-native'
 import React, { useState } from 'react'
-
-import LoginComponent from '../components/signup/LoginComponent'
-import RegisterComponent from '../components/signup/RegisterComponent'
+import { LoginComponent, RegisterComponent } from '@/components'
 import { VStack } from 'native-base'
 
-const SignUpContainer: React.FC = (): JSX.Element => {
+const SignUpScreen: React.FC = (): JSX.Element => {
     const [isLogin, setIsLogin] = useState<boolean>(true)
     return (
         isLogin ?
@@ -19,6 +17,6 @@ const SignUpContainer: React.FC = (): JSX.Element => {
     )
 }
 
-export default SignUpContainer
+export default SignUpScreen
 
 const styles = StyleSheet.create({})
