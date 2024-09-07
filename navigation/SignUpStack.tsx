@@ -4,7 +4,8 @@ import colors from '../colors';
 import SignUpScreen from '../screens/SignUpScreen';
 import { logo } from '../assets';
 import { NavigationContainer } from '@react-navigation/native';
-
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { TouchableOpacity } from 'react-native';
 
 const SignUpStack: React.FC = () => {
     const Stack = createNativeStackNavigator<any>();
@@ -14,6 +15,16 @@ const SignUpStack: React.FC = () => {
             <VStack >
                 <Image w={"115px"} h={"30px"} source={logo} />
             </VStack>
+        )
+    }
+
+    const headerRight = () => {
+
+        return (
+
+            <TouchableOpacity>
+                <Ionicons name="close" size={30} color="white" />
+            </TouchableOpacity>
         )
     }
 
@@ -30,7 +41,7 @@ const SignUpStack: React.FC = () => {
     return (
         <NavigationContainer>
             <Stack.Navigator initialRouteName='SignUpScreen' >
-                <Stack.Screen name='SignUpScreen' options={{ headerLeft, title: '', ...headerStyles, headerShadowVisible: false }} component={SignUpScreen} />
+                <Stack.Screen name='SignUpScreen' options={{ headerLeft, headerRight, title: '', ...headerStyles, headerShadowVisible: false }} component={SignUpScreen} />
             </Stack.Navigator >
         </NavigationContainer>
     )

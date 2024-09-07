@@ -1,6 +1,4 @@
-import { extendTheme, Input } from "native-base";
-import colors from "../colors";
-
+import { extendTheme } from "native-base";
 
 export const theme = extendTheme({
     colors: {

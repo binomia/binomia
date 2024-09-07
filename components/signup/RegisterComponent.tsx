@@ -52,7 +52,7 @@ const RegisterComponent: React.FC<Props> = ({ isLogin, setIsLogin }): JSX.Elemen
                             fontSize={"14px"}
                             _focus={{ selectionColor: "white" }}
                             color={"white"}
-                            onChangeText={(e) => setEmail(e)}
+                            onChangeText={(e) => setPassword(e)}
                             placeholder="Correo Electronico*"
                         />
                     </VStack>

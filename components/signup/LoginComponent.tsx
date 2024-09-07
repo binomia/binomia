@@ -1,10 +1,11 @@
 import { useContext, useState } from 'react';
-import { VStack, Input, Heading, HStack, Text, Pressable } from 'native-base';
+import { VStack, Heading, HStack, Text } from 'native-base';
 import { SafeAreaView, TouchableOpacity } from 'react-native';
 import Button from '../global/Button';
 import { SessionContext } from '../../contexts';
 import { SessionPropsType } from '../../types';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Input from '../global/Input';
 
 type Props = {
     isLogin: boolean
@@ -26,19 +27,10 @@ const LoginComponent: React.FC<Props> = ({ isLogin, setIsLogin }): JSX.Element =
                         <Text w={"80%"} color={"white"}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Text>
                     </VStack>
                     <Input
-                        variant={"input"}
-                        fontSize={"14px"}
-                        _focus={{ selectionColor: "white" }}
-                        fontWeight={"medium"}
-                        color={"white"}
                         onChangeText={(e) => setEmail(e)}
                         placeholder="Correo Electronico*"
                     />
-                    <Input
-                        variant={"input"}
-                        fontSize={"14px"}
-                        _focus={{ selectionColor: "white" }}
-                        color={"white"}
+                    <Input                        
                         secureTextEntry={!showPassword}
                         onChangeText={(e) => setPassword(e)}
                         placeholder="Contraseña*"
