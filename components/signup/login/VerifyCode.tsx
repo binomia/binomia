@@ -31,14 +31,6 @@ const VerifyCode: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     });
 
 
-    const generateCode = () => {
-        const token = GENERATE_SIX_DIGIT_TOKEN();
-        console.log({ token });
-
-        return token
-    }
-
-
     useEffect(() => {
         setDisabledButton(true)
         setInvalidCode(false)
@@ -108,7 +100,7 @@ const VerifyCode: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             w={"100%"}
-                            onPress={generateCode}
+                            onPress={nextPage}
                             title={"Siguiente"}
                         />
                     </VStack>

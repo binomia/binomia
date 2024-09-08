@@ -4,7 +4,7 @@ import { SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Sty
 import { SessionContext } from '@/contexts';
 import { SessionPropsType } from '@/types';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Input, Button, BottomSheet, ForgotPassword, VerifyCode } from '@/components';
+import { Input, Button, BottomSheet, ForgotPassword, VerifyCode, ChangePassword } from '@/components';
 import colors from '@/colors';
 import { INPUT_HEIGHT, SCREEN_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { VALIDATE_EMAIL } from '@/helpers';
@@ -18,7 +18,7 @@ const LoginComponent: React.FC = (): JSX.Element => {
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [currentPage, setCurrentPage] = useState<number>(2);
 
 
     const nextPage = () => {
@@ -88,8 +88,9 @@ const LoginComponent: React.FC = (): JSX.Element => {
                     </VStack>
                     <BottomSheet sheetBg='white' height={SCREEN_HEIGHT * 0.8} open>
                         <PagerView ref={pageViewRef} style={{ flex: 1 }} initialPage={currentPage}>
-                            <ForgotPassword nextPage={nextPage} key="1" />
-                            <VerifyCode nextPage={nextPage} key="1" />
+                            <ForgotPassword key="1" nextPage={nextPage} />
+                            <VerifyCode key="2" nextPage={nextPage} />
+                            <ChangePassword key="3" nextPage={nextPage} />
                         </PagerView>
                     </BottomSheet>
                 </VStack>
