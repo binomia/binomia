@@ -1,11 +1,17 @@
 import Button from "./global/Button";
 import Input from "./global/Input";
-import LoginComponent from "./signup/LoginComponent";
+import BottomSheet from "./global/BottomSheet";
+import LoginComponent from "./signup/login";
+import ForgotPassword from "./signup/login/ForgotPassword";
+import VerifyCode from "./signup/login/VerifyCode";
 import RegisterComponent from "./signup/register";
 
-export { 
+export {
 	RegisterComponent,
 	LoginComponent,
-	Button ,
-	Input
+	ForgotPassword,
+	VerifyCode,
+	Button,
+	Input,
+	BottomSheet
 }

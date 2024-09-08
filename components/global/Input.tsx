@@ -16,19 +16,18 @@ interface Props extends IInputProps {
 
 
 const InputComponent: React.FC<Props> = (props) => {
-    const { onChangeText, placeholder, errorMessage, isInvalid = false } = props
+    const { errorMessage, isInvalid = false, fontSize = "14px" } = props
 
     return (
         <HStack mb={isInvalid ? "10px" : "0px"}>
             <FormControl isInvalid={isInvalid} >
                 <Input
-                    {...props}                    
+                    {...props}
                     variant={"input"}
-                    fontSize={"14px"}
+                    fontSize={fontSize}
                     _focus={{ selectionColor: "white" }}
                     fontWeight={"medium"}
                     color={"white"}
-             
                     placeholderTextColor={"rgba(255,255,255,0.2)"}
                 />
                 <FormControl.ErrorMessage

@@ -49,7 +49,7 @@ const SignUpStack: React.FC = () => {
 
 
     return (
-        <Stack.Navigator initialRouteName='RegisterScreen' >
+        <Stack.Navigator initialRouteName='LoginScreen' >
             <Stack.Screen name='WelcomeScreen' options={{ headerLeft, headerRight: welcomeReaderRight, title: '', ...headerStyles, headerShadowVisible: false }} component={WelcomeScreen} />
             <Stack.Screen name='LoginScreen' options={{ headerLeft, headerRight, title: '', ...headerStyles, headerShadowVisible: false }} component={LoginComponent} />
             <Stack.Screen name='RegisterScreen' options={{ headerLeft, headerRight, title: '', ...headerStyles, headerShadowVisible: false }} component={RegisterComponent} />
