@@ -14,15 +14,15 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 
 type Props = {
     nextPage: () => void
+    prevPage: () => void
 }
 
 const CELL_COUNT = 6;
-const VerifyCode: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
-    const { onLogin } = useContext<SessionPropsType>(SessionContext);
+const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
+    const { verificationCode, setVerificationCode } = useContext<SessionPropsType>(SessionContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(false);
     const [invalidCode, setInvalidCode] = useState<boolean>(false);
 
-    const [token, setToken] = useState('101394');
     const [code, setCode] = useState('');
     const ref = useBlurOnFulfill({ value: code, cellCount: 6 });
     const [props, getCellOnLayoutHandler] = useClearByFocusCell({
@@ -31,17 +31,23 @@ const VerifyCode: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     });
 
 
+
+    const goBack = () => {
+        setCode('')
+        setVerificationCode('')
+        prevPage()
+    }
+
     useEffect(() => {
         setDisabledButton(true)
         setInvalidCode(false)
 
-        if (code.length === 6 && code !== token)
+        if (code.length === 6 && code !== verificationCode)
             setInvalidCode(true)
 
 
-        if (code.length === 6 && code === token)
+        if (code.length === 6 && code === verificationCode)
             setDisabledButton(false)
-
 
     }, [code])
 
@@ -64,6 +70,7 @@ const VerifyCode: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                             rootStyle={styles.codeFieldRoot}
                             keyboardType="number-pad"
                             textContentType="oneTimeCode"
+                            autoComplete={"sms-otp"}
                             renderCell={({ index, symbol, isFocused }) => (
                                 <HStack justifyContent={"center"} alignItems={"center"} style={[styles.cell, isFocused && styles.focusCell]}>
                                     <Text
@@ -84,26 +91,33 @@ const VerifyCode: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                                 </Text>
                             </HStack>
                             :
-                            code.length === 6 && code === token &&
+                            code.length === 6 && code === verificationCode &&
                             <HStack mt={"20px"}>
                                 <AntDesign style={{ marginTop: 5 }} name="checkcircle" size={24} color={colors.mainGreen} />
                                 <Text textAlign={"center"} fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"85%"} color={"mainGreen"}>
-                                    As ingresado un código valido. Ahora puede presionar el botón Siguiente para continuar.
+                                    As ingresado un código valido. Ahora puede presionar el botón que dice Siguiente.
                                 </Text>
                             </HStack>
                         }
 
                     </VStack>
-                    <VStack w={"100%"} alignItems={"center"} mb={"100px"}>
+                    <HStack w={"100%"} justifyContent={"space-between"} mb={"50px"}>
+                        <Button
+                            bg={"lightGray"}
+                            color={"mainGreen"}
+                            w={"48%"}
+                            onPress={goBack}
+                            title={"Atras"}
+                        />
                         <Button
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
-                            w={"100%"}
+                            w={"48%"}
                             onPress={nextPage}
                             title={"Siguiente"}
                         />
-                    </VStack>
+                    </HStack>
                 </VStack>
             </TouchableWithoutFeedback>
         </SafeAreaView >

@@ -9,9 +9,11 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 type Props = {
     nextPage: () => void
+    prevPage: () => void
+    cancelBottomSheet: () => void
 }
 
-const ChangePassword: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
+const ChangePassword: React.FC<Props> = ({ nextPage, cancelBottomSheet }: Props): JSX.Element => {
     const [password, setPassword] = useState<string>("");
     const [confirmPassword, setConfirmPassword] = useState<string>("");
 
@@ -67,17 +69,23 @@ const ChangePassword: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                             }
                         />
                     </VStack>
-                    <VStack w={"100%"} alignItems={"center"} mb={"30px"}>
+                    <HStack justifyContent={"space-between"} w={"100%"} alignItems={"center"} mb={"30px"}>
                         <Button
-
+                            bg={"lightGray"}
+                            color={"alert"}
+                            w={"48%"}
+                            onPress={cancelBottomSheet}
+                            title={"Cancelar"}
+                        />
+                        <Button
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
-                            w={"100%"}
+                            w={"48%"}
                             onPress={nextPage}
-                            title={"Siguiente"}
+                            title={"Cambiar"}
                         />
-                    </VStack>
+                    </HStack>
                 </VStack>
             </TouchableWithoutFeedback>
         </SafeAreaView>

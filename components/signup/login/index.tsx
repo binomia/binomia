@@ -11,14 +11,19 @@ import { VALIDATE_EMAIL } from '@/helpers';
 import PagerView from 'react-native-pager-view';
 
 const LoginComponent: React.FC = (): JSX.Element => {
+
     const pageViewRef = useRef<PagerView>(null);
-    const { onLogin } = useContext<SessionPropsType>(SessionContext);
+    const { onLogin, setVerificationCode } = useContext<SessionPropsType>(SessionContext);
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
-    const [currentPage, setCurrentPage] = useState<number>(2);
+    const [showResetPasswordBottomSheet, setShowResetPasswordBottomSheet] = useState<boolean>(false);
+    const [currentPage, setCurrentPage] = useState<number>(0);
+
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 
 
     const nextPage = () => {
@@ -28,7 +33,29 @@ const LoginComponent: React.FC = (): JSX.Element => {
 
         } else
             pageViewRef.current?.setPage(currentPage + 1)
+
         setCurrentPage(currentPage + 1)
+    }
+
+
+    const prevPage = () => {
+        if (currentPage === 0) {
+            pageViewRef.current?.setPage(0)
+            setCurrentPage(0)
+
+        } else
+            pageViewRef.current?.setPage(currentPage - 1)
+
+        setCurrentPage(currentPage - 1)
+    }
+
+    const cancelBottomSheet = async () => {
+        setVerificationCode('')
+        setShowResetPasswordBottomSheet(false)
+
+        await delay(1500)
+        setCurrentPage(0)
+        pageViewRef.current?.setPage(0)
     }
 
 
@@ -72,7 +99,7 @@ const LoginComponent: React.FC = (): JSX.Element => {
                                 </TouchableOpacity>
                             }
                         />
-                        <TouchableOpacity style={{ alignSelf: "flex-end" }}>
+                        <TouchableOpacity style={{ alignSelf: "flex-end" }} onPress={() => setShowResetPasswordBottomSheet(true)}>
                             <Text underline fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} alignSelf={"flex-end"} fontWeight={"medium"} mt={"10px"} textAlign={"right"} color={"white"}>Olvidaste tu contraseña?</Text>
                         </TouchableOpacity>
                     </VStack>
@@ -86,15 +113,15 @@ const LoginComponent: React.FC = (): JSX.Element => {
                             title={"Iniciar Sesión"}
                         />
                     </VStack>
-                    <BottomSheet sheetBg='white' height={SCREEN_HEIGHT * 0.8} open>
-                        <PagerView ref={pageViewRef} style={{ flex: 1 }} initialPage={currentPage}>
-                            <ForgotPassword key="1" nextPage={nextPage} />
-                            <VerifyCode key="2" nextPage={nextPage} />
-                            <ChangePassword key="3" nextPage={nextPage} />
-                        </PagerView>
-                    </BottomSheet>
                 </VStack>
             </TouchableWithoutFeedback>
+            <BottomSheet onCloseFinish={() => setShowResetPasswordBottomSheet(false)} sheetBg='white' height={SCREEN_HEIGHT * 0.8} open={showResetPasswordBottomSheet}>
+                <PagerView scrollEnabled={false} ref={pageViewRef} style={{ flex: 1 }} initialPage={currentPage}>
+                    <ForgotPassword key="1" nextPage={nextPage} />
+                    <VerifyCode key="2" nextPage={nextPage} prevPage={prevPage} />
+                    <ChangePassword key="3" cancelBottomSheet={cancelBottomSheet} nextPage={nextPage} prevPage={prevPage} />
+                </PagerView>
+            </BottomSheet>
         </SafeAreaView>
 
     );

@@ -4,17 +4,43 @@ import { useMutation } from '@apollo/client';
 import { SessionApolloQueries } from "@/apollo/query/sessionQuery";
 import * as SecureStore from 'expo-secure-store';
 import * as Updates from 'expo-updates';
+import { notificationServer } from "@/rpc";
+import { GENERATE_SIX_DIGIT_TOKEN } from "@/helpers";
 
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => { },
     onLogout: () => { },
+    sendVerificationCode: (_: string) => { },
+    setVerificationCode: (_: string) => { },
+    verificationCode: "",
     jwt: "",
 });
 
 
 export const SessionContextProvider = ({ children }: SessionContextType) => {
     const [jwt, setJwt] = useState<string>("");
+    const [verificationCode, setVerificationCode] = useState<string>("");
+
+
+    const sendVerificationCode = async (to: string) => {
+        try {
+            const code = GENERATE_SIX_DIGIT_TOKEN()
+            setVerificationCode(code)
+
+            const message = await notificationServer("sendEmail", {
+                to,
+                subject: `Codigo De Verificación`,
+                text: `Su Codigo De Verificación Es: ${code}`,
+                html: `<b>Su Codigo De Verificación Es: ${code}</b>`
+            })
+
+            return message
+
+        } catch (error: unknown) {
+            console.log({ error });
+        }
+    }
 
     const [login] = useMutation(SessionApolloQueries.login(), {
         variables: { email: "test@email.com", password: "password" }
@@ -52,7 +78,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
         try {
             await remove("jwt");
             await Updates.reloadAsync();
-            
+
         } catch (error) {
             console.log({ error });
         }
@@ -84,6 +110,9 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const value = {
         onLogin,
         onLogout,
+        sendVerificationCode,
+        setVerificationCode,
+        verificationCode,
         jwt
     };
 

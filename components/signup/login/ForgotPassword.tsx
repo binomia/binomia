@@ -13,11 +13,23 @@ type Props = {
 }
 
 const ForgotPassword: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
-    const { onLogin } = useContext<SessionPropsType>(SessionContext);
+    const { sendVerificationCode } = useContext<SessionPropsType>(SessionContext);
     const [email, setEmail] = useState<string>("");
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
 
 
+    const sendCode = async () => {
+        try {
+            const message = await sendVerificationCode(email.toLowerCase())
+
+            if (message) {
+                nextPage()
+            }
+
+        } catch (error: any) {
+            console.error(error.toString());
+        }
+    }
 
     useEffect(() => {
         setDisabledButton(true)
@@ -53,7 +65,7 @@ const ForgotPassword: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             w={"100%"}
-                            onPress={nextPage}
+                            onPress={sendCode}
                             title={"Siguiente"}
                         />
                     </VStack>
