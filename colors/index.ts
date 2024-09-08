@@ -14,7 +14,7 @@ export default {
     lightSkyGray: '#EAECED',
     lightRed: '#fbecf1',
     gray: '#cccccc',
-    red: "#D2416E",
+    red: 'rgb(255, 69, 58)',
     lightGreen: '#e7f7f7',
     green: "#0DB1AD",
     lightPurple: '#EEEBF4',
@@ -24,6 +24,6 @@ export default {
     card: 'rgb(18, 18, 18)',
     text: 'rgb(229, 229, 231)',
     border: 'rgb(39, 39, 41)',
-    notification: 'rgb(255, 69, 58)',
+    alert: '#c22525',
     warning: 'rgba(240, 175, 64,1)',
 }

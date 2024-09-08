@@ -5,22 +5,18 @@ import { SessionContext } from '@/contexts';
 import { SessionPropsType } from '@/types';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Input, Button } from '@/components';
+import colors from '@/colors';
 
-type Props = {
-    isLogin: boolean
-    setIsLogin: (value: boolean) => void
-}
-
-const LoginComponent: React.FC<Props> = ({ isLogin, setIsLogin }): JSX.Element => {
+const LoginComponent: React.FC = (): JSX.Element => {
     const { onLogin } = useContext<SessionPropsType>(SessionContext);
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [showPassword, setShowPassword] = useState<boolean>(false);
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <VStack variant={"body"} mt={"50px"} justifyContent={"space-between"} h={"100%"}>
+                <VStack w={"100%"} px={"20px"} variant={"body"} mt={"50px"} justifyContent={"space-between"} h={"100%"}>
                     <VStack alignItems={"center"}>
                         <VStack w={"100%"} mb={"50px"}>
                             <Heading size={"xl"} mb={"5px"} color={"white"}>Iniciar Sesión</Heading>

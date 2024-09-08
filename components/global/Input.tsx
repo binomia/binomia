@@ -1,33 +1,43 @@
-import { View } from 'react-native'
 import React from 'react'
-import { Input, StyledProps } from 'native-base'
+import { StyleSheet } from 'react-native'
+import { FormControl, HStack, IInputProps, Input } from 'native-base'
+import Feather from '@expo/vector-icons/Feather';
+import colors from '@/colors';
 
-type Props = {
+interface Props extends IInputProps {
     onChangeText: (value: string) => void
     placeholder: string
-    style?: StyledProps
     rightElement?: JSX.Element
     leftElement?: JSX.Element
     secureTextEntry?: boolean
+    isInvalid?: boolean
+    errorMessage?: string
 }
 
-const InputComponent: React.FC<Props> = ({ onChangeText, placeholder, style, rightElement, leftElement, secureTextEntry = false }) => {
+
+const InputComponent: React.FC<Props> = (props) => {
+    const { onChangeText, placeholder, errorMessage, isInvalid = false } = props
+
     return (
-        <View>
-            <Input
-                rightElement={rightElement}
-                leftElement={leftElement}
-                secureTextEntry={secureTextEntry}
-                {...style}
-                variant={"input"}
-                fontSize={"14px"}
-                _focus={{ selectionColor: "white" }}
-                fontWeight={"medium"}
-                color={"white"}
-                onChangeText={(e) => onChangeText(e)}
-                placeholder={placeholder}
-            />
-        </View>
+        <HStack mb={isInvalid ? "10px" : "0px"}>
+            <FormControl isInvalid={isInvalid} >
+                <Input
+                    {...props}                    
+                    variant={"input"}
+                    fontSize={"14px"}
+                    _focus={{ selectionColor: "white" }}
+                    fontWeight={"medium"}
+                    color={"white"}
+                    placeholderTextColor={"rgba(255,255,255,0.2)"}
+                />
+                <FormControl.ErrorMessage
+                    leftIcon={
+                        <Feather name="alert-circle" size={24} color={colors.alert} />
+                    }>
+                    {errorMessage}
+                </FormControl.ErrorMessage>
+            </FormControl>
+        </HStack>
     )
 }
 

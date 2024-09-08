@@ -1,7 +1,9 @@
+import colors from "@/colors";
 import { extendTheme } from "native-base";
 
 export const theme = extendTheme({
     colors: {
+        ...colors,
         lightGray: "#2C2C2C",
         darkGray: "#1E1E1E",
         mainGreen: "#1D9B48",
@@ -26,7 +28,7 @@ export const theme = extendTheme({
                     px: "20px",
                     h: "55px",
                     w: "100%",
-                    m: "5px",
+                    my: "5px",
                     borderRadius: 10
                 }
             }
