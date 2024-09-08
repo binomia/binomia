@@ -1,6 +1,5 @@
-import { TouchableOpacity } from 'react-native'
 import React from 'react'
-import { Text, HStack, StyledProps } from 'native-base';
+import { Text, StyledProps, Pressable } from 'native-base';
 
 
 interface Props extends StyledProps {
@@ -11,14 +10,12 @@ interface Props extends StyledProps {
 }
 
 const Button: React.FC<Props> = (props): JSX.Element => {
-    const {color = "white", title, onPress = () => { }, disabled = false} = props
-    
+    const { width, color = "white", title, onPress = () => { }, disabled = false } = props
+
     return (
-        <TouchableOpacity disabled={disabled} style={{ width: "100%" }} onPress={onPress}>
-            <HStack  {...props} borderRadius={"25px"}  alignItems={"center"} justifyContent={"center"} h="55px">
-                <Text width={"100%"} fontWeight={"bold"} fontSize={"16px"} textAlign={"center"} color={color}>{title}</Text>
-            </HStack>
-        </TouchableOpacity>
+        <Pressable _pressed={{ opacity: 0.5 }} {...props} borderRadius={"25px"} alignItems={"center"} justifyContent={"center"} h="55px" disabled={disabled} onPress={onPress}>
+            <Text width={"100%"} fontWeight={"bold"} fontSize={"16px"} textAlign={"center"} color={color}>{title}</Text>
+        </Pressable>
     )
 }
 

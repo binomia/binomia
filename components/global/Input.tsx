@@ -28,6 +28,7 @@ const InputComponent: React.FC<Props> = (props) => {
                     _focus={{ selectionColor: "white" }}
                     fontWeight={"medium"}
                     color={"white"}
+             
                     placeholderTextColor={"rgba(255,255,255,0.2)"}
                 />
                 <FormControl.ErrorMessage

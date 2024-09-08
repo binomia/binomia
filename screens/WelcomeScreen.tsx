@@ -18,8 +18,8 @@ const WelcomeScreen: React.FC = () => {
 					<Heading size={"2xl"} color={"white"}>Hola, Bienvenido</Heading>
 					<Text textAlign={"center"} w={"80%"} color={"white"}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Text>
 				</VStack>
-				<VStack px={"20px"} mt={"20px"} alignItems={"center"}>
-					<Button mb="50px" title="Crear una Cuenta" onPress={() => navigation.navigate("RegisterScreen")} />
+				<VStack w={"100%"} px={"20px"} mt={"20px"} alignItems={"center"}>
+					<Button w={"100%"} bg={"mainGreen"} mb="50px" title="Crear una Cuenta" onPress={() => navigation.navigate("RegisterScreen")} />
 				</VStack>
 			</VStack>
 		</SafeAreaView>
