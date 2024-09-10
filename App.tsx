@@ -20,7 +20,6 @@ export default function App() {
 
 		await delay(3000); // Wait for 5 seconds
 		await SplashScreen.hideAsync();
-
 	}, []);
 
 	return (
@@ -41,6 +40,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
 	container: {
+		backgroundColor: "pink",
 		flex: 1,
 	},
 });

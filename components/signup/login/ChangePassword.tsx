@@ -1,10 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack } from 'native-base';
 import { SafeAreaView, TouchableWithoutFeedback, Keyboard, TouchableOpacity } from 'react-native';
-import { Input, Button } from '@/components';
 import colors from '@/colors';
 import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { SessionPropsType } from '@/types';
+import { SessionContext } from '@/contexts';
+import { useMutation } from '@apollo/client';
+import { UserApolloQueries } from '@/apollo/query/userQuery';
+import Input from '@/components/global/Input';
+import Button from '@/components/global/Button';
 
 
 type Props = {
@@ -14,12 +19,45 @@ type Props = {
 }
 
 const ChangePassword: React.FC<Props> = ({ nextPage, cancelBottomSheet }: Props): JSX.Element => {
+    const { verificationData } = useContext<SessionPropsType>(SessionContext);
+
     const [password, setPassword] = useState<string>("");
     const [confirmPassword, setConfirmPassword] = useState<string>("");
 
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+    const [updateUserPassword] = useMutation(UserApolloQueries.updateUserPassword());
+
+
+    const onPress = async () => {
+        try {
+
+            if (password === confirmPassword) {
+                console.log(verificationData);
+                const updateUser = await updateUserPassword({
+                    variables: {
+                        email: verificationData.email.toLowerCase(),
+                        password,
+                        data: {
+                            token: verificationData.token,
+                            signature: verificationData.signature
+                        }
+                    }
+                })
+
+                console.log(
+                    updateUser?.data?.updateUserPassword
+                );
+                nextPage()
+            }
+            // console.log(verificationData);
+
+        } catch (error: any) {
+            console.log(error);
+
+        }
+    }
 
 
 
@@ -63,13 +101,13 @@ const ChangePassword: React.FC<Props> = ({ nextPage, cancelBottomSheet }: Props)
                             rightElement={
                                 <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
                                     <HStack mr={"15px"}>
-                                        <MaterialCommunityIcons name={showPassword ? "eye-outline" : "eye-off-outline"} size={22} color={confirmPassword === password && confirmPassword ? colors.mainGreen : confirmPassword ? colors.alert : "gray"} />
+                                        <MaterialCommunityIcons name={showConfirmPassword ? "eye-outline" : "eye-off-outline"} size={22} color={confirmPassword === password && confirmPassword ? colors.mainGreen : confirmPassword ? colors.alert : "gray"} />
                                     </HStack>
                                 </TouchableOpacity>
                             }
                         />
                     </VStack>
-                    <HStack justifyContent={"space-between"} w={"100%"} alignItems={"center"} mb={"30px"}>
+                    <HStack justifyContent={"space-between"} w={"100%"} alignItems={"center"} mb={"40px"}>
                         <Button
                             bg={"lightGray"}
                             color={"alert"}
@@ -82,7 +120,7 @@ const ChangePassword: React.FC<Props> = ({ nextPage, cancelBottomSheet }: Props)
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             w={"48%"}
-                            onPress={nextPage}
+                            onPress={onPress}
                             title={"Cambiar"}
                         />
                     </HStack>

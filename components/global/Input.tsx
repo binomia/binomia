@@ -1,5 +1,4 @@
 import React from 'react'
-import { StyleSheet } from 'react-native'
 import { FormControl, HStack, IInputProps, Input } from 'native-base'
 import Feather from '@expo/vector-icons/Feather';
 import colors from '@/colors';

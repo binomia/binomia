@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
-import { SessionContextType, SessionPropsType } from "@/types";
+import { SessionContextType, SessionPropsType, VerificationDataType } from "@/types";
 import { useMutation } from '@apollo/client';
-import { SessionApolloQueries } from "@/apollo/query/sessionQuery";
+import { SessionApolloQueries } from "@/apollo/query";
 import * as SecureStore from 'expo-secure-store';
 import * as Updates from 'expo-updates';
 import { notificationServer } from "@/rpc";
@@ -9,10 +9,16 @@ import { GENERATE_SIX_DIGIT_TOKEN } from "@/helpers";
 
 
 export const SessionContext = createContext<SessionPropsType>({
+    save: (_: string, __: string) => { },
+    get: (_: string) => Promise.resolve(""),
     onLogin: (_: { email: string, password: string }) => { },
     onLogout: () => { },
     sendVerificationCode: (_: string) => { },
     setVerificationCode: (_: string) => { },
+    setVerificationData: (_: VerificationDataType) => { },
+    setInvalidCredentials: (_: boolean) => { },
+    invalidCredentials: false,
+    verificationData: { token: "", signature: "", email: "" },
     verificationCode: "",
     jwt: "",
 });
@@ -20,7 +26,11 @@ export const SessionContext = createContext<SessionPropsType>({
 
 export const SessionContextProvider = ({ children }: SessionContextType) => {
     const [jwt, setJwt] = useState<string>("");
+    const [verificationData, setVerificationData] = useState<VerificationDataType>({ token: "", signature: "", email: "" });
     const [verificationCode, setVerificationCode] = useState<string>("");
+    const [login] = useMutation(SessionApolloQueries.login());
+    const [invalidCredentials, setInvalidCredentials] = useState<boolean>(false);
+
 
 
     const sendVerificationCode = async (to: string) => {
@@ -30,6 +40,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
             const message = await notificationServer("sendEmail", {
                 to,
+                code,
                 subject: `Codigo De Verificación`,
                 text: `Su Codigo De Verificación Es: ${code}`,
                 html: `<b>Su Codigo De Verificación Es: ${code}</b>`
@@ -37,14 +48,12 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
             return message
 
-        } catch (error: unknown) {
-            console.log({ error });
+        } catch (error: any) {
+            return error
         }
     }
 
-    const [login] = useMutation(SessionApolloQueries.login(), {
-        variables: { email: "test@email.com", password: "password" }
-    });
+
 
     const save = async (key: string, value: string) => {
         await SecureStore.setItemAsync(key, value);
@@ -85,9 +94,8 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     }
 
 
-    const onLogin = async ({ email, password }: { email: string, password: string }) => {
+    const onLogin = async ({ email, password }: { email: string, password: string }): Promise<any> => {
         try {
-            console.log({ email, password });
 
             const data = await login({
                 variables: { email, password }
@@ -100,18 +108,26 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 return data.data.login
             }
 
-            return ""
+            return data
         } catch (error) {
+            setInvalidCredentials(true)
             console.log({ error });
         }
     }
 
 
     const value = {
+        save,
+        get,
         onLogin,
         onLogout,
+        login,
         sendVerificationCode,
         setVerificationCode,
+        setVerificationData,
+        setInvalidCredentials,
+        invalidCredentials, 
+        verificationData,
         verificationCode,
         jwt
     };

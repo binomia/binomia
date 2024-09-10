@@ -9,7 +9,6 @@ import Address from './Address';
 
 const RegisterComponent: React.FC = (): JSX.Element => {
     const ref = useRef<PagerView>(null);
-    const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [currentPage, setCurrentPage] = useState<number>(0);
 
     const nextPage = () => {

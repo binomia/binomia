@@ -1,16 +1,14 @@
 import { useContext, useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack } from 'native-base';
-import { SafeAreaView, TouchableWithoutFeedback, Keyboard, StyleSheet, Platform } from 'react-native';
+import { SafeAreaView, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
 import { SessionContext } from '@/contexts';
 import { SessionPropsType } from '@/types';
-import { Button } from '@/components';
 import colors from '@/colors';
-import { INPUT_CODE_HEIGHT, INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
-import { GENERATE_SIX_DIGIT_TOKEN, VALIDATE_EMAIL } from '@/helpers';
+import { INPUT_CODE_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell, } from 'react-native-confirmation-code-field';
-import digitToken from 'n-digit-token';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import Button from '@/components/global/Button';
 
 type Props = {
     nextPage: () => void
@@ -29,7 +27,6 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
         value: code,
         setValue: setCode,
     });
-
 
 
     const goBack = () => {

@@ -4,9 +4,6 @@ import { extendTheme } from "native-base";
 export const theme = extendTheme({
     colors: {
         ...colors,
-        lightGray: "#2C2C2C",
-        darkGray: "#1E1E1E",
-        mainGreen: "#1D9B48",
     },
     components: {
         VStack: {

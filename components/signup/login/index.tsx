@@ -4,19 +4,24 @@ import { SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Sty
 import { SessionContext } from '@/contexts';
 import { SessionPropsType } from '@/types';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Input, Button, BottomSheet, ForgotPassword, VerifyCode, ChangePassword } from '@/components';
 import colors from '@/colors';
 import { INPUT_HEIGHT, SCREEN_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { VALIDATE_EMAIL } from '@/helpers';
 import PagerView from 'react-native-pager-view';
+import AccountRecovered from './AccountRecovered';
+import Input from '@/components/global/Input';
+import Button from '@/components/global/Button';
+import BottomSheet from '@/components/global/BottomSheet';
+import ForgotPassword from './ForgotPassword';
+import VerifyCode from './VerifyCode';
+import ChangePassword from './ChangePassword';
 
 const LoginComponent: React.FC = (): JSX.Element => {
 
     const pageViewRef = useRef<PagerView>(null);
-    const { onLogin, setVerificationCode } = useContext<SessionPropsType>(SessionContext);
+    const { onLogin, setVerificationCode, invalidCredentials, setInvalidCredentials } = useContext<SessionPropsType>(SessionContext);
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
-
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [showResetPasswordBottomSheet, setShowResetPasswordBottomSheet] = useState<boolean>(false);
@@ -27,7 +32,7 @@ const LoginComponent: React.FC = (): JSX.Element => {
 
 
     const nextPage = () => {
-        if (currentPage === 2) {
+        if (currentPage === 3) {
             pageViewRef.current?.setPage(0)
             setCurrentPage(0)
 
@@ -59,8 +64,8 @@ const LoginComponent: React.FC = (): JSX.Element => {
     }
 
 
-
     useEffect(() => {
+        setInvalidCredentials(false)
         setDisabledButton(true)
 
         if (email && password && VALIDATE_EMAIL(email) && password.length >= 6) {
@@ -81,20 +86,22 @@ const LoginComponent: React.FC = (): JSX.Element => {
                             <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Text>
                         </VStack>
                         <Input
-                            h={`${INPUT_HEIGHT}px`}
-                            style={VALIDATE_EMAIL(email) ? styles.InputsSucess : email ? styles.InputsFail : {}}
+                            keyboardType='email-address'
+                            h={`${INPUT_HEIGHT}px`}                        
                             onChangeText={(e) => setEmail(e)}
                             placeholder="Correo Electronico*"
                         />
                         <Input
                             h={`${INPUT_HEIGHT}px`}
+                            isInvalid={invalidCredentials}
+                            errorMessage='La contraseña y correo electronico no coinciden'
                             secureTextEntry={!showPassword}
                             onChangeText={(e) => setPassword(e)}
                             placeholder="Contraseña*"
                             rightElement={
                                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                                     <HStack mr={"15px"}>
-                                        <MaterialCommunityIcons name={showPassword ? "eye-outline" : "eye-off-outline"} size={22} color={password.length >= 6 ? colors.mainGreen : password ? colors.alert : "gray"} />
+                                        <MaterialCommunityIcons name={showPassword ? "eye-outline" : "eye-off-outline"} size={22} color={disabledButton ? colors.gray : colors.mainGreen}/>
                                     </HStack>
                                 </TouchableOpacity>
                             }
@@ -109,17 +116,18 @@ const LoginComponent: React.FC = (): JSX.Element => {
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             w={"100%"}
-                            onPress={() => onLogin({ email, password })}
+                            onPress={() => onLogin({ email: email.toLowerCase(), password })}
                             title={"Iniciar Sesión"}
                         />
                     </VStack>
                 </VStack>
             </TouchableWithoutFeedback>
-            <BottomSheet onCloseFinish={() => setShowResetPasswordBottomSheet(false)} sheetBg='white' height={SCREEN_HEIGHT * 0.8} open={showResetPasswordBottomSheet}>
+            <BottomSheet onCloseFinish={() => setShowResetPasswordBottomSheet(false)} sheetBg='white' height={SCREEN_HEIGHT * 0.9} open={showResetPasswordBottomSheet}>
                 <PagerView scrollEnabled={false} ref={pageViewRef} style={{ flex: 1 }} initialPage={currentPage}>
                     <ForgotPassword key="1" nextPage={nextPage} />
                     <VerifyCode key="2" nextPage={nextPage} prevPage={prevPage} />
                     <ChangePassword key="3" cancelBottomSheet={cancelBottomSheet} nextPage={nextPage} prevPage={prevPage} />
+                    <AccountRecovered key="4" cancelBottomSheet={cancelBottomSheet} />
                 </PagerView>
             </BottomSheet>
         </SafeAreaView>
