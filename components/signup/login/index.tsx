@@ -83,11 +83,13 @@ const LoginComponent: React.FC = (): JSX.Element => {
                     <VStack alignItems={"center"}>
                         <VStack w={"100%"} mb={"50px"}>
                             <Heading fontSize={`${TEXT_HEADING_FONT_SIZE}px`} mb={"5px"} color={"white"}>Iniciar Sesión</Heading>
-                            <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Text>
+                            <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"90%"} color={"white"}>
+                                Gestiona tu dinero de manera segura, eficiente y sin complicaciones.
+                            </Text>
                         </VStack>
                         <Input
                             keyboardType='email-address'
-                            h={`${INPUT_HEIGHT}px`}                        
+                            h={`${INPUT_HEIGHT}px`}
                             onChangeText={(e) => setEmail(e)}
                             placeholder="Correo Electronico*"
                         />
@@ -101,7 +103,7 @@ const LoginComponent: React.FC = (): JSX.Element => {
                             rightElement={
                                 <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                                     <HStack mr={"15px"}>
-                                        <MaterialCommunityIcons name={showPassword ? "eye-outline" : "eye-off-outline"} size={22} color={disabledButton ? colors.gray : colors.mainGreen}/>
+                                        <MaterialCommunityIcons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color={disabledButton ? colors.gray : colors.mainGreen} />
                                     </HStack>
                                 </TouchableOpacity>
                             }

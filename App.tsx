@@ -8,6 +8,7 @@ import { apolloClient } from '@/apollo';
 import * as SplashScreen from 'expo-splash-screen';
 import { Navigation } from '@/navigation';
 import { NavigationContainer } from '@react-navigation/native';
+import { GlobalContextProvider } from './contexts/globalContext';
 
 
 LogBox.ignoreAllLogs();
@@ -26,12 +27,14 @@ export default function App() {
 		<ApolloProvider client={apolloClient}>
 			<NativeBaseProvider theme={theme}>
 				<SessionContextProvider>
-					<View onLayout={onLayoutRootView} style={styles.container}>
-						<StatusBar barStyle="light-content" />
-						<NavigationContainer>
-							<Navigation />
-						</NavigationContainer>
-					</View>
+					<GlobalContextProvider>
+						<View onLayout={onLayoutRootView} style={styles.container}>
+							<StatusBar barStyle="light-content" />
+							<NavigationContainer>
+								<Navigation />
+							</NavigationContainer>
+						</View>
+					</GlobalContextProvider>
 				</SessionContextProvider>
 			</NativeBaseProvider>
 		</ApolloProvider>

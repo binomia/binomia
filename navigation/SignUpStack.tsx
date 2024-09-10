@@ -8,10 +8,15 @@ import { useNavigation } from '@react-navigation/native';
 import WelcomeScreen from '@/screens/WelcomeScreen';
 import LoginComponent from '@/components/signup/login';
 import RegisterComponent from '@/components/signup/register';
+import { useContext } from 'react';
+import { GlobalContextType } from '@/types';
+import { GlobalContext } from '@/contexts/globalContext';
 
 const SignUpStack: React.FC = () => {
     const navigation = useNavigation<any>();
     const Stack = createNativeStackNavigator<any>();
+    const { resetAllStates } = useContext<GlobalContextType>(GlobalContext);
+
 
     const headerLeft = () => {
         return (
@@ -22,9 +27,13 @@ const SignUpStack: React.FC = () => {
     }
 
     const headerRight = () => {
+        const onClose = () => { 
+            resetAllStates()
+            navigation.navigate("WelcomeScreen")
+        }
 
         return (
-            <TouchableOpacity onPress={() => navigation.navigate("WelcomeScreen")}>
+            <TouchableOpacity onPress={onClose}>
                 <Ionicons name="close" size={30} color="white" />
             </TouchableOpacity>
         )

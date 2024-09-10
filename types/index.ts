@@ -29,3 +29,38 @@ export type SecureStoreType = {
     save: (key: string, value: string) => void
     get: (key: string) => Promise<any>
 }
+
+
+export type Address = {
+    street: string
+    number: number
+    city: string
+    province: string
+    municipality: string
+}
+
+
+export type GlobalContextType = {
+    email: string
+    setEmail: (value: string) => void
+
+    password: string
+    setPassword: (value: string) => void
+
+    names: string
+    setNames: (value: string) => void
+    
+    lastNames: string
+    setLastNames: (value: string) => void
+
+    phoneNumber: string
+    setPhoneNumber: (value: string) => void
+
+    address: Address
+    setAddress: (value: Address) => void
+    
+    userAgreement: boolean
+    setUserAgreement: (value: boolean) => void
+
+    resetAllStates: () => void
+}

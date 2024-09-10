@@ -5,6 +5,7 @@ import PagerView from 'react-native-pager-view';
 import colors from '@/colors';
 import CreateAccount from './CreateAccount';
 import Address from './Address';
+import VerifyCode from './VerifyCode';
 
 
 const RegisterComponent: React.FC = (): JSX.Element => {
@@ -35,7 +36,8 @@ const RegisterComponent: React.FC = (): JSX.Element => {
             <VStack h={"100%"}>
                 <PagerView scrollEnabled={false} ref={ref} style={{ flex: 1 }} initialPage={currentPage}>                    
                     <CreateAccount key={"1"} nextPage={nextPage} />
-                    <Address key={"2"} />
+                    <Address key={"2"} nextPage={nextPage} prevPage={prevPage}/>
+                    <VerifyCode key={"3"} nextPage={nextPage} prevPage={prevPage}/>
                 </PagerView>
             </VStack>
         </SafeAreaView>
