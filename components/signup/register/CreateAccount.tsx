@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack } from 'native-base';
+import { VStack, Heading, Text, HStack, Stack } from 'native-base';
 import { Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import colors from '@/colors';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -31,35 +31,36 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     const [getUserByEmail] = useLazyQuery(UserApolloQueries.userByEmail());
 
     const [showEmailError, setShowEmailError] = useState<boolean>(false);
+    const [showPasswordError, setShowPasswordError] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [openBottomSheetUrl, setOpenBottomSheetUrl] = useState<string>("");
 
 
-    const sendCode = async () => {
-        try {
-            const message = await sendVerificationCode(email.toLowerCase())
+    // const sendCode = async () => {
+    //     try {
+    //         const message = await sendVerificationCode(email.toLowerCase())
 
-            if (message) {
-                setVerificationData({ ...message, email: email.toLowerCase() })
-                nextPage()
-            }
+    //         if (message) {
+    //             setVerificationData({ ...message, email: email.toLowerCase() })
+    //             nextPage()
+    //         }
 
-        } catch (error: any) {
-            console.error(error.toString());
-        }
-    }
+    //     } catch (error: any) {
+    //         console.error(error.toString());
+    //     }
+    // }
 
 
-    const verifyUserEmail = async (_email: string) => {
-        try {
-            const user = await getUserByEmail({ variables: { email: email.toLowerCase() } })
-            setShowEmailError(user.data.userByEmail)
+    // const verifyUserEmail = async (_email: string) => {
+    //     try {
+    //         const user = await getUserByEmail({ variables: { email: email.toLowerCase() } })
+    //         setShowEmailError(user.data.userByEmail)
 
-        } catch (error) {
-            console.error(error);
-        }
-    }
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // }
 
 
     const openTermsAndConditions = (url: string) => {
@@ -75,11 +76,20 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
         return isValid
     };
 
-    useEffect(() => {
-        if (VALIDATE_EMAIL(email))
-            verifyUserEmail(email)
+    // useEffect(() => {
+    //     if (VALIDATE_EMAIL(email))
+    //         verifyUserEmail(email)
 
-    }, [email])
+    // }, [email])
+
+    useEffect(() => {
+        if (password.length >= 6) {
+            console.log("password", password);
+
+            setShowPasswordError(true)
+        }
+
+    }, [password])
 
     useEffect(() => {
         setDisabledButton(true)
@@ -87,7 +97,6 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
         if (names.length >= 2 && lastNames.length >= 2 && phoneNumber && email && password && userAgreement) {
             if (isAValidPhoneNumber(phoneNumber) && VALIDATE_EMAIL(email) && password.length >= 6)
                 setDisabledButton(false)
-
         }
 
     }, [names, lastNames, phoneNumber, email, password, userAgreement])
@@ -136,24 +145,27 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                                 style={VALIDATE_EMAIL(email) && !showEmailError ? styles.InputsSucess : email ? styles.InputsFail : {}}
                                 keyboardType='email-address'
                                 value={email}
-                                onChangeText={(value) => setEmail(value.toLowerCase().trim())}  
+                                onChangeText={(value) => setEmail(value.toLowerCase().trim())}
                                 placeholder="Correo Electrónico*"
                             />
-                            <Input
-                                h={`${INPUT_HEIGHT}px`}
-                                secureTextEntry={!showPassword}
-                                value={password}
-                                keyboardType="visible-password"
-                                onChangeText={(value) => setPassword(value)}
-                                placeholder="Contraseña*"
-                                rightElement={
-                                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                                        <HStack mr={"15px"}>
-                                            <MaterialCommunityIcons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color={password.length >= 6 ? colors.mainGreen : password ? colors.alert : "gray"} />
-                                        </HStack>
-                                    </TouchableOpacity>
-                                }
-                            />
+                            <Stack borderRadius={"10px"} my={"5px"} borderWidth={1} borderColor={password.length >= 6 ? colors.mainGreen : password ? colors.alert : "transparent"} w={"100%"}>
+                                <Input
+                                    m={"0px"}
+                                    h={`${INPUT_HEIGHT}px`}
+                                    secureTextEntry={!showPassword}
+                                    value={password}                                
+                                    keyboardType="visible-password"
+                                    onChangeText={(value) => setPassword(value)}
+                                    placeholder="Contraseña*"
+                                    rightElement={
+                                        <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                            <HStack mr={"15px"}>
+                                                <MaterialCommunityIcons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color={password.length >= 6 ? colors.mainGreen : password ? colors.alert : "gray"} />
+                                            </HStack>
+                                        </TouchableOpacity>
+                                    }
+                                />
+                            </Stack>
                         </VStack>
 
                         <HStack alignSelf={"flex-end"} w={"100%"} mt={"20px"} px={"25px"}>
@@ -173,7 +185,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             mb="10px"
-                            onPress={sendCode}
+                            onPress={nextPage}
                             title={"Siguiente"}
                         />
                     </VStack>

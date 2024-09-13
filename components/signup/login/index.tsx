@@ -1,5 +1,5 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { VStack, Heading, HStack, Text } from 'native-base';
+import { VStack, Heading, HStack, Text, Stack } from 'native-base';
 import { SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
 import { SessionContext } from '@/contexts';
 import { SessionPropsType } from '@/types';
@@ -89,25 +89,30 @@ const LoginComponent: React.FC = (): JSX.Element => {
                         </VStack>
                         <Input
                             keyboardType='email-address'
-                            h={`${INPUT_HEIGHT}px`}
-                            onChangeText={(e) => setEmail(e)}
+                            h={`${INPUT_HEIGHT}px`}                        
+                            style={VALIDATE_EMAIL(email) && !invalidCredentials ? styles.InputsSucess : email && !invalidCredentials ? styles.InputsFail : {}}
+                            value={email}
+                            onChangeText={(e) => setEmail(e.trim().toLowerCase())}
                             placeholder="Correo Electronico*"
                         />
-                        <Input
-                            h={`${INPUT_HEIGHT}px`}
-                            isInvalid={invalidCredentials}
-                            errorMessage='La contraseña y correo electronico no coinciden'
-                            secureTextEntry={!showPassword}
-                            onChangeText={(e) => setPassword(e)}
-                            placeholder="Contraseña*"
-                            rightElement={
-                                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                                    <HStack mr={"15px"}>
-                                        <MaterialCommunityIcons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color={disabledButton ? colors.gray : colors.mainGreen} />
-                                    </HStack>
-                                </TouchableOpacity>
-                            }
-                        />
+                        <Stack  borderRadius={"10px"} my={"5px"} borderWidth={invalidCredentials ? 0 : 1} borderColor={password.length >= 6 ? colors.mainGreen : password ? colors.alert : "transparent"} w={"100%"}>
+                            <Input
+                                m={"0px"}
+                                h={`${INPUT_HEIGHT}px`}
+                                isInvalid={invalidCredentials}
+                                errorMessage='La contraseña y correo electronico no coinciden'
+                                secureTextEntry={!showPassword}
+                                onChangeText={(e) => setPassword(e)}
+                                placeholder="Contraseña*"
+                                rightElement={
+                                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                                        <HStack mr={"15px"}>
+                                            <MaterialCommunityIcons name={showPassword ? "eye-outline" : "eye-off-outline"} size={20} color={password.length && !invalidCredentials ? colors.mainGreen : password && !invalidCredentials ? colors.alert : "gray"} />
+                                        </HStack>
+                                    </TouchableOpacity>
+                                }
+                            />
+                        </Stack>
                         <TouchableOpacity style={{ alignSelf: "flex-end" }} onPress={() => setShowResetPasswordBottomSheet(true)}>
                             <Text underline fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} alignSelf={"flex-end"} fontWeight={"medium"} mt={"10px"} textAlign={"right"} color={"white"}>Olvidaste tu contraseña?</Text>
                         </TouchableOpacity>

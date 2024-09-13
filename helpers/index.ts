@@ -28,3 +28,19 @@ export const GENERATE_SIX_DIGIT_TOKEN = (): string => {
     const token = Math.floor(100000 + Math.random() * 900000);
     return token.toString();
 }
+
+
+export const FORMAT_CEDULA = (value: string) => {
+    if (value.length <= 3 && value !== "") {
+        return value.replaceAll("-", "")
+    }
+    else if (value.length > 3 && value.length <= 10) {
+        const formattedValue = value.slice(0, 3) + "-" + value.slice(3)
+        return formattedValue
+    }
+    else if (value.length > 10 && value.length <= 11) {
+        const formattedValue = value.slice(0, 3) + "-" + value.slice(3, 10) + "-" + value.slice(10, 11);
+        return formattedValue
+    }
+    return value
+}

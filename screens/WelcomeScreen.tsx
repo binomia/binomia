@@ -16,7 +16,7 @@ const WelcomeScreen: React.FC = () => {
 				<VStack h={"65%"} w={"100%"} justifyContent={"flex-end"} alignItems={"center"}>
 					<Image resizeMode='contain' w={"100%"} h={height / 3} source={welcome} />
 					<Heading size={"2xl"} color={"white"}>Hola, Bienvenido</Heading>
-					<Text textAlign={"center"} w={"80%"} color={"white"}>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</Text>
+					<Text textAlign={"center"} w={"75%"} color={"white"}>Tu dinero, siempre a tu alcance. Seguro y rápido. Todo en un solo lugar.</Text>
 				</VStack>
 				<VStack w={"100%"} px={"20px"} alignItems={"center"}>
 					<Button w={"100%"} bg={"mainGreen"} mb="20px" title="Crear una Cuenta" onPress={() => navigation.navigate("RegisterScreen")} />

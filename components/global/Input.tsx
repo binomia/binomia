@@ -1,5 +1,5 @@
 import React from 'react'
-import { FormControl, HStack, IInputProps, Input } from 'native-base'
+import { FormControl, HStack, IInputProps, Input, Text } from 'native-base'
 import Feather from '@expo/vector-icons/Feather';
 import colors from '@/colors';
 
@@ -11,29 +11,33 @@ interface Props extends IInputProps {
     secureTextEntry?: boolean
     isInvalid?: boolean
     errorMessage?: string
+    bColor?: string
 }
 
 
 const InputComponent: React.FC<Props> = (props) => {
-    const { errorMessage, isInvalid = false, fontSize = "14px" } = props
+    const { errorMessage, bColor, isInvalid = false, fontSize = "14px" } = props
 
     return (
         <HStack mb={isInvalid ? "10px" : "0px"}>
             <FormControl isInvalid={isInvalid} >
                 <Input
                     {...props}
+                    borderColor={bColor}
                     variant={"input"}
                     fontSize={fontSize}
                     _focus={{ selectionColor: "white" }}
                     fontWeight={"medium"}
                     color={"white"}
                     placeholderTextColor={"rgba(255,255,255,0.2)"}
+
                 />
                 <FormControl.ErrorMessage
+                    w={"85%"}
                     leftIcon={
                         <Feather name="alert-circle" size={24} color={colors.alert} />
                     }>
-                    {errorMessage}
+                    <Text>{errorMessage}</Text>
                 </FormControl.ErrorMessage>
             </FormControl>
         </HStack>

@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack } from 'native-base';
 import { StyleSheet, Keyboard, SafeAreaView, TouchableWithoutFeedback } from 'react-native';
 import colors from '@/colors';
@@ -16,43 +16,44 @@ type Props = {
 
 
 const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
-    const { address, setAddress, } = useContext<GlobalContextType>(GlobalContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
+    const { address, setAddress, } = useContext<GlobalContextType>(GlobalContext);
     const [street, setStreet] = useState<string>("");
     const [number, setNumber] = useState<string>("");
     const [province, setProvince] = useState<string>("");
-    const [city, setCity] = useState<string>("");
+    const [sector, setSector] = useState<string>("");
     const [municipality, setMunicipality] = useState<string>("");
+
+
 
 
     useEffect(() => {
         setDisabledButton(true)
+        console.log({ address, street, number, province, sector, municipality });
 
-        if (street.length >= 2 && number && province.length >= 2 && city.length >= 2 && municipality.length >= 2) {
+        if (street.length >= 2 && number && province.length >= 2 && sector.length >= 2 && municipality.length >= 2) {
             setDisabledButton(false)
             setAddress({
                 street,
                 number: Number(number),
                 province,
-                city,
+                city: sector,
                 municipality
             })
         }
 
-        console.log({ address, street, number, province, city, municipality });
-
-    }, [address, street, number, province, city, municipality])
+    }, [street, number, province, sector, municipality])
 
 
     return (
         <SafeAreaView style={{ backgroundColor: colors.darkGray }}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <VStack mt={"10%"} h={"95%"} w={"100%"} justifyContent={"space-between"}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
+                <VStack mt={"10%"} h={"96%"} w={"100%"} justifyContent={"space-between"}>
                     <VStack>
                         <VStack px={"20px"} w={"100%"} alignItems={"flex-start"}>
-                            <Heading fontSize={`${TEXT_HEADING_FONT_SIZE - 2}px`} color={"white"}>Ingresa Tu Dirección</Heading>
+                            <Heading fontSize={`${TEXT_HEADING_FONT_SIZE}px`} color={"white"}>Dirección</Heading>
                             <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>
-                                Por favor, proporcione su dirección de residencia. Esto nos permitirá fortalecer la seguridad de su cuenta.
+                                Ingrese su dirección donde reside. Lo cual nos a procesar tu cuenta.
                             </Text>
                         </VStack>
                         <VStack w={"100%"} px={"20px"} mt={"30px"} alignItems={"center"} >
@@ -66,16 +67,16 @@ const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element =>
                             <Input
                                 h={`${INPUT_HEIGHT}px`}
                                 keyboardType="number-pad"
-                                style={number ? styles.InputsSucess : {}}
+                                style={number.length >= 2 ? styles.InputsSucess : {}}
                                 onChangeText={(value) => setNumber(value)}
                                 value={number}
                                 placeholder="Numero De Casa*"
                             />
                             <Input
                                 h={`${INPUT_HEIGHT}px`}
-                                style={city.length >= 2 ? styles.InputsSucess : {}}
-                                onChangeText={(value) => setCity(value)}
-                                value={city}
+                                style={sector.length >= 2 ? styles.InputsSucess : {}}
+                                onChangeText={(value) => setSector(value)}
+                                value={sector}
                                 placeholder="Sector*"
                             />
                             <Input

@@ -6,19 +6,16 @@ import colors from '@/colors';
 import CreateAccount from './CreateAccount';
 import Address from './Address';
 import VerifyCode from './VerifyCode';
+import ScanID from './ScanID';
+import AddCedula from './AddCedula';
 
 
 const RegisterComponent: React.FC = (): JSX.Element => {
     const ref = useRef<PagerView>(null);
-    const [currentPage, setCurrentPage] = useState<number>(0);
+    const [currentPage, setCurrentPage] = useState<number>(2);
 
     const nextPage = () => {
-        if (currentPage === 2) {
-            ref.current?.setPage(0)
-            setCurrentPage(0)
-
-        } else
-            ref.current?.setPage(currentPage + 1)
+        ref.current?.setPage(currentPage + 1)
         setCurrentPage(currentPage + 1)
     }
 
@@ -32,12 +29,14 @@ const RegisterComponent: React.FC = (): JSX.Element => {
     }
 
     return (
-        <SafeAreaView style={{ backgroundColor: colors.darkGray }}>
-            <VStack h={"100%"}>
-                <PagerView scrollEnabled={false} ref={ref} style={{ flex: 1 }} initialPage={currentPage}>                    
+        <SafeAreaView style={{ backgroundColor: colors.darkGray, flex: 1 }}>
+            <VStack flex={1}>
+                <PagerView scrollEnabled={false} ref={ref} style={{ flex: 1 }} initialPage={currentPage}>
                     <CreateAccount key={"1"} nextPage={nextPage} />
-                    <Address key={"2"} nextPage={nextPage} prevPage={prevPage}/>
-                    <VerifyCode key={"3"} nextPage={nextPage} prevPage={prevPage}/>
+                    <Address key={"2"} nextPage={nextPage} prevPage={prevPage} />
+                    <AddCedula key={"3"} nextPage={nextPage} prevPage={prevPage} />
+                    <ScanID key={"4"} nextPage={nextPage} prevPage={prevPage} />
+                    <VerifyCode key={"last"} nextPage={nextPage} prevPage={prevPage} />
                 </PagerView>
             </VStack>
         </SafeAreaView>
