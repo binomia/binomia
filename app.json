@@ -13,13 +13,20 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.dinero.com"
+      "bundleIdentifier": "com.dinero.com",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000"
-      }
+      },
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
+      "package": "com.dinero.com"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,6 +38,8 @@
     },
     "owner": "brayhandeaza",
     "plugins": [
+      "react-native-document-scanner-plugin",
+      "react-native-vision-camera",
       [
         "expo-secure-store",
         {
