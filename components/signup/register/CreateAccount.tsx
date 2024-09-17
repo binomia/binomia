@@ -5,7 +5,7 @@ import colors from '@/colors';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { phone } from 'phone';
-import { FORMAT_PHONE_NUMBER, VALIDATE_EMAIL } from '@/helpers';
+import { FORMAT_CEDULA, FORMAT_PHONE_NUMBER, VALIDATE_EMAIL } from '@/helpers';
 import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-sticky-footer-avoiding-scroll-view';
 import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import Input from '@/components/global/Input';
@@ -17,6 +17,7 @@ import { WebView } from 'react-native-webview';
 import { SessionContext } from '@/contexts';
 import { useLazyQuery } from '@apollo/client';
 import { UserApolloQueries } from '@/apollo/query';
+import axios from 'axios';
 
 
 type Props = {
@@ -35,6 +36,9 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [openBottomSheetUrl, setOpenBottomSheetUrl] = useState<string>("");
+    const [isInvalid, setIsInvalid] = useState<boolean>(false)
+    const [id, setID] = useState<string>("");
+
 
 
     // const sendCode = async () => {
@@ -76,11 +80,29 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
         return isValid
     };
 
-    // useEffect(() => {
-    //     if (VALIDATE_EMAIL(email))
-    //         verifyUserEmail(email)
 
-    // }, [email])
+    const validateCedula = async () => {
+        setIsInvalid(true)
+        try {
+            await axios.get(`https://api.digital.gob.do/v3/cedulas/${id.replace(/-/g, '')}/validate`)
+            setIsInvalid(false)
+
+        } catch (error) {
+            console.log({ error });
+            setIsInvalid(true)
+        }
+    }
+
+    useEffect(() => {
+        setIsInvalid(false)
+
+        if (id.length === 13) {
+            setIsInvalid(false)
+            validateCedula()
+            setDisabledButton(false)
+        }
+
+    }, [id])
 
     useEffect(() => {
         if (password.length >= 6) {
@@ -94,15 +116,15 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     useEffect(() => {
         setDisabledButton(true)
 
-        if (names.length >= 2 && lastNames.length >= 2 && phoneNumber && email && password && userAgreement) {
+        if (names.length >= 2 && lastNames.length >= 2 && phoneNumber && email && password && userAgreement && id.length === 13 && !isInvalid) {
             if (isAValidPhoneNumber(phoneNumber) && VALIDATE_EMAIL(email) && password.length >= 6)
                 setDisabledButton(false)
         }
 
-    }, [names, lastNames, phoneNumber, email, password, userAgreement])
+    }, [names, lastNames, id, phoneNumber, email, password, userAgreement, isInvalid])
 
     return (
-        <KeyboardAvoidingScrollView contentContainerStyle={{ flex: 1 }}>
+        <KeyboardAvoidingScrollView onScroll={Keyboard.dismiss} contentContainerStyle={{ flex: 1 }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <VStack mt={"30px"} h={"100%"} w={"100%"} justifyContent={"space-between"}>
                     <VStack w={"100%"} alignItems={"center"}>
@@ -126,6 +148,19 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                                 value={lastNames}
                                 onChangeText={(value) => setLastNames(value)}
                                 placeholder="Apellidos*"
+                            />
+                            <Input
+                                isInvalid={isInvalid}
+                                errorMessage='El correo electronico no se encuentra registrado como usuario.
+                            Por favor verifique e intente de nuevo.'
+                                h={`${INPUT_HEIGHT}px`}
+                                autoComplete="off"
+                                maxLength={12}
+                                style={id.length === 13 && !isInvalid ? styles.InputsSucess : (id && !isInvalid || isInvalid) ? styles.InputsFail : {}}
+                                onChangeText={(value) => setID(FORMAT_CEDULA(value.replace(/-/g, '')))}
+                                keyboardType="number-pad"
+                                value={id}
+                                placeholder="Numero De Cédula*"
                             />
                             <Input
                                 h={`${INPUT_HEIGHT}px`}
@@ -153,7 +188,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                                     m={"0px"}
                                     h={`${INPUT_HEIGHT}px`}
                                     secureTextEntry={!showPassword}
-                                    value={password}                                
+                                    value={password}
                                     keyboardType="visible-password"
                                     onChangeText={(value) => setPassword(value)}
                                     placeholder="Contraseña*"

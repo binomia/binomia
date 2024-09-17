@@ -62,11 +62,14 @@ export type GlobalContextType = {
     idBack: string
     setIdBack: (value: string) => void
 
-    address: Address
-    setAddress: (value: Address) => void
+    address: string
+    setAddress: (value: string) => void
     
     userAgreement: boolean
     setUserAgreement: (value: boolean) => void
+
+    addressAgreement: boolean
+    setAddressAgreement: (value: boolean) => void
 
     resetAllStates: () => void
 }

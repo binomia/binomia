@@ -15,14 +15,10 @@ export const globalContextInitialState: GlobalContextType = {
     setIdFront: (_: string) => { },
     idBack: "",
     setIdBack: (_: string) => { },
-    address: {
-        street: "",
-        number: 0,
-        city: "",
-        province: "",
-        municipality: ""
-    },
-    setAddress: (_: Address) => { },
+    addressAgreement: false,
+    setAddressAgreement: (_: boolean) => { },
+    address: "",
+    setAddress: (_: string) => { },
     setPhoneNumber: (_: string) => { },
     userAgreement: false,
     setUserAgreement: (_: boolean) => { },

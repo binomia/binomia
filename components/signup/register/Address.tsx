@@ -1,13 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack } from 'native-base';
-import { StyleSheet, Keyboard, SafeAreaView, TouchableWithoutFeedback } from 'react-native';
+import { VStack, Heading, Text, HStack, TextArea } from 'native-base';
+import { StyleSheet, Keyboard, SafeAreaView, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
 import colors from '@/colors';
-import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
+import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE, TEXTAREA_HEIGHT } from '@/constants';
 import Button from '@/components/global/Button';
 import { GlobalContextType } from '@/types';
 import { GlobalContext } from '@/contexts/globalContext';
 import Input from '@/components/global/Input';
-
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 type Props = {
     nextPage: () => void
@@ -17,32 +18,17 @@ type Props = {
 
 const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
-    const { address, setAddress, } = useContext<GlobalContextType>(GlobalContext);
-    const [street, setStreet] = useState<string>("");
-    const [number, setNumber] = useState<string>("");
-    const [province, setProvince] = useState<string>("");
-    const [sector, setSector] = useState<string>("");
-    const [municipality, setMunicipality] = useState<string>("");
-
-
+    const { address, setAddress, addressAgreement, setAddressAgreement } = useContext<GlobalContextType>(GlobalContext);
 
 
     useEffect(() => {
         setDisabledButton(true)
-        console.log({ address, street, number, province, sector, municipality });
 
-        if (street.length >= 2 && number && province.length >= 2 && sector.length >= 2 && municipality.length >= 2) {
+        if (address && addressAgreement) {
             setDisabledButton(false)
-            setAddress({
-                street,
-                number: Number(number),
-                province,
-                city: sector,
-                municipality
-            })
         }
 
-    }, [street, number, province, sector, municipality])
+    }, [address])
 
 
     return (
@@ -53,47 +39,34 @@ const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element =>
                         <VStack px={"20px"} w={"100%"} alignItems={"flex-start"}>
                             <Heading fontSize={`${TEXT_HEADING_FONT_SIZE}px`} color={"white"}>Dirección</Heading>
                             <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>
-                                Ingrese su dirección donde reside. Lo cual nos a procesar tu cuenta.
+                                Ingrese su dirección de residencia para completar el procesamiento de su cuenta.
                             </Text>
                         </VStack>
                         <VStack w={"100%"} px={"20px"} mt={"30px"} alignItems={"center"} >
-                            <Input
-                                h={`${INPUT_HEIGHT}px`}
-                                style={street.length >= 2 ? styles.InputsSucess : {}}
-                                onChangeText={(value) => setStreet(value)}
-                                value={street}
-                                placeholder="Nombres De La Calle*"
-                            />
-                            <Input
-                                h={`${INPUT_HEIGHT}px`}
-                                keyboardType="number-pad"
-                                style={number.length >= 2 ? styles.InputsSucess : {}}
-                                onChangeText={(value) => setNumber(value)}
-                                value={number}
-                                placeholder="Numero De Casa*"
-                            />
-                            <Input
-                                h={`${INPUT_HEIGHT}px`}
-                                style={sector.length >= 2 ? styles.InputsSucess : {}}
-                                onChangeText={(value) => setSector(value)}
-                                value={sector}
-                                placeholder="Sector*"
-                            />
-                            <Input
-                                h={`${INPUT_HEIGHT}px`}
-                                style={municipality.length >= 2 ? styles.InputsSucess : {}}
-                                onChangeText={(value) => setMunicipality(value)}
-                                value={municipality}
-                                placeholder="Municipio*"
-                            />
-                            <Input
-                                h={`${INPUT_HEIGHT}px`}
-                                style={province.length >= 2 ? styles.InputsSucess : {}}
-                                onChangeText={(value) => setProvince(value)}
-                                value={province}
-                                placeholder="Provincia*"
+                            <TextArea
+                                borderWidth={0}
+                                borderColor={"white"}
+                                borderRadius={"10px"}
+                                bg={"lightGray"}
+                                _focus={{ bg: "lightGray", selectionColor: "white" }}
+                                value={address}
+                                fontSize={"16px"}
+                                onChangeText={(value) => setAddress(value)}
+                                h={`${TEXTAREA_HEIGHT}px`}
+                                color={"white"}
+                                autoCompleteType={"street-address"}
+                                placeholder='Ingresa tu dirección'
+                                style={addressAgreement ? styles.InputsSucess : address ? styles.InputsFail : {}}
                             />
                         </VStack>
+                        <HStack alignSelf={"flex-end"} w={"100%"} mt={"40px"} px={"25px"}>
+                            <TouchableOpacity onPress={() => setAddressAgreement(!addressAgreement)}>
+                                <MaterialIcons style={{ marginTop: 3 }} name={addressAgreement ? "check-box" : "check-box-outline-blank"} size={28} color={colors.mainGreen} />
+                            </TouchableOpacity>
+                            <Text mx={"5px"} fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"90%"} color={"white"}>
+                                Certifico que la dirección proporcionada es la correcta y corresponde a mi residencia actual.
+                            </Text>
+                        </HStack>
                     </VStack>
                     <HStack w={"100%"} mb={"40px"} px={"20px"} justifyContent={"space-between"}>
                         <Button

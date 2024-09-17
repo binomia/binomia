@@ -66,6 +66,7 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"85%"} color={"white"}>Ingrese el código de verificación de 6 digitos enviado a su correo electronico.</Text>
                         </VStack>
                         <CodeField
+
                             ref={ref}
                             {...props}
                             value={code}
@@ -75,7 +76,7 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             keyboardType="number-pad"
                             textContentType="oneTimeCode"
                             autoComplete={"sms-otp"}
-                            
+
                             renderCell={({ index, symbol, isFocused }) => (
                                 <HStack justifyContent={"center"} alignItems={"center"} style={[styles.cell, isFocused && styles.focusCell]}>
                                     <Text

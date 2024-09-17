@@ -14,8 +14,9 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     const [phoneNumber, setPhoneNumber] = useState<string>("");
     const [idFront, setIdFront] = useState<string>("");
     const [idBack, setIdBack] = useState<string>("");
-    const [address, setAddress] = useState<Address>(globalContextInitialState.address);
+    const [address, setAddress] = useState<string>(globalContextInitialState.address);
     const [userAgreement, setUserAgreement] = useState<boolean>(false);
+    const [addressAgreement, setAddressAgreement] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
 
@@ -28,6 +29,7 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
         setPhoneNumber("")
         setIdFront("")
         setIdBack("")
+        setAddressAgreement(false)
         setAddress(globalContextInitialState.address)
         setUserAgreement(false)
         setShowPassword(false)
@@ -56,6 +58,8 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
         idFront,
         setIdFront,
         idBack,
+        addressAgreement,
+        setAddressAgreement,
         setIdBack,
         setDisabledButton,
         resetAllStates

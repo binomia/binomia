@@ -69,12 +69,21 @@ const AddCedula: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element 
             <VStack h={"100%"} w={"100%"} justifyContent={"space-between"}>
                 <VStack pt={"10%"} bg={"red.200"}>
                     <VStack px={"20px"} w={"100%"} alignItems={"flex-start"}>
-                        <Heading fontSize={`${TEXT_HEADING_FONT_SIZE - 2}px`} color={"white"}>Ingresa Tu Cédula</Heading>
-                        <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>
-                            Por favor, proporcione su cedula. Esto nos permitirá fortalecer la seguridad de su cuenta.
+                        <Heading fontSize={`${TEXT_HEADING_FONT_SIZE - 5}px`} color={"white"}>Datos De La Cédula</Heading>
+                        <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"85%"} color={"white"}>
+                            Por favor, proporcione los datos de su cedula. Esto nos permitirá fortalecer la seguridad de su cuenta.
                         </Text>
                     </VStack>
                     <VStack w={width} h={"50%"} px={"30px"} mt={"30px"} alignItems={"center"} >
+                        <Input                            
+                            h={`${INPUT_HEIGHT}px`}
+                            maxLength={12}
+                            style={id.length === 13 && !isInvalid ? styles.InputsSucess : id && isInvalid ? styles.InputsFail : {}}
+                            onChangeText={(value) => setID(FORMAT_CEDULA(value.replace(/-/g, '')))}
+                            keyboardType="number-pad"
+                            value={id}
+                            placeholder="Nombre En La Cédula*"
+                        />
                         <Input
                             isInvalid={isInvalid}
                             errorMessage='El correo electronico no se encuentra registrado como usuario.
@@ -85,7 +94,7 @@ const AddCedula: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element 
                             onChangeText={(value) => setID(FORMAT_CEDULA(value.replace(/-/g, '')))}
                             keyboardType="number-pad"
                             value={id}
-                            placeholder="Numero de Cedula*"
+                            placeholder="Numero De Cédula*"
                         />
                     </VStack>
                 </VStack>

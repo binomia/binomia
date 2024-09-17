@@ -13,7 +13,7 @@ import ScanBackID from './ScanBackID';
 
 const RegisterComponent: React.FC = (): JSX.Element => {
     const ref = useRef<PagerView>(null);
-    const [currentPage, setCurrentPage] = useState<number>(3);
+    const [currentPage, setCurrentPage] = useState<number>(1);
 
     const nextPage = () => {
         ref.current?.setPage(currentPage + 1)
@@ -35,9 +35,9 @@ const RegisterComponent: React.FC = (): JSX.Element => {
                 <PagerView scrollEnabled={false} ref={ref} style={{ flex: 1 }} initialPage={currentPage}>
                     <CreateAccount key={"1"} nextPage={nextPage} />
                     <Address key={"2"} nextPage={nextPage} prevPage={prevPage} />
-                    <AddCedula key={"3"} nextPage={nextPage} prevPage={prevPage} />
-                    <ScanFrontID key={"4"} nextPage={nextPage} prevPage={prevPage} />
-                    <ScanBackID key={"5"} nextPage={nextPage} prevPage={prevPage} />
+                    <ScanFrontID key={"3"} nextPage={nextPage} prevPage={prevPage} />
+                    <ScanBackID key={"4"} nextPage={nextPage} prevPage={prevPage} />
+                    {/* <AddCedula key={"5"} nextPage={nextPage} prevPage={prevPage} /> */}
                     <VerifyCode key={"last"} nextPage={nextPage} prevPage={prevPage} />
                 </PagerView>
             </VStack>
