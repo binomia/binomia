@@ -1,18 +1,13 @@
 import { Alert, PermissionsAndroid, Platform } from 'react-native'
 import { useState } from "react"
-import  DocumentScanner, { ScanDocumentOptions } from 'react-native-document-scanner-plugin'
+import DocumentScanner, { ScanDocumentOptions, ScanDocumentResponseStatus } from 'react-native-document-scanner-plugin'
 
 
 
 export const useDocumentScanner = () => {
-    const [scannedImages, setScannedImages] = useState<any>([]);
+    const [scannedImages, setScannedImages] = useState<string[]>([]);
 
     const scanDocument = async () => {
-        const options: ScanDocumentOptions = {
-            maxNumDocuments: 1, 
-        }
-
-
         if (Platform.OS === 'android') {
             const permission = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.CAMERA)
 
@@ -22,19 +17,25 @@ export const useDocumentScanner = () => {
             }
         }
 
-        const image = await DocumentScanner.scanDocument(options)
+        const image = await DocumentScanner.scanDocument({
+            maxNumDocuments: 1,
+            croppedImageQuality: 100,
+        })
+
         if (image.status === "success") {
             image.scannedImages
             if (image.scannedImages) {
                 setScannedImages([...scannedImages, ...image.scannedImages])
+                return image.scannedImages[0]
             }
         }
+
     }
 
     return {
         scanDocument,
         setScannedImages,
-        document: scannedImages[0],
+        document: scannedImages,
         images: scannedImages
     }
 }

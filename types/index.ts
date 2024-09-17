@@ -56,6 +56,12 @@ export type GlobalContextType = {
     phoneNumber: string
     setPhoneNumber: (value: string) => void
 
+    idFront: string
+    setIdFront: (value: string) => void
+
+    idBack: string
+    setIdBack: (value: string) => void
+
     address: Address
     setAddress: (value: Address) => void
     

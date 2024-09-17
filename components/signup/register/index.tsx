@@ -6,13 +6,14 @@ import colors from '@/colors';
 import CreateAccount from './CreateAccount';
 import Address from './Address';
 import VerifyCode from './VerifyCode';
-import ScanID from './ScanID';
+import ScanFrontID from './ScanFrontID';
 import AddCedula from './AddCedula';
+import ScanBackID from './ScanBackID';
 
 
 const RegisterComponent: React.FC = (): JSX.Element => {
     const ref = useRef<PagerView>(null);
-    const [currentPage, setCurrentPage] = useState<number>(2);
+    const [currentPage, setCurrentPage] = useState<number>(3);
 
     const nextPage = () => {
         ref.current?.setPage(currentPage + 1)
@@ -35,7 +36,8 @@ const RegisterComponent: React.FC = (): JSX.Element => {
                     <CreateAccount key={"1"} nextPage={nextPage} />
                     <Address key={"2"} nextPage={nextPage} prevPage={prevPage} />
                     <AddCedula key={"3"} nextPage={nextPage} prevPage={prevPage} />
-                    <ScanID key={"4"} nextPage={nextPage} prevPage={prevPage} />
+                    <ScanFrontID key={"4"} nextPage={nextPage} prevPage={prevPage} />
+                    <ScanBackID key={"5"} nextPage={nextPage} prevPage={prevPage} />
                     <VerifyCode key={"last"} nextPage={nextPage} prevPage={prevPage} />
                 </PagerView>
             </VStack>

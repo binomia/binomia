@@ -2,13 +2,14 @@ import { useContext, useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack } from 'native-base';
 import { SafeAreaView, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
 import { SessionContext } from '@/contexts';
-import { SessionPropsType } from '@/types';
+import { GlobalContextType, SessionPropsType } from '@/types';
 import colors from '@/colors';
 import { INPUT_CODE_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell, } from 'react-native-confirmation-code-field';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Button from '@/components/global/Button';
+import { GlobalContext } from '@/contexts/globalContext';
 
 type Props = {
     nextPage: () => void
@@ -18,6 +19,7 @@ type Props = {
 const CELL_COUNT = 6;
 const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const { verificationCode, setVerificationCode } = useContext<SessionPropsType>(SessionContext);
+    const globalContext = useContext<GlobalContextType>(GlobalContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(false);
     const [invalidCode, setInvalidCode] = useState<boolean>(false);
 
@@ -48,6 +50,11 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
 
     }, [code])
 
+    useEffect(() => {
+        console.log(JSON.stringify(globalContext, null, 2));
+
+    }, [code])
+
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
@@ -68,6 +75,7 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             keyboardType="number-pad"
                             textContentType="oneTimeCode"
                             autoComplete={"sms-otp"}
+                            
                             renderCell={({ index, symbol, isFocused }) => (
                                 <HStack justifyContent={"center"} alignItems={"center"} style={[styles.cell, isFocused && styles.focusCell]}>
                                     <Text

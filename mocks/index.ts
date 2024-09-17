@@ -11,6 +11,10 @@ export const globalContextInitialState: GlobalContextType = {
     lastNames: "",
     setLastNames: (_: string) => { },
     phoneNumber: "",
+    idFront: "",
+    setIdFront: (_: string) => { },
+    idBack: "",
+    setIdBack: (_: string) => { },
     address: {
         street: "",
         number: 0,

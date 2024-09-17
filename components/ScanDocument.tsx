@@ -1,10 +1,28 @@
-import { StyleSheet, Text, View } from 'react-native';
+import React, { Component, useRef } from "react"
+import { View, Image } from "react-native"
 
-export default function App() {
+import Scanner from "react-native-rectangle-scanner"
+
+const DocumentScanner = () => {
+	const camera = useRef<any>();
+
+	const onCapture = () => {
+		if (camera?.current.capture) return
+		camera?.current?.capture();
+
+		console.log("Captured");
+	}
+
 
 	return (
-		<View style={{ position: 'relative', flex: 1 }}>
-			<Text>Open up App.tsx to start working on your app!</Text>
-		</View>
+		<Scanner
+			onPictureProcessed={onCapture}
+			ref={camera}
+			style={{ flex: 1 }}
+		/>
 	);
+
 }
+
+
+export default DocumentScanner

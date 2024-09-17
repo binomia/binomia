@@ -12,6 +12,8 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     const [names, setNames] = useState<string>("");
     const [lastNames, setLastNames] = useState<string>("");
     const [phoneNumber, setPhoneNumber] = useState<string>("");
+    const [idFront, setIdFront] = useState<string>("");
+    const [idBack, setIdBack] = useState<string>("");
     const [address, setAddress] = useState<Address>(globalContextInitialState.address);
     const [userAgreement, setUserAgreement] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -24,6 +26,8 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
         setNames("")
         setLastNames("")
         setPhoneNumber("")
+        setIdFront("")
+        setIdBack("")
         setAddress(globalContextInitialState.address)
         setUserAgreement(false)
         setShowPassword(false)
@@ -49,6 +53,10 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
         showPassword,
         setShowPassword,
         disabledButton,
+        idFront,
+        setIdFront,
+        idBack,
+        setIdBack,
         setDisabledButton,
         resetAllStates
     }

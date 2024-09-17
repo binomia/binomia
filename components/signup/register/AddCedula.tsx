@@ -13,6 +13,7 @@ import { FORMAT_CEDULA } from '@/helpers';
 import axios from 'axios';
 import Feather from '@expo/vector-icons/Feather';
 import ScanDocument from '@/components/ScanDocument';
+import DocumentScanner from 'react-native-document-scanner-plugin';
 
 
 type Props = {
@@ -50,7 +51,7 @@ const AddCedula: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element 
 
     useEffect(() => {
         setDisabledButton(true)
-        
+
         if (id.length === 13) {
             setIsInvalid(false)
             validateCedula()
@@ -65,7 +66,7 @@ const AddCedula: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element 
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
-            {/* <VStack h={"100%"} w={"100%"} justifyContent={"space-between"}>
+            <VStack h={"100%"} w={"100%"} justifyContent={"space-between"}>
                 <VStack pt={"10%"} bg={"red.200"}>
                     <VStack px={"20px"} w={"100%"} alignItems={"flex-start"}>
                         <Heading fontSize={`${TEXT_HEADING_FONT_SIZE - 2}px`} color={"white"}>Ingresa Tu Cédula</Heading>
@@ -105,8 +106,7 @@ const AddCedula: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element 
                         title={"Siguiente"}
                     />
                 </HStack>
-            </VStack> */}
-            <ScanDocument/>
+            </VStack>
         </TouchableWithoutFeedback>
     );
 }
