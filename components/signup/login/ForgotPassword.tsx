@@ -24,22 +24,24 @@ const ForgotPassword: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     const [email, setEmail] = useState<string>("");
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [showEmailError, setShowEmailError] = useState<boolean>(false);
-    const [code, setCode] = useState('');
-
+    const [loading, setLoading] = useState<boolean>(false)
     const [getUserByEmail] = useLazyQuery(UserApolloQueries.userByEmail());
 
     const sendCode = async () => {
         try {
+            setLoading(true)
             const message = await sendVerificationCode(email.toLowerCase())
 
-            if (message) {
-                setVerificationData({...message, email: email.toLowerCase()})
-                nextPage()
-            }
+            if (message)
+                setVerificationData({ ...message, email: email.toLowerCase() })
 
+
+            nextPage()
+            setLoading(false)
 
         } catch (error: any) {
             console.error(error.toString());
+            setLoading(false)
         }
     }
 
@@ -105,6 +107,7 @@ const ForgotPassword: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                     </VStack>
                     <VStack w={"100%"} alignItems={"center"} mb={"40px"}>
                         <Button
+                            spin={loading}
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}

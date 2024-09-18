@@ -22,7 +22,9 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
     const { setIdFront, idFront: idFrontScaned } = useContext<GlobalContextType>(GlobalContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const { scanDocument } = useDocumentScanner()
+
 
 
     const handleScanDocument = async () => {
@@ -36,7 +38,7 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
     useEffect(() => {
         if (idFrontScaned)
             setDisabledButton(false)
-        
+
     }, [idFrontScaned])
 
 
@@ -79,11 +81,16 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                             title={"Atras"}
                         />
                         <Button
+                            spin={loading}
                             w={"49%"}
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
-                            onPress={nextPage}
+                            onPress={async () => {
+                                setLoading(true)
+                                nextPage()
+                                setLoading(false)
+                            }}
                             title={"Siguiente"}
                         />
                         <BottomSheet showDragIcon={false} onCloseFinish={() => setOpenBottomSheet(false)} open={openBottomSheet} height={height * 0.9}>

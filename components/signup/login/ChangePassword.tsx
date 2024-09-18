@@ -23,7 +23,7 @@ const ChangePassword: React.FC<Props> = ({ nextPage, cancelBottomSheet }: Props)
 
     const [password, setPassword] = useState<string>("");
     const [confirmPassword, setConfirmPassword] = useState<string>("");
-
+    const [loading, setLoading] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
@@ -32,7 +32,7 @@ const ChangePassword: React.FC<Props> = ({ nextPage, cancelBottomSheet }: Props)
 
     const onPress = async () => {
         try {
-
+            setLoading(true)
             if (password === confirmPassword) {
                 console.log(verificationData);
                 const updateUser = await updateUserPassword({
@@ -50,12 +50,12 @@ const ChangePassword: React.FC<Props> = ({ nextPage, cancelBottomSheet }: Props)
                     updateUser?.data?.updateUserPassword
                 );
                 nextPage()
+                setLoading(false)
             }
-            // console.log(verificationData);
 
         } catch (error: any) {
             console.log(error);
-
+            setLoading(false)
         }
     }
 
@@ -116,6 +116,7 @@ const ChangePassword: React.FC<Props> = ({ nextPage, cancelBottomSheet }: Props)
                             title={"Cancelar"}
                         />
                         <Button
+                            spin={loading}
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}

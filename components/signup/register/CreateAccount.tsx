@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack, Stack, Box } from 'native-base';
+import { VStack, Heading, Text, HStack, Spinner, Box } from 'native-base';
 import { Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Dimensions, View, StatusBar } from 'react-native';
 import colors from '@/colors';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -47,6 +47,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [openBottomSheetUrl, setOpenBottomSheetUrl] = useState<string>("");
     const [isInvalid, setIsInvalid] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(false)
     const [id, setID] = useState<string>("");
 
 
@@ -108,16 +109,16 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     }, [id])
 
     useEffect(() => {
-        if (password.length >= 6) 
+        if (password.length >= 6)
             setShowPasswordError(true)
 
     }, [password])
 
     useEffect(() => {
-        setDisabledButton(true)        
+        setDisabledButton(true)
 
         if (names.length >= 2 && lastNames.length >= 2 && phoneNumber && email && password && userAgreement && id.length === 13 && !isInvalid) {
-            if (isAValidPhoneNumber(phoneNumber) && VALIDATE_EMAIL(email) && password.length >= 6  && !showEmailError)
+            if (isAValidPhoneNumber(phoneNumber) && VALIDATE_EMAIL(email) && password.length >= 6 && !showEmailError)
                 setDisabledButton(false)
         }
 
@@ -217,12 +218,17 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                     </VStack>
                     <VStack bg={"red.100"} px={"20px"} w={"100%"}>
                         <Button
+                            spin={loading}
                             w={"100%"}
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             mb="10px"
-                            onPress={nextPage}
+                            onPress={async () => {
+                                setLoading(true)
+                                nextPage()
+                                setLoading(false)
+                            }}
                             title={"Siguiente"}
                         />
                     </VStack>

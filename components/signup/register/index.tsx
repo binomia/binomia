@@ -36,7 +36,7 @@ const RegisterComponent: React.FC = (): JSX.Element => {
                     <Address key={"2"} nextPage={nextPage} prevPage={prevPage} />
                     <ScanFrontID key={"3"} nextPage={nextPage} prevPage={prevPage} />
                     <ScanBackID key={"4"} nextPage={nextPage} prevPage={prevPage} />
-                    <VerifyCode key={"last"} nextPage={nextPage} prevPage={prevPage} />
+                    <VerifyCode key={"5"} nextPage={nextPage} prevPage={prevPage} />
                 </PagerView>
             </VStack>
         </SafeAreaView>

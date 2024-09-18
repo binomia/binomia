@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { VStack, Heading, Text, HStack, Image } from 'native-base';
 import { Dimensions } from 'react-native';
 import Button from '@/components/global/Button';
@@ -16,12 +16,15 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 const AccountRecovered: React.FC<Props> = ({ cancelBottomSheet }): JSX.Element => {
     const { setVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
+    const [loading, setLoading] = useState(false);
 
 
     const onPress = () => {
+        setLoading(true)
         setVerificationCode("")
         setVerificationData({ token: "", signature: "", email: "" })
         cancelBottomSheet()
+        setLoading(false)
     }
 
 
@@ -39,6 +42,7 @@ const AccountRecovered: React.FC<Props> = ({ cancelBottomSheet }): JSX.Element =
 
             <HStack justifyContent={"space-between"} w={"100%"} alignItems={"center"} mb={"50px"}>
                 <Button
+                    spin={loading}
                     bg={"mainGreen"}
                     color={"white"}
                     w={"100%"}

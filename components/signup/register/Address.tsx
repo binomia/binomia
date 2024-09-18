@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack, TextArea } from 'native-base';
+import { VStack, Heading, Text, HStack, TextArea, Spinner } from 'native-base';
 import { StyleSheet, Keyboard, SafeAreaView, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
 import colors from '@/colors';
 import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE, TEXTAREA_HEIGHT } from '@/constants';
@@ -19,6 +19,8 @@ type Props = {
 const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const { address, setAddress, addressAgreement, setAddressAgreement } = useContext<GlobalContextType>(GlobalContext);
+    const [loading, setLoading] = useState<boolean>(false)
+
 
 
     useEffect(() => {
@@ -78,12 +80,17 @@ const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element =>
                             title={"Atras"}
                         />
                         <Button
+                            spin={loading}
                             w={"49%"}
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             mb="10px"
-                            onPress={nextPage}
+                            onPress={async () => {
+                                setLoading(true)
+                                nextPage()
+                                setLoading(false)
+                            }}
                             title={"Siguiente"}
                         />
                     </HStack>

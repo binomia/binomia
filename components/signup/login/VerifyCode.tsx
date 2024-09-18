@@ -20,6 +20,7 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
     const { verificationCode, setVerificationCode } = useContext<SessionPropsType>(SessionContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(false);
     const [invalidCode, setInvalidCode] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
 
     const [code, setCode] = useState('');
     const ref = useBlurOnFulfill({ value: code, cellCount: 6 });
@@ -107,11 +108,16 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             title={"Atras"}
                         />
                         <Button
+                            spin={loading}
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             w={"48%"}
-                            onPress={nextPage}
+                            onPress={() => {
+                                setLoading(true)
+                                nextPage()
+                                setLoading(false)
+                            }}
                             title={"Siguiente"}
                         />
                     </HStack>

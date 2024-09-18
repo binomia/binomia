@@ -21,10 +21,10 @@ const { width, height } = Dimensions.get("window");
 
 const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const { setIdBack, idBack: idBackScaned, email } = useContext<GlobalContextType>(GlobalContext);
-    const { sendVerificationCode, setVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
-
+    const { sendVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const { scanDocument } = useDocumentScanner()
 
 
@@ -38,15 +38,18 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
 
     const onPressNext = async () => {
         try {
+            setLoading(true)
             const message = await sendVerificationCode(email.toLowerCase())
 
-            if (message) {
+            if (message)
                 setVerificationData({ ...message, email: email.toLowerCase() })
-                nextPage()
-            }
+
+            nextPage()
+            setLoading(false)
 
         } catch (error) {
             console.error(error);
+            setLoading(false)
         }
     }
 
@@ -95,6 +98,7 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             title={"Atras"}
                         />
                         <Button
+                            spin={loading}
                             w={"49%"}
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
