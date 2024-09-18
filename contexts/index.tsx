@@ -4,7 +4,7 @@ import { useMutation } from '@apollo/client';
 import { SessionApolloQueries } from "@/apollo/query";
 import * as SecureStore from 'expo-secure-store';
 import * as Updates from 'expo-updates';
-import { notificationServer } from "@/rpc";
+import { notificationServer } from "@/rpc/notificationRPC";
 import { GENERATE_SIX_DIGIT_TOKEN } from "@/helpers";
 
 

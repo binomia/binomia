@@ -10,6 +10,16 @@
     "preview": {
       "distribution": "internal"
     },
+    "simulator": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "avdName": "Pixel_3a_API_29"
+      }
+    },
     "production": {}
   },
   "submit": {

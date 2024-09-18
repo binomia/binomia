@@ -13,7 +13,7 @@ import ScanBackID from './ScanBackID';
 
 const RegisterComponent: React.FC = (): JSX.Element => {
     const ref = useRef<PagerView>(null);
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [currentPage, setCurrentPage] = useState<number>(0);
 
     const nextPage = () => {
         ref.current?.setPage(currentPage + 1)

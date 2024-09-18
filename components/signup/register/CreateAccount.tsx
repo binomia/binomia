@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack, Stack } from 'native-base';
-import { Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { VStack, Heading, Text, HStack, Stack, Box } from 'native-base';
+import { Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Dimensions, View, StatusBar } from 'react-native';
 import colors from '@/colors';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -15,9 +15,17 @@ import { GlobalContextType, SessionPropsType } from '@/types';
 import BottomSheet from '@/components/global/BottomSheet';
 import { WebView } from 'react-native-webview';
 import { SessionContext } from '@/contexts';
-import { useLazyQuery } from '@apollo/client';
+import { gql, useLazyQuery } from '@apollo/client';
 import { UserApolloQueries } from '@/apollo/query';
 import axios from 'axios';
+import { authServer } from '@/rpc/authRPC';
+
+
+const UserByEmail = gql`
+    query UserByEmail($email: String!) {
+  userByEmail(email: $email)
+}
+`
 
 
 type Props = {
@@ -29,7 +37,9 @@ const { width, height } = Dimensions.get("window");
 const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     const { email, setEmail, password, setPassword, names, setNames, lastNames, setLastNames, phoneNumber, setPhoneNumber, userAgreement, setUserAgreement } = useContext<GlobalContextType>(GlobalContext);
     const { sendVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
-    const [getUserByEmail] = useLazyQuery(UserApolloQueries.userByEmail());
+    const [getUserByEmail] = useLazyQuery(UserByEmail, {
+        fetchPolicy: "no-cache"
+    });
 
     const [showEmailError, setShowEmailError] = useState<boolean>(false);
     const [showPasswordError, setShowPasswordError] = useState<boolean>(false);
@@ -39,32 +49,6 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     const [isInvalid, setIsInvalid] = useState<boolean>(false)
     const [id, setID] = useState<string>("");
 
-
-
-    // const sendCode = async () => {
-    //     try {
-    //         const message = await sendVerificationCode(email.toLowerCase())
-
-    //         if (message) {
-    //             setVerificationData({ ...message, email: email.toLowerCase() })
-    //             nextPage()
-    //         }
-
-    //     } catch (error: any) {
-    //         console.error(error.toString());
-    //     }
-    // }
-
-
-    // const verifyUserEmail = async (_email: string) => {
-    //     try {
-    //         const user = await getUserByEmail({ variables: { email: email.toLowerCase() } })
-    //         setShowEmailError(user.data.userByEmail)
-
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // }
 
 
     const openTermsAndConditions = (url: string) => {
@@ -93,6 +77,27 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
         }
     }
 
+    const checkIfEmailExists = async () => {
+        setShowEmailError(false)
+        if (VALIDATE_EMAIL(email)) {
+            try {
+                const emailExists = await authServer("emailExists", { email: email.toLowerCase() })
+                setShowEmailError(emailExists)
+
+            } catch (error) {
+                console.log({ error });
+                setShowEmailError(false)
+            }
+        } else {
+            setShowEmailError(false)
+        }
+    }
+
+    useEffect(() => {
+        checkIfEmailExists()
+
+    }, [email])
+
     useEffect(() => {
         setIsInvalid(false)
 
@@ -105,29 +110,28 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     }, [id])
 
     useEffect(() => {
-        if (password.length >= 6) {
-            console.log("password", password);
-
+        if (password.length >= 6) 
             setShowPasswordError(true)
-        }
 
     }, [password])
 
     useEffect(() => {
         setDisabledButton(true)
+        console.log({showEmailError});
+        
 
         if (names.length >= 2 && lastNames.length >= 2 && phoneNumber && email && password && userAgreement && id.length === 13 && !isInvalid) {
-            if (isAValidPhoneNumber(phoneNumber) && VALIDATE_EMAIL(email) && password.length >= 6)
+            if (isAValidPhoneNumber(phoneNumber) && VALIDATE_EMAIL(email) && password.length >= 6  && !showEmailError)
                 setDisabledButton(false)
         }
 
-    }, [names, lastNames, id, phoneNumber, email, password, userAgreement, isInvalid])
+    }, [names, lastNames, id, phoneNumber, email, password, userAgreement, isInvalid, showEmailError])
 
     return (
-        <KeyboardAvoidingScrollView onScroll={Keyboard.dismiss} contentContainerStyle={{ flex: 1 }}>
+        <KeyboardAvoidingScrollView scrollEnabled={false}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <VStack mt={"30px"} h={"100%"} w={"100%"} justifyContent={"space-between"}>
-                    <VStack w={"100%"} alignItems={"center"}>
+                <View style={{ width, height: height - 130, display: "flex", justifyContent: "space-between" }} >
+                    <VStack mt={"30px"} w={"100%"} alignItems={"center"}>
                         <VStack px={"20px"} w={"100%"} alignItems={"flex-start"}>
                             <Heading fontSize={`${TEXT_HEADING_FONT_SIZE - 2}px`} color={"white"}>Crea tu cuenta</Heading>
                             <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>
@@ -183,7 +187,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                                 onChangeText={(value) => setEmail(value.toLowerCase().trim())}
                                 placeholder="Correo Electrónico*"
                             />
-                            <Stack borderRadius={"10px"} my={"5px"} borderWidth={1} borderColor={password.length >= 6 ? colors.mainGreen : password ? colors.alert : "transparent"} w={"100%"}>
+                            <Box borderRadius={"10px"} my={"5px"} borderWidth={1} borderColor={password.length >= 6 ? colors.mainGreen : password ? colors.alert : "transparent"} w={"100%"}>
                                 <Input
                                     m={"0px"}
                                     h={`${INPUT_HEIGHT}px`}
@@ -200,7 +204,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                                         </TouchableOpacity>
                                     }
                                 />
-                            </Stack>
+                            </Box>
                         </VStack>
 
                         <HStack alignSelf={"flex-end"} w={"100%"} mt={"20px"} px={"25px"}>
@@ -212,8 +216,10 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                             </Text>
 
                         </HStack>
+
+
                     </VStack>
-                    <VStack px={"20px"} mt={"20px"} mb={"30px"} w={"100%"} alignItems={"center"}>
+                    <VStack bg={"red.100"} px={"20px"} w={"100%"}>
                         <Button
                             w={"100%"}
                             disabled={disabledButton}
@@ -224,7 +230,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                             title={"Siguiente"}
                         />
                     </VStack>
-                </VStack>
+                </View>
             </TouchableWithoutFeedback>
             <BottomSheet onCloseFinish={() => setOpenBottomSheetUrl("")} open={!!openBottomSheetUrl} height={height * 0.9}>
                 <WebView
@@ -233,8 +239,6 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                 />
             </BottomSheet>
         </KeyboardAvoidingScrollView>
-
-
     );
 }
 
