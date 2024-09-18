@@ -33,7 +33,7 @@ const AccountRecovered: React.FC<Props> = ({ cancelBottomSheet }): JSX.Element =
                     Ahora puedes iniciar sesión con tu correo electrónico y tu nueva contraseña.
                 </Text>
                 <HStack w={"100%"} justifyContent={"center"} mt={"30px"}>
-                    <Image w={width} h={height / 3} resizeMode="cover" source={account} alt="welcome" />
+                    <Image w={width} h={height / 3} resizeMode="cover" source={account} alt="welcome-screen-image-account" />
                 </HStack>
             </VStack>
 

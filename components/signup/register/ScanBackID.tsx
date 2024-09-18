@@ -54,7 +54,7 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                         <VStack w={width} h={"52%"} px={"30px"} mt={"30px"} alignItems={"center"} >
                             <TouchableOpacity onPress={handleScanDocument} style={{ width: "100%", height: "100%" }}>
                                 <Box shadow={7} w={"100%"} h={"100%"}>
-                                    <Image w={"100%"} h={"100%"} resizeMode="contain" source={idBackScaned ? { uri: idBackScaned } : idBack} />
+                                    <Image w={"100%"} h={"100%"} alt='idBackScaned-image' resizeMode="contain" source={idBackScaned ? { uri: idBackScaned } : idBack} />
                                 </Box>
                             </TouchableOpacity>
                             {idBackScaned ? <Button

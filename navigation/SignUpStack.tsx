@@ -21,7 +21,7 @@ const SignUpStack: React.FC = () => {
     const headerLeft = () => {
         return (
             <VStack >
-                <Image w={"115px"} h={"30px"} source={logo} />
+                <Image alt='logo-image' w={"115px"} h={"30px"} source={logo} />
             </VStack>
         )
     }

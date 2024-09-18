@@ -1,19 +1,14 @@
-import { useContext, useEffect, useRef, useState } from 'react';
-import { VStack, Heading, Text, HStack, Image } from 'native-base';
-import { StyleSheet, Keyboard, SafeAreaView, TouchableWithoutFeedback, Dimensions } from 'react-native';
+import { useContext, useEffect, useState } from 'react';
+import { VStack, Heading, Text, HStack } from 'native-base';
+import { StyleSheet, Keyboard, TouchableWithoutFeedback, Dimensions } from 'react-native';
 import colors from '@/colors';
 import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import Button from '@/components/global/Button';
 import { GlobalContextType } from '@/types';
 import { GlobalContext } from '@/contexts/globalContext';
 import Input from '@/components/global/Input';
-import { idMock } from '@/assets';
-import BottomSheet from '@/components/global/BottomSheet';
 import { FORMAT_CEDULA } from '@/helpers';
 import axios from 'axios';
-import Feather from '@expo/vector-icons/Feather';
-import ScanDocument from '@/components/ScanDocument';
-import DocumentScanner from 'react-native-document-scanner-plugin';
 
 
 type Props = {
@@ -21,7 +16,7 @@ type Props = {
     prevPage: () => void
 }
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const AddCedula: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const { address, setAddress, } = useContext<GlobalContextType>(GlobalContext);
@@ -31,8 +26,6 @@ const AddCedula: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element 
 
 
     const goNextPage = () => {
-        console.log({ id });
-
         nextPage()
     }
 
@@ -43,7 +36,6 @@ const AddCedula: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element 
             })
 
         } catch (error) {
-            console.log({ error });
             setIsInvalid(true)
         }
     }

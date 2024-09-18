@@ -56,7 +56,7 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                             <TouchableOpacity onPress={handleScanDocument} style={{ width: "100%", height: "100%" }}>
                                 <Box shadow={7} w={"100%"} h={"100%"}>
                                     <ZStack w={"100%"} h={"100%"} alignItems={"center"}>
-                                        <Image w={"100%"} h={"100%"} resizeMode="contain" source={idFrontScaned ? { uri: idFrontScaned } : idFront} />
+                                        <Image alt='id-front-scan' w={"100%"} h={"100%"} resizeMode="contain" source={idFrontScaned ? { uri: idFrontScaned } : idFront} />
                                     </ZStack>
                                 </Box>
                             </TouchableOpacity>

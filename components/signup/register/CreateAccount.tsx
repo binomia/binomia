@@ -72,7 +72,6 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
             setIsInvalid(false)
 
         } catch (error) {
-            console.log({ error });
             setIsInvalid(true)
         }
     }
@@ -85,7 +84,6 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                 setShowEmailError(emailExists)
 
             } catch (error) {
-                console.log({ error });
                 setShowEmailError(false)
             }
         } else {
@@ -116,9 +114,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     }, [password])
 
     useEffect(() => {
-        setDisabledButton(true)
-        console.log({showEmailError});
-        
+        setDisabledButton(true)        
 
         if (names.length >= 2 && lastNames.length >= 2 && phoneNumber && email && password && userAgreement && id.length === 13 && !isInvalid) {
             if (isAValidPhoneNumber(phoneNumber) && VALIDATE_EMAIL(email) && password.length >= 6  && !showEmailError)
