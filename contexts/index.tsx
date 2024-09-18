@@ -36,8 +36,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const sendVerificationCode = async (to: string) => {
         try {
             const code = GENERATE_SIX_DIGIT_TOKEN()
-            setVerificationCode(code)
-
+            
             const message = await notificationServer("sendEmail", {
                 to,
                 code,
@@ -45,7 +44,8 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 text: `Su Codigo De Verificación Es: ${code}`,
                 html: `<b>Su Codigo De Verificación Es: ${code}</b>`
             })
-
+            
+            setVerificationCode(code)
             return message
 
         } catch (error: any) {

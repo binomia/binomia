@@ -28,7 +28,7 @@ const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element =>
             setDisabledButton(false)
         }
 
-    }, [address])
+    }, [address, addressAgreement])
 
 
     return (

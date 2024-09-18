@@ -8,7 +8,9 @@ import BottomSheet from '@/components/global/BottomSheet';
 import { useDocumentScanner } from '@/hooks/useDocumentScan';
 import { CameraView } from 'expo-camera';
 import { GlobalContext } from '@/contexts/globalContext';
-import { GlobalContextType } from '@/types';
+import { GlobalContextType, SessionPropsType } from '@/types';
+import { SessionContext } from '@/contexts';
+import { GENERATE_SIX_DIGIT_TOKEN } from '@/helpers';
 
 type Props = {
     nextPage: () => void
@@ -18,7 +20,9 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 
 const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
-    const { setIdBack, idBack: idBackScaned } = useContext<GlobalContextType>(GlobalContext);
+    const { setIdBack, idBack: idBackScaned, email } = useContext<GlobalContextType>(GlobalContext);
+    const { sendVerificationCode, setVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
+
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
     const { scanDocument } = useDocumentScanner()
@@ -29,6 +33,21 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
         if (!image) return
 
         setIdBack(image || "")
+    }
+
+
+    const onPressNext = async () => {
+        try {
+            const message = await sendVerificationCode(email.toLowerCase())
+
+            if (message) {
+                setVerificationData({ ...message, email: email.toLowerCase() })
+                nextPage()
+            }
+
+        } catch (error) {
+            console.error(error);
+        }
     }
 
 
@@ -80,7 +99,7 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
-                            onPress={nextPage}
+                            onPress={onPressNext}
                             title={"Siguiente"}
                         />
                         <BottomSheet showDragIcon={false} onCloseFinish={() => setOpenBottomSheet(false)} open={openBottomSheet} height={height * 0.9}>

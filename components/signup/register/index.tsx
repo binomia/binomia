@@ -7,7 +7,6 @@ import CreateAccount from './CreateAccount';
 import Address from './Address';
 import VerifyCode from './VerifyCode';
 import ScanFrontID from './ScanFrontID';
-import AddCedula from './AddCedula';
 import ScanBackID from './ScanBackID';
 
 
@@ -37,7 +36,6 @@ const RegisterComponent: React.FC = (): JSX.Element => {
                     <Address key={"2"} nextPage={nextPage} prevPage={prevPage} />
                     <ScanFrontID key={"3"} nextPage={nextPage} prevPage={prevPage} />
                     <ScanBackID key={"4"} nextPage={nextPage} prevPage={prevPage} />
-                    {/* <AddCedula key={"5"} nextPage={nextPage} prevPage={prevPage} /> */}
                     <VerifyCode key={"last"} nextPage={nextPage} prevPage={prevPage} />
                 </PagerView>
             </VStack>
