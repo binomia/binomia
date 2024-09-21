@@ -8,11 +8,13 @@ import Address from './Address';
 import VerifyCode from './VerifyCode';
 import ScanFrontID from './ScanFrontID';
 import ScanBackID from './ScanBackID';
+import AccountCreated from './AccountCreated';
+import FaceID from './FaceID';
 
 
 const RegisterComponent: React.FC = (): JSX.Element => {
     const ref = useRef<PagerView>(null);
-    const [currentPage, setCurrentPage] = useState<number>(0);
+    const [currentPage, setCurrentPage] = useState<number>(4);
 
     const nextPage = () => {
         ref.current?.setPage(currentPage + 1)
@@ -36,7 +38,9 @@ const RegisterComponent: React.FC = (): JSX.Element => {
                     <Address key={"2"} nextPage={nextPage} prevPage={prevPage} />
                     <ScanFrontID key={"3"} nextPage={nextPage} prevPage={prevPage} />
                     <ScanBackID key={"4"} nextPage={nextPage} prevPage={prevPage} />
-                    <VerifyCode key={"5"} nextPage={nextPage} prevPage={prevPage} />
+                    <FaceID key={"5"} nextPage={nextPage} prevPage={prevPage}/>
+                    <VerifyCode key={"6"} nextPage={nextPage} prevPage={prevPage} />
+                    <AccountCreated key={"7"}/>
                 </PagerView>
             </VStack>
         </SafeAreaView>

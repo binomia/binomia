@@ -5,6 +5,9 @@ import idMock from './idMock.png';
 import idFrontMock from './idFrontdMock.jpg';
 import idFront from './id-front.png';
 import idBack from './id-back.png';
+import welcomeSignup from './welcome-signup.png';
+import biometric from './biometric.png';
+import biometricOn from './biometric-on.png';
 
 
 
@@ -15,5 +18,8 @@ export {
     idFront,
     idBack,
     idFrontMock,
-    welcome
+    welcome,
+    welcomeSignup,
+    biometric,
+    biometricOn
 }
