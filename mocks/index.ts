@@ -2,25 +2,38 @@ import { Address, GlobalContextType } from "@/types";
 
 
 export const globalContextInitialState: GlobalContextType = {
-    email: "",
     setEmail: (_: string) => { },
-    password: "",
+    email: "",
+
     setPassword: (_: string) => { },
-    names: "",
+    password: "",
+
     setNames: (_: string) => { },
-    lastNames: "",
+    names: "",
+
     setLastNames: (_: string) => { },
-    phoneNumber: "",
-    idFront: "",
-    setIdFront: (_: string) => { },
-    idBack: "",
-    setIdBack: (_: string) => { },
-    addressAgreement: false,
-    setAddressAgreement: (_: boolean) => { },
-    address: "",
-    setAddress: (_: string) => { },
+    lastNames: "",
+
     setPhoneNumber: (_: string) => { },
+    phoneNumber: "",
+
+    setIdFront: (_: string) => { },
+    idFront: "",
+
+    setIdBack: (_: string) => { },
+    idBack: "",
+
+    setAddressAgreement: (_: boolean) => { },
+    addressAgreement: false,
+
+    setAddress: (_: string) => { },
+    address: "",
+
     userAgreement: false,
     setUserAgreement: (_: boolean) => { },
+
+    showCloseButton: true,
+    setShowCloseButton: (_: boolean) => { },
+
     resetAllStates: () => { }
 }

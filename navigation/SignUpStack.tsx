@@ -15,7 +15,7 @@ import { GlobalContext } from '@/contexts/globalContext';
 const SignUpStack: React.FC = () => {
     const navigation = useNavigation<any>();
     const Stack = createNativeStackNavigator<any>();
-    const { resetAllStates } = useContext<GlobalContextType>(GlobalContext);
+    const { resetAllStates, showCloseButton } = useContext<GlobalContextType>(GlobalContext);
 
 
     const headerLeft = () => {
@@ -27,14 +27,14 @@ const SignUpStack: React.FC = () => {
     }
 
     const headerRight = () => {
-        const onClose = () => { 
+        const onClose = () => {
             resetAllStates()
             navigation.navigate("WelcomeScreen")
         }
 
         return (
             <TouchableOpacity onPress={onClose}>
-                <Ionicons name="close" size={30} color="white" />
+                {showCloseButton ? <Ionicons name="close" size={30} color="white" /> : null}
             </TouchableOpacity>
         )
     }

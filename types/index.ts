@@ -71,5 +71,8 @@ export type GlobalContextType = {
     addressAgreement: boolean
     setAddressAgreement: (value: boolean) => void
 
+    showCloseButton: boolean
+    setShowCloseButton: (value: boolean) => void
+
     resetAllStates: () => void
 }

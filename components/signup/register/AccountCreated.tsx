@@ -3,11 +3,10 @@ import { VStack, Heading, Text, HStack, Image, Stack, ZStack } from 'native-base
 import { Dimensions } from 'react-native';
 import Button from '@/components/global/Button';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
-import { SessionPropsType } from '@/types';
+import {  SessionPropsType } from '@/types';
 import { SessionContext } from '@/contexts';
-import { account, welcomeSignup } from '@/assets';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import colors from '@/colors';
+import {  welcomeSignup } from '@/assets';
+
 
 type Props = {
 
@@ -17,6 +16,7 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 const AccountCreated: React.FC<Props> = ({ }): JSX.Element => {
     const { setVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
+
     const [loading, setLoading] = useState(false);
 
 

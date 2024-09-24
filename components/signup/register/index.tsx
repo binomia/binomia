@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { VStack } from 'native-base';
 import { SafeAreaView } from 'react-native';
 import PagerView from 'react-native-pager-view';
@@ -10,15 +10,24 @@ import ScanFrontID from './ScanFrontID';
 import ScanBackID from './ScanBackID';
 import AccountCreated from './AccountCreated';
 import FaceID from './FaceID';
+import { GlobalContextType } from '@/types';
+import { GlobalContext } from '@/contexts/globalContext';
 
 
 const RegisterComponent: React.FC = (): JSX.Element => {
     const ref = useRef<PagerView>(null);
-    const [currentPage, setCurrentPage] = useState<number>(6);
+    const [currentPage, setCurrentPage] = useState<number>(0);
+    const { setShowCloseButton } = useContext<GlobalContextType>(GlobalContext);
+
 
     const nextPage = () => {
         ref.current?.render
         ref.current?.setPage(currentPage + 1)
+
+        if (currentPage === 5) {
+            setShowCloseButton(false)
+        }
+
         setCurrentPage(currentPage + 1)
     }
 
