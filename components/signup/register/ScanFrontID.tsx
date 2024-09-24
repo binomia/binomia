@@ -1,30 +1,27 @@
 import { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack, Image, Pressable, Stack, Box, ZStack } from 'native-base';
+import { VStack, Heading, Text, HStack, Image, Box, ZStack } from 'native-base';
 import { StyleSheet, Keyboard, TouchableWithoutFeedback, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
-import colors from '@/colors';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
-import Button from '@/components/global/Button';
 import { idFront } from '@/assets';
-import BottomSheet from '@/components/global/BottomSheet';
 import { useDocumentScanner } from '@/hooks/useDocumentScan';
-import { CameraView } from 'expo-camera';
 import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType } from '@/types';
+import colors from '@/colors';
+import Button from '@/components/global/Button';
+
 
 type Props = {
     nextPage: () => void
     prevPage: () => void
 }
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const { setIdFront, idFront: idFrontScaned } = useContext<GlobalContextType>(GlobalContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
-    const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const { scanDocument } = useDocumentScanner()
-
 
 
     const handleScanDocument = async () => {
@@ -34,14 +31,11 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
         setIdFront(image || "")
     }
 
-
     useEffect(() => {
         if (idFrontScaned)
             setDisabledButton(false)
 
     }, [idFrontScaned])
-
-
 
     return (
         <ScrollView contentContainerStyle={{ flex: 1 }}>
@@ -93,19 +87,6 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                             }}
                             title={"Siguiente"}
                         />
-                        <BottomSheet showDragIcon={false} onCloseFinish={() => setOpenBottomSheet(false)} open={openBottomSheet} height={height * 0.9}>
-                            <HStack bg={"red"} style={{ width: "100%", height: "100%" }}>
-                                <CameraView autofocus='on' style={{ width: "100%", height: "100%" }} facing={"back"}>
-                                    <Stack h={"100%"} justifyContent={"flex-end"} pb={"50px"}>
-                                        <HStack h={"100px"} w={"100%"} alignItems={"center"} justifyContent={"center"}>
-                                            <Pressable borderWidth={4} borderColor={"white"} borderRadius={100} bg={"white"} h={"75px"} w={"75px"} alignItems={"center"} justifyContent={"center"} >
-                                                <Stack borderWidth={2} bg={"white"} h={"100%"} w={"100%"} borderRadius={100} />
-                                            </Pressable>
-                                        </HStack>
-                                    </Stack>
-                                </CameraView>
-                            </HStack>
-                        </BottomSheet>
                     </HStack>
                 </VStack>
             </TouchableWithoutFeedback>

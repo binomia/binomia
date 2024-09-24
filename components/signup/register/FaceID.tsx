@@ -15,6 +15,8 @@ import { Worklets } from 'react-native-worklets-core';
 import { crop } from 'vision-camera-cropper';
 import Fade from "react-native-fade";
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { detect } from 'vision-camera-dynamsoft-document-normalizer';
+
 
 type Props = {
     nextPage: () => void
@@ -64,11 +66,14 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
         }
 
     })
+
     const frameProcessor = useFrameProcessor((frame) => {
         'worklet'
 
         const faces = detectFaces(frame)
         handleDetectedFaces(faces, frame)
+
+        const detectionResults = detect(frame);
 
 
     }, [handleDetectedFaces])
@@ -177,33 +182,34 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                     </Text>
                 </HStack>
             </VStack>
-
             <HStack h={"70px"} px={"20px"} justifyContent={"space-between"}>
-                <Button
-                    w={"49%"}
-                    bg={"lightGray"}
-                    color={"mainGreen"}
-                    onPress={prevPage}
-                    title={"Atras"}
-                />
-                {!video ?
+                <VStack>
                     <Button
                         w={"49%"}
                         bg={"lightGray"}
                         color={"mainGreen"}
-                        onPress={() => setOpenBottomSheet(true)}
-                        title={"Escanear"}
+                        onPress={prevPage}
+                        title={"Atras"}
                     />
-                    :
-                    <Button
-                        spin={loading}
-                        w={"49%"}
-                        bg={"mainGreen"}
-                        color={"white"}
-                        onPress={onPressNext}
-                        title={"Continuar"}
-                    />
-                }
+                    {!video ?
+                        <Button
+                            w={"49%"}
+                            bg={"lightGray"}
+                            color={"mainGreen"}
+                            onPress={() => setOpenBottomSheet(true)}
+                            title={"Escanear"}
+                        />
+                        :
+                        <Button
+                            spin={loading}
+                            w={"49%"}
+                            bg={"mainGreen"}
+                            color={"white"}
+                            onPress={onPressNext}
+                            title={"Continuar"}
+                        />
+                    }
+                </VStack>
                 <BottomSheet onCloseFinish={() => onCloseFinish()} showDragIcon={false} open={openBottomSheet} height={height * 0.9}>
                     {device &&
                         <ZStack flex={1}>

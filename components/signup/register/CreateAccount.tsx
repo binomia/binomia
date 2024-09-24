@@ -1,31 +1,21 @@
-import { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack, Spinner, Box } from 'native-base';
-import { Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Dimensions, View, StatusBar } from 'react-native';
 import colors from '@/colors';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import Input from '@/components/global/Input';
+import Button from '@/components/global/Button';
+import BottomSheet from '@/components/global/BottomSheet';
+import axios from 'axios';
+import { useContext, useEffect, useState } from 'react';
+import { VStack, Heading, Text, HStack, Box } from 'native-base';
+import { Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Dimensions, View } from 'react-native';
 import { phone } from 'phone';
 import { FORMAT_CEDULA, FORMAT_PHONE_NUMBER, VALIDATE_EMAIL } from '@/helpers';
 import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-sticky-footer-avoiding-scroll-view';
 import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
-import Input from '@/components/global/Input';
-import Button from '@/components/global/Button';
 import { GlobalContext } from '@/contexts/globalContext';
-import { GlobalContextType, SessionPropsType } from '@/types';
-import BottomSheet from '@/components/global/BottomSheet';
+import { GlobalContextType } from '@/types';
 import { WebView } from 'react-native-webview';
-import { SessionContext } from '@/contexts';
-import { gql, useLazyQuery } from '@apollo/client';
-import { UserApolloQueries } from '@/apollo/query';
-import axios from 'axios';
 import { authServer } from '@/rpc/authRPC';
-
-
-const UserByEmail = gql`
-    query UserByEmail($email: String!) {
-  userByEmail(email: $email)
-}
-`
 
 
 type Props = {
@@ -36,20 +26,15 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     const { email, setEmail, password, setPassword, names, setNames, lastNames, setLastNames, phoneNumber, setPhoneNumber, userAgreement, setUserAgreement } = useContext<GlobalContextType>(GlobalContext);
-    const { sendVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
-    const [getUserByEmail] = useLazyQuery(UserByEmail, {
-        fetchPolicy: "no-cache"
-    });
 
     const [showEmailError, setShowEmailError] = useState<boolean>(false);
-    const [showPasswordError, setShowPasswordError] = useState<boolean>(false);
+    const [showDNIError, setShowDNIError] = useState<boolean>(false);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [openBottomSheetUrl, setOpenBottomSheetUrl] = useState<string>("");
     const [isInvalid, setIsInvalid] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
     const [id, setID] = useState<string>("");
-
 
 
     const openTermsAndConditions = (url: string) => {
@@ -65,15 +50,26 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
         return isValid
     };
 
-
     const validateCedula = async () => {
         setIsInvalid(true)
         try {
             await axios.get(`https://api.digital.gob.do/v3/cedulas/${id.replace(/-/g, '')}/validate`)
             setIsInvalid(false)
+            checkIfDNIExists()
 
         } catch (error) {
             setIsInvalid(true)
+        }
+    }
+
+    const checkIfDNIExists = async () => {
+        setShowEmailError(false)
+        try {
+            const dniExists = await authServer("fetchUser", { key: "dni", value: id.toLowerCase() })
+            setShowDNIError(dniExists)
+
+        } catch (error) {
+            setShowDNIError(false)
         }
     }
 
@@ -81,12 +77,13 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
         setShowEmailError(false)
         if (VALIDATE_EMAIL(email)) {
             try {
-                const emailExists = await authServer("emailExists", { email: email.toLowerCase() })
+                const emailExists = await authServer("fetchUser", { key: "email", value: email.toLowerCase() })
                 setShowEmailError(emailExists)
 
             } catch (error) {
                 setShowEmailError(false)
             }
+
         } else {
             setShowEmailError(false)
         }
@@ -107,12 +104,6 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
         }
 
     }, [id])
-
-    useEffect(() => {
-        if (password.length >= 6)
-            setShowPasswordError(true)
-
-    }, [password])
 
     useEffect(() => {
         setDisabledButton(true)
@@ -152,12 +143,11 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                             />
                             <Input
                                 isInvalid={isInvalid}
-                                errorMessage='El correo electronico no se encuentra registrado como usuario.
-                            Por favor verifique e intente de nuevo.'
+                                errorMessage='Ya existe una cuenta con este numero de cédula'
                                 h={`${INPUT_HEIGHT}px`}
                                 autoComplete="off"
                                 maxLength={12}
-                                style={id.length === 13 && !isInvalid ? styles.InputsSucess : (id && !isInvalid || isInvalid) ? styles.InputsFail : {}}
+                                style={id.length === 13 && !isInvalid && !showDNIError ? styles.InputsSucess : (id && !isInvalid || isInvalid) ? styles.InputsFail : {}}
                                 onChangeText={(value) => setID(FORMAT_CEDULA(value.replace(/-/g, '')))}
                                 keyboardType="number-pad"
                                 value={id}
