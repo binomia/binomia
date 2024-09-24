@@ -14,11 +14,17 @@ import FaceID from './FaceID';
 
 const RegisterComponent: React.FC = (): JSX.Element => {
     const ref = useRef<PagerView>(null);
-    const [currentPage, setCurrentPage] = useState<number>(4);
+    const [currentPage, setCurrentPage] = useState<number>(6);
 
     const nextPage = () => {
+        ref.current?.render
         ref.current?.setPage(currentPage + 1)
         setCurrentPage(currentPage + 1)
+    }
+
+    function reRenderPage<T>(state?: T) {
+        ref.current?.render()
+        return state
     }
 
     const prevPage = () => {
@@ -38,9 +44,9 @@ const RegisterComponent: React.FC = (): JSX.Element => {
                     <Address key={"2"} nextPage={nextPage} prevPage={prevPage} />
                     <ScanFrontID key={"3"} nextPage={nextPage} prevPage={prevPage} />
                     <ScanBackID key={"4"} nextPage={nextPage} prevPage={prevPage} />
-                    <FaceID key={"5"} nextPage={nextPage} prevPage={prevPage}/>
+                    <FaceID key={"5"} nextPage={nextPage} prevPage={prevPage} reRenderPage={reRenderPage} />
                     <VerifyCode key={"6"} nextPage={nextPage} prevPage={prevPage} />
-                    <AccountCreated key={"7"}/>
+                    <AccountCreated key={"7"} />
                 </PagerView>
             </VStack>
         </SafeAreaView>

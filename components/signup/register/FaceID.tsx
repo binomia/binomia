@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from 'react';
-import { VStack, Heading, Text, HStack, Image, ZStack } from 'native-base';
-import { StyleSheet, TouchableOpacity, Dimensions, View } from 'react-native';
+import { VStack, Heading, Text, HStack, ZStack } from 'native-base';
+import { StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import colors from '@/colors';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import Button from '@/components/global/Button';
@@ -8,21 +8,23 @@ import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType, SessionPropsType } from '@/types';
 import BottomSheet from '@/components/global/BottomSheet';
 import { SessionContext } from '@/contexts';
-import { CameraView } from 'expo-camera';
-import { biometric } from '@/assets';
-import CircularProgress from 'react-native-circular-progress-indicator';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Camera, useCameraDevice, useCameraPermission, useMicrophonePermission, useFrameProcessor, Frame } from 'react-native-vision-camera';
+import { biometric, biometricOn } from '@/assets';
+import { useCameraDevice, useCameraPermission, useMicrophonePermission, useFrameProcessor, useCodeScanner, Camera, Frame } from 'react-native-vision-camera';
+import { Face, FaceDetectionOptions, useFaceDetector } from 'react-native-vision-camera-face-detector'
+import { Worklets } from 'react-native-worklets-core';
+import { crop } from 'vision-camera-cropper';
+import Fade from "react-native-fade";
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 type Props = {
     nextPage: () => void
     prevPage: () => void
+    reRenderPage: <T> (state?: T) => void
 }
 
 
 const { width, height } = Dimensions.get("window");
-const FaceID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
-    const camera = useRef<CameraView>(null);
+const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): JSX.Element => {
     const ref = useRef<Camera>(null);
     const { } = useContext<GlobalContextType>(GlobalContext);
     const { } = useContext<SessionPropsType>(SessionContext);
@@ -30,76 +32,75 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
     const [images, setImages] = useState<string[]>([]);
-    const [progress, setProgress] = useState<number>(0);
+    const [video, setVideo] = useState<string>("");
+    const [progress, setProgress] = useState<number>(5);
     const [recording, setRecording] = useState<boolean>(false);
-
-    const frameProcessor = useFrameProcessor((frame) => {
-        'worklet'
-        frame.
-      }, [])
-
-    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const [fade, setFade] = useState(false);
 
     const device = useCameraDevice("front");
     const cameraPermission = useCameraPermission()
     const microphonePermission = useMicrophonePermission()
+    const faceDetectionOptions = useRef<FaceDetectionOptions>({}).current
+    const { detectFaces } = useFaceDetector(faceDetectionOptions)
 
+
+    const handleDetectedFaces = Worklets.createRunOnJS((faces: Face[], frame: Frame) => {
+        if (faces.length > 0) {
+            // console.log("handleDetectedFaces", faces.length);
+            // const cropRegion = {
+            //     left: 10,
+            //     top: 10,
+            //     width: 80,
+            //     height: 30
+            // }
+
+            // const result = crop(frame, { cropRegion, includeImageBase64: true, saveAsFile: false });
+            // console.log("image", result);
+
+
+            // if (result.base64) {
+            //     saveImages(result.base64)
+            // }
+        }
+
+    })
+    const frameProcessor = useFrameProcessor((frame) => {
+        'worklet'
+
+        const faces = detectFaces(frame)
+        handleDetectedFaces(faces, frame)
+
+
+    }, [handleDetectedFaces])
 
     const onPressNext = async () => {
         nextPage()
     }
 
-
-    const stopRecording = async () => {
-        if (ref.current) {
-            await ref.current.stopRecording()
-            setRecording(false)
-        }
-
-
-    }
-
     const startRecording = async () => {
         if (ref.current) {
             ref.current.startRecording({
-
-                onRecordingFinished: (video) => console.log({ video }),
-                onRecordingError: (error) => console.error({ error })
+                onRecordingFinished: (video) => setVideo(video.path),
+                onRecordingError: (error) => console.error(error)
             });
-
-
-
-            setRecording(true)
         }
+        setRecording(true)
     }
 
-
-    const takePicture = async () => {
-        // await delay(3000);
-        if (camera.current) {
-            console.log("starting record");
-
-            const video = await camera.current.recordAsync({ maxDuration: 15 });
-            console.log(video?.uri);
-
-
-            setTimeout(() => {
-                setOpenBottomSheet(true)
-            }, 1000)
-
-
-            // if (video?.uri) {
-            //     const _images = images;
-            //     _images.push(video?.uri);
-
-            //     console.log({
-            //         images: _images,
-            //         progress: Math.floor(_images.length / 5 * 100) // 0 - 100,
-            //     });
-
-            //     setImages(_images);
-            // }
+    const stopRecording = async () => {
+        if (ref.current) {
+            await ref.current.stopRecording();
         }
+
+        setRecording(false)
+        setProgress(0)
+    }
+
+    const onCloseFinish = () => {
+        setOpenBottomSheet(false)
+        setImages([])
+        setProgress(5)
+        setFade(false)
     }
 
     useEffect(() => {
@@ -128,31 +129,30 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
     useEffect(() => {
         let interval: NodeJS.Timeout;
         (async () => {
-
-
+            let s = 5
             if (recording) {
                 interval = setInterval(() => {
-                    const _progress = progress;
+                    s = s - 1
+                    setFade(false)
+                    setProgress(s)
+                    setFade(true)
 
-                    if (_progress + 6 > 100) {
+                    if (s === 0) {
                         clearInterval(interval);
-                        setProgress(100)
-
-                    } else {
-                        setProgress(_progress + 6)
+                        setRecording(false)
+                        setProgress(0)
+                        setOpenBottomSheet(false)
+                        stopRecording()
                     }
 
-                    console.log(_progress);
-                }, 1000);
-
-
-
+                }, 1500);
             }
         })()
 
         return () => clearInterval(interval);
 
     }, [recording])
+
 
     return (
         <VStack h={height} flex={1} bg={"red.100"} justifyContent={"space-between"}>
@@ -162,14 +162,19 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                     Se escanearán tus datos biométricos para garantizar un acceso seguro y protegido.
                 </Text>
                 <HStack w={"100%"} alignItems={"center"} justifyContent={"center"}>
-                    <TouchableOpacity onPress={() => setOpenBottomSheet(true)}>
-                        <Image shadow={5} w={width * 0.7} resizeMode="contain" source={biometric} alt="welcome-screen-image-account" />
+                    <TouchableOpacity disabled={!!video} onPress={() => setOpenBottomSheet(true)}>
+                        {video ?
+                            <Image style={{ width: width * 0.7 }} resizeMode="contain" source={biometricOn} alt="welcome-screen-image-account" />
+                            :
+                            <Image style={{ width: width * 0.7 }} resizeMode="contain" source={biometric} alt="welcome-screen-image-account" />
+                        }
                     </TouchableOpacity>
                 </HStack>
-                <HStack w={"100%"} alignItems={"center"} justifyContent={"center"}>
-                    <TouchableOpacity onPress={() => setOpenBottomSheet(true)}>
-                        <Image shadow={5} h={"50px"} w={"25px"} resizeMode="contain" source={biometric} alt="welcome-screen-image-account" />
-                    </TouchableOpacity>
+                <HStack space={2} w={"100%"} justifyContent={"center"}>
+                    <AntDesign style={{ marginTop: 5 }} name="exclamationcircleo" size={24} color={colors.mainGreen} />
+                    <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>
+                        Los datos biométricos han sido escaneados con éxito, y ahora puedes continuar con tu registro.
+                    </Text>
                 </HStack>
             </VStack>
 
@@ -181,7 +186,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                     onPress={prevPage}
                     title={"Atras"}
                 />
-                {images.length !== 5 ?
+                {!video ?
                     <Button
                         w={"49%"}
                         bg={"lightGray"}
@@ -193,28 +198,40 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                     <Button
                         spin={loading}
                         w={"49%"}
-                        disabled={disabledButton}
-                        bg={disabledButton ? "lightGray" : "mainGreen"}
-                        color={disabledButton ? 'placeholderTextColor' : "white"}
+                        bg={"mainGreen"}
+                        color={"white"}
                         onPress={onPressNext}
                         title={"Continuar"}
                     />
                 }
-                <BottomSheet onCloseFinish={() => setOpenBottomSheet(false)} showDragIcon={false} open={openBottomSheet} height={height * 0.9}>
+                <BottomSheet onCloseFinish={() => onCloseFinish()} showDragIcon={false} open={openBottomSheet} height={height * 0.9}>
                     {device &&
                         <ZStack flex={1}>
-                            <Camera ref={ref} audio={true} video={true} isActive device={device} style={StyleSheet.absoluteFillObject} />
+                            <Camera
+                                ref={ref}
+                                photo={true}
+                                video={true}
+                                style={StyleSheet.absoluteFillObject}
+                                device={device}
+                                frameProcessor={frameProcessor}
+                                pixelFormat="rgb"
+                                isActive
+                            />
                             <VStack w={"100%"} h={"100%"} justifyContent={"space-between"} alignItems={"center"} pb={"50px"}>
-                                <Heading mt={"20px"} color={"red"}>{progress}%</Heading>
+                                <HStack position={"absolute"} top={"60%"}>
+                                    <Fade visible={fade} direction="up">
+                                        <Heading opacity={0.5} fontSize={`${width / 2.2}px`} mt={"20px"} color={"red"}>{progress}</Heading>
+                                    </Fade>
+                                </HStack>
                                 <HStack space={20}>
-                                    {recording ?
+                                    {!recording ?
                                         <TouchableOpacity onPress={() => startRecording()}>
                                             <HStack borderColor={"white"} borderWidth={3} bg={"white"} borderRadius={100} style={styles.Shadow}>
                                                 <HStack borderColor={"black"} borderWidth={3} borderRadius={100} w={"65px"} h={"65px"} />
                                             </HStack>
                                         </TouchableOpacity>
                                         :
-                                        <TouchableOpacity onPress={() => startRecording()}>
+                                        <TouchableOpacity onPress={() => console.log(video)}>
                                             <HStack borderColor={"white"} borderWidth={3} w={"65px"} h={"65px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} style={styles.Shadow}>
                                                 <HStack bg={"red"} borderRadius={"5px"} w={"25px"} h={"25px"} />
                                             </HStack>

@@ -9,15 +9,28 @@ import * as SplashScreen from 'expo-splash-screen';
 import { Navigation } from '@/navigation';
 import { NavigationContainer } from '@react-navigation/native';
 import { GlobalContextProvider } from './contexts/globalContext';
+import { useCameraDevice, useCameraPermission, useMicrophonePermission, useFrameProcessor, Frame } from 'react-native-vision-camera';
+
 
 
 LogBox.ignoreAllLogs();
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
+	const cameraPermission = useCameraPermission()
+	const microphonePermission = useMicrophonePermission()
 
 	const onLayoutRootView = useCallback(async () => {
 		const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+
+		if (!cameraPermission.hasPermission) {
+			await cameraPermission.requestPermission();
+		};
+
+		if (!microphonePermission.hasPermission) {
+			await microphonePermission.requestPermission();
+		};
 
 		await delay(3000); // Wait for 5 seconds
 		await SplashScreen.hideAsync();
