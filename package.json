@@ -15,11 +15,17 @@
   },
   "dependencies": {
     "@apollo/client": "^3.11.7",
+    "@azure-rest/ai-vision-face": "^1.0.0-beta.1",
+    "@azure/cognitiveservices-face": "^5.0.0",
+    "@azure/core-auth": "^1.8.0",
+    "@azure/ms-rest-js": "^2.7.0",
     "@cassianosch/react-native-keyboard-sticky-footer-avoiding-scroll-view": "^1.0.5",
     "@react-navigation/bottom-tabs": "^6.6.1",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/native-stack": "^6.11.0",
     "@types/nodemailer": "^6.4.15",
+    "@types/uuid": "^10.0.0",
+    "aws-sdk": "^2.1691.0",
     "axios": "^1.7.7",
     "expo": "^51.0.32",
     "expo-application": "~5.9.1",
@@ -58,7 +64,8 @@
     "react-native-svg": "^15.7.1",
     "react-native-vision-camera": "^4.5.3",
     "react-native-webview": "13.8.6",
-    "react-native-worklets-core": "^1.2.0"
+    "react-native-worklets-core": "^1.2.0",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
