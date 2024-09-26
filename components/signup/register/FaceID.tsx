@@ -9,7 +9,7 @@ import { GlobalContextType, SessionPropsType } from '@/types';
 import BottomSheet from '@/components/global/BottomSheet';
 import { SessionContext } from '@/contexts';
 import { biometric, biometricOn } from '@/assets';
-import { useCameraDevice, useCameraPermission, useMicrophonePermission, useFrameProcessor, useCodeScanner, Camera, Frame } from 'react-native-vision-camera';
+import { useCameraDevice, useCameraPermission, useMicrophonePermission, useFrameProcessor, Camera, Frame } from 'react-native-vision-camera';
 import { Face, FaceDetectionOptions, useFaceDetector } from 'react-native-vision-camera-face-detector'
 import { Worklets } from 'react-native-worklets-core';
 import { crop } from 'vision-camera-cropper';
@@ -28,8 +28,8 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): JSX.Element => {
     const ref = useRef<Camera>(null);
-    const { } = useContext<GlobalContextType>(GlobalContext);
-    const { } = useContext<SessionPropsType>(SessionContext);
+    const { email } = useContext<GlobalContextType>(GlobalContext);
+    const { sendVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
     const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
@@ -48,9 +48,12 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
 
     const handleDetectedFaces = Worklets.createRunOnJS((faces: Face[], frame: Frame) => {
         if (faces.length > 0) {
+            setDisabledButton(false)
+            console.log({ x: faces[0].bounds.x, y: faces[0].bounds.y, width: faces[0].bounds.width, height: faces[0].bounds.height });
+
             // console.log("handleDetectedFaces", faces.length);
             // const cropRegion = {
-            //     left: 10,
+            //     left: 10,   
             //     top: 10,
             //     width: 80,
             //     height: 30
@@ -71,15 +74,34 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
         'worklet'
 
         const faces = detectFaces(frame)
+
+        if (faces.length > 0) {
+
+            faces[0].bounds
+            console.log("frameProcessor", faces.length);
+        }
+
         handleDetectedFaces(faces, frame)
 
         const detectionResults = detect(frame);
 
-
-    }, [handleDetectedFaces])
+    }, [])
 
     const onPressNext = async () => {
-        nextPage()
+        try {
+            setLoading(true)
+            // const message = await sendVerificationCode(email.toLowerCase())
+
+            // if (message)
+            //     setVerificationData({ ...message, email: email.toLowerCase() })
+
+            nextPage()
+            setLoading(false)
+
+        } catch (error) {
+            console.error(error);
+            setLoading(false)
+        }
     }
 
     const startRecording = async () => {
@@ -183,33 +205,32 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                 </HStack>
             </VStack>
             <HStack h={"70px"} px={"20px"} justifyContent={"space-between"}>
-                <VStack>
+                <Button
+                    w={"49%"}
+                    bg={"lightGray"}
+                    color={"mainGreen"}
+                    onPress={prevPage}
+                    title={"Atras"}
+                />
+                {!video ?
                     <Button
                         w={"49%"}
                         bg={"lightGray"}
                         color={"mainGreen"}
-                        onPress={prevPage}
-                        title={"Atras"}
+                        onPress={() => setOpenBottomSheet(true)}
+                        title={"Escanear"}
                     />
-                    {!video ?
-                        <Button
-                            w={"49%"}
-                            bg={"lightGray"}
-                            color={"mainGreen"}
-                            onPress={() => setOpenBottomSheet(true)}
-                            title={"Escanear"}
-                        />
-                        :
-                        <Button
-                            spin={loading}
-                            w={"49%"}
-                            bg={"mainGreen"}
-                            color={"white"}
-                            onPress={onPressNext}
-                            title={"Continuar"}
-                        />
-                    }
-                </VStack>
+                    :
+                    <Button
+                        spin={loading}
+                        w={"49%"}
+                        bg={"mainGreen"}
+                        color={"white"}
+                        onPress={onPressNext}
+                        title={"Continuar"}
+                    />
+                }
+
                 <BottomSheet onCloseFinish={() => onCloseFinish()} showDragIcon={false} open={openBottomSheet} height={height * 0.9}>
                     {device &&
                         <ZStack flex={1}>
@@ -228,7 +249,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                                     <Fade visible={fade} direction="up">
                                         <Heading opacity={0.5} fontSize={`${width / 2.2}px`} mt={"20px"} color={"red"}>{progress}</Heading>
                                     </Fade>
-                                </HStack>
+                                </HStack>                                
                                 <HStack space={20}>
                                     {!recording ?
                                         <TouchableOpacity onPress={() => startRecording()}>

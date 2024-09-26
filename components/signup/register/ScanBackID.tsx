@@ -10,7 +10,6 @@ import { CameraView } from 'expo-camera';
 import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType, SessionPropsType } from '@/types';
 import { SessionContext } from '@/contexts';
-import { GENERATE_SIX_DIGIT_TOKEN } from '@/helpers';
 
 type Props = {
     nextPage: () => void
@@ -21,7 +20,6 @@ const { width, height } = Dimensions.get("window");
 
 const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const { setIdBack, idBack: idBackScaned, email } = useContext<GlobalContextType>(GlobalContext);
-    const { sendVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -37,20 +35,7 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
 
 
     const onPressNext = async () => {
-        try {
-            setLoading(true)
-            const message = await sendVerificationCode(email.toLowerCase())
-
-            if (message)
-                setVerificationData({ ...message, email: email.toLowerCase() })
-
-            nextPage()
-            setLoading(false)
-
-        } catch (error) {
-            console.error(error);
-            setLoading(false)
-        }
+        nextPage()
     }
 
 

@@ -9,8 +9,6 @@ import welcomeSignup from './welcome-signup.png';
 import biometric from './biometric.png';
 import biometricOn from './biometric-on.png';
 
-
-
 export {
     logo,
     account,
@@ -21,5 +19,5 @@ export {
     welcome,
     welcomeSignup,
     biometric,
-    biometricOn
+    biometricOn,
 }

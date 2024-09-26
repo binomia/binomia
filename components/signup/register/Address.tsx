@@ -1,14 +1,14 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack, TextArea, Spinner } from 'native-base';
+import React, { useContext, useState } from 'react';
+import { VStack, Heading, Text, HStack, TextArea } from 'native-base';
 import { StyleSheet, Keyboard, SafeAreaView, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
 import colors from '@/colors';
-import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE, TEXTAREA_HEIGHT } from '@/constants';
+import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE, TEXTAREA_HEIGHT } from '@/constants';
 import Button from '@/components/global/Button';
 import { GlobalContextType } from '@/types';
 import { GlobalContext } from '@/contexts/globalContext';
-import Input from '@/components/global/Input';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { registerActions } from '@/redux/slices/registerSlice';
+import { useSelector, useDispatch } from 'react-redux';
 
 type Props = {
     nextPage: () => void
@@ -17,20 +17,34 @@ type Props = {
 
 
 const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
+    const dispatch = useDispatch()
+    const state = useSelector((state: any) => state)
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
-    const { address, setAddress, addressAgreement, setAddressAgreement } = useContext<GlobalContextType>(GlobalContext);
+    const { } = useContext<GlobalContextType>(GlobalContext);
     const [loading, setLoading] = useState<boolean>(false)
 
+    const [address, setAddress] = useState<string>("");
+    const [addressAgreement, setAddressAgreement] = useState<boolean>(false);
 
 
-    useEffect(() => {
+    const onChange = (value: string, type: string) => {
         setDisabledButton(true)
+
+        if (type === "address") {
+            setAddress(value)
+            dispatch(registerActions.setAddress(value))
+
+        } else {
+            dispatch(registerActions.setAddressAgreement(!addressAgreement))
+            setAddressAgreement(!addressAgreement)
+        }
 
         if (address && addressAgreement) {
             setDisabledButton(false)
         }
 
-    }, [address, addressAgreement])
+        console.log(JSON.stringify(state, null, 2));
+    }
 
 
     return (
@@ -48,12 +62,13 @@ const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element =>
                             <TextArea
                                 borderWidth={0}
                                 borderColor={"white"}
+                                keyboardType="ascii-capable"
                                 borderRadius={"10px"}
                                 bg={"lightGray"}
                                 _focus={{ bg: "lightGray", selectionColor: "white" }}
                                 value={address}
                                 fontSize={"16px"}
-                                onChangeText={(value) => setAddress(value)}
+                                onChangeText={(value) => onChange(value, "address")}
                                 h={`${TEXTAREA_HEIGHT}px`}
                                 color={"white"}
                                 autoCompleteType={"street-address"}
@@ -62,7 +77,7 @@ const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element =>
                             />
                         </VStack>
                         <HStack alignSelf={"flex-end"} w={"100%"} mt={"40px"} px={"25px"}>
-                            <TouchableOpacity onPress={() => setAddressAgreement(!addressAgreement)}>
+                            <TouchableOpacity onPress={() => onChange("", "agreement")}>
                                 <MaterialIcons style={{ marginTop: 3 }} name={addressAgreement ? "check-box" : "check-box-outline-blank"} size={28} color={colors.mainGreen} />
                             </TouchableOpacity>
                             <Text mx={"5px"} fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"90%"} color={"white"}>

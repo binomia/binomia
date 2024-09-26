@@ -1,10 +1,10 @@
-import { SafeAreaView, Dimensions } from 'react-native'
 import React from 'react'
+import colors from '@/colors'
+import Button from '@/components/global/Button'
+import { SafeAreaView, Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack } from 'native-base'
 import { welcome } from '@/assets'
-import colors from '@/colors'
 import { useNavigation } from '@react-navigation/native'
-import Button from '@/components/global/Button'
 
 const { height } = Dimensions.get('window')
 const WelcomeScreen: React.FC = () => {

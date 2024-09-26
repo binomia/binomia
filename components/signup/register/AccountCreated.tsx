@@ -1,11 +1,12 @@
 import { useContext, useState } from 'react';
-import { VStack, Heading, Text, HStack, Image, Stack, ZStack } from 'native-base';
+import { VStack, Heading, Text, HStack, Image } from 'native-base';
 import { Dimensions } from 'react-native';
 import Button from '@/components/global/Button';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
-import {  SessionPropsType } from '@/types';
+import { GlobalContextType, SessionPropsType } from '@/types';
 import { SessionContext } from '@/contexts';
-import {  welcomeSignup } from '@/assets';
+import { welcomeSignup } from '@/assets';
+import { GlobalContext } from '@/contexts/globalContext';
 
 
 type Props = {
@@ -15,8 +16,8 @@ type Props = {
 
 const { width, height } = Dimensions.get("window");
 const AccountCreated: React.FC<Props> = ({ }): JSX.Element => {
+    const { names, lastNames, email, dni, address, password, phoneNumber, idBack, idFront } = useContext<GlobalContextType>(GlobalContext);
     const { setVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
-
     const [loading, setLoading] = useState(false);
 
 

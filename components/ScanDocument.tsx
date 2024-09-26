@@ -1,6 +1,4 @@
-import React, { Component, useRef } from "react"
-import { View, Image } from "react-native"
-
+import React, { useRef } from "react"
 import Scanner from "react-native-rectangle-scanner"
 
 const DocumentScanner = () => {

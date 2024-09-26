@@ -74,5 +74,14 @@ export type GlobalContextType = {
     showCloseButton: boolean
     setShowCloseButton: (value: boolean) => void
 
+    dni: string
+    setDNI: (value: string) => void
+
+    dniExpiration: string
+    setDNIExpiration: (value: string) => void
+
+    dniDOB: string
+    setDNIDOB: (value: string) => void
+
     resetAllStates: () => void
 }

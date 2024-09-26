@@ -35,5 +35,14 @@ export const globalContextInitialState: GlobalContextType = {
     showCloseButton: true,
     setShowCloseButton: (_: boolean) => { },
 
+    dni: "",
+    setDNI: (_: string) => { },
+
+    dniExpiration: "",
+    setDNIExpiration: (_: string) => { },
+
+    dniDOB: "",
+    setDNIDOB: (_: string) => { },
+
     resetAllStates: () => { }
 }

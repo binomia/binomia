@@ -13,6 +13,9 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     const [lastNames, setLastNames] = useState<string>("");
     const [phoneNumber, setPhoneNumber] = useState<string>("");
     const [idFront, setIdFront] = useState<string>("");
+    const [dni, setDNI] = useState<string>("");
+    const [dniExpiration, setDNIExpiration] = useState<string>("");
+    const [dniDOB, setDNIDOB] = useState<string>("");
     const [idBack, setIdBack] = useState<string>("");
     const [address, setAddress] = useState<string>(globalContextInitialState.address);
     const [userAgreement, setUserAgreement] = useState<boolean>(false);
@@ -30,6 +33,9 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
         setPhoneNumber("")
         setIdFront("")
         setIdBack("")
+        setDNI("")
+        setDNIExpiration("")
+        setDNIDOB("")
         setShowCloseButton(false)
         setAddressAgreement(false)
         setAddress(globalContextInitialState.address)
@@ -42,30 +48,52 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     const data = {
         email,
         setEmail,
+
         password,
         setPassword,
+
         names,
         setNames,
+
         lastNames,
         setLastNames,
+
         phoneNumber,
         setPhoneNumber,
+
         address,
         setAddress,
+
         userAgreement,
         setUserAgreement,
+
         showPassword,
         setShowPassword,
-        disabledButton,
+
         idFront,
         setIdFront,
-        showCloseButton, 
+
+        showCloseButton,
         setShowCloseButton,
-        idBack,
+
         addressAgreement,
         setAddressAgreement,
+
+        idBack,
         setIdBack,
+
+        disabledButton,
         setDisabledButton,
+
+        dni,
+        setDNI,
+
+        dniExpiration,
+        setDNIExpiration,
+
+        dniDOB,
+        setDNIDOB,
+
         resetAllStates
     }
 

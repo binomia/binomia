@@ -50,12 +50,6 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
 
     }, [code])
 
-    useEffect(() => {
-        console.log(JSON.stringify(globalContext, null, 2));
-
-    }, [code])
-
-
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -66,7 +60,6 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"85%"} color={"white"}>Ingrese el código de verificación de 6 digitos enviado a su correo electronico.</Text>
                         </VStack>
                         <CodeField
-
                             ref={ref}
                             {...props}
                             value={code}

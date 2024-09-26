@@ -12,6 +12,9 @@ import AccountCreated from './AccountCreated';
 import FaceID from './FaceID';
 import { GlobalContextType } from '@/types';
 import { GlobalContext } from '@/contexts/globalContext';
+import IDData from './IdData';
+import * as Crypto from "expo-crypto"
+
 
 
 const RegisterComponent: React.FC = (): JSX.Element => {
@@ -21,7 +24,6 @@ const RegisterComponent: React.FC = (): JSX.Element => {
 
 
     const nextPage = () => {
-        ref.current?.render
         ref.current?.setPage(currentPage + 1)
 
         if (currentPage === 5) {
@@ -45,12 +47,14 @@ const RegisterComponent: React.FC = (): JSX.Element => {
         setCurrentPage(currentPage - 1)
     }
 
+
     return (
         <SafeAreaView style={{ backgroundColor: colors.darkGray, flex: 1 }}>
             <VStack flex={1}>
                 <PagerView scrollEnabled={false} ref={ref} style={{ flex: 1 }} initialPage={currentPage}>
-                    <CreateAccount key={"1"} nextPage={nextPage} />
-                    <Address key={"2"} nextPage={nextPage} prevPage={prevPage} />
+                    <CreateAccount key={"0"} nextPage={nextPage} />
+                    <Address key={"1"} nextPage={nextPage} prevPage={prevPage} />
+                    <IDData key={"2"} nextPage={nextPage} prevPage={prevPage} />
                     <ScanFrontID key={"3"} nextPage={nextPage} prevPage={prevPage} />
                     <ScanBackID key={"4"} nextPage={nextPage} prevPage={prevPage} />
                     <FaceID key={"5"} nextPage={nextPage} prevPage={prevPage} reRenderPage={reRenderPage} />
