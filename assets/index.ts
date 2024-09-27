@@ -8,6 +8,7 @@ import idBack from './id-back.png';
 import welcomeSignup from './welcome-signup.png';
 import biometric from './biometric.png';
 import biometricOn from './biometric-on.png';
+import pendingVerification from './pending-verification.png';
 
 export {
     logo,
@@ -20,4 +21,5 @@ export {
     welcomeSignup,
     biometric,
     biometricOn,
+    pendingVerification
 }

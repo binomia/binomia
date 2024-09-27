@@ -5,9 +5,10 @@ import Button from '@/components/global/Button';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { GlobalContextType, SessionPropsType } from '@/types';
 import { SessionContext } from '@/contexts';
-import { welcomeSignup } from '@/assets';
+import { welcomeSignup, pendingVerification } from '@/assets';
 import { GlobalContext } from '@/contexts/globalContext';
-
+import { registerActions } from '@/redux/slices/registerSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 type Props = {
 
@@ -16,13 +17,14 @@ type Props = {
 
 const { width, height } = Dimensions.get("window");
 const AccountCreated: React.FC<Props> = ({ }): JSX.Element => {
-    const { names, lastNames, email, dni, address, password, phoneNumber, idBack, idFront } = useContext<GlobalContextType>(GlobalContext);
+    const state = useSelector((state: any) => state)
+    const { } = useContext<GlobalContextType>(GlobalContext);
     const { setVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
     const [loading, setLoading] = useState(false);
 
-
     const onPress = () => {
-        setLoading(true)
+        // setLoading(true)
+        console.log(JSON.stringify(state, null, 2));
     }
 
 

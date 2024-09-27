@@ -8,8 +8,9 @@ import BottomSheet from '@/components/global/BottomSheet';
 import { useDocumentScanner } from '@/hooks/useDocumentScan';
 import { CameraView } from 'expo-camera';
 import { GlobalContext } from '@/contexts/globalContext';
-import { GlobalContextType, SessionPropsType } from '@/types';
-import { SessionContext } from '@/contexts';
+import { GlobalContextType } from '@/types';
+import { registerActions } from '@/redux/slices/registerSlice';
+import { useDispatch } from 'react-redux';
 
 type Props = {
     nextPage: () => void
@@ -19,7 +20,8 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 
 const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
-    const { setIdBack, idBack: idBackScaned, email } = useContext<GlobalContextType>(GlobalContext);
+    const dispatch = useDispatch()
+    const { setIdBack, idBack: idBackScaned } = useContext<GlobalContextType>(GlobalContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -30,12 +32,15 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
         const image = await scanDocument()
         if (!image) return
 
-        setIdBack(image || "")
+        setIdBack(image)
+        dispatch(registerActions.setIdBackUrl(image))
     }
 
 
     const onPressNext = async () => {
+        setLoading(true)
         nextPage()
+        setLoading(false)
     }
 
 

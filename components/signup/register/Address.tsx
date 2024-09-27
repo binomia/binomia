@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack, TextArea } from 'native-base';
 import { StyleSheet, Keyboard, SafeAreaView, TouchableWithoutFeedback, TouchableOpacity } from 'react-native';
 import colors from '@/colors';
@@ -8,7 +8,7 @@ import { GlobalContextType } from '@/types';
 import { GlobalContext } from '@/contexts/globalContext';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { registerActions } from '@/redux/slices/registerSlice';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 type Props = {
     nextPage: () => void
@@ -18,7 +18,6 @@ type Props = {
 
 const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const dispatch = useDispatch()
-    const state = useSelector((state: any) => state)
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const { } = useContext<GlobalContextType>(GlobalContext);
     const [loading, setLoading] = useState<boolean>(false)
@@ -27,29 +26,34 @@ const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element =>
     const [addressAgreement, setAddressAgreement] = useState<boolean>(false);
 
 
-    const onChange = (value: string, type: string) => {
-        setDisabledButton(true)
-
+    const onChange = (value: string = "", type: string = "") => {
         if (type === "address") {
             setAddress(value)
             dispatch(registerActions.setAddress(value))
 
         } else {
-            dispatch(registerActions.setAddressAgreement(!addressAgreement))
-            setAddressAgreement(!addressAgreement)
+            const agreement = addressAgreement
+            setAddressAgreement(!agreement)
+            dispatch(registerActions.setAddressAgreement(!agreement))
         }
+    }
+
+
+    useEffect(() => {
+        setDisabledButton(true)
 
         if (address && addressAgreement) {
             setDisabledButton(false)
         }
 
-        console.log(JSON.stringify(state, null, 2));
-    }
+    }, [address, addressAgreement])
+
+
 
 
     return (
-        <SafeAreaView style={{ backgroundColor: colors.darkGray }}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
+            <SafeAreaView style={{ backgroundColor: colors.darkGray }}>
                 <VStack mt={"10%"} h={"96%"} w={"100%"} justifyContent={"space-between"}>
                     <VStack>
                         <VStack px={"20px"} w={"100%"} alignItems={"flex-start"}>
@@ -60,9 +64,8 @@ const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element =>
                         </VStack>
                         <VStack w={"100%"} px={"20px"} mt={"30px"} alignItems={"center"} >
                             <TextArea
-                                borderWidth={0}
+                                borderWidth={1}
                                 borderColor={"white"}
-                                keyboardType="ascii-capable"
                                 borderRadius={"10px"}
                                 bg={"lightGray"}
                                 _focus={{ bg: "lightGray", selectionColor: "white" }}
@@ -73,11 +76,11 @@ const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element =>
                                 color={"white"}
                                 autoCompleteType={"street-address"}
                                 placeholder='Ingresa tu dirección'
-                                style={addressAgreement ? styles.InputsSucess : address ? styles.InputsFail : {}}
+                                style={addressAgreement && address.length > 0 ? styles.InputsSucess : address.length > 0 && !addressAgreement ? styles.InputsFail : {}}
                             />
                         </VStack>
                         <HStack alignSelf={"flex-end"} w={"100%"} mt={"40px"} px={"25px"}>
-                            <TouchableOpacity onPress={() => onChange("", "agreement")}>
+                            <TouchableOpacity onPress={() => onChange()}>
                                 <MaterialIcons style={{ marginTop: 3 }} name={addressAgreement ? "check-box" : "check-box-outline-blank"} size={28} color={colors.mainGreen} />
                             </TouchableOpacity>
                             <Text mx={"5px"} fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"90%"} color={"white"}>
@@ -110,8 +113,8 @@ const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element =>
                         />
                     </HStack>
                 </VStack>
-            </TouchableWithoutFeedback>
-        </SafeAreaView>
+            </SafeAreaView>
+        </TouchableWithoutFeedback>
     );
 }
 

@@ -18,6 +18,8 @@ import { WebView } from 'react-native-webview';
 import { authServer } from '@/rpc/authRPC';
 import DatePicker from 'react-native-date-picker'
 import moment from 'moment';
+import { registerActions } from '@/redux/slices/registerSlice';
+import { useDispatch } from 'react-redux';
 
 
 type Props = {
@@ -30,7 +32,8 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 
 const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
-    const { setDNI, setDNIExpiration, setDNIDOB } = useContext<GlobalContextType>(GlobalContext);
+    const dispatch = useDispatch()
+    const { } = useContext<GlobalContextType>(GlobalContext);
     const [showDNIError, setShowDNIError] = useState<boolean>(false);
     const [showDNIErroreMessage, setShowDNErrorMessage] = useState<string>("");
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
@@ -86,20 +89,18 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
 
         if (openedDateTitle === "exp") {
             setExp(dateString)
+            dispatch(registerActions.setDniExpiration(dateString))
         }
         else if (openedDateTitle === "dob") {
             setDob(dateString)
+            dispatch(registerActions.setDniDOB(dateString))
         }
-
-        console.log(JSON.stringify({
-            dateString,
-            openedDateTitle,
-            dniExpiration: exp,
-            dniDOB: dob
-
-        }, null, 2));
-
         setOpen(false)
+    }
+
+    const onChangeText = (value: string) => {
+        setId(value)
+        dispatch(registerActions.setDni(value))
     }
 
 
@@ -143,7 +144,7 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                                 autoComplete="off"
                                 maxLength={12}
                                 style={id.length === 13 && !isInvalid && !showDNIError ? styles.InputsSucess : (id && !isInvalid || isInvalid) ? styles.InputsFail : {}}
-                                onChangeText={(value) => setId(FORMAT_CEDULA(value.replace(/-/g, '')))}
+                                onChangeText={(value) => onChangeText(FORMAT_CEDULA(value.replace(/-/g, '')))}
                                 keyboardType="number-pad"
                                 value={id}
                                 placeholder="Numero De Cédula*"
@@ -156,10 +157,18 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                             </Pressable>
                         </VStack>
                     </VStack>
-                    <VStack bg={"red.100"} px={"20px"} w={"100%"}>
+                    <HStack bg={"red.100"} px={"20px"} w={"100%"} justifyContent={"space-between"}>
+                        <Button
+                            w={"49%"}
+                            bg={"lightGray"}
+                            color={"mainGreen"}
+                            mb="10px"
+                            onPress={prevPage}
+                            title={"Atras"}
+                        />
                         <Button
                             spin={loading}
-                            w={"100%"}
+                            w={"49%"}
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
@@ -171,7 +180,7 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                             }}
                             title={"Siguiente"}
                         />
-                    </VStack>
+                    </HStack>
                 </View>
             </TouchableWithoutFeedback>
             <BottomSheet onCloseFinish={() => setOpenBottomSheetUrl("")} open={!!openBottomSheetUrl} height={height * 0.9}>

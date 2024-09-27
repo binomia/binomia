@@ -8,6 +8,8 @@ import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType } from '@/types';
 import colors from '@/colors';
 import Button from '@/components/global/Button';
+import { registerActions } from '@/redux/slices/registerSlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 
 type Props = {
@@ -18,6 +20,8 @@ type Props = {
 const { width } = Dimensions.get("window");
 
 const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
+    const dispatch = useDispatch()
+    const state = useSelector((state: any) => state)
     const { setIdFront, idFront: idFrontScaned } = useContext<GlobalContextType>(GlobalContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
@@ -29,6 +33,9 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
         if (!image) return
 
         setIdFront(image || "")
+        dispatch(registerActions.setIdFrontUrl(image || ""))
+        console.log(JSON.stringify(state, null, 2));
+
     }
 
     useEffect(() => {

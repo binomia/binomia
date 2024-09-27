@@ -15,7 +15,8 @@ import { Worklets } from 'react-native-worklets-core';
 import { crop } from 'vision-camera-cropper';
 import Fade from "react-native-fade";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { detect } from 'vision-camera-dynamsoft-document-normalizer';
+import { registerActions } from '@/redux/slices/registerSlice';
+import { useDispatch } from 'react-redux';
 
 
 type Props = {
@@ -27,6 +28,7 @@ type Props = {
 
 const { width, height } = Dimensions.get("window");
 const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): JSX.Element => {
+    const dispatch = useDispatch()
     const ref = useRef<Camera>(null);
     const { email } = useContext<GlobalContextType>(GlobalContext);
     const { sendVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
@@ -49,7 +51,6 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
     const handleDetectedFaces = Worklets.createRunOnJS((faces: Face[], frame: Frame) => {
         if (faces.length > 0) {
             setDisabledButton(false)
-            console.log({ x: faces[0].bounds.x, y: faces[0].bounds.y, width: faces[0].bounds.width, height: faces[0].bounds.height });
 
             // console.log("handleDetectedFaces", faces.length);
             // const cropRegion = {
@@ -76,24 +77,20 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
         const faces = detectFaces(frame)
 
         if (faces.length > 0) {
-
             faces[0].bounds
-            console.log("frameProcessor", faces.length);
         }
 
         handleDetectedFaces(faces, frame)
-
-        const detectionResults = detect(frame);
 
     }, [])
 
     const onPressNext = async () => {
         try {
             setLoading(true)
-            // const message = await sendVerificationCode(email.toLowerCase())
+            const message = await sendVerificationCode(email.toLowerCase())
 
-            // if (message)
-            //     setVerificationData({ ...message, email: email.toLowerCase() })
+            if (message)
+                setVerificationData({ ...message, email: email.toLowerCase() })
 
             nextPage()
             setLoading(false)
@@ -107,7 +104,10 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
     const startRecording = async () => {
         if (ref.current) {
             ref.current.startRecording({
-                onRecordingFinished: (video) => setVideo(video.path),
+                onRecordingFinished: (video) => {
+                    setVideo(video.path)
+                    dispatch(registerActions.setFaceVideoUrl(video.path))
+                },
                 onRecordingError: (error) => console.error(error)
             });
         }
@@ -158,6 +158,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
         (async () => {
             let s = 5
             if (recording) {
+                setFade(true)
                 interval = setInterval(() => {
                     s = s - 1
                     setFade(false)
@@ -183,7 +184,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
 
     return (
         <VStack h={height} flex={1} bg={"red.100"} justifyContent={"space-between"}>
-            <VStack px={"20px"} bg={"red.100"} h={"50%"}>
+            <VStack px={"20px"} bg={"red.100"} h={"50%"} bgColor={"red.100"}>
                 <Heading fontSize={`${TEXT_HEADING_FONT_SIZE - 2}px`} mb={"5px"} mt={"30px"} color={"white"}>Escaneos Biométricos</Heading>
                 <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"85%"} color={"white"}>
                     Se escanearán tus datos biométricos para garantizar un acceso seguro y protegido.
@@ -191,9 +192,9 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                 <HStack w={"100%"} alignItems={"center"} justifyContent={"center"}>
                     <TouchableOpacity disabled={!!video} onPress={() => setOpenBottomSheet(true)}>
                         {video ?
-                            <Image style={{ width: width * 0.7 }} resizeMode="contain" source={biometricOn} alt="welcome-screen-image-account" />
+                            <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometricOn} alt="welcome-screen-image-account" />
                             :
-                            <Image style={{ width: width * 0.7 }} resizeMode="contain" source={biometric} alt="welcome-screen-image-account" />
+                            <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometric} alt="welcome-screen-image-account" />
                         }
                     </TouchableOpacity>
                 </HStack>
@@ -249,7 +250,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                                     <Fade visible={fade} direction="up">
                                         <Heading opacity={0.5} fontSize={`${width / 2.2}px`} mt={"20px"} color={"red"}>{progress}</Heading>
                                     </Fade>
-                                </HStack>                                
+                                </HStack>
                                 <HStack space={20}>
                                     {!recording ?
                                         <TouchableOpacity onPress={() => startRecording()}>

@@ -23,6 +23,7 @@ const LoginComponent: React.FC = (): JSX.Element => {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [showResetPasswordBottomSheet, setShowResetPasswordBottomSheet] = useState<boolean>(false);
     const [currentPage, setCurrentPage] = useState<number>(0);
@@ -89,13 +90,13 @@ const LoginComponent: React.FC = (): JSX.Element => {
                         </VStack>
                         <Input
                             keyboardType='email-address'
-                            h={`${INPUT_HEIGHT}px`}                        
+                            h={`${INPUT_HEIGHT}px`}
                             style={VALIDATE_EMAIL(email) && !invalidCredentials ? styles.InputsSucess : email && !invalidCredentials ? styles.InputsFail : {}}
                             value={email}
                             onChangeText={(e) => setEmail(e.trim().toLowerCase())}
                             placeholder="Correo Electronico*"
                         />
-                        <Stack  borderRadius={"10px"} my={"5px"} borderWidth={invalidCredentials ? 0 : 1} borderColor={password.length >= 6 ? colors.mainGreen : password ? colors.alert : "transparent"} w={"100%"}>
+                        <Stack borderRadius={"10px"} my={"5px"} borderWidth={invalidCredentials ? 0 : 1} borderColor={password.length >= 6 ? colors.mainGreen : password ? colors.alert : "transparent"} w={"100%"}>
                             <Input
                                 m={"0px"}
                                 h={`${INPUT_HEIGHT}px`}
@@ -119,11 +120,15 @@ const LoginComponent: React.FC = (): JSX.Element => {
                     </VStack>
                     <VStack w={"100%"} alignItems={"center"} mb={"25px"}>
                         <Button
+                            spin
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             w={"100%"}
-                            onPress={() => onLogin({ email: email.toLowerCase(), password })}
+                            onPress={async () => {
+                                onLogin({ email: email.toLowerCase(), password })
+                                
+                            }}
                             title={"Iniciar Sesión"}
                         />
                     </VStack>

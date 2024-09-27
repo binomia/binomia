@@ -13,8 +13,6 @@ import FaceID from './FaceID';
 import { GlobalContextType } from '@/types';
 import { GlobalContext } from '@/contexts/globalContext';
 import IDData from './IdData';
-import * as Crypto from "expo-crypto"
-
 
 
 const RegisterComponent: React.FC = (): JSX.Element => {

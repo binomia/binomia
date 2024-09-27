@@ -80,6 +80,7 @@ const ForgotPassword: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                             <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"85%"} color={"white"}>Ingrese su correo electrónico para enviarle un código de recuperación de contraseña.</Text>
                         </VStack>
                         <Input
+                        value={email.toLowerCase()}
                             keyboardType="email-address"
                             h={`${INPUT_HEIGHT}px`}
                             style={VALIDATE_EMAIL(email) ? styles.InputsSucess : email ? styles.InputsFail : {}}

@@ -11,7 +11,7 @@ import { GENERATE_SIX_DIGIT_TOKEN } from "@/helpers";
 export const SessionContext = createContext<SessionPropsType>({
     save: (_: string, __: string) => { },
     get: (_: string) => Promise.resolve(""),
-    onLogin: (_: { email: string, password: string }) => { },
+    onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
     onLogout: () => { },
     sendVerificationCode: (_: string) => { },
     setVerificationCode: (_: string) => { },
@@ -36,7 +36,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const sendVerificationCode = async (to: string) => {
         try {
             const code = GENERATE_SIX_DIGIT_TOKEN()
-            
+
             const message = await notificationServer("sendEmail", {
                 to,
                 code,
@@ -44,11 +44,16 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 text: `Su Codigo De Verificación Es: ${code}`,
                 html: `<b>Su Codigo De Verificación Es: ${code}</b>`
             })
+
+            console.log({ message });
             
+
             setVerificationCode(code)
             return message
 
         } catch (error: any) {
+            console.log({ error });
+
             return error
         }
     }
@@ -126,7 +131,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
         setVerificationCode,
         setVerificationData,
         setInvalidCredentials,
-        invalidCredentials, 
+        invalidCredentials,
         verificationData,
         verificationCode,
         jwt

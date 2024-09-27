@@ -10,6 +10,7 @@ import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Button from '@/components/global/Button';
 import { GlobalContext } from '@/contexts/globalContext';
+import { useDispatch, useSelector } from 'react-redux';
 
 type Props = {
     nextPage: () => void

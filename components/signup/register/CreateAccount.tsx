@@ -101,12 +101,6 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
         }
     }
 
-
-
-    useEffect(() => {
-        console.log(JSON.stringify(state, null, 2));
-    }, [password])
-
     useEffect(() => {
         checkIfEmailExists()
 
@@ -177,7 +171,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                                     h={`${INPUT_HEIGHT}px`}
                                     secureTextEntry={!showPassword}
                                     value={password}
-                                    // keyboardType="visible-password"
+                                    keyboardType="visible-password"
                                     onChangeText={(value) => onChangeText(value, "password")}
                                     placeholder="Contraseña*"
                                     rightElement={
@@ -192,7 +186,10 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                         </VStack>
 
                         <HStack alignSelf={"flex-end"} w={"100%"} mt={"20px"} px={"25px"}>
-                            <TouchableOpacity onPress={() => setUserAgreement(!userAgreement)}>
+                            <TouchableOpacity onPress={() => {
+                                dispatch(registerActions.setUserAgreement(!userAgreement))
+                                setUserAgreement(!userAgreement)
+                            }}>
                                 <MaterialIcons style={{ marginTop: 3 }} name={userAgreement ? "check-box" : "check-box-outline-blank"} size={28} color={colors.mainGreen} />
                             </TouchableOpacity>
                             <Text mx={"5px"} fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"90%"} color={"white"}>
