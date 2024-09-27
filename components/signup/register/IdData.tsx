@@ -190,6 +190,7 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                 />
             </BottomSheet>
             <DatePicker
+                locale='es'
                 confirmText='Confirmar'
                 cancelText='Cancelar'
                 modal
