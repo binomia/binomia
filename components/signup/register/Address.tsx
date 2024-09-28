@@ -64,7 +64,7 @@ const Address: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element =>
                         </VStack>
                         <VStack w={"100%"} px={"20px"} mt={"30px"} alignItems={"center"} >
                             <TextArea
-                                borderWidth={1}
+                                borderWidth={0}
                                 borderColor={"white"}
                                 borderRadius={"10px"}
                                 bg={"lightGray"}

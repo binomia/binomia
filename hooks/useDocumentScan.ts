@@ -20,6 +20,7 @@ export const useDocumentScanner = () => {
         const image = await DocumentScanner.scanDocument({
             maxNumDocuments: 1,
             croppedImageQuality: 100,
+            
         })
 
         if (image.status === "success") {

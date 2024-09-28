@@ -18,7 +18,6 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { registerActions } from '@/redux/slices/registerSlice';
 import { useDispatch } from 'react-redux';
 
-
 type Props = {
     nextPage: () => void
     prevPage: () => void
@@ -73,7 +72,6 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
 
     const frameProcessor = useFrameProcessor((frame) => {
         'worklet'
-
         const faces = detectFaces(frame)
 
         if (faces.length > 0) {
