@@ -2,12 +2,13 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import { VStack, Heading, Text, HStack, ZStack } from 'native-base';
 import { StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import colors from '@/colors';
-import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
+import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE, OCR_SPACE_API_KEY } from '@/constants';
 import Button from '@/components/global/Button';
 import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType, SessionPropsType } from '@/types';
 import BottomSheet from '@/components/global/BottomSheet';
 import { SessionContext } from '@/contexts';
+import { useOCRSpace } from '@/hooks/useOCRSpace';
 import { biometric, biometricOn } from '@/assets';
 import { useCameraDevice, useCameraPermission, useMicrophonePermission, useFrameProcessor, Camera, Frame } from 'react-native-vision-camera';
 import { Face, FaceDetectionOptions, useFaceDetector } from 'react-native-vision-camera-face-detector'
@@ -41,10 +42,9 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
     const [fade, setFade] = useState(false);
 
     const device = useCameraDevice("front");
-    const cameraPermission = useCameraPermission()
-    const microphonePermission = useMicrophonePermission()
     const faceDetectionOptions = useRef<FaceDetectionOptions>({}).current
     const { detectFaces } = useFaceDetector(faceDetectionOptions)
+    const { extractTextFromImage, validateIDImage } = useOCRSpace()
 
 
     const handleDetectedFaces = Worklets.createRunOnJS((faces: Face[], frame: Frame) => {
@@ -99,6 +99,13 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
         }
     }
 
+    const takePicture = async () => {
+        if (ref.current) {
+            const photo = await ref.current.takePhoto();
+            console.log("photo", photo);
+        }
+    }
+
     const startRecording = async () => {
         if (ref.current) {
             ref.current.startRecording({
@@ -128,16 +135,13 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
         setFade(false)
     }
 
+    const extractText = async () => {
+        const idData = await validateIDImage("https://pbs.twimg.com/media/CIHaxr5UsAAdnFK.jpg")
+        console.log(JSON.stringify(idData, null, 2));
+    }
+
     useEffect(() => {
         (async () => {
-            if (!cameraPermission.hasPermission) {
-                await cameraPermission.requestPermission();
-            };
-
-            if (!microphonePermission.hasPermission) {
-                await microphonePermission.requestPermission();
-            };
-
             if (openBottomSheet) {
                 console.log("openBottomSheet", openBottomSheet);
                 setImages([])
@@ -188,7 +192,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                     Se escanearán tus datos biométricos para garantizar un acceso seguro y protegido.
                 </Text>
                 <HStack w={"100%"} alignItems={"center"} justifyContent={"center"}>
-                    <TouchableOpacity disabled={!!video} onPress={() => setOpenBottomSheet(true)}>
+                    <TouchableOpacity disabled={!!video} onPress={async () => extractText()}>
                         {video ?
                             <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometricOn} alt="welcome-screen-image-account" />
                             :
@@ -251,7 +255,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                                 </HStack>
                                 <HStack space={20}>
                                     {!recording ?
-                                        <TouchableOpacity onPress={() => startRecording()}>
+                                        <TouchableOpacity onPress={() => takePicture()}>
                                             <HStack borderColor={"white"} borderWidth={3} bg={"white"} borderRadius={100} style={styles.Shadow}>
                                                 <HStack borderColor={"black"} borderWidth={3} borderRadius={100} w={"65px"} h={"65px"} />
                                             </HStack>

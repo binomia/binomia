@@ -11,7 +11,6 @@ import Button from '@/components/global/Button';
 import { registerActions } from '@/redux/slices/registerSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
-
 type Props = {
     nextPage: () => void
     prevPage: () => void
@@ -95,9 +94,9 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                             title={"Siguiente"}
                         />
                     </HStack>
+   
                 </VStack>
             </TouchableWithoutFeedback>
-
         </ScrollView>
     );
 }

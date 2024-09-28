@@ -52,3 +52,27 @@ export const FORMAT_TIME_PLAYED = (value: number) => { // "00:00:00"
     const seconds = Math.floor(value - (hours * 3600) - (minutes * 60));
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
+
+
+export const FORMAT_DATE = (value: string) => {
+    if (!value) return null;
+
+    const months: any = {
+        "enero": "01",
+        "febrero": "02",
+        "marzo": "03",
+        "abril": "04",
+        "mayo": "05",
+        "junio": "06",
+        "julio": "07",
+        "agosto": "08",
+        "septiembre": "09",
+        "octubre": "10",
+        "noviembre": "11",
+        "diciembre": "12"
+    }
+
+    const [day, month, year] = value.split(" ");
+    const date = `${year}-${months[month]}-${day}`
+    return date
+}

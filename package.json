@@ -29,7 +29,7 @@
     "@types/uuid": "^10.0.0",
     "aws-sdk": "^2.1691.0",
     "axios": "^1.7.7",
-    "expo": "^51.0.32",
+    "expo": "^51.0.0",
     "expo-application": "~5.9.1",
     "expo-build-properties": "~0.12.5",
     "expo-camera": "~15.0.16",
