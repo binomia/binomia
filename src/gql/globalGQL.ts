@@ -9,7 +9,8 @@ const type = () => {
 
 
 const query = () => {
-    return ``
+    return `
+    `
 }
 
 const mutation = () => {

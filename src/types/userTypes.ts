@@ -3,11 +3,21 @@ export type UserModelType = {
     fullName: string
     username: string
     password: string
+    phone: string
     imageUrl: string
     email: string
-    dni: string
-    sex: string
+    dniNumber: string
+    profileImageUrl: string
+    addressAgreementSigned: boolean
+    userAgreementSigned: boolean
+    gender: string
     address: string
+    idFrontUrl: string
+    idBackUrl: string
+    faceVideoUrl: string
+    occupation: string
+    maritalStatus: string
+    bloodType: string
     dob: Date
     dniExpiration: Date
     createdAt: Date

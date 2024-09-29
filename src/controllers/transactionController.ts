@@ -1,9 +1,8 @@
-import { AccountModel, UsersModel, TransactionsModel } from '@/models'
-import { checkForProtectedRequests, getQueryResponseFields } from '@/helpers'
+import { AccountModel, TransactionsModel } from '@/models'
+import { checkForProtectedRequests, } from '@/helpers'
 import { GraphQLError } from 'graphql';
-import { Op } from 'sequelize';
 import { TransactionJoiSchema } from '@/joi/transactionJoiSchema';
-import { TransactionCreateType, TransactionModelType, TransactionAuthorizationType } from '@/types';
+import { TransactionCreateType,  TransactionAuthorizationType } from '@/types';
 import { authServer } from '@/rpc';
 import { Cryptography } from '@/helpers/cryptography';
 import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
@@ -34,9 +33,6 @@ export class TransactionsController {
                 userId: context.req.jwtData.userId,
                 signature
             }));
-
-            console.log({ transactionAuthorization });
-
 
             const senderAccount = await AccountModel.findOne({
                 where: { id: transactionAuthorization.senderId }

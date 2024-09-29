@@ -1,4 +1,4 @@
-import { DATE, STRING } from "sequelize";
+import { BOOLEAN, STRING } from "sequelize";
 import { db } from "@/config";
 
 const UsersModel = db.define('users', {
@@ -11,9 +11,14 @@ const UsersModel = db.define('users', {
         allowNull: false,
         unique: true
     },
-    imageUrl: {
+    dniNumber: {
         type: STRING,
-        allowNull: true
+        allowNull: false,
+        unique: true
+    },
+    phone: {
+        type: STRING,
+        allowNull: false
     },
     email: {
         type: STRING,
@@ -24,25 +29,37 @@ const UsersModel = db.define('users', {
         type: STRING,
         allowNull: false
     },
-    dni: {
+    profileImageUrl: {
         type: STRING,
-        allowNull: false,
-        unique: true
+        allowNull: true
     },
-    sex: {
+    addressAgreementSigned: {
+        type: BOOLEAN,
+        allowNull: false
+    },
+    userAgreementSigned: {
+        type: BOOLEAN,
+        allowNull: false
+    },
+    idFrontUrl: {
         type: STRING,
         allowNull: false
+    },
+    idBackUrl: {
+        type: STRING,
+        allowNull: false
+    },
+    faceVideoUrl: {
+        type: STRING,
+        allowNull: false
+    },
+    status: {
+        type: STRING,
+        allowNull: false,
+        defaultValue: "active"
     },
     address: {
         type: STRING,
-        allowNull: false
-    },
-    dob: {
-        type: DATE,
-        allowNull: false
-    },
-    dniExpiration: {
-        type: DATE,
         allowNull: false
     }
 })

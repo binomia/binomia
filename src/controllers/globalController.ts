@@ -3,6 +3,9 @@ import { checkForProtectedRequests, getQueryResponseFields } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { Cryptography } from '@/helpers/cryptography';
 import { ZERO_SIGN_PRIVATE_KEY, ZERO_ENCRYPTION_KEY } from '@/constants';
+import { notificationServer } from '@/rpc/notificationRPC';
+import { EmailJoiSchema } from '@/joi/emailSchema';
+import { EmailMessageType } from '@/types';
 
 export class GlobalController {
     static signData = async (_: unknown, { hash }: { hash: string }, context: any) => {
@@ -24,4 +27,5 @@ export class GlobalController {
             throw new GraphQLError(error.message);
         }
     }
+
 }

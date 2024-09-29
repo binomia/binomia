@@ -3,6 +3,7 @@ import accountGQL from "./accountGQL";
 import cardGQL from "./cardGQL";
 import transactionGQL from "./transactionGQL";
 import globalGQL from "./globalGQL";
+import kycGQL from "./kycGQL";
 
 
 
@@ -12,6 +13,7 @@ export const typeDefs = `
     ${cardGQL.type()}
     ${transactionGQL.type()}
     ${globalGQL.type()}
+    ${kycGQL.type()}
     
 
 
@@ -21,6 +23,7 @@ export const typeDefs = `
         ${cardGQL.query()}
         ${transactionGQL.query()}
         ${globalGQL.query()}
+        ${kycGQL.query()}
     }
 
 
@@ -29,11 +32,13 @@ export const typeDefs = `
         ${cardGQL.mutation()}
         ${transactionGQL.mutation()}
         ${globalGQL.mutation()}
+        ${kycGQL.mutation()}
     }
 
 
     type Subscription {
         ${userGQL.subscription()}
+        ${cardGQL.subscription()}
     }
 `;
 
@@ -44,7 +49,8 @@ export const resolvers = {
         ...accountGQL.resolvers.query,
         ...cardGQL.resolvers.query,
         ...transactionGQL.resolvers.query,
-        ...globalGQL.resolvers.query
+        ...globalGQL.resolvers.query,
+        ...kycGQL.resolvers.query
 
     },
 
@@ -53,7 +59,8 @@ export const resolvers = {
         ...accountGQL.resolvers.mutation,
         ...cardGQL.resolvers.mutation,
         ...transactionGQL.resolvers.mutation,
-        ...globalGQL.resolvers.mutation
+        ...globalGQL.resolvers.mutation,
+        ...kycGQL.resolvers.mutation
 
     },
 
@@ -62,7 +69,8 @@ export const resolvers = {
         ...accountGQL.resolvers.subscription,
         ...cardGQL.resolvers.subscription,
         ...transactionGQL.resolvers.subscription,
-        ...globalGQL.resolvers.subscription
+        ...globalGQL.resolvers.subscription,
+        ...kycGQL.resolvers.subscription
     }
 }
 

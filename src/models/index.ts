@@ -3,7 +3,11 @@ import UsersModel from "./userModel"
 import SessionModel from "./sessionModel"
 import CardsModel from "./cardsModel"
 import TransactionsModel from "./transactionModel"
+import kycModel from "./kycModel"
 
+
+UsersModel.hasOne(kycModel)
+kycModel.belongsTo(UsersModel)
 
 AccountModel.belongsTo(UsersModel)
 UsersModel.hasOne(AccountModel)
@@ -25,5 +29,6 @@ export {
 	SessionModel,
 	TransactionsModel,
 	AccountModel,
-	CardsModel
+	CardsModel,
+	kycModel
 }

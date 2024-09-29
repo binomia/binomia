@@ -7,6 +7,17 @@ import { TransactionModelType,TransactionCreateType, TransactionAuthorizationTyp
 
 type CurrencyType = "DOP" | "USD" | "EUR"
 
+export type VerificationDataType = {
+    token: string
+    signature: string,
+}
+
+export type EmailMessageType = {
+    subject: string
+    message: string
+    html: string
+}
+
 
 export {
     UserModelType,

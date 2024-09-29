@@ -1,14 +1,16 @@
-import { AccountModel, UsersModel, TransactionsModel, CardsModel } from '@/models'
+import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel } from '@/models'
 import { Op } from 'sequelize'
 import { getQueryResponseFields, checkForProtectedRequests } from '@/helpers'
 import { SESSION_SECRET_SECRET_KEY, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
 import { UserJoiSchema } from '@/joi';
-import { UserModelType } from '@/types';
+import { UserModelType, VerificationDataType } from '@/types';
 import { Request, Response } from "express"
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { Cryptography } from '@/helpers/cryptography';
+import { authServer } from '@/rpc';
+import { z } from 'zod'
 
 
 export class UsersController {
@@ -73,7 +75,7 @@ export class UsersController {
         try {
             await checkForProtectedRequests(context.req);
             const fields = getQueryResponseFields(fieldNodes, 'user')
-            
+
             const user = await UsersModel.findOne({
                 where: {
                     id: context.req.jwtData.userId
@@ -135,6 +137,57 @@ export class UsersController {
         }
     }
 
+    static userByEmail = async (_: unknown, { email }: { email: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            const user = await UsersModel.findOne({
+                where: {
+                    email
+                },
+                attributes: ["id"]
+            })
+
+            return Boolean(user)
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
+    static updateUserPassword = async (_: unknown, { email, password, data }: { email: string, password: string, data: VerificationDataType }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            const validatedData: UserModelType = await UserJoiSchema.updateUserPassword.validateAsync({ email, password })
+
+            const user = await UsersModel.findOne({
+                where: {
+                    email
+                },
+                attributes: ["id"]
+            })
+
+            if (!user) {
+                throw new GraphQLError('User not found')
+            }
+
+            const verify = await authServer('verifyData', data)
+
+            if (!verify) {
+                throw new GraphQLError('Invalid token or signature')
+            }
+
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(validatedData.password, salt);
+
+            const updatedUser = await user.update({
+                password: hashedPassword
+            })
+
+            return updatedUser.reload()
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
     static searchUsers = async (_: any, { search, limit }: { search: UserModelType, limit: number }, __: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const fields = getQueryResponseFields(fieldNodes, "users")
@@ -166,23 +219,27 @@ export class UsersController {
             const validatedData: UserModelType = await UserJoiSchema.createUser.validateAsync(data)
             const regexPattern = new RegExp('^\\d{3}-\\d{7}-\\d{1}');
 
-            if (!regexPattern.test(validatedData.dni))
+            const parsedData = await UserJoiSchema._createUser.parseAsync(data)
+            console.log({ parsedData });
+
+
+            if (!regexPattern.test(validatedData.dniNumber))
                 throw new GraphQLError('Invalid `dni` format');
 
 
             const userExists = await UsersModel.findOne({
                 where: {
                     [Op.or]: [
-                        { dni: validatedData.dni },
                         { email: validatedData.email },
                         { username: validatedData.username }
                     ]
                 },
-                attributes: ['dni', "email", "username"]
+                attributes: ["email", "username", "dniNumber"]
             })
 
-            if (userExists?.dataValues.dni === validatedData.dni)
-                throw new GraphQLError(`A user with dni: ${validatedData.dni} already exists`);
+            if (userExists?.dataValues.dniNumber === validatedData.dniNumber)
+                throw new GraphQLError('A user with dni: ' + validatedData.dniNumber + ' already exists');
+
 
             if (userExists?.dataValues.email === validatedData.email)
                 throw new GraphQLError('A user with email: ' + validatedData.email + ' already exists');
@@ -200,12 +257,29 @@ export class UsersController {
             const account = await AccountModel.create({
                 userId: user.dataValues.id,
                 currency: "DOP",
+            })
 
+            console.log(account.dataValues);
+
+
+            const kycStatus = "validated"
+
+            const kyc = await kycModel.create({
+                userId: user.dataValues.id,
+                dniNumber: validatedData.dniNumber,
+                dob: validatedData.dob,
+                status: kycStatus,
+                expiration: validatedData.dniExpiration,
+                occupation: validatedData.occupation,
+                gender: validatedData.gender,
+                maritalStatus: validatedData.maritalStatus,
+                bloodType: validatedData.bloodType
             })
 
             return {
                 ...user.dataValues,
-                accounts: [account]
+                accounts: [account],
+                kyc: kyc.dataValues
             }
 
         } catch (error: any) {
@@ -234,7 +308,7 @@ export class UsersController {
                 sid: req.session.id
             }, ZERO_ENCRYPTION_KEY);
 
-            
+
 
 
             req.session.jwt = token
