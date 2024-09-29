@@ -19,8 +19,6 @@ export const useOCRSpace = () => {
     const validateIDImage = async (imageurl: string) => {
         const text: string = await extractTextFromImage(imageurl)
 
-        // console.log(text);
-
         const idNumberMatch = text.match(/(\d{3}-\d{7}-\d)/);
         const placeOfBirthMatch = text.match(/LUGAR DE NACIMIENTO[:;]?\s*(.*)/i);
         const dateOfBirthMatch = text.match(/FECHA DE NACIMIENTO[:;]?\s*(.*)/i);
@@ -48,7 +46,7 @@ export const useOCRSpace = () => {
 
             else
                 bloodType = String(bloodTypeArray[1]).replaceAll("0", "O")
-        }
+        }        
 
         const nameIndex = dateOfExpiration ? text.split("\n").indexOf(dateOfExpiration) : null
         const name = nameIndex ? text.split("\n").slice(nameIndex + 1).join(" ").trim() : null

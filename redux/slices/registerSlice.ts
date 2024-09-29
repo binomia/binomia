@@ -2,19 +2,31 @@ import { createSlice, configureStore } from '@reduxjs/toolkit'
 import { generate } from 'short-uuid'
 
 
+// {
+//     "name": "Poste ROSA ELENA VICTORIANO SEVERINO",
+//     "idNumber": "224-0082268-4",
+//     "placeOfBirth": "villa mella, r.d.",
+//     "dateOfBirth": "1989-12-11",
+//     "dateOfExpiration": "2024-12-11",
+//     "occupation": "estudiante",
+//     "maritalStatus": "soltera",
+//     "gender": "f",
+//     "bloodType": "CIVIL:"
+//   }
+
 const registerSlice = createSlice({
     name: 'counter',
     initialState: {
         faceVideoUrl: "",
-        fullName: "",
+        fullName: "ROSA ELENA VICTORIANO SEVERINO",
         phone: "",
         username: "",
         email: "",
-        dni: "",
-        sex: "",
+        dni: "224-0082268-4",
+        sex: "m",
         address: "",
-        dob: "",
-        dniExpiration: "",
+        dob: "1989-12-11",
+        dniExpiration: "2024-12-11",
         imageUrl: "",
         password: "",
         addressAgreement: false,

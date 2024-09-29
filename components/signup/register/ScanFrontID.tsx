@@ -1,15 +1,18 @@
-import { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack, Image, Box, ZStack } from 'native-base';
-import { StyleSheet, Keyboard, TouchableWithoutFeedback, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
+import { useEffect, useState } from 'react';
+import { VStack, Heading, Text, HStack, Image, Box, ZStack, Spinner } from 'native-base';
+import { Keyboard, TouchableWithoutFeedback, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { idFront } from '@/assets';
-import { useDocumentScanner } from '@/hooks/useDocumentScan';
-import { GlobalContext } from '@/contexts/globalContext';
-import { GlobalContextType } from '@/types';
-import colors from '@/colors';
 import Button from '@/components/global/Button';
 import { registerActions } from '@/redux/slices/registerSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import CameraComponent from '@/components/global/Camera';
+import { useOCRSpace } from '@/hooks/useOCRSpace';
+import { useCloudinary } from '@/hooks/useCloudinary';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import colors from '@/colors';
+import moment from 'moment';
+
 
 type Props = {
     nextPage: () => void
@@ -20,28 +23,107 @@ const { width } = Dimensions.get("window");
 
 const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const dispatch = useDispatch()
-    const state = useSelector((state: any) => state)
-    const { setIdFront, idFront: idFrontScaned } = useContext<GlobalContextType>(GlobalContext);
+    const state = useSelector((state: any) => state.registerReducer)
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
-    const { scanDocument } = useDocumentScanner()
+    const [openCamera, setOpenCamera] = useState<boolean>(false);
+    const [isInValidIdImageMessage, setIsInValidIdImageMessage] = useState<string>("");
+    const [imageUrl, setImageUrl] = useState<string>("");
+    const { validateIDImage } = useOCRSpace();
+    const { uploadImage } = useCloudinary();
 
 
-    const handleScanDocument = async () => {
-        const image = await scanDocument()
-        if (!image) return
+    // {
+    //     "name": "JOSE ALBERTO FONDEUR ROSARIO",
+    //     "idNumber": "001-1276244-8",
+    //     "placeOfBirth": "santo domingo, d.n.",
+    //     "dateOfBirth": "1980-01-29",
+    //     "dateOfExpiration": "2024-01-29",
+    //     "occupation": "empresario (a)",
+    //     "maritalStatus": "soltero",
+    //     "gender": "m",
+    //     "bloodType": "A+"
+    // }
 
-        setIdFront(image || "")
-        dispatch(registerActions.setIdFrontUrl(image || ""))
-        console.log(JSON.stringify(state, null, 2));
+    // {
+    //     "faceVideoUrl": "",
+    //     "fullName": "",
+    //     "phone": "",
+    //     "username": "",
+    //     "email": "",
+    //     "dni": "001-06867-6",
+    //     "sex": "",
+    //     "address": "",
+    //     "dob": "",
+    //     "dniExpiration": "",
+    //     "imageUrl": "",
+    //     "password": "",
+    //     "addressAgreement": false,
+    //     "userAgreement": false,
+    //     "idBackUrl": "",
+    //     "idFrontUrl": "file:///var/mobile/Containers/Data/Application/C61C11E2-E863-4D4B-994C-44238A2C1FB3/Library/Caches/ImageManipulator/4A3E2349-4E13-4F59-827B-3B6ABFFA8AD7.jpg"
+    // }
 
-    }
-
-    useEffect(() => {
-        if (idFrontScaned)
+    const validateIDImageOCR = async (data: any) => {
+        try {
             setDisabledButton(false)
 
-    }, [idFrontScaned])
+            if (data["idNumber"] !== state.dni) {
+                setIsInValidIdImageMessage("La cédula escaneada no coincide con el numero de cédula ingresado previamente")
+                setDisabledButton(true)
+            }
+
+            if (data["dateOfBirth"] !== state.dob) {
+                setIsInValidIdImageMessage("La cédula escaneada no coincide con la fecha de nacimiento ingresada previamente")
+                setDisabledButton(true)
+            }
+
+            if (moment(data["dateOfExpiration"]).isBefore(moment())) {
+                console.log("expire dni");
+                setIsInValidIdImageMessage("La cédula escaneada ya expiro por favor escanea una nueva que no haya expirado")
+                setDisabledButton(true)
+            }
+
+            console.log(data["name"], state.fullName);
+            
+            if (!data["name"].includes(state.fullName)) {               
+                setIsInValidIdImageMessage("La cédula escaneada coincide con el nombre ingresado previamente")
+                setDisabledButton(true)
+            }
+
+
+        } catch (error) {
+
+        }
+    }
+
+
+    useEffect(() => {
+        if (imageUrl) {
+            (async () => {
+                try {
+                    setLoading(true)
+                    setOpenCamera(false);
+
+                    const _imageUrl = await uploadImage(imageUrl)
+                    const ocrData = await validateIDImage(_imageUrl)
+
+                    await validateIDImageOCR(ocrData)
+
+                    dispatch(registerActions.setIdFrontUrl(imageUrl))
+                    setLoading(false)
+
+                    console.log(JSON.stringify(ocrData, null, 2));
+
+                } catch (error) {
+                    console.error(error)
+                    setLoading(false)
+                }
+            })()
+        }
+
+    }, [imageUrl])
+
 
     return (
         <ScrollView contentContainerStyle={{ flex: 1 }}>
@@ -55,21 +137,30 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                             </Text>
                         </VStack>
                         <VStack w={width} h={"52%"} px={"30px"} mt={"30px"} alignItems={"center"} >
-                            <TouchableOpacity onPress={handleScanDocument} style={{ width: "100%", height: "100%" }}>
+                            <TouchableOpacity onPress={() => setOpenCamera(true)} style={{ width: "100%", height: "100%" }}>
                                 <Box shadow={7} w={"100%"} h={"100%"}>
-                                    <ZStack w={"100%"} h={"100%"} alignItems={"center"}>
-                                        <Image alt='id-front-scan' w={"100%"} h={"100%"} resizeMode="contain" source={idFrontScaned ? { uri: idFrontScaned } : idFront} />
+                                    <ZStack w={"100%"} h={"100%"} alignItems={"center"} justifyContent={"center"}>
+                                        <Image alt='id-front-scan' w={"100%"} h={"100%"} resizeMode="contain" source={imageUrl && !loading ? { uri: imageUrl } : idFront} />
+                                        {loading ? <Spinner size={"lg"} color={"mainGreen"} position={"absolute"} /> : null}
                                     </ZStack>
                                 </Box>
                             </TouchableOpacity>
-                            {idFrontScaned ? <Button
+                            {imageUrl ? <Button
                                 mt={"10px"}
                                 w={"60%"}
                                 bg={"lightGray"}
-                                color={"mainGreen"}
-                                onPress={handleScanDocument}
+                                color={isInValidIdImageMessage ? "red" : "mainGreen"}
+                                onPress={() => {
+                                    setImageUrl("")
+                                    setOpenCamera(true)
+                                    setIsInValidIdImageMessage("")
+                                }}
                                 title={"Volver a Escanear"}
                             /> : null}
+                            {isInValidIdImageMessage ? <HStack mt={"30px"} space={2} w={"100%"} justifyContent={"center"}>
+                                <AntDesign style={{ marginTop: 5 }} name="exclamationcircleo" size={24} color={colors.red} />
+                                <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>{isInValidIdImageMessage}</Text>
+                            </HStack> : null}
                         </VStack>
                     </VStack>
                     <HStack px={"20px"} mb={"20px"} justifyContent={"space-between"}>
@@ -94,7 +185,7 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                             title={"Siguiente"}
                         />
                     </HStack>
-   
+                    <CameraComponent setImage={setImageUrl} open={openCamera} onCloseFinish={() => setOpenCamera(false)} />
                 </VStack>
             </TouchableWithoutFeedback>
         </ScrollView>
@@ -103,27 +194,3 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
 
 
 export default ScanID
-
-const styles = StyleSheet.create({
-    Shadow: {
-        shadowColor: "#fff",
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 1,
-        elevation: 1,
-    },
-    InputsSucess: {
-        borderColor: colors.mainGreen,
-        borderWidth: 1,
-        borderRadius: 10,
-    },
-    InputsFail: {
-        borderColor: colors.alert,
-        borderWidth: 1,
-        borderRadius: 10,
-    }
-});
-

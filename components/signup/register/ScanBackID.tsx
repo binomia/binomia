@@ -1,40 +1,35 @@
-import { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack, Image, Pressable, Stack, Box } from 'native-base';
+import { useEffect, useState } from 'react';
+import { VStack, Heading, Text, HStack, Image, Box, Spinner, ZStack } from 'native-base';
 import { Keyboard, TouchableWithoutFeedback, Dimensions, TouchableOpacity, ScrollView } from 'react-native';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
-import Button from '@/components/global/Button';
 import { idBack } from '@/assets';
-import BottomSheet from '@/components/global/BottomSheet';
-import { useDocumentScanner } from '@/hooks/useDocumentScan';
-import { CameraView } from 'expo-camera';
-import { GlobalContext } from '@/contexts/globalContext';
-import { GlobalContextType } from '@/types';
 import { registerActions } from '@/redux/slices/registerSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import Button from '@/components/global/Button';
+import CameraComponent from '@/components/global/Camera';
+import { useOCRSpace } from '@/hooks/useOCRSpace';
+import { useCloudinary } from '@/hooks/useCloudinary';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import colors from '@/colors';
+
 
 type Props = {
     nextPage: () => void
     prevPage: () => void
 }
 
-const { width, height } = Dimensions.get("window");
+const { width } = Dimensions.get("window");
 
 const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const dispatch = useDispatch()
-    const { setIdBack, idBack: idBackScaned } = useContext<GlobalContextType>(GlobalContext);
+    const state = useSelector((state: any) => state.registerReducer)
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
-    const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
-    const { scanDocument } = useDocumentScanner()
-
-
-    const handleScanDocument = async () => {
-        const image = await scanDocument()
-        if (!image) return
-
-        setIdBack(image)
-        dispatch(registerActions.setIdBackUrl(image))
-    }
+    const [imageUrl, setImageUrl] = useState<string>("");
+    const [openCamera, setOpenCamera] = useState<boolean>(false);
+    const [isInValidIdImageMessage, setIsInValidIdImageMessage] = useState<string>("");
+    const { validateIDImage } = useOCRSpace();
+    const { uploadImage } = useCloudinary();
 
 
     const onPressNext = async () => {
@@ -43,12 +38,37 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
         setLoading(false)
     }
 
-
     useEffect(() => {
-        if (idBackScaned)
-            setDisabledButton(false)
+        if (imageUrl) {
+            (async () => {
+                try {
+                    setLoading(true)
+                    setOpenCamera(false);
 
-    }, [idBackScaned])
+                    const _imageUrl = await uploadImage(imageUrl)
+                    const ocrData = await validateIDImage(_imageUrl)
+
+                    if (ocrData["idNumber"] !== state.dni) {
+                        setIsInValidIdImageMessage("La cédula escaneada no coincide con el numero de cédula de la cedula de frontal")
+                        setDisabledButton(true)
+
+                    } else {
+                        dispatch(registerActions.setIdFrontUrl(imageUrl))
+                        setDisabledButton(false)
+
+                        console.log(JSON.stringify(ocrData, null, 2));
+                    }
+
+                    setLoading(false)
+
+                } catch (error) {
+                    console.error(error)
+                    setLoading(false)
+                }
+            })()
+        }
+
+    }, [imageUrl])
 
 
 
@@ -64,19 +84,30 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             </Text>
                         </VStack>
                         <VStack w={width} h={"52%"} px={"30px"} mt={"30px"} alignItems={"center"} >
-                            <TouchableOpacity onPress={handleScanDocument} style={{ width: "100%", height: "100%" }}>
+                            <TouchableOpacity onPress={() => setOpenCamera(true)} style={{ width: "100%", height: "100%" }}>
                                 <Box shadow={7} w={"100%"} h={"100%"}>
-                                    <Image w={"100%"} h={"100%"} alt='idBackScaned-image' resizeMode="contain" source={idBackScaned ? { uri: idBackScaned } : idBack} />
+                                    <ZStack w={"100%"} h={"100%"} alignItems={"center"} justifyContent={"center"}>
+                                        <Image w={"100%"} h={"100%"} alt='idBackScaned-image' resizeMode="contain" source={imageUrl && !loading ? { uri: imageUrl } : idBack} />
+                                        {loading ? <Spinner size={"lg"} color={"mainGreen"} position={"absolute"} /> : null}
+                                    </ZStack>
                                 </Box>
                             </TouchableOpacity>
-                            {idBackScaned ? <Button
+                            {imageUrl ? <Button
                                 mt={"10px"}
                                 w={"60%"}
                                 bg={"lightGray"}
-                                color={"mainGreen"}
-                                onPress={handleScanDocument}
+                                color={isInValidIdImageMessage ? "red" : "mainGreen"}
+                                onPress={() => {
+                                    setImageUrl("")
+                                    setOpenCamera(true)
+                                    setIsInValidIdImageMessage("")
+                                }}
                                 title={"Volver a Escanear"}
                             /> : null}
+                            {isInValidIdImageMessage ? <HStack mt={"30px"} space={2} w={"100%"} justifyContent={"center"}>
+                                <AntDesign style={{ marginTop: 5 }} name="exclamationcircleo" size={24} color={colors.red} />
+                                <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>{isInValidIdImageMessage}</Text>
+                            </HStack> : null}
                         </VStack>
                     </VStack>
                     <HStack px={"20px"} mb={"20px"} justifyContent={"space-between"}>
@@ -96,19 +127,7 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             onPress={onPressNext}
                             title={"Siguiente"}
                         />
-                        <BottomSheet showDragIcon={false} onCloseFinish={() => setOpenBottomSheet(false)} open={openBottomSheet} height={height * 0.9}>
-                            <HStack bg={"red"} style={{ width: "100%", height: "100%" }}>
-                                <CameraView autofocus='on' style={{ width: "100%", height: "100%" }} facing={"back"}>
-                                    <Stack h={"100%"} justifyContent={"flex-end"} pb={"50px"}>
-                                        <HStack h={"100px"} w={"100%"} alignItems={"center"} justifyContent={"center"}>
-                                            <Pressable borderWidth={4} borderColor={"white"} borderRadius={100} bg={"white"} h={"75px"} w={"75px"} alignItems={"center"} justifyContent={"center"} >
-                                                <Stack borderWidth={2} bg={"white"} h={"100%"} w={"100%"} borderRadius={100} />
-                                            </Pressable>
-                                        </HStack>
-                                    </Stack>
-                                </CameraView>
-                            </HStack>
-                        </BottomSheet>
+                        <CameraComponent setImage={setImageUrl} open={openCamera} onCloseFinish={() => setOpenCamera(false)} />
                     </HStack>
                 </VStack>
             </TouchableWithoutFeedback>

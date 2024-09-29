@@ -10,7 +10,7 @@ import BottomSheet from '@/components/global/BottomSheet';
 import { SessionContext } from '@/contexts';
 import { useOCRSpace } from '@/hooks/useOCRSpace';
 import { biometric, biometricOn } from '@/assets';
-import { useCameraDevice, useCameraPermission, useMicrophonePermission, useFrameProcessor, Camera, Frame } from 'react-native-vision-camera';
+import { useCameraDevice, useCameraPermission, useMicrophonePermission, Camera, useFrameProcessor, Frame } from 'react-native-vision-camera';
 import { Face, FaceDetectionOptions, useFaceDetector } from 'react-native-vision-camera-face-detector'
 import { Worklets } from 'react-native-worklets-core';
 import { crop } from 'vision-camera-cropper';
@@ -18,10 +18,12 @@ import Fade from "react-native-fade";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { registerActions } from '@/redux/slices/registerSlice';
 import { useDispatch } from 'react-redux';
+import CameraComponent from '@/components/global/Camera';
 
 type Props = {
     nextPage: () => void
     prevPage: () => void
+    // setImageOCRData: (data: any) => void
     reRenderPage: <T> (state?: T) => void
 }
 
@@ -44,7 +46,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
     const device = useCameraDevice("front");
     const faceDetectionOptions = useRef<FaceDetectionOptions>({}).current
     const { detectFaces } = useFaceDetector(faceDetectionOptions)
-    const { extractTextFromImage, validateIDImage } = useOCRSpace()
+    const { validateIDImage } = useOCRSpace()
 
 
     const handleDetectedFaces = Worklets.createRunOnJS((faces: Face[], frame: Frame) => {
@@ -192,7 +194,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                     Se escanearán tus datos biométricos para garantizar un acceso seguro y protegido.
                 </Text>
                 <HStack w={"100%"} alignItems={"center"} justifyContent={"center"}>
-                    <TouchableOpacity disabled={!!video} onPress={async () => extractText()}>
+                    <TouchableOpacity disabled={!!video} onPress={async () => setOpenBottomSheet(true)}>
                         {video ?
                             <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometricOn} alt="welcome-screen-image-account" />
                             :
@@ -233,46 +235,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                         title={"Continuar"}
                     />
                 }
-
-                <BottomSheet onCloseFinish={() => onCloseFinish()} showDragIcon={false} open={openBottomSheet} height={height * 0.9}>
-                    {device &&
-                        <ZStack flex={1}>
-                            <Camera
-                                ref={ref}
-                                photo={true}
-                                video={true}
-                                style={StyleSheet.absoluteFillObject}
-                                device={device}
-                                frameProcessor={frameProcessor}
-                                pixelFormat="rgb"
-                                isActive
-                            />
-                            <VStack w={"100%"} h={"100%"} justifyContent={"space-between"} alignItems={"center"} pb={"50px"}>
-                                <HStack position={"absolute"} top={"60%"}>
-                                    <Fade visible={fade} direction="up">
-                                        <Heading opacity={0.5} fontSize={`${width / 2.2}px`} mt={"20px"} color={"red"}>{progress}</Heading>
-                                    </Fade>
-                                </HStack>
-                                <HStack space={20}>
-                                    {!recording ?
-                                        <TouchableOpacity onPress={() => takePicture()}>
-                                            <HStack borderColor={"white"} borderWidth={3} bg={"white"} borderRadius={100} style={styles.Shadow}>
-                                                <HStack borderColor={"black"} borderWidth={3} borderRadius={100} w={"65px"} h={"65px"} />
-                                            </HStack>
-                                        </TouchableOpacity>
-                                        :
-                                        <TouchableOpacity onPress={() => console.log(video)}>
-                                            <HStack borderColor={"white"} borderWidth={3} w={"65px"} h={"65px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} style={styles.Shadow}>
-                                                <HStack bg={"red"} borderRadius={"5px"} w={"25px"} h={"25px"} />
-                                            </HStack>
-                                        </TouchableOpacity>
-                                    }
-                                </HStack>
-                            </VStack>
-                        </ZStack>
-
-                    }
-                </BottomSheet>
+                <CameraComponent video={true} cameraType='front' open={openBottomSheet} onCloseFinish={onCloseFinish} setVideo={setVideo} />
             </HStack>
         </VStack>
     );
