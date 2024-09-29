@@ -1,29 +1,23 @@
-import { useContext, useEffect, useRef, useState } from 'react';
-import { VStack, Heading, Text, HStack, ZStack } from 'native-base';
+import { useContext, useEffect, useState } from 'react';
+import { VStack, Heading, Text, HStack } from 'native-base';
 import { StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import colors from '@/colors';
-import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE, OCR_SPACE_API_KEY } from '@/constants';
+import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import Button from '@/components/global/Button';
 import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType, SessionPropsType } from '@/types';
-import BottomSheet from '@/components/global/BottomSheet';
 import { SessionContext } from '@/contexts';
-import { useOCRSpace } from '@/hooks/useOCRSpace';
-import { biometric, biometricOn } from '@/assets';
-import { useCameraDevice, useCameraPermission, useMicrophonePermission, Camera, useFrameProcessor, Frame } from 'react-native-vision-camera';
-import { Face, FaceDetectionOptions, useFaceDetector } from 'react-native-vision-camera-face-detector'
-import { Worklets } from 'react-native-worklets-core';
-import { crop } from 'vision-camera-cropper';
-import Fade from "react-native-fade";
+import { biometric, biometricError, biometricOn } from '@/assets';
+
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { registerActions } from '@/redux/slices/registerSlice';
 import { useDispatch } from 'react-redux';
 import CameraComponent from '@/components/global/Camera';
+import { useCloudinary } from '@/hooks/useCloudinary';
 
 type Props = {
     nextPage: () => void
     prevPage: () => void
-    // setImageOCRData: (data: any) => void
     reRenderPage: <T> (state?: T) => void
 }
 
@@ -31,58 +25,16 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): JSX.Element => {
     const dispatch = useDispatch()
-    const ref = useRef<Camera>(null);
     const { email } = useContext<GlobalContextType>(GlobalContext);
     const { sendVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
     const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
-    const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [loading, setLoading] = useState<boolean>(false);
-    const [images, setImages] = useState<string[]>([]);
-    const [video, setVideo] = useState<string>("");
-    const [progress, setProgress] = useState<number>(5);
-    const [recording, setRecording] = useState<boolean>(false);
-    const [fade, setFade] = useState(false);
-
-    const device = useCameraDevice("front");
-    const faceDetectionOptions = useRef<FaceDetectionOptions>({}).current
-    const { detectFaces } = useFaceDetector(faceDetectionOptions)
-    const { validateIDImage } = useOCRSpace()
+    const [videoUrl, setVideoUrl] = useState<string>("");
+    const [error, setError] = useState<boolean>(false);
+    const [isVideoFinishedUploaded, setIsVideoFinishedUploaded] = useState<boolean>(false);
+    const { uploadVideo } = useCloudinary()
 
 
-    const handleDetectedFaces = Worklets.createRunOnJS((faces: Face[], frame: Frame) => {
-        if (faces.length > 0) {
-            setDisabledButton(false)
-
-            // console.log("handleDetectedFaces", faces.length);
-            // const cropRegion = {
-            //     left: 10,   
-            //     top: 10,
-            //     width: 80,
-            //     height: 30
-            // }
-
-            // const result = crop(frame, { cropRegion, includeImageBase64: true, saveAsFile: false });
-            // console.log("image", result);
-
-
-            // if (result.base64) {
-            //     saveImages(result.base64)
-            // }
-        }
-
-    })
-
-    const frameProcessor = useFrameProcessor((frame) => {
-        'worklet'
-        const faces = detectFaces(frame)
-
-        if (faces.length > 0) {
-            faces[0].bounds
-        }
-
-        handleDetectedFaces(faces, frame)
-
-    }, [])
 
     const onPressNext = async () => {
         try {
@@ -98,92 +50,33 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
         } catch (error) {
             console.error(error);
             setLoading(false)
+            setError(true)
         }
-    }
-
-    const takePicture = async () => {
-        if (ref.current) {
-            const photo = await ref.current.takePhoto();
-            console.log("photo", photo);
-        }
-    }
-
-    const startRecording = async () => {
-        if (ref.current) {
-            ref.current.startRecording({
-                onRecordingFinished: (video) => {
-                    setVideo(video.path)
-                    dispatch(registerActions.setFaceVideoUrl(video.path))
-                },
-                onRecordingError: (error) => console.error(error)
-            });
-        }
-        setRecording(true)
-    }
-
-    const stopRecording = async () => {
-        if (ref.current) {
-            await ref.current.stopRecording();
-        }
-
-        setRecording(false)
-        setProgress(0)
-    }
-
-    const onCloseFinish = () => {
-        setOpenBottomSheet(false)
-        setImages([])
-        setProgress(5)
-        setFade(false)
-    }
-
-    const extractText = async () => {
-        const idData = await validateIDImage("https://pbs.twimg.com/media/CIHaxr5UsAAdnFK.jpg")
-        console.log(JSON.stringify(idData, null, 2));
     }
 
     useEffect(() => {
         (async () => {
-            if (openBottomSheet) {
-                console.log("openBottomSheet", openBottomSheet);
-                setImages([])
+            try {
+                setError(true)
+                setIsVideoFinishedUploaded(false)
+                if (videoUrl) {
+                    const secure_url = await uploadVideo(videoUrl)
 
-                // while (openBottomSheet) {
-                //     await takePicture()
-                // }
+                    dispatch(registerActions.setFaceVideoUrl(secure_url))
+                    setError(false)
+                    setOpenBottomSheet(false)
+                    setLoading(false)
+                    setIsVideoFinishedUploaded(true)
+                }
 
-                // setOpenBottomSheet(false)
+            } catch (error) {
+                setOpenBottomSheet(false)
+                setIsVideoFinishedUploaded(true)
+                setError(true)
+                setLoading(false)
             }
         })()
-    }, [openBottomSheet])
-
-    useEffect(() => {
-        let interval: NodeJS.Timeout;
-        (async () => {
-            let s = 5
-            if (recording) {
-                setFade(true)
-                interval = setInterval(() => {
-                    s = s - 1
-                    setFade(false)
-                    setProgress(s)
-                    setFade(true)
-
-                    if (s === 0) {
-                        clearInterval(interval);
-                        setRecording(false)
-                        setProgress(0)
-                        setOpenBottomSheet(false)
-                        stopRecording()
-                    }
-
-                }, 1500);
-            }
-        })()
-
-        return () => clearInterval(interval);
-
-    }, [recording])
+    }, [videoUrl])
 
 
     return (
@@ -194,20 +87,31 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                     Se escanearán tus datos biométricos para garantizar un acceso seguro y protegido.
                 </Text>
                 <HStack w={"100%"} alignItems={"center"} justifyContent={"center"}>
-                    <TouchableOpacity disabled={!!video} onPress={async () => setOpenBottomSheet(true)}>
-                        {video ?
+                    <TouchableOpacity disabled={!!videoUrl} onPress={async () => setOpenBottomSheet(true)}>
+                        {videoUrl && !error && isVideoFinishedUploaded ?
                             <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometricOn} alt="welcome-screen-image-account" />
-                            :
-                            <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometric} alt="welcome-screen-image-account" />
+                            : error && isVideoFinishedUploaded ?
+                                <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometricError} alt="welcome-screen-image-account" />
+                                :
+                                <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometric} alt="welcome-screen-image-account" />
                         }
                     </TouchableOpacity>
                 </HStack>
-                <HStack space={2} w={"100%"} justifyContent={"center"}>
+                {videoUrl && !error && isVideoFinishedUploaded ? <HStack space={2} w={"100%"} justifyContent={"center"}>
                     <AntDesign style={{ marginTop: 5 }} name="exclamationcircleo" size={24} color={colors.mainGreen} />
                     <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>
                         Los datos biométricos han sido escaneados con éxito, y ahora puedes continuar con tu registro.
                     </Text>
                 </HStack>
+                    : error && videoUrl && isVideoFinishedUploaded ?
+                        <HStack space={2} w={"100%"} justifyContent={"center"}>
+                            <AntDesign style={{ marginTop: 5 }} name="exclamationcircleo" size={24} color={colors.red} />
+                            <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>
+                                Haz ocurrido un error al escanear los datos biométricos por favor vuelve a intentarlo.
+                            </Text>
+                        </HStack> :
+                        null
+                }
             </VStack>
             <HStack h={"70px"} px={"20px"} justifyContent={"space-between"}>
                 <Button
@@ -217,11 +121,12 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                     onPress={prevPage}
                     title={"Atras"}
                 />
-                {!video ?
+                {!videoUrl && !isVideoFinishedUploaded || videoUrl && error ?
                     <Button
+                        spin={loading}
                         w={"49%"}
                         bg={"lightGray"}
-                        color={"mainGreen"}
+                        color={error && isVideoFinishedUploaded ? "red" : "mainGreen"}
                         onPress={() => setOpenBottomSheet(true)}
                         title={"Escanear"}
                     />
@@ -229,13 +134,24 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                     <Button
                         spin={loading}
                         w={"49%"}
-                        bg={"mainGreen"}
+                        bg={loading ? "lightGray" : "mainGreen"}
                         color={"white"}
                         onPress={onPressNext}
                         title={"Continuar"}
                     />
                 }
-                <CameraComponent video={true} cameraType='front' open={openBottomSheet} onCloseFinish={onCloseFinish} setVideo={setVideo} />
+                <CameraComponent
+                    video={true}
+                    cameraType='front'
+                    open={openBottomSheet}
+                    onCloseFinish={() => setOpenBottomSheet(false)}
+                    setVideo={(video) => {
+                        setLoading(true)
+                        setIsVideoFinishedUploaded(false)
+                        setError(true)
+                        setVideoUrl(video)
+                    }}
+                />
             </HStack>
         </VStack>
     );

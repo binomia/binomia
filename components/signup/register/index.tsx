@@ -17,7 +17,7 @@ import IDData from './IdData';
 
 const RegisterComponent: React.FC = (): JSX.Element => {
     const ref = useRef<PagerView>(null);
-    const [currentPage, setCurrentPage] = useState<number>(3);
+    const [currentPage, setCurrentPage] = useState<number>(5);
     const { setShowCloseButton } = useContext<GlobalContextType>(GlobalContext);
 
 

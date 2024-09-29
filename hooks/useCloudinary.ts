@@ -1,4 +1,4 @@
-import { CLOUDINARY_API_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_ID_UPLOAD_PRESET } from "@/constants";
+import { CLOUDINARY_API_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_ID_UPLOAD_PRESET, CLOUDINARY_VIDEO_UPLOAD_PRESET } from "@/constants";
 import axios from "axios"
 import { useState } from "react";
 
@@ -7,7 +7,7 @@ import { useState } from "react";
 type UseCloudinaryType = {
     uploadImage: (image: any) => Promise<any>;
     uploadImages: (images: any) => Promise<any>;
-    uploadAudio: (audioUri: string) => Promise<any>;
+    uploadVideo: (audioUri: string) => Promise<any>;
     setUploadedData: (image: any) => void;
     uploadedData: any
 }
@@ -58,36 +58,39 @@ export const useCloudinary = (): UseCloudinaryType => {
             console.log(error, "uploadImage");
         }
     }
-    const uploadAudio = async (audioUri: string): Promise<any> => {
+
+    const uploadVideo = async (audioUri: string): Promise<any> => {
         try {
             if (audioUri) {
-                console.log('Uploading audio...', audioUri);
                 const audio: any = {
                     uri: audioUri,
-                    type: "audio/mp3",
+                    type: "video/mp4",
                     name: audioUri
                 }
 
                 const data = new FormData()
                 data.append("file", audio)
-                data.append("upload_preset", "h7pttcur")
-                data.append("cloud_name", "brayhandeaza")
+                data.append("upload_preset", CLOUDINARY_VIDEO_UPLOAD_PRESET)
+                data.append("cloud_name", CLOUDINARY_CLOUD_NAME)
                 data.append("public_id", `${Date.now()}`)
 
 
                 const response = await axios.post(CLOUDINARY_API_URL, data)
-                return response.data
+                setUploadedData(response.data)
+
+                return response.data?.secure_url
             }
 
         } catch (error: any) {
-            console.log({ error }, "uploadAudio");
+            // console.log({ error }, "uploadAudio");
+            throw error
         }
     }
 
     return {
         uploadImage,
         uploadImages,
-        uploadAudio,
+        uploadVideo,
         setUploadedData,
         uploadedData
     }
