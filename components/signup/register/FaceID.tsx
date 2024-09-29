@@ -11,7 +11,7 @@ import { biometric, biometricError, biometricOn } from '@/assets';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { registerActions } from '@/redux/slices/registerSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import CameraComponent from '@/components/global/Camera';
 import { useCloudinary } from '@/hooks/useCloudinary';
 
@@ -25,6 +25,8 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): JSX.Element => {
     const dispatch = useDispatch()
+    const state = useSelector((state: any) => state.registerReducer)
+
     const { email } = useContext<GlobalContextType>(GlobalContext);
     const { sendVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
     const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
@@ -63,6 +65,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                     const secure_url = await uploadVideo(videoUrl)
 
                     dispatch(registerActions.setFaceVideoUrl(secure_url))
+
                     setError(false)
                     setOpenBottomSheet(false)
                     setLoading(false)

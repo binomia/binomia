@@ -20,6 +20,7 @@ import DatePicker from 'react-native-date-picker'
 import moment from 'moment';
 import { registerActions } from '@/redux/slices/registerSlice';
 import { useDispatch } from 'react-redux';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 
 type Props = {
@@ -47,7 +48,10 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
 
     const [date, setDate] = useState(new Date())
     const [open, setOpen] = useState(false)
+    const [hasDobError, setHasDobError] = useState(false)
+    const [hasExpError, setHasExpError] = useState(false)
     const [openedDateTitle, setOpenedDateTitle] = useState("")
+    const [isInvalidDate, setIsInvalidDate] = useState<string>("")
 
 
 
@@ -85,9 +89,17 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
     }
 
     const onConfirmDate = (date: Date) => {
+        setIsInvalidDate("")
+        setHasExpError(false)
         const dateString: string = date.toISOString().split('T')[0]
 
         if (openedDateTitle === "exp") {
+            if (moment(dateString).isBefore(moment())) {
+                console.log("expire dni");
+                setIsInvalidDate("Lo sentimos, no podemos procesar cédulas cuya fecha de vigencia haya expirado.")
+                setDisabledButton(true)
+                setHasExpError(true)
+            }
             setExp(dateString)
             dispatch(registerActions.setDniExpiration(dateString))
         }
@@ -149,13 +161,17 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                                 value={id}
                                 placeholder="Numero De Cédula*"
                             />
-                            <Pressable borderColor={"mainGreen"} borderWidth={exp ? 1 : 0} my={"5px"} px={"20px"} h={`${INPUT_HEIGHT}px`} borderRadius={"10px"} bg={"lightGray"} justifyContent={"center"} onPress={() => onOpenDate("exp")}>
-                                <Text color={exp ? "white" : colors.placeholderTextColor}>{exp ? moment(exp).format("ll") : "Fecha De Expiración*"}</Text>
-                            </Pressable>
                             <Pressable borderColor={"mainGreen"} borderWidth={dob ? 1 : 0} my={"5px"} px={"20px"} h={`${INPUT_HEIGHT}px`} borderRadius={"10px"} bg={"lightGray"} justifyContent={"center"} onPress={() => onOpenDate("dob")}>
                                 <Text color={dob ? "white" : colors.placeholderTextColor}>{dob ? moment(dob).format("ll") : "Fecha De Nacimiento*"}</Text>
                             </Pressable>
+                            <Pressable borderColor={hasExpError ? "red" : "mainGreen"} borderWidth={exp ? 1 : 0} my={"5px"} px={"20px"} h={`${INPUT_HEIGHT}px`} borderRadius={"10px"} bg={"lightGray"} justifyContent={"center"} onPress={() => onOpenDate("exp")}>
+                                <Text color={exp ? "white" : colors.placeholderTextColor}>{exp ? moment(exp).format("ll") : "Fecha De Expiración*"}</Text>
+                            </Pressable>
                         </VStack>
+                        {isInvalidDate ? <HStack space={2} w={"100%"} mt={"10px"} justifyContent={"center"}>
+                            <AntDesign style={{ marginTop: 5 }} name="exclamationcircleo" size={24} color={colors.red} />
+                            <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"80%"} color={"white"}>{isInvalidDate} </Text>
+                        </HStack> : null}
                     </VStack>
                     <HStack bg={"red.100"} px={"20px"} w={"100%"} justifyContent={"space-between"}>
                         <Button

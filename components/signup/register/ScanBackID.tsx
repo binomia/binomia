@@ -46,17 +46,18 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                     setOpenCamera(false);
 
                     const _imageUrl = await uploadImage(imageUrl)
+                    dispatch(registerActions.setIdBackUrl(_imageUrl))
+
                     const ocrData = await validateIDImage(_imageUrl)
+                    console.log(JSON.stringify({ ocrData, state }, null, 2));
+
 
                     if (ocrData["idNumber"] !== state.dni) {
                         setIsInValidIdImageMessage("La cédula escaneada no coincide con el numero de cédula de la cedula de frontal")
                         setDisabledButton(true)
 
                     } else {
-                        dispatch(registerActions.setIdFrontUrl(imageUrl))
                         setDisabledButton(false)
-
-                        console.log(JSON.stringify(ocrData, null, 2));
                     }
 
                     setLoading(false)

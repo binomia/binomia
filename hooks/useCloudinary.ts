@@ -76,7 +76,7 @@ export const useCloudinary = (): UseCloudinaryType => {
 
 
                 const response = await axios.post(CLOUDINARY_API_URL, data)
-                setUploadedData(response.data)
+                setUploadedData(response.data)                
 
                 return response.data?.secure_url
             }

@@ -49,6 +49,7 @@ const registerSlice = createSlice({
         },
         setDni: (state, action) => {
             state.dni = action.payload
+            state.username = action.payload
         },
         setDniExpiration: (state, action) => {
             state.dniExpiration = action.payload

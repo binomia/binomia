@@ -17,7 +17,7 @@ type Props = {
 
 const { width, height } = Dimensions.get("window");
 const AccountCreated: React.FC<Props> = ({ }): JSX.Element => {
-    const state = useSelector((state: any) => state)
+    const state = useSelector((state: any) => state.registerReducer)
     const { } = useContext<GlobalContextType>(GlobalContext);
     const { setVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
     const [loading, setLoading] = useState(false);

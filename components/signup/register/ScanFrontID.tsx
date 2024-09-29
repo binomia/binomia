@@ -33,37 +33,6 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
     const { uploadImage } = useCloudinary();
 
 
-    // {
-    //     "name": "JOSE ALBERTO FONDEUR ROSARIO",
-    //     "idNumber": "001-1276244-8",
-    //     "placeOfBirth": "santo domingo, d.n.",
-    //     "dateOfBirth": "1980-01-29",
-    //     "dateOfExpiration": "2024-01-29",
-    //     "occupation": "empresario (a)",
-    //     "maritalStatus": "soltero",
-    //     "gender": "m",
-    //     "bloodType": "A+"
-    // }
-
-    // {
-    //     "faceVideoUrl": "",
-    //     "fullName": "",
-    //     "phone": "",
-    //     "username": "",
-    //     "email": "",
-    //     "dni": "001-06867-6",
-    //     "sex": "",
-    //     "address": "",
-    //     "dob": "",
-    //     "dniExpiration": "",
-    //     "imageUrl": "",
-    //     "password": "",
-    //     "addressAgreement": false,
-    //     "userAgreement": false,
-    //     "idBackUrl": "",
-    //     "idFrontUrl": "file:///var/mobile/Containers/Data/Application/C61C11E2-E863-4D4B-994C-44238A2C1FB3/Library/Caches/ImageManipulator/4A3E2349-4E13-4F59-827B-3B6ABFFA8AD7.jpg"
-    // }
-
     const validateIDImageOCR = async (data: any) => {
         try {
             setDisabledButton(false)
@@ -84,9 +53,7 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                 setDisabledButton(true)
             }
 
-            console.log(data["name"], state.fullName);
-            
-            if (!data["name"].includes(state.fullName)) {               
+            if (!data["name"].includes(state.fullName.toLowerCase())) {
                 setIsInValidIdImageMessage("La cédula escaneada coincide con el nombre ingresado previamente")
                 setDisabledButton(true)
             }
@@ -110,10 +77,10 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
 
                     await validateIDImageOCR(ocrData)
 
-                    dispatch(registerActions.setIdFrontUrl(imageUrl))
+                    dispatch(registerActions.setIdFrontUrl(_imageUrl))
                     setLoading(false)
 
-                    console.log(JSON.stringify(ocrData, null, 2));
+                    console.log(JSON.stringify({ ocrData, state }, null, 2));
 
                 } catch (error) {
                     console.error(error)
@@ -145,7 +112,7 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                                     </ZStack>
                                 </Box>
                             </TouchableOpacity>
-                            {imageUrl ? <Button
+                            {imageUrl && !loading ? <Button
                                 mt={"10px"}
                                 w={"60%"}
                                 bg={"lightGray"}
