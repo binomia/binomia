@@ -1,6 +1,6 @@
 import { Alert, PermissionsAndroid, Platform } from 'react-native'
 import { useState } from "react"
-import DocumentScanner, { ScanDocumentOptions, ScanDocumentResponseStatus } from 'react-native-document-scanner-plugin'
+import DocumentScanner from 'react-native-document-scanner-plugin'
 
 
 

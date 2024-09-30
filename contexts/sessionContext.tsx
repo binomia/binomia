@@ -6,8 +6,6 @@ import * as SecureStore from 'expo-secure-store';
 import * as Updates from 'expo-updates';
 import { notificationServer } from "@/rpc/notificationRPC";
 import { GENERATE_SIX_DIGIT_TOKEN } from "@/helpers";
-import z from "zod";
-import { UserAuthSchema } from "@/auth/userAuth";
 
 export const SessionContext = createContext<SessionPropsType>({
     save: (_: string, __: string) => { },
@@ -48,9 +46,6 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 text: `Su Codigo De Verificación Es: ${code}`,
                 html: `<b>Su Codigo De Verificación Es: ${code}</b>`
             })
-
-            console.log({ message });
-
 
             setVerificationCode(code)
             return message
@@ -120,7 +115,6 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             return data
         } catch (error) {
             setInvalidCredentials(true)
-            console.log({ error });
         }
     }
     const onRegister = async (data: CreateUserDataType): Promise<any> => {
@@ -132,12 +126,10 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             const token = createUserResponse.data?.createUser?.token
             await save("jwt", token)
 
-            console.log(JSON.stringify(createUserResponse.data?.createUser, null, 2));
 
             return createUserResponse.data
         } catch (error) {
             setInvalidCredentials(true)
-            console.log({ error });
         }
     }
 

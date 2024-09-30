@@ -1,4 +1,4 @@
-import { Address, GlobalContextType } from "@/types";
+import { GlobalContextType } from "@/types";
 
 
 export const globalContextInitialState: GlobalContextType = {

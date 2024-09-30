@@ -120,14 +120,15 @@ const LoginComponent: React.FC = (): JSX.Element => {
                     </VStack>
                     <VStack w={"100%"} alignItems={"center"} mb={"25px"}>
                         <Button
-                            spin
+                            spin={loading}
                             disabled={disabledButton}
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             w={"100%"}
                             onPress={async () => {
+                                setLoading(true)
                                 onLogin({ email: email.toLowerCase(), password })
-                                
+                                setLoading(false)
                             }}
                             title={"Iniciar Sesión"}
                         />

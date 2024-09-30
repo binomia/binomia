@@ -8,10 +8,9 @@ import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType, SessionPropsType } from '@/types';
 import { SessionContext } from '@/contexts/sessionContext';
 import { biometric, biometricError, biometricOn } from '@/assets';
-
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { registerActions } from '@/redux/slices/registerSlice';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import CameraComponent from '@/components/global/Camera';
 import { useCloudinary } from '@/hooks/useCloudinary';
 
@@ -25,8 +24,6 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): JSX.Element => {
     const dispatch = useDispatch()
-    const state = useSelector((state: any) => state.registerReducer)
-
     const { email } = useContext<GlobalContextType>(GlobalContext);
     const { sendVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
     const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
@@ -50,7 +47,6 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
             setLoading(false)
 
         } catch (error) {
-            console.error(error);
             setLoading(false)
             setError(true)
         }

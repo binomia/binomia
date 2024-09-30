@@ -17,7 +17,7 @@ import { store } from '@/redux';
 LogBox.ignoreAllLogs();
 SplashScreen.preventAutoHideAsync();
 
-export default function App() {
+const App: React.FC = () => {
 	const cameraPermission = useCameraPermission()
 	const microphonePermission = useMicrophonePermission()
 
@@ -57,9 +57,12 @@ export default function App() {
 	);
 }
 
+
 const styles = StyleSheet.create({
 	container: {
 		backgroundColor: "pink",
-		flex: 1,
-	},
+		flex: 1
+	}
 });
+
+export default App

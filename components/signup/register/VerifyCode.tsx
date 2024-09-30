@@ -24,13 +24,11 @@ const CELL_COUNT = 6;
 const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const state = useSelector((state: any) => state.registerReducer)
     const { verificationCode, setVerificationCode, onRegister } = useContext<SessionPropsType>(SessionContext);
-    const globalContext = useContext<GlobalContextType>(GlobalContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(false);
     const [invalidCode, setInvalidCode] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [code, setCode] = useState('');
     const ref = useBlurOnFulfill({ value: code, cellCount: 6 });
-    const [createUser] = useMutation(UserApolloQueries.createUser());
     const [props, getCellOnLayoutHandler] = useClearByFocusCell({
         value: code,
         setValue: setCode,

@@ -1,8 +1,6 @@
-import { CLOUDINARY_API_KEY, CLOUDINARY_API_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_ID_UPLOAD_PRESET, CLOUDINARY_SECRET_KEY, CLOUDINARY_VIDEO_UPLOAD_PRESET } from "@/constants";
+import { CLOUDINARY_API_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_ID_UPLOAD_PRESET, CLOUDINARY_VIDEO_UPLOAD_PRESET } from "@/constants";
 import axios from "axios"
 import { useState } from "react";
-import * as Crypto from 'expo-crypto';
-
 
 
 type UseCloudinaryType = {

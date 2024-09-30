@@ -16,13 +16,18 @@ export class UserApolloQueries {
                     id
                     fullName
                     username
-                    imageUrl
+                    phone
                     email
-                    dni
-                    sex
+                    password
+                    dniNumber
+                    profileImageUrl
+                    addressAgreementSigned
+                    userAgreementSigned
+                    idFrontUrl
+                    status
+                    idBackUrl
+                    faceVideoUrl
                     address
-                    dob
-                    dniExpiration
                     createdAt
                     updatedAt
                 }

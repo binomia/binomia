@@ -1,11 +1,6 @@
-import { AZURE_FACE_API_ENDPOINT, AZURE_FACE_API_KEY } from "@/constants";
-import axios from "axios";
-import * as Crypto from 'expo-crypto';
-
 import AWS from 'aws-sdk';
 
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const useAzureFaceAPI = () => {
     AWS.config.update({

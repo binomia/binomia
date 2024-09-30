@@ -3,24 +3,6 @@ import axios from "axios";
 import { NOTIFICATION_SERVER_URL } from "@/constants";
 
 
-
-// const client = new JSONRPCClient(async (jsonRPCRequest) => {
-//     if (NOTIFICATION_SERVER_URL === undefined) {
-//         throw new Error("AUTH_SERVER_URL is not defined");
-//     }
-
-//     const response = await fetch(NOTIFICATION_SERVER_URL, {
-//         method: "POST",
-//         headers: {
-//             "content-type": "application/json",
-//         },
-//         body: JSON.stringify(jsonRPCRequest),
-//     })
-
-//     return response.json();
-// })
-
-
 const client = new JSONRPCClient(async (jsonRPCRequest) => {
     if (NOTIFICATION_SERVER_URL === undefined) {
         throw new Error("AUTH_SERVER_URL is not defined");

@@ -1,17 +1,6 @@
 import { OCR_SPACE_API_KEY } from "@/constants"
 import { FORMAT_CEDULA, FORMAT_DATE } from "@/helpers"
 
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { TextractClient, StartDocumentTextDetectionCommand, GetDocumentTextDetectionCommand } from "@aws-sdk/client-textract";
-import { Readable } from "stream";
-
-
-// Initialize S3 client
-const s3Client = new S3Client({ region: "us-east-1" });
-
-// Initialize Textract client
-const textractClient = new TextractClient({ region: "us-east-1" });
-
 
 export const useOCRSpace = () => {
     const extractTextFromImage = async (image: string) => {

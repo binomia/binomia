@@ -1,5 +1,5 @@
 import { globalContextInitialState } from "@/mocks";
-import { Address, GlobalContextType } from "@/types";
+import { GlobalContextType } from "@/types";
 import { createContext, useState } from "react";
 
 

@@ -1,15 +1,12 @@
 import colors from '@/colors';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Input from '@/components/global/Input';
 import Button from '@/components/global/Button';
 import BottomSheet from '@/components/global/BottomSheet';
 import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack, Box, Pressable } from 'native-base';
-import { Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Dimensions, View } from 'react-native';
-import { phone } from 'phone';
-import { FORMAT_CEDULA, FORMAT_PHONE_NUMBER, VALIDATE_EMAIL } from '@/helpers';
+import { VStack, Heading, Text, HStack, Pressable } from 'native-base';
+import { Keyboard, StyleSheet, TouchableWithoutFeedback, Dimensions, View } from 'react-native';
+import { FORMAT_CEDULA } from '@/helpers';
 import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-sticky-footer-avoiding-scroll-view';
 import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { GlobalContext } from '@/contexts/globalContext';
@@ -48,7 +45,6 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
 
     const [date, setDate] = useState(new Date())
     const [open, setOpen] = useState(false)
-    const [hasDobError, setHasDobError] = useState(false)
     const [hasExpError, setHasExpError] = useState(false)
     const [openedDateTitle, setOpenedDateTitle] = useState("")
     const [isInvalidDate, setIsInvalidDate] = useState<string>("")
@@ -89,9 +85,11 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
     }
 
     const onConfirmDate = (date: Date) => {
+        setDate(date)
         setIsInvalidDate("")
         setHasExpError(false)
         const dateString: string = moment(date).format("YYYY-MM-DD")
+
 
         if (openedDateTitle === "exp") {
             if (moment(dateString).isBefore(moment())) {
