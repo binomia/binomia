@@ -91,7 +91,7 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
     const onConfirmDate = (date: Date) => {
         setIsInvalidDate("")
         setHasExpError(false)
-        const dateString: string = date.toISOString()
+        const dateString: string = moment(date).format("YYYY-MM-DD")
 
         if (openedDateTitle === "exp") {
             if (moment(dateString).isBefore(moment())) {
@@ -101,11 +101,11 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                 setHasExpError(true)
             }
             setExp(dateString)
-            dispatch(registerActions.setDniExpiration(dateString.split('T')[0]))
+            dispatch(registerActions.setDniExpiration(dateString))
         }
         else if (openedDateTitle === "dob") {
             setDob(dateString)
-            dispatch(registerActions.setDniDOB(dateString.split('T')[0]))
+            dispatch(registerActions.setDniDOB(dateString))
         }
         setOpen(false)
     }
