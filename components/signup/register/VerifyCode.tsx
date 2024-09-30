@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack } from 'native-base';
 import { SafeAreaView, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
-import { SessionContext } from '@/contexts';
+import { SessionContext } from '@/contexts/sessionContext';
 import { GlobalContextType, SessionPropsType } from '@/types';
 import colors from '@/colors';
 import { INPUT_CODE_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
@@ -11,6 +11,9 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Button from '@/components/global/Button';
 import { GlobalContext } from '@/contexts/globalContext';
 import { useDispatch, useSelector } from 'react-redux';
+import { useMutation } from '@apollo/client';
+import { UserApolloQueries } from '@/apollo/query/userQuery';
+import { UserAuthSchema } from '@/auth/userAuth';
 
 type Props = {
     nextPage: () => void
@@ -19,13 +22,15 @@ type Props = {
 
 const CELL_COUNT = 6;
 const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
-    const { verificationCode, setVerificationCode } = useContext<SessionPropsType>(SessionContext);
+    const state = useSelector((state: any) => state.registerReducer)
+    const { verificationCode, setVerificationCode, onRegister } = useContext<SessionPropsType>(SessionContext);
     const globalContext = useContext<GlobalContextType>(GlobalContext);
     const [disabledButton, setDisabledButton] = useState<boolean>(false);
     const [invalidCode, setInvalidCode] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
     const [code, setCode] = useState('');
     const ref = useBlurOnFulfill({ value: code, cellCount: 6 });
+    const [createUser] = useMutation(UserApolloQueries.createUser());
     const [props, getCellOnLayoutHandler] = useClearByFocusCell({
         value: code,
         setValue: setCode,
@@ -36,6 +41,21 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
         setCode('')
         setVerificationCode('')
         prevPage()
+    }
+
+    const onPressNext = async () => {
+        try {
+            setLoading(true)
+
+            const data = UserAuthSchema.createUser.parse(state)
+            await onRegister(data)
+
+            nextPage()
+            setLoading(false)
+
+        } catch (error) {
+            setLoading(false)
+        }
     }
 
     useEffect(() => {
@@ -115,11 +135,7 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             w={"48%"}
-                            onPress={async () => {
-                                setLoading(true)
-                                nextPage()
-                                setLoading(false)
-                            }}
+                            onPress={onPressNext}
                             title={"Siguiente"}
                         />
                     </HStack>

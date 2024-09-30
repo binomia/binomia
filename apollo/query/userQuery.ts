@@ -30,5 +30,13 @@ export class UserApolloQueries {
         `
     }
 
-
+    static createUser = () => {
+        return gql`
+            mutation CreateUser($data: UserInput!) {
+                createUser(data: $data) {                    
+                    token
+                }
+            }
+        `
+    }
 }

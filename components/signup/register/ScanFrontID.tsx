@@ -37,7 +37,7 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
         try {
             setDisabledButton(false)
 
-            if (data["idNumber"] !== state.dni) {
+            if (data["idNumber"] !== state.dniNumber) {
                 setIsInValidIdImageMessage("La cédula escaneada no coincide con el numero de cédula ingresado previamente")
                 setDisabledButton(true)
             }

@@ -3,7 +3,7 @@ import SignUpStack from '@/navigation/SignUpStack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useContext } from 'react';
 import { SessionPropsType } from '@/types';
-import { SessionContext } from '@/contexts';
+import { SessionContext } from '@/contexts/sessionContext';
 import { Button } from 'react-native';
 import { HStack } from 'native-base';
 

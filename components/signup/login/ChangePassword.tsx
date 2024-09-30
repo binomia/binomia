@@ -5,7 +5,7 @@ import colors from '@/colors';
 import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { SessionPropsType } from '@/types';
-import { SessionContext } from '@/contexts';
+import { SessionContext } from '@/contexts/sessionContext';
 import { useMutation } from '@apollo/client';
 import { UserApolloQueries } from '@/apollo/query/userQuery';
 import Input from '@/components/global/Input';

@@ -1,36 +1,39 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 
-
 const registerSlice = createSlice({
     name: 'register',
     initialState: {
-        faceVideoUrl: "",
         fullName: "",
-        phone: "",
         username: "",
+        phone: "",
         email: "",
-        dni: "",
-        sex: "m",
-        address: "",
-        dob: "",
-        dniExpiration: "",
-        imageUrl: "",
         password: "",
-        addressAgreement: false,
-        userAgreement: false,
+        profileImageUrl: null,
+        addressAgreementSigned: false,
+        userAgreementSigned: false,
         idBackUrl: "",
         idFrontUrl: "",
+        faceVideoUrl: "",
+        address: "",
+        
+        dniNumber: "",
+        dob: "",
+        dniExpiration: "",
+        gender: null,
+        occupation: null,
+        maritalStatus: null,
+        bloodType: null
     },
     reducers: {
         setUserAgreement: (state, action) => {
-            state.userAgreement = action.payload
+            state.userAgreementSigned = action.payload
         },
         setFaceVideoUrl: (state, action) => {
             state.faceVideoUrl = action.payload
         },
         setFullName: (state, action) => {
-            state.fullName = action.payload
+            state.fullName = action.payload.toLowerCase()
         },
         setPhone: (state, action) => {
             state.phone = action.payload
@@ -45,10 +48,10 @@ const registerSlice = createSlice({
             state.address = action.payload
         },
         setAddressAgreement: (state, action) => {
-            state.addressAgreement = action.payload
+            state.addressAgreementSigned = action.payload
         },
         setDni: (state, action) => {
-            state.dni = action.payload
+            state.dniNumber = action.payload
             state.username = action.payload
         },
         setDniExpiration: (state, action) => {
@@ -58,13 +61,13 @@ const registerSlice = createSlice({
             state.dob = action.payload
         },
         setSex: (state, action) => {
-            state.sex = action.payload
+            state.gender = action.payload
         },
         setUsername: (state, action) => {
             state.username = action.payload
         },
         setImageUrl: (state, action) => {
-            state.imageUrl = action.payload
+            state.profileImageUrl = action.payload
         },
         setIdFrontUrl: (state, action) => {
             state.idFrontUrl = action.payload

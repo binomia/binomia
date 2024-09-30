@@ -1,6 +1,6 @@
 import { LogBox, StyleSheet, StatusBar } from 'react-native';
 import { useCallback } from 'react';
-import { SessionContextProvider } from '@/contexts';
+import { SessionContextProvider } from '@/contexts/sessionContext';
 import { ApolloProvider } from '@apollo/client';
 import { NativeBaseProvider, View } from "native-base";
 import { theme } from '@/themes';

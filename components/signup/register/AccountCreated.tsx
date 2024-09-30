@@ -1,32 +1,17 @@
-import { useContext, useState } from 'react';
 import { VStack, Heading, Text, HStack, Image } from 'native-base';
 import { Dimensions } from 'react-native';
 import Button from '@/components/global/Button';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
-import { GlobalContextType, SessionPropsType } from '@/types';
-import { SessionContext } from '@/contexts';
-import { welcomeSignup, pendingVerification } from '@/assets';
-import { GlobalContext } from '@/contexts/globalContext';
-import { registerActions } from '@/redux/slices/registerSlice';
-import { useDispatch, useSelector } from 'react-redux';
-
-type Props = {
-
-}
+import { welcomeSignup } from '@/assets';
+import * as Updates from 'expo-updates';
 
 
-const { width, height } = Dimensions.get("window");
-const AccountCreated: React.FC<Props> = ({ }): JSX.Element => {
-    const state = useSelector((state: any) => state.registerReducer)
-    const { } = useContext<GlobalContextType>(GlobalContext);
-    const { setVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
-    const [loading, setLoading] = useState(false);
 
-    const onPress = () => {
-        // setLoading(true)
-        console.log(JSON.stringify(state, null, 2));
+const { width } = Dimensions.get("window");
+const AccountCreated: React.FC = (): JSX.Element => {
+    const onPress = async () => {
+        await Updates.reloadAsync();
     }
-
 
     return (
         <VStack px={"20px"} flex={1} justifyContent={"space-between"} pb={"30px"}>
@@ -44,7 +29,6 @@ const AccountCreated: React.FC<Props> = ({ }): JSX.Element => {
 
             <HStack px={"20px"} w={"100%"} alignItems={"flex-end"}>
                 <Button
-                    spin={loading}
                     bg={"mainGreen"}
                     color={"white"}
                     w={"100%"}

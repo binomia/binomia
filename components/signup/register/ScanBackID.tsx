@@ -52,7 +52,7 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                     console.log(JSON.stringify({ ocrData, state }, null, 2));
 
 
-                    if (ocrData["idNumber"] !== state.dni) {
+                    if (ocrData["idNumber"] !== state.dniNumber) {
                         setIsInValidIdImageMessage("La cédula escaneada no coincide con el numero de cédula de la cedula de frontal")
                         setDisabledButton(true)
 

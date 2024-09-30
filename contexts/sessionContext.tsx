@@ -1,17 +1,19 @@
 import { createContext, useEffect, useState } from "react";
-import { SessionContextType, SessionPropsType, VerificationDataType } from "@/types";
+import { CreateUserDataType, SessionContextType, SessionPropsType, VerificationDataType } from "@/types";
 import { useMutation } from '@apollo/client';
-import { SessionApolloQueries } from "@/apollo/query";
+import { SessionApolloQueries, UserApolloQueries } from "@/apollo/query";
 import * as SecureStore from 'expo-secure-store';
 import * as Updates from 'expo-updates';
 import { notificationServer } from "@/rpc/notificationRPC";
 import { GENERATE_SIX_DIGIT_TOKEN } from "@/helpers";
-
+import z from "zod";
+import { UserAuthSchema } from "@/auth/userAuth";
 
 export const SessionContext = createContext<SessionPropsType>({
     save: (_: string, __: string) => { },
     get: (_: string) => Promise.resolve(""),
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
+    onRegister: (_data: CreateUserDataType) => Promise.resolve({}),
     onLogout: () => { },
     sendVerificationCode: (_: string) => { },
     setVerificationCode: (_: string) => { },
@@ -28,8 +30,10 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const [jwt, setJwt] = useState<string>("");
     const [verificationData, setVerificationData] = useState<VerificationDataType>({ token: "", signature: "", email: "" });
     const [verificationCode, setVerificationCode] = useState<string>("");
-    const [login] = useMutation(SessionApolloQueries.login());
     const [invalidCredentials, setInvalidCredentials] = useState<boolean>(false);
+    const [login] = useMutation(SessionApolloQueries.login());
+    const [createUser] = useMutation(UserApolloQueries.createUser());
+
 
 
 
@@ -46,7 +50,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             })
 
             console.log({ message });
-            
+
 
             setVerificationCode(code)
             return message
@@ -119,12 +123,30 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             console.log({ error });
         }
     }
+    const onRegister = async (data: CreateUserDataType): Promise<any> => {
+        try {
+            const createUserResponse = await createUser({
+                variables: { data }
+            })
+
+            const token = createUserResponse.data?.createUser?.token
+            await save("jwt", token)
+
+            console.log(JSON.stringify(createUserResponse.data?.createUser, null, 2));
+
+            return createUserResponse.data
+        } catch (error) {
+            setInvalidCredentials(true)
+            console.log({ error });
+        }
+    }
 
 
     const value = {
         save,
         get,
         onLogin,
+        onRegister,
         onLogout,
         login,
         sendVerificationCode,

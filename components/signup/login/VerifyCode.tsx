@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack } from 'native-base';
 import { SafeAreaView, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
-import { SessionContext } from '@/contexts';
+import { SessionContext } from '@/contexts/sessionContext';
 import { SessionPropsType } from '@/types';
 import colors from '@/colors';
 import { INPUT_CODE_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';

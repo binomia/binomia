@@ -1,3 +1,6 @@
+import { UserAuthSchema } from "@/auth/userAuth"
+import z from "zod";
+
 export type SessionContextType = {
     children: JSX.Element
 }
@@ -9,10 +12,13 @@ export type VerificationDataType = {
     email: string
 }
 
+export type CreateUserDataType = z.infer<typeof UserAuthSchema.createUser>
+
 export type SessionPropsType = {
     save: (key: string, value: string) => void
     get: (key: string) => Promise<any>
     onLogin: ({ email, password }: { email: string, password: string }) => Promise<any>
+    onRegister: (data:CreateUserDataType) => Promise<any>,
     onLogout: () => void
     sendVerificationCode: (to: string) => any
     setVerificationCode: (to: string) => any
@@ -49,7 +55,7 @@ export type GlobalContextType = {
 
     names: string
     setNames: (value: string) => void
-    
+
     lastNames: string
     setLastNames: (value: string) => void
 
@@ -64,7 +70,7 @@ export type GlobalContextType = {
 
     address: string
     setAddress: (value: string) => void
-    
+
     userAgreement: boolean
     setUserAgreement: (value: boolean) => void
 

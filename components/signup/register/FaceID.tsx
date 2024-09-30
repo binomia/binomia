@@ -1,12 +1,12 @@
 import { useContext, useEffect, useState } from 'react';
-import { VStack, Heading, Text, HStack } from 'native-base';
+import { VStack, Heading, Text, HStack, Spinner, ZStack } from 'native-base';
 import { StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import colors from '@/colors';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import Button from '@/components/global/Button';
 import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType, SessionPropsType } from '@/types';
-import { SessionContext } from '@/contexts';
+import { SessionContext } from '@/contexts/sessionContext';
 import { biometric, biometricError, biometricOn } from '@/assets';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -96,7 +96,10 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                             : error && isVideoFinishedUploaded ?
                                 <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometricError} alt="welcome-screen-image-account" />
                                 :
-                                <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometric} alt="welcome-screen-image-account" />
+                                <ZStack w={"100%"} h={"100%"} justifyContent={"center"} alignItems={"center"}>
+                                    <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometric} alt="welcome-screen-image-account" />
+                                    <Spinner position={"relative"} left={"-28px"} size={"lg"} color={colors.mainGreen}/>
+                                </ZStack>
                         }
                     </TouchableOpacity>
                 </HStack>

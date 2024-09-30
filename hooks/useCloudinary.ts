@@ -1,6 +1,7 @@
-import { CLOUDINARY_API_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_ID_UPLOAD_PRESET, CLOUDINARY_VIDEO_UPLOAD_PRESET } from "@/constants";
+import { CLOUDINARY_API_KEY, CLOUDINARY_API_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_ID_UPLOAD_PRESET, CLOUDINARY_SECRET_KEY, CLOUDINARY_VIDEO_UPLOAD_PRESET } from "@/constants";
 import axios from "axios"
 import { useState } from "react";
+import * as Crypto from 'expo-crypto';
 
 
 
@@ -52,6 +53,9 @@ export const useCloudinary = (): UseCloudinaryType => {
             const response = await axios.post(CLOUDINARY_API_URL, data)
             setUploadedData(response.data)
 
+            console.log(JSON.stringify(response.data, null, 2));
+
+
             return response.data?.secure_url
 
         } catch (error) {
@@ -76,7 +80,7 @@ export const useCloudinary = (): UseCloudinaryType => {
 
 
                 const response = await axios.post(CLOUDINARY_API_URL, data)
-                setUploadedData(response.data)                
+                setUploadedData(response.data)
 
                 return response.data?.secure_url
             }
@@ -86,6 +90,7 @@ export const useCloudinary = (): UseCloudinaryType => {
             throw error
         }
     }
+  
 
     return {
         uploadImage,

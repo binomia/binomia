@@ -4,7 +4,7 @@ import { Dimensions } from 'react-native';
 import Button from '@/components/global/Button';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { SessionPropsType } from '@/types';
-import { SessionContext } from '@/contexts';
+import { SessionContext } from '@/contexts/sessionContext';
 import { account } from '@/assets';
 
 
