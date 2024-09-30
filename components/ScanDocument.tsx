@@ -7,8 +7,6 @@ const DocumentScanner = () => {
 	const onCapture = () => {
 		if (camera?.current.capture) return
 		camera?.current?.capture();
-
-		console.log("Captured");
 	}
 
 

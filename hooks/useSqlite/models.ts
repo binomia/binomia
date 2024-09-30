@@ -40,7 +40,7 @@ export const synchTables = async (db: SQLiteDatabase) => {
         )
 
     } catch (error: any) {
-        console.log(error.toString(), 'synchTables error');
+        console.error(error);
     }
 }
 export const dropTables = async (db: SQLiteDatabase, table: string) => {

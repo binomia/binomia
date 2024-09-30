@@ -49,7 +49,6 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                     dispatch(registerActions.setIdBackUrl(_imageUrl))
 
                     const ocrData = await validateIDImage(_imageUrl)
-                    console.log(JSON.stringify({ ocrData, state }, null, 2));
 
 
                     if (ocrData["idNumber"] !== state.dniNumber) {
@@ -63,7 +62,6 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                     setLoading(false)
 
                 } catch (error) {
-                    console.error(error)
                     setLoading(false)
                 }
             })()

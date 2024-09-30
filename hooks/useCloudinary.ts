@@ -19,8 +19,6 @@ export const useCloudinary = (): UseCloudinaryType => {
     const uploadImages = async (images: any) => {
 
         if (images.length > 0) {
-            console.log('Uploading images...');
-
             const uploadResponses = await Promise.all(
                 images.map((image: string) => {
                     return uploadImage(image)
@@ -51,13 +49,10 @@ export const useCloudinary = (): UseCloudinaryType => {
             const response = await axios.post(CLOUDINARY_API_URL, data)
             setUploadedData(response.data)
 
-            console.log(JSON.stringify(response.data, null, 2));
-
-
             return response.data?.secure_url
 
         } catch (error) {
-            console.log(error, "uploadImage");
+            console.error(error, "uploadImage");
         }
     }
 

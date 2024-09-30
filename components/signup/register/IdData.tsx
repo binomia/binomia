@@ -93,7 +93,6 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
 
         if (openedDateTitle === "exp") {
             if (moment(dateString).isBefore(moment())) {
-                console.log("expire dni");
                 setIsInvalidDate("Lo sentimos, no podemos procesar cédulas cuya fecha de vigencia haya expirado.")
                 setDisabledButton(true)
                 setHasExpError(true)

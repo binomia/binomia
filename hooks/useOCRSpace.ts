@@ -12,9 +12,7 @@ export const useOCRSpace = () => {
             return response
 
         }).catch(error => {
-            console.log({
-                error
-            })
+            console.error(error)
         })
     }
 

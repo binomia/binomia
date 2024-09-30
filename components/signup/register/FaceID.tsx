@@ -4,13 +4,12 @@ import { StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
 import colors from '@/colors';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import Button from '@/components/global/Button';
-import { GlobalContext } from '@/contexts/globalContext';
-import { GlobalContextType, SessionPropsType } from '@/types';
+import { SessionPropsType } from '@/types';
 import { SessionContext } from '@/contexts/sessionContext';
 import { biometric, biometricError, biometricOn } from '@/assets';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { registerActions } from '@/redux/slices/registerSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import CameraComponent from '@/components/global/Camera';
 import { useCloudinary } from '@/hooks/useCloudinary';
 
@@ -24,7 +23,7 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): JSX.Element => {
     const dispatch = useDispatch()
-    const { email } = useContext<GlobalContextType>(GlobalContext);
+    const state = useSelector((state: any) => state.registerReducer)
     const { sendVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
     const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
@@ -38,10 +37,10 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
     const onPressNext = async () => {
         try {
             setLoading(true)
-            const message = await sendVerificationCode(email.toLowerCase())
+            const message = await sendVerificationCode(state.email.toLowerCase())
 
             if (message)
-                setVerificationData({ ...message, email: email.toLowerCase() })
+                setVerificationData({ ...message, email: state.email.toLowerCase() })
 
             nextPage()
             setLoading(false)

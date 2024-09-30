@@ -7,7 +7,6 @@ export const useFileSystem = () => {
         try {
             if (FileSystem.documentDirectory) {
                 const files = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory);
-                console.log(files, 'files');
                 return files
             }
         } catch (error) {
@@ -21,7 +20,6 @@ export const useFileSystem = () => {
 
             if (exists) {
                 await FileSystem.deleteAsync(`${file}`);
-                console.log(`File: ${file} deleted successfully!`);
             }
 
         } catch (error: any) {

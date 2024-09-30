@@ -48,7 +48,6 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
             }
 
             if (moment(data["dateOfExpiration"]).isBefore(moment())) {
-                console.log("expire dni");
                 setIsInValidIdImageMessage("La cédula escaneada ya expiro por favor escanea una nueva que no haya expirado")
                 setDisabledButton(true)
             }
@@ -80,10 +79,7 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                     dispatch(registerActions.setIdFrontUrl(_imageUrl))
                     setLoading(false)
 
-                    console.log(JSON.stringify({ ocrData, state }, null, 2));
-
                 } catch (error) {
-                    console.error(error)
                     setLoading(false)
                 }
             })()
