@@ -98,7 +98,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                                 :
                                 <ZStack w={"100%"} h={"100%"} justifyContent={"center"} alignItems={"center"}>
                                     <Image style={{ width: width * 0.7, height: height * 0.5 }} resizeMode="contain" source={biometric} alt="welcome-screen-image-account" />
-                                    <Spinner position={"relative"} left={"-28px"} size={"lg"} color={colors.mainGreen}/>
+                                    {loading ? <Spinner position={"relative"} left={"-28px"} size={"lg"} color={colors.mainGreen} /> : null}
                                 </ZStack>
                         }
                     </TouchableOpacity>
