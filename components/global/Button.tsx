@@ -1,10 +1,11 @@
 import React from 'react'
-import { Text, StyledProps, Pressable, Spinner } from 'native-base';
+import { Text, StyledProps, Pressable, Spinner, HStack } from 'native-base';
 import { INPUT_HEIGHT } from '@/constants';
 
 
 interface Props extends StyledProps {
     title: string
+    leftRender?: JSX.Element
     color?: string
     disabled?: boolean
     spin?: boolean
@@ -12,14 +13,17 @@ interface Props extends StyledProps {
 }
 
 const Button: React.FC<Props> = (props): JSX.Element => {
-    const { spin = false, color = "white", title, onPress = () => { }, disabled = false } = props
+    const { leftRender, h = `${INPUT_HEIGHT}px`, borderRadius = "25px", spin = false, color = "white", title, onPress = () => { }, disabled = false } = props
 
     return (
-        <Pressable _pressed={{ opacity: 0.5 }} {...props} borderRadius={"25px"} alignItems={"center"} justifyContent={"center"} h={`${INPUT_HEIGHT}px`} disabled={disabled} onPress={onPress}>
+        <Pressable _pressed={{ opacity: 0.5 }} {...props} borderRadius={borderRadius} alignItems={"center"} justifyContent={"center"} h={h} disabled={disabled} onPress={onPress}>
             {spin ?
                 <Spinner color={color} />
                 :
-                <Text width={"100%"} fontWeight={"bold"} fontSize={"16px"} textAlign={"center"} color={color}>{title}</Text>
+                <HStack space={2} w={"100%"} justifyContent={"center"} alignItems={"center"}>
+                    {leftRender}
+                    <Text  fontWeight={"bold"} fontSize={"16px"} textAlign={"center"} color={color}>{title}</Text>
+                </HStack>
             }
         </Pressable>
     )

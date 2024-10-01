@@ -1,4 +1,5 @@
 import logo from './logo.png';
+import logoChar from './logo-char.png';
 import welcome from './welcome.png';
 import account from './account.png';
 import idMock from './idMock.png';
@@ -10,15 +11,32 @@ import biometric from './biometric.png';
 import biometricOn from './biometric-on.png';
 import biometricError from './biometric-error.png';
 import pendingVerification from './pending-verification.png';
+import pendingVerificationSVG from './pending-verification.svg';
 import homeOff from './homeOff.png';
 import homeOn from './homeOn.png';
 import transationsOff from './transationsOff.png';
 import transationsOn from './transationsOn.png';
 import profileOff from './profileOff.png';
 import profileOn from './profileOn.png';
+import qrIcon from './qr.png';
+import sendIcon from './sendIcon.png';
+import receiveIcon from './receiveIcon.png';
+import phoneIcon from './phone.png';
+import cars from './cars.png';
+import house from './house.png';
+import bills from './bills.png';
+
 
 
 export {
+    pendingVerificationSVG,
+    bills,
+    cars,
+    house,
+    sendIcon,
+    phoneIcon,
+    receiveIcon,
+    qrIcon,
     homeOff,
     homeOn,
     transationsOff,
@@ -26,6 +44,7 @@ export {
     profileOff,
     profileOn,
     logo,
+    logoChar,
     account,
     idMock,
     idFront,

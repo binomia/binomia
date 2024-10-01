@@ -9,6 +9,7 @@ import { HStack, Image } from 'native-base';
 import { homeOff, homeOn, profileOff, profileOn, transationsOff, transationsOn } from '@/assets';
 import colors from '@/colors';
 import HomeScreen from '@/screens/HomeScreen';
+import HomeStack from './HomeStack';
 
 
 
@@ -42,9 +43,9 @@ const HomeNavigationTab: React.FC = () => {
     return (
         <Tab.Navigator screenOptions={tabBarIcon} >
             <Tab.Group screenOptions={{ headerShown: false }} >
-                <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Home' component={HomeScreen} />
-                <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Transactions' component={HomeScreen} />
-                <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Profile' component={HomeScreen} />
+                <Tab.Screen options={{ tabBarShowLabel: true, title: "" }} name='Home' component={HomeStack} />
+                <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Transactions' component={HomeStack} />
+                <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Profile' component={HomeStack} />
             </Tab.Group>
         </Tab.Navigator>
     )

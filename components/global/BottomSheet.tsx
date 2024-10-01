@@ -1,18 +1,18 @@
 import colors from '@/colors';
 import { useEffect, useRef, useState } from 'react'
-import { BottomSheet as RNBottomSheet, BottomSheetRef } from 'react-native-sheet';
+import { BottomSheet as RNBottomSheet, BottomSheetRef, BottomSheetProps } from 'react-native-sheet';
 
 
-type Props = {
-    children?: JSX.Element
-    onCloseFinish?: Function
-    height?: number
+interface Props extends BottomSheetProps {
+    // children?: JSX.Element
+    // onCloseFinish?: Function
+    // height?: number
     open?: boolean
-    showDragIcon?: boolean
-    draggable?: boolean
+    // showDragIcon?: boolean
+    // draggable?: boolean
     backdropBg?: string
-    sheetBg?: string
-    sheetStyle?: object
+    // sheetBg?: string
+    // sheetStyle?: object
 }
 
 
@@ -45,6 +45,7 @@ const BottomSheet: React.FC<Props> = ({
 
     return (
         <RNBottomSheet
+
             onCloseFinish={() => onCloseFinish()}
 
             openTime={500}
