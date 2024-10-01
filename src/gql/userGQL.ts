@@ -53,6 +53,27 @@ const type = () => {
             updatedAt: String
         }
 
+        type UserCreatedType {
+            id: Int
+            fullName: String
+            username: String
+            phone: String
+            email: String
+            dniNumber: String
+            password: String
+            profileImageUrl: String
+            addressAgreementSigned: Boolean
+            userAgreementSigned: Boolean
+            idFrontUrl: String
+            status: String
+            idBackUrl: String
+            faceVideoUrl: String
+            address: String
+            createdAt: String
+            updatedAt: String
+            token: String
+        }
+
         type OnlyUserType {
             id:  Int
             fullName: String
@@ -85,7 +106,7 @@ const query = () => {
 
 const mutation = () => {
     return `            
-        createUser(data: UserInput!): UserType 
+        createUser(data: UserInput!): UserCreatedType 
         updateUser(uuid:  Int!, data: UserInput!): UserType
         sendMessage(message: String): String
         login(email: String!, password: String!): String

@@ -1,7 +1,7 @@
 import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel } from '@/models'
 import { Op } from 'sequelize'
 import { getQueryResponseFields, checkForProtectedRequests } from '@/helpers'
-import { SESSION_SECRET_SECRET_KEY, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
+import { ZERO_ENCRYPTION_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
 import { UserJoiSchema } from '@/joi';
 import { UserModelType, VerificationDataType } from '@/types';
@@ -10,8 +10,6 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { Cryptography } from '@/helpers/cryptography';
 import { authServer } from '@/rpc';
-import { z } from 'zod'
-
 
 export class UsersController {
     static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -137,7 +135,7 @@ export class UsersController {
         }
     }
 
-    static userByEmail = async (_: unknown, { email }: { email: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+    static userByEmail = async (_: unknown, { email }: { email: string }) => {
         try {
             const user = await UsersModel.findOne({
                 where: {
@@ -153,10 +151,9 @@ export class UsersController {
         }
     }
 
-    static updateUserPassword = async (_: unknown, { email, password, data }: { email: string, password: string, data: VerificationDataType }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+    static updateUserPassword = async (_: unknown, { email, password, data }: { email: string, password: string, data: VerificationDataType }) => {
         try {
-            const validatedData: UserModelType = await UserJoiSchema.updateUserPassword.validateAsync({ email, password })
-
+            const validatedData = await UserJoiSchema.updateUserPassword.parseAsync({ email, password })
             const user = await UsersModel.findOne({
                 where: {
                     email
@@ -214,19 +211,15 @@ export class UsersController {
         }
     }
 
-    static createUser = async (_: unknown, { data }: { data: any }, { res, req }: { res: Response, req: Request }) => {
+    static createUser = async (_: unknown, { data }: { data: any }, { __, req }: { __: any, req: any }) => {
         try {
-            const validatedData: UserModelType = await UserJoiSchema.createUser.validateAsync(data)
+            const validatedData = await UserJoiSchema.createUser.parseAsync(data)
             const regexPattern = new RegExp('^\\d{3}-\\d{7}-\\d{1}');
-
-            const parsedData = await UserJoiSchema._createUser.parseAsync(data)
-            console.log({ parsedData });
-
-
+            
             if (!regexPattern.test(validatedData.dniNumber))
                 throw new GraphQLError('Invalid `dni` format');
-
-
+            
+            
             const userExists = await UsersModel.findOne({
                 where: {
                     [Op.or]: [
@@ -236,16 +229,27 @@ export class UsersController {
                 },
                 attributes: ["email", "username", "dniNumber"]
             })
-
+            
             if (userExists?.dataValues.dniNumber === validatedData.dniNumber)
                 throw new GraphQLError('A user with dni: ' + validatedData.dniNumber + ' already exists');
-
-
+            
             if (userExists?.dataValues.email === validatedData.email)
                 throw new GraphQLError('A user with email: ' + validatedData.email + ' already exists');
 
             if (userExists?.dataValues.username === validatedData.username)
                 throw new GraphQLError('A user with username: ' + validatedData.username + ' already exists');
+            
+
+            const kycExists = await kycModel.findOne({
+                where: {
+                    dniNumber: validatedData.dniNumber
+                }
+            })
+
+            if (kycExists)
+                throw new GraphQLError('The dni: ' + validatedData.dniNumber + ' already belong to a existing user');
+
+            
 
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(validatedData.password, salt);
@@ -259,11 +263,9 @@ export class UsersController {
                 currency: "DOP",
             })
 
-            console.log(account.dataValues);
-
-
             const kycStatus = "validated"
 
+            
             const kyc = await kycModel.create({
                 userId: user.dataValues.id,
                 dniNumber: validatedData.dniNumber,
@@ -276,10 +278,16 @@ export class UsersController {
                 bloodType: validatedData.bloodType
             })
 
+            const token = jwt.sign({
+                userId: user.dataValues.id,
+                sid: req.session.id
+            }, ZERO_ENCRYPTION_KEY);
+
             return {
                 ...user.dataValues,
                 accounts: [account],
-                kyc: kyc.dataValues
+                kyc: kyc.dataValues,
+                token
             }
 
         } catch (error: any) {
@@ -289,7 +297,7 @@ export class UsersController {
 
     static login = async (_: unknown, { email, password }: { email: string, password: string }, { res, req }: { res: any, req: any }) => {
         try {
-            const validatedData: UserModelType = await UserJoiSchema.login.validateAsync({ email, password })
+            const validatedData = await UserJoiSchema.login.parseAsync({ email, password })
 
             const user = await UsersModel.findOne({
                 where: { email }
@@ -307,7 +315,6 @@ export class UsersController {
                 userId: user.dataValues.id,
                 sid: req.session.id
             }, ZERO_ENCRYPTION_KEY);
-
 
 
 
