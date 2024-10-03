@@ -4,6 +4,7 @@ import * as Device from 'expo-device';
 const globalSlice = createSlice({
     name: 'global',
     initialState: {
+        session: {},
         applicationId: "",
         jwt: "",
         network: {
@@ -23,6 +24,9 @@ const globalSlice = createSlice({
         }
     },
     reducers: {
+        setSession: (state, action) => {
+            state.session = action.payload
+        },
         setNetwork: (state, action) => {
             state.network = action.payload
         },

@@ -28,6 +28,42 @@ export class UserApolloQueries {
         `
     }
 
+    static sessionUser = () => {
+        return gql`
+            query SessionUser {
+                sessionUser {
+                    id
+                    fullName
+                    username
+                    phone
+                    email
+                    dniNumber
+                    profileImageUrl
+                    addressAgreementSigned
+                    userAgreementSigned
+                    idFrontUrl
+                    status
+                    idBackUrl
+                    faceVideoUrl
+                    address
+                    kyc {
+                        id
+                        dniNumber
+                        dob
+                        status
+                        expiration
+                        occupation
+                        gender
+                        maritalStatus
+                        bloodType
+                        createdAt
+                        updatedAt
+                    }
+                }
+            }
+        `
+    }
+
     static userByEmail = () => {
         return gql`
             query UserByEmail($email: String!) {

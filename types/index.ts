@@ -26,6 +26,7 @@ export type SessionPropsType = {
     verificationData: VerificationDataType
     verificationCode: string
     jwt: string
+    applicationId: string
 }
 
 

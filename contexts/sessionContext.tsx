@@ -21,6 +21,7 @@ export const SessionContext = createContext<SessionPropsType>({
     verificationData: { token: "", signature: "", email: "" },
     verificationCode: "",
     jwt: "",
+    applicationId: "",
 });
 
 
@@ -30,6 +31,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const state = useSelector((state: any) => state.globalReducer)
     const { setItem, getItem, deleteItem } = useAsyncStorage()
     const [jwt, setJwt] = useState<string>("");
+    const [applicationId, setApplicationId] = useState<string>("");
     const [verificationData, setVerificationData] = useState<VerificationDataType>({ token: "", signature: "", email: "" });
     const [verificationCode, setVerificationCode] = useState<string>("");
     const [invalidCredentials, setInvalidCredentials] = useState<boolean>(false);
@@ -75,7 +77,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 variables: { email, password },
                 context: {
                     headers: {
-                        device: JSON.stringify({...state.device, network: state.network, location: state.location}),
+                        device: JSON.stringify({ ...state.device, network: state.network, location: state.location }),
                         "session-auth-identifier": state.applicationId,
                         "authorization": state.applicationId,
                     }
@@ -118,6 +120,13 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     useEffect(() => {
         (async () => {
             const jwt = await getItem("jwt");
+            const applicationId = await getItem("applicationId")
+
+
+            if (applicationId) {
+                await dispatch(globalActions.setApplicationId(applicationId))
+                setApplicationId(applicationId)
+            }
 
             if (jwt) {
                 await dispatch(globalActions.setJwt(jwt))
@@ -140,7 +149,8 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
         invalidCredentials,
         verificationData,
         verificationCode,
-        jwt
+        jwt,
+        applicationId
     };
 
     return (
