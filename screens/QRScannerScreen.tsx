@@ -1,7 +1,7 @@
 import { StyleSheet, Dimensions } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { Camera, useCameraDevice, useCodeScanner } from 'react-native-vision-camera'
-import { HStack, VStack, ZStack, Text, Image } from 'native-base'
+import { HStack, VStack, ZStack, Text, Image, Heading } from 'native-base'
 import { z } from 'zod'
 import colors from '@/colors'
 import * as Linking from 'expo-linking';
@@ -10,6 +10,7 @@ import Button from '@/components/global/Button'
 import BottomSheet from '@/components/global/BottomSheet'
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { logo, logoChar, pendingVerificationSVG } from '@/assets'
+import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants'
 
 
 
@@ -118,25 +119,23 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish }: Props) => {
                                         data={'#simple'}
                                         pieceLiquidRadius={0}
                                         logo={{
-                                            width: width / 10,
-                                            href: logo,
-                                            padding: 5,
-                                            scale: 1.5
+                                            href: logo                                           
                                         }}
                                         padding={20}
+                                        aria-hidden
                                         style={{
                                             backgroundColor: "transparent"
                                         }}
-                                        outerEyesOptions={{ borderRadius: 30 }}
-                                        innerEyesOptions={{ borderRadius: 20 }}
+                                        outerEyesOptions={{ borderRadius: 30}}
+                                        innerEyesOptions={{ borderRadius: 20, color: colors.mainGreen }}
                                         pieceSize={width / 29}
-                                        // pieceStroke={colors.gray}
                                         pieceBorderRadius={5}
-                                    />
+                                    />                                 
                                 </HStack>
-                                <HStack borderRadius={"10px"} mb={"10px"} py={"7px"} px={"15px"} bg={colors.darkGray} >
-                                    <Text color={colors.white}>Escanea el código QR{width / 30}</Text>
-                                </HStack>
+                                <VStack w={width * 0.85} alignItems={"center"} borderRadius={"10px"} mt={"30px"} py={"7px"} px={"15px"} bg={colors.darkGray} >
+                                    <Heading fontSize={`${TEXT_HEADING_FONT_SIZE}px`} color={colors.white}>Camila López</Heading>
+                                    <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} color={colors.white}>$camila_lopez</Text>
+                                </VStack>
                             </VStack>
                             <HStack w={width * 0.85}>
                                 <HStack h={55} borderRadius={"25px"} bg={"rgba(0,0,0,0.5)"} p={"3px"} w={"100%"} justifyContent={"space-between"}>
@@ -173,3 +172,29 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish }: Props) => {
 
 
 export default QRScannerScreen
+
+
+const styles = StyleSheet.create({
+    root: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    svg: {
+        backgroundColor: '#fff',
+        borderRadius: 20,
+        overflow: 'hidden',
+    },
+    logoContainer: {
+        position: 'absolute',
+        width: 88,
+        height: 88,
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    logo: {
+        width: '90%',
+        height: '90%',
+        top: -2,
+    },
+});

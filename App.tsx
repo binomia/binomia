@@ -22,19 +22,19 @@ const App: React.FC = () => {
 	const microphonePermission = useMicrophonePermission()
 
 	const onLayoutRootView = useCallback(async () => {
-		const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+		try {
+			if (!cameraPermission.hasPermission) {
+				await cameraPermission.requestPermission();
+			};
 
+			if (!microphonePermission.hasPermission) {
+				await microphonePermission.requestPermission();
+			};
 
-		if (!cameraPermission.hasPermission) {
-			await cameraPermission.requestPermission();
-		};
+		} catch (error) {
+			console.log({ error });
+		}
 
-		if (!microphonePermission.hasPermission) {
-			await microphonePermission.requestPermission();
-		};
-
-		await delay(3000); // Wait for 5 seconds
-		await SplashScreen.hideAsync();
 	}, []);
 
 	return (

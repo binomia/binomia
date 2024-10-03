@@ -15,8 +15,6 @@ export type VerificationDataType = {
 export type CreateUserDataType = z.infer<typeof UserAuthSchema.createUser>
 
 export type SessionPropsType = {
-    save: (key: string, value: string) => void
-    get: (key: string) => Promise<any>
     onLogin: ({ email, password }: { email: string, password: string }) => Promise<any>
     onRegister: (data:CreateUserDataType) => Promise<any>,
     onLogout: () => void

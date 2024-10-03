@@ -2,14 +2,14 @@ import { createContext, useEffect, useState } from "react";
 import { CreateUserDataType, SessionContextType, SessionPropsType, VerificationDataType } from "@/types";
 import { useMutation } from '@apollo/client';
 import { SessionApolloQueries, UserApolloQueries } from "@/apollo/query";
-import * as SecureStore from 'expo-secure-store';
 import * as Updates from 'expo-updates';
 import { notificationServer } from "@/rpc/notificationRPC";
 import { GENERATE_SIX_DIGIT_TOKEN } from "@/helpers";
+import useAsyncStorage from "@/hooks/useAsyncStorage";
+import { useSelector, useDispatch } from "react-redux";
+import { globalActions } from "@/redux/slices/globalSlice";
 
 export const SessionContext = createContext<SessionPropsType>({
-    save: (_: string, __: string) => { },
-    get: (_: string) => Promise.resolve(""),
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
     onRegister: (_data: CreateUserDataType) => Promise.resolve({}),
     onLogout: () => { },
@@ -24,16 +24,17 @@ export const SessionContext = createContext<SessionPropsType>({
 });
 
 
+
 export const SessionContextProvider = ({ children }: SessionContextType) => {
+    const dispatch = useDispatch()
+    const state = useSelector((state: any) => state.globalReducer)
+    const { setItem, getItem, deleteItem } = useAsyncStorage()
     const [jwt, setJwt] = useState<string>("");
     const [verificationData, setVerificationData] = useState<VerificationDataType>({ token: "", signature: "", email: "" });
     const [verificationCode, setVerificationCode] = useState<string>("");
     const [invalidCredentials, setInvalidCredentials] = useState<boolean>(false);
     const [login] = useMutation(SessionApolloQueries.login());
     const [createUser] = useMutation(UserApolloQueries.createUser());
-
-
-
 
     const sendVerificationCode = async (to: string) => {
         try {
@@ -57,39 +58,9 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
         }
     }
 
-
-
-    const save = async (key: string, value: string) => {
-        await SecureStore.setItemAsync(key, value);
-    }
-
-
-    const get = async (key: string) => {
-        const value = await SecureStore.getItemAsync(key);
-        return value
-    }
-
-
-    const remove = async (key: string) => {
-        await SecureStore.deleteItemAsync(key);
-    }
-
-    const getJWTToken = async (key: string) => {
-        const value = await get(key);
-
-        if (value)
-            setJwt(value);
-    }
-
-
-    useEffect(() => {
-        getJWTToken("jwt");
-    }, [])
-
-
     const onLogout = async () => {
         try {
-            await remove("jwt");
+            await deleteItem("jwt");
             await Updates.reloadAsync();
 
         } catch (error) {
@@ -97,16 +68,22 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
         }
     }
 
-
     const onLogin = async ({ email, password }: { email: string, password: string }): Promise<any> => {
         try {
 
             const data = await login({
-                variables: { email, password }
+                variables: { email, password },
+                context: {
+                    headers: {
+                        device: JSON.stringify({...state.device, network: state.network, location: state.location}),
+                        "session-auth-identifier": state.applicationId,
+                        "authorization": state.applicationId,
+                    }
+                }
             });
 
             if (data.data.login) {
-                await save("jwt", data.data.login)
+                await setItem("jwt", data.data.login)
                 await Updates.reloadAsync();
 
                 return data.data.login
@@ -114,17 +91,22 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
             return data
         } catch (error) {
+            console.log({ error });
+
             setInvalidCredentials(true)
         }
     }
+
     const onRegister = async (data: CreateUserDataType): Promise<any> => {
         try {
             const createUserResponse = await createUser({
-                variables: { data }
+                variables: { data },
+
+                context: { headers: { Authorization: `Bearer ${jwt}` } }
             })
 
             const token = createUserResponse.data?.createUser?.token
-            await save("jwt", token)
+            await setItem("jwt", token)
 
 
             return createUserResponse.data
@@ -133,10 +115,20 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
         }
     }
 
+    useEffect(() => {
+        (async () => {
+            const jwt = await getItem("jwt");
+
+            if (jwt) {
+                await dispatch(globalActions.setJwt(jwt))
+                setJwt(jwt)
+            }
+        })()
+    }, [])
+
+
 
     const value = {
-        save,
-        get,
         onLogin,
         onRegister,
         onLogout,
@@ -157,3 +149,6 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
         </SessionContext.Provider>
     )
 }
+
+
+

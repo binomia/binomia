@@ -1,6 +1,33 @@
 import { gql } from "@apollo/client"
 
 export class UserApolloQueries {
+    static user = () => {
+        return gql`
+            query User {
+                user {
+                    id
+                    fullName
+                    username
+                    phone
+                    email
+                    password
+                    dniNumber
+                    profileImageUrl
+                    addressAgreementSigned
+                    userAgreementSigned
+                    idFrontUrl
+                    status
+                    idBackUrl
+                    faceVideoUrl
+                    address
+                    accounts {
+                        id
+                    }
+                }
+            }
+        `
+    }
+
     static userByEmail = () => {
         return gql`
             query UserByEmail($email: String!) {

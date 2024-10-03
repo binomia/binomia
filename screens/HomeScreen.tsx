@@ -7,9 +7,21 @@ import colors from '@/colors';
 import Button from '@/components/global/Button';
 import { bills, cars, house, phoneIcon, receiveIcon, sendIcon } from '@/assets';
 import Feather from '@expo/vector-icons/Feather';
+import { gql, useLazyQuery } from '@apollo/client';
+import { useSelector } from 'react-redux';
+import { UserApolloQueries } from '@/apollo/query';
 
+
+const testQuery = gql`
+    query Test{
+        test
+    }
+`
 const HomeScreen: React.FC = () => {
+    const state = useSelector((state: any) => state.globalReducer)
     const { onLogout } = useContext<SessionPropsType>(SessionContext);
+    const [getUser] = useLazyQuery(UserApolloQueries.user());
+
 
 
     return (
@@ -22,18 +34,31 @@ const HomeScreen: React.FC = () => {
                 </VStack>
                 <HStack w={"100%"} justifyContent={"space-between"} >
                     <Button
+
                         leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={sendIcon} />}
                         w={"49%"} bg={"darkGray"}
                         mt={"20px"}
                         borderRadius={"10px"}
-                        title="Enviar" onPress={() => { }}
+                        title="Enviar"
+                        onPress={async () => {
+                            const data = await getUser({
+
+                                context: {
+                                    headers: {
+                                        "session-auth-identifier": state.applicationId,
+                                        "authorization": `Bearer ${state.jwt}`,
+                                    }
+                                }
+                            })
+                            console.log(JSON.stringify(state, null, 2));
+                        }}
                     />
                     <Button
                         leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={receiveIcon} />}
                         w={"49%"} bg={"darkGray"}
                         mt={"20px"}
                         borderRadius={"10px"}
-                        title="Recibir" onPress={() => { }}
+                        title="Recibir" onPress={() => onLogout()}
                     />
                 </HStack>
             </VStack>

@@ -135,7 +135,7 @@ const LoginComponent: React.FC = (): JSX.Element => {
                     </VStack>
                 </VStack>
             </TouchableWithoutFeedback>
-            <BottomSheet onCloseFinish={() => setShowResetPasswordBottomSheet(false)} sheetBg='white' height={SCREEN_HEIGHT * 0.9} open={showResetPasswordBottomSheet}>
+            <BottomSheet onCloseFinish={() => setShowResetPasswordBottomSheet(false)} height={SCREEN_HEIGHT * 0.9} open={showResetPasswordBottomSheet}>
                 <PagerView scrollEnabled={false} ref={pageViewRef} style={{ flex: 1 }} initialPage={currentPage}>
                     <ForgotPassword key="1" nextPage={nextPage} />
                     <VerifyCode key="2" nextPage={nextPage} prevPage={prevPage} />

@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { registerReducer } from './slices/registerSlice'
+import { globalReducer } from './slices/globalSlice'
 
 
 export const store = configureStore({
     reducer: {
-        registerReducer
+        globalReducer,
+        registerReducer,
     }
 })

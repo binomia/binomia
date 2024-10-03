@@ -1,15 +1,20 @@
 import * as React from 'react';
 import SignUpStack from '@/navigation/SignUpStack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { SessionPropsType } from '@/types';
 import { SessionContext } from '@/contexts/sessionContext';
-import { Button } from 'react-native';
-import { HStack, Image } from 'native-base';
+import { Image } from 'native-base';
 import { homeOff, homeOn, profileOff, profileOn, transationsOff, transationsOn } from '@/assets';
 import colors from '@/colors';
-import HomeScreen from '@/screens/HomeScreen';
 import HomeStack from './HomeStack';
+import useAsyncStorage from '@/hooks/useAsyncStorage';
+import { useDispatch } from 'react-redux';
+import { globalActions } from '@/redux/slices/globalSlice';
+import * as Crypto from 'expo-crypto';
+import { useLocation } from "@/hooks/useLocation";
+import * as SplashScreen from 'expo-splash-screen';
+import * as Network from 'expo-network';
 
 
 
@@ -52,9 +57,50 @@ const HomeNavigationTab: React.FC = () => {
 }
 
 
-
 export const Navigation: React.FC = () => {
+    const { setItem, getItem } = useAsyncStorage()
+    const dispatch = useDispatch()
     const { jwt } = useContext<SessionPropsType>(SessionContext);
+    const { getLocation } = useLocation()
+
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const [ip, network] = await Promise.all([Network.getIpAddressAsync(), Network.getNetworkStateAsync()])
+                const id = await getItem("applicationId")
+                const location = await getLocation()
+
+                await Promise.all([
+                    dispatch(globalActions.setNetwork({ ...network, ip })),
+                    dispatch(globalActions.setLocation(location))
+                ])
+
+
+                if (id)
+                    await dispatch(globalActions.setApplicationId(id))
+
+                else {
+                    const applicationId = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, Crypto.randomUUID().toString(), {
+                        encoding: Crypto.CryptoEncoding.HEX
+                    })
+
+                    await dispatch(globalActions.setApplicationId(id))
+                    setItem("applicationId", applicationId)
+                }
+
+            } catch (error) {
+                console.log({ error });
+            }
+
+
+            await delay(3000); // Wait for 5 seconds
+            await SplashScreen.hideAsync();
+
+        })()
+    }, [])
 
     return (
         jwt ? <HomeNavigationTab /> : <SignUpStack />
