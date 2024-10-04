@@ -16,15 +16,35 @@ export class UserAuthSchema {
         address: z.string(),
     }).nullable().default(null)
 
+
+    static accountsData = z.object({
+        id: z.number(),
+        balance: z.number(),
+        status: z.string(),
+        sendLimit: z.number(),
+        receiveLimit: z.number(),
+        withdrawLimit: z.number(),
+        hash: z.string(),
+        currency: z.string(),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+    }).nullable().default(null)
+
+
     static kycData = z.object({
+        id: z.number(),
         dniNumber: z.string().regex(/^[0-9]{3}-[0-9]{7}-[0-9]{1}$/),
         dob: z.string(),
-        dniExpiration: z.string(),
+        status: z.string(),
+        expiration: z.string(),
         occupation: z.string().optional().nullable().default(null),
         gender: z.string().optional().nullable().default(null),
         maritalStatus: z.string().optional().nullable().default(null),
-        bloodType: z.string().optional().nullable().default(null)
+        bloodType: z.string().optional().nullable().default(null),
+        createdAt: z.string(),
+        updatedAt: z.string(),
     }).nullable().default(null)
+
 
     static createUser = z.object({
         fullName: z.string(),

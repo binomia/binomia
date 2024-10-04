@@ -59,6 +59,18 @@ export class UserApolloQueries {
                         createdAt
                         updatedAt
                     }
+                    account {
+                        id
+                        balance
+                        status
+                        sendLimit
+                        receiveLimit
+                        withdrawLimit
+                        hash
+                        currency
+                        createdAt
+                        updatedAt
+                    }
                 }
             }
         `

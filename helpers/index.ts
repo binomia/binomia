@@ -76,3 +76,11 @@ export const FORMAT_DATE = (value: string) => {
     const date = `${year}-${months[month]}-${day}`
     return date
 }
+
+
+export const FORMAT_CURRENCY = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    }).format(value)
+}
