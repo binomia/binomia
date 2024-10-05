@@ -1,5 +1,6 @@
 export default {
     mainGreen: '#1D9B48',
+    lightGreen: 'rgba(29, 155, 72, 0.3)',
     lightGray: "#2C2C2C",
     darkGray: "#1E1E1E",
 
@@ -9,13 +10,12 @@ export default {
     placeholderTextColor: '#535353',
     primaryBlue: '#007AFF',
     placeholder: '#2C2C2C',
-    lightBlue: 'rgba(25, 123, 210, 0.1)',
+    lightBlue: 'rgba(25, 123, 210, 0.05)',
     blue: "rgba(25, 123, 210, 1)",
     lightSkyGray: '#B2B2B2',
     lightRed: '#fbecf1',
     gray: '#cccccc',
     red: 'rgb(255, 69, 58)',
-    lightGreen: '#e7f7f7',
     green: "#0DB1AD",
     lightPurple: '#EEEBF4',
     purple: "#7042C9",

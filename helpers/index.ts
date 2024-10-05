@@ -105,3 +105,19 @@ export const GENERATE_RAMDOM_COLOR_BASE_ON_TEXT = (test: string): string => {
 
     return color;
 }
+
+export const MAKE_FULL_NAME_SHORTEN = (fullName: string) => {
+    const nameParts = fullName.trim().split(" ");
+
+    if (nameParts.length === 1) {
+        return fullName; // Return full name if there's only one part
+    }
+
+    const firstName = nameParts[0];
+    const middleNameInitial = nameParts.length > 2 ? nameParts[1].charAt(0).toUpperCase() + '.' : '';
+    const lastNameInitial = nameParts[nameParts.length - 1];
+
+    return middleNameInitial
+        ? `${firstName} ${middleNameInitial} ${lastNameInitial}`
+        : `${firstName} ${lastNameInitial}`;
+}

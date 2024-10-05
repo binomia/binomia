@@ -1,24 +1,21 @@
-import { StyleSheet, Dimensions, View, TouchableOpacity } from 'react-native'
-import React, { useContext, useEffect, useState } from 'react'
-import { SessionPropsType } from '@/types';
-import { SessionContext } from '@/contexts/sessionContext';
+import { StyleSheet, Dimensions } from 'react-native'
+import React, { useEffect, useState } from 'react'
+
 import { Heading, HStack, Image, Pressable, VStack, Text, Stack } from 'native-base';
 import colors from '@/colors';
 import Button from '@/components/global/Button';
 import { bills, cars, house, phoneIcon, receiveIcon, sendIcon } from '@/assets';
-import Feather from '@expo/vector-icons/Feather';
-import { gql, useLazyQuery } from '@apollo/client';
-import { useDispatch, useSelector } from 'react-redux';
+
+import { useLazyQuery } from '@apollo/client';
+import { useDispatch } from 'react-redux';
 import { UserApolloQueries } from '@/apollo/query';
-import Entypo from '@expo/vector-icons/Entypo';
-import Carousel from 'react-native-reanimated-carousel';
 import { UserAuthSchema } from '@/auth/userAuth';
 import { z } from 'zod';
 import { globalActions } from '@/redux/slices/globalSlice';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { FORMAT_CURRENCY } from '@/helpers';
-import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import { scale } from 'react-native-size-matters';
 import { useNavigation } from '@react-navigation/native';
+import QRScannerScreen from './QRScannerScreen';
 
 
 
@@ -27,13 +24,9 @@ const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
     const dispatch = useDispatch()
     const navigation = useNavigation<any>();
-    const state = useSelector((state: any) => state.globalReducer)
-    const { onLogout } = useContext<SessionPropsType>(SessionContext);
-    const [getUser] = useLazyQuery(UserApolloQueries.user());
     const [getSessionUser] = useLazyQuery(UserApolloQueries.sessionUser());
 
-    const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [currentAccountIndex, setCurrentAccountIndex] = useState(0);
+    const [showBottomSheet, setShowBottomSheet] = useState(false)
     const [account, setAccount] = useState<z.infer<typeof UserAuthSchema.accountsData>>()
 
 
@@ -46,11 +39,11 @@ const HomeScreen: React.FC = () => {
             const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account)
 
             setAccount(accountsData)
-            await dispatch(globalActions.setSession({
-                accounts: accountsData,
-                user: userProfileData,
-                kyc: kycData
-            }))
+            await Promise.all([
+                dispatch(globalActions.setUser(userProfileData)),
+                dispatch(globalActions.setKyc(kycData)),
+                dispatch(globalActions.setAccount(accountsData))
+            ])
 
         } catch (error) {
             console.error(error);
@@ -85,7 +78,7 @@ const HomeScreen: React.FC = () => {
                             w={"49%"} bg={"darkGray"}
                             mt={"20px"}
                             borderRadius={"10px"}
-                            title="Recibir" onPress={() => onLogout()}
+                            title="Recibir" onPress={() => setShowBottomSheet(true)}
                         />
                     </HStack>
                 </VStack>
@@ -114,6 +107,7 @@ const HomeScreen: React.FC = () => {
                     </Pressable>
                 </HStack>
             </VStack>
+            <QRScannerScreen defaultPage={1} open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
         </VStack>
     )
 }

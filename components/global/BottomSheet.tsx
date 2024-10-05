@@ -20,6 +20,7 @@ const BottomSheet: React.FC<Props> = ({
     onCloseFinish = () => { },
     children,
     height = 500,
+    openTime = 500,
     open = false,
     showDragIcon = true,
     draggable = true,
@@ -45,10 +46,8 @@ const BottomSheet: React.FC<Props> = ({
 
     return (
         <RNBottomSheet
-
             onCloseFinish={() => onCloseFinish()}
-
-            openTime={500}
+            openTime={openTime}
             showDragIcon={showDragIcon}
             sheetStyle={sheetStyle}
             backdropBackgroundColor={backdropBg}

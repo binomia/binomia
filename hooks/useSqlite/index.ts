@@ -1,11 +1,9 @@
 import { drizzle } from "drizzle-orm/expo-sqlite";
-import { openDatabaseSync, useSQLiteContext } from "expo-sqlite/next";
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import migrations from '../../drizzle/migrations';
+import { useSQLiteContext } from "expo-sqlite/next";
 import { searchedUsersSchema } from "@/db/schemas/usersSchema";
 import { z } from "zod";
 import { UserAuthSchema } from "@/auth/userAuth";
-import { eq, desc, exists } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 
 
 
@@ -16,7 +14,10 @@ export const useSqlite = () => {
     const getOneSearchedUser = async (id: number) => {
         try {
             const response = await db.select().from(searchedUsersSchema).where(eq(searchedUsersSchema.id, id)).limit(1)
-            return response.length > 0 ? response[0] : null
+            if (response.length === 0) return null
+
+            const user = await UserAuthSchema.singleSearchUserData.parseAsync(response[0])
+            return user
 
         } catch (error) {
             console.error(error);
@@ -27,8 +28,10 @@ export const useSqlite = () => {
     const getSearchedUsers = async () => {
         try {
             const response = await db.select().from(searchedUsersSchema).orderBy(desc(searchedUsersSchema.id))
-            const users = UserAuthSchema.searchUserData.parseAsync(response)
-            return users 
+            if (response.length === 0) return []
+
+            const users = await UserAuthSchema.searchUserData.parseAsync(response)
+            return users
 
         } catch (error) {
             console.error(error);
@@ -36,15 +39,13 @@ export const useSqlite = () => {
         }
     }
 
-    const insertSearchedUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>) => {
+    const insertSearchedUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>): Promise<void> => {
         try {
             const userExists = await getOneSearchedUser(user.id)
             if (userExists) return
 
-            const response = await db.insert(searchedUsersSchema).values(user);
+            await db.insert(searchedUsersSchema).values(user);
             console.log(`User with id ${user.id} inserted successfully`);
-
-            return response
 
         } catch (error) {
             console.error(error);

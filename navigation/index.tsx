@@ -96,31 +96,6 @@ export const Navigation: React.FC = () => {
 
                 setItem("applicationId", applicationId)
                 await dispatch(globalActions.setApplicationId(applicationId))
-                // const user = await getSessionUser({
-                //     context: {
-                //         headers: {
-                //             "session-auth-identifier": applicationId,
-                //             "authorization": `Bearer ${jwt}`
-                //         }
-                //     }
-                // })
-
-                // const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user.data.sessionUser)
-                // const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
-                // const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.accounts)
-
-                // // console.log(JSON.stringify({
-                // //     user: userProfileData,
-                // //     kyc: kycData,
-                // //     accounts: accountsData
-                // // }, null, 2));
-                
-                // await dispatch(globalActions.setSession({
-                //     accounts: accountsData,
-                //     user: userProfileData,
-                //     kyc: kycData
-                // }))
-
 
             } catch (error) {
                 console.log({ error });

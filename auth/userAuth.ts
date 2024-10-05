@@ -28,7 +28,6 @@ export class UserAuthSchema {
 
     static searchUserData = z.array(UserAuthSchema.singleSearchUserData).min(0)
 
-
     static accountsData = z.object({
         id: z.number(),
         balance: z.number(),

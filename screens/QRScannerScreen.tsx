@@ -11,22 +11,28 @@ import BottomSheet from '@/components/global/BottomSheet'
 import QRCodeStyled from 'react-native-qrcode-styled';
 import { logo, logoChar, pendingVerificationSVG } from '@/assets'
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants'
+import { useSelector } from 'react-redux'
+import { scale } from 'react-native-size-matters'
+import { MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 
 
 
 type Props = {
     open?: boolean
     onCloseFinish?: () => void
+    defaultPage?: number
 }
 
 
 const { height, width } = Dimensions.get('window')
-const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish }: Props) => {
+const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0 }: Props) => {
+    const { user } = useSelector((state: any) => state.globalReducer)
+
     const pageFef = useRef<PagerView>(null);
 
     const ref = useRef<Camera>(null);
     const device = useCameraDevice("back");
-    const [currentPage, setCurrentPage] = useState<number>(0);
+    const [currentPage, setCurrentPage] = useState<number>(defaultPage);
     const [qrCode, setQrCode] = useState<string>("");
 
     const codeScanner = useCodeScanner({
@@ -63,7 +69,7 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish }: Props) => {
     }
 
     return (
-        <BottomSheet onOpenFinish={onOpenFinish} showDragIcon={false} height={height * 0.90} open={open} onCloseFinish={onCloseFinished}>
+        <BottomSheet onOpenFinish={onOpenFinish} height={height * 0.90} open={open} onCloseFinish={onCloseFinished}>
             {device &&
                 <PagerView scrollEnabled={false} style={{ flex: 1 }} initialPage={currentPage} ref={pageFef}>
                     <ZStack key={"1"} flex={1}>
@@ -119,22 +125,22 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish }: Props) => {
                                         data={'#simple'}
                                         pieceLiquidRadius={0}
                                         logo={{
-                                            href: logo                                           
+                                            href: logo
                                         }}
                                         padding={20}
                                         aria-hidden
                                         style={{
                                             backgroundColor: "transparent"
                                         }}
-                                        outerEyesOptions={{ borderRadius: 30}}
+                                        outerEyesOptions={{ borderRadius: 30 }}
                                         innerEyesOptions={{ borderRadius: 20, color: colors.mainGreen }}
                                         pieceSize={width / 29}
                                         pieceBorderRadius={5}
-                                    />                                 
+                                    />
                                 </HStack>
-                                <VStack w={width * 0.85} alignItems={"center"} borderRadius={"10px"} mt={"30px"} py={"7px"} px={"15px"} bg={colors.darkGray} >
-                                    <Heading fontSize={`${TEXT_HEADING_FONT_SIZE}px`} color={colors.white}>Camila López</Heading>
-                                    <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} color={colors.white}>$camila_lopez</Text>
+                                <VStack alignItems={"center"} borderRadius={"10px"} mt={"10px"} py={"7px"} px={"15px"} bg={colors.darkGray} >
+                                    <Heading  textTransform={"capitalize"} fontSize={scale(28)} color={colors.white}>{MAKE_FULL_NAME_SHORTEN(user?.fullName || "")}</Heading>
+                                    <Text textTransform={"lowercase"} fontSize={scale(15)} color={colors.lightSkyGray}>{user?.username}</Text>
                                 </VStack>
                             </VStack>
                             <HStack w={width * 0.85}>
