@@ -1,8 +1,8 @@
-import { sqliteTable, text, integer, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
-export const SearchedUsers = sqliteTable('searched_users', {
+export const searchedUsersSchema = sqliteTable('searched_users', {
     id: integer('id').primaryKey(),
-    name: text('fullName'),
+    fullName: text('fullName'),
     username: text('username'),
     email: text('email'),
     dniNumber: text('dniNumber'),

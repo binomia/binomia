@@ -16,6 +16,18 @@ export class UserAuthSchema {
         address: z.string(),
     }).nullable().default(null)
 
+    static singleSearchUserData = z.object({
+        id: z.number(),
+        fullName: z.string(),
+        username: z.string(),
+        email: z.string().email(),
+        dniNumber: z.string().regex(/^[0-9]{3}-[0-9]{7}-[0-9]{1}$/),
+        profileImageUrl: z.string().url().optional().nullable().default(null),
+        status: z.string(),
+    })
+
+    static searchUserData = z.array(UserAuthSchema.singleSearchUserData).min(0)
+
 
     static accountsData = z.object({
         id: z.number(),

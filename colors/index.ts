@@ -11,7 +11,7 @@ export default {
     placeholder: '#2C2C2C',
     lightBlue: 'rgba(25, 123, 210, 0.1)',
     blue: "rgba(25, 123, 210, 1)",
-    lightSkyGray: '#EAECED',
+    lightSkyGray: '#B2B2B2',
     lightRed: '#fbecf1',
     gray: '#cccccc',
     red: 'rgb(255, 69, 58)',

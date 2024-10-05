@@ -84,3 +84,24 @@ export const FORMAT_CURRENCY = (value: number) => {
         currency: 'USD',
     }).format(value)
 }
+
+export const GENERATE_RAMDOM_COLOR_BASE_ON_TEXT = (test: string): string => {
+    // Create a hash from the name
+    let hash: number = 0;
+    for (let i = 0; i < test.length; i++) {
+        hash = test.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    // Convert the hash to a hex color with a restriction on lightness
+    let color: string = '#';
+    for (let i = 0; i < 3; i++) {
+        let value: number = (hash >> (i * 8)) & 0xFF;
+
+        // Ensure the value is not too light (e.g., restrict values to a range like 50-200)
+        value = Math.max(50, Math.min(200, value));
+
+        color += ('00' + value.toString(16)).slice(-2);
+    }
+
+    return color;
+}

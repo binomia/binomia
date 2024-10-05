@@ -26,7 +26,7 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish }: Props) => {
 
     const ref = useRef<Camera>(null);
     const device = useCameraDevice("back");
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [currentPage, setCurrentPage] = useState<number>(0);
     const [qrCode, setQrCode] = useState<string>("");
 
     const codeScanner = useCodeScanner({

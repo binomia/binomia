@@ -28,6 +28,22 @@ export class UserApolloQueries {
         `
     }
 
+    static searchUser = () => {
+        return gql`
+        query Query($search: UserInput!, $limit: Int) {
+            searchUsers(search: $search, limit: $limit) {
+                id
+                fullName
+                username
+                email
+                dniNumber
+                profileImageUrl
+                status
+            }
+        }
+        `
+    }
+
     static sessionUser = () => {
         return gql`
             query SessionUser {

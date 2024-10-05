@@ -18,6 +18,7 @@ import { globalActions } from '@/redux/slices/globalSlice';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { FORMAT_CURRENCY } from '@/helpers';
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
+import { useNavigation } from '@react-navigation/native';
 
 
 
@@ -25,6 +26,7 @@ import { scale, verticalScale, moderateScale } from 'react-native-size-matters';
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
     const dispatch = useDispatch()
+    const navigation = useNavigation<any>();
     const state = useSelector((state: any) => state.globalReducer)
     const { onLogout } = useContext<SessionPropsType>(SessionContext);
     const [getUser] = useLazyQuery(UserApolloQueries.user());
@@ -76,22 +78,7 @@ const HomeScreen: React.FC = () => {
                             mt={"20px"}
                             borderRadius={"10px"}
                             title="Enviar"
-                            onPress={async () => {
-                                try {
-                                    const data = await getUser({
-                                        context: {
-                                            headers: {
-                                                "session-auth-identifier": state.applicationId,
-                                                "authorization": `Bearer ${state.jwt}`,
-                                            }
-                                        }
-                                    })
-                                    console.log(JSON.stringify(data.data, null, 2));
-
-                                } catch (error) {
-                                    console.error(error);
-                                }
-                            }}
+                            onPress={async () => navigation.navigate("SearchUserScreen")}
                         />
                         <Button
                             leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={receiveIcon} />}

@@ -1,8 +1,8 @@
-import { LogBox, StyleSheet, StatusBar } from 'react-native';
-import { useCallback } from 'react';
+import { LogBox, StyleSheet, StatusBar, View, Text, ActivityIndicator } from 'react-native';
+import { useCallback, useEffect } from 'react';
 import { SessionContextProvider } from '@/contexts/sessionContext';
 import { ApolloProvider } from '@apollo/client';
-import { NativeBaseProvider, View } from "native-base";
+import { NativeBaseProvider } from "native-base";
 import { theme } from '@/themes';
 import { apolloClient } from '@/apollo';
 import * as SplashScreen from 'expo-splash-screen';
@@ -13,11 +13,23 @@ import { useCameraPermission, useMicrophonePermission } from 'react-native-visio
 import { Provider } from 'react-redux';
 import { store } from '@/redux';
 
+import { drizzle } from "drizzle-orm/expo-sqlite";
+import { openDatabaseSync, SQLiteProvider } from "expo-sqlite/next";
+import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
+import migrations from './drizzle/migrations';
+import { DATABASE_NAME } from '@/constants';
+
+
+const expo = openDatabaseSync(DATABASE_NAME);
+const db = drizzle(expo);
+
 
 LogBox.ignoreAllLogs();
 SplashScreen.preventAutoHideAsync();
 
 const App: React.FC = () => {
+	const { success, error } = useMigrations(db, migrations);
+
 	const cameraPermission = useCameraPermission()
 	const microphonePermission = useMicrophonePermission()
 
@@ -37,23 +49,37 @@ const App: React.FC = () => {
 
 	}, []);
 
+	if (error) {
+		return (
+			<View>
+				<Text>Migration error: {error.message}</Text>
+			</View>
+		);
+	}
+	if (!success) {
+		console.log("Migration is in progress...", success);
+		return <ActivityIndicator style={{ flex: 1, justifyContent: "center", alignItems: "center" }} />
+	}
+
 	return (
-		<Provider store={store}>
-			<ApolloProvider client={apolloClient}>
-				<NativeBaseProvider theme={theme}>
-					<SessionContextProvider>
-						<GlobalContextProvider>
-							<View onLayout={onLayoutRootView} style={styles.container}>
-								<StatusBar barStyle="light-content" />
-								<NavigationContainer>
-									<Navigation />
-								</NavigationContainer>
-							</View>
-						</GlobalContextProvider>
-					</SessionContextProvider>
-				</NativeBaseProvider>
-			</ApolloProvider>
-		</Provider>
+		<SQLiteProvider databaseName={DATABASE_NAME}>
+			<Provider store={store}>
+				<ApolloProvider client={apolloClient}>
+					<NativeBaseProvider theme={theme}>
+						<SessionContextProvider>
+							<GlobalContextProvider>
+								<View onLayout={onLayoutRootView} style={styles.container}>
+									<StatusBar barStyle="light-content" />
+									<NavigationContainer>
+										<Navigation />
+									</NavigationContainer>
+								</View>
+							</GlobalContextProvider>
+						</SessionContextProvider>
+					</NativeBaseProvider>
+				</ApolloProvider>
+			</Provider>
+		</SQLiteProvider>
 	);
 }
 
