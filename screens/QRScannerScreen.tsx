@@ -41,8 +41,10 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
             const { success, data } = z.string().regex(/\$.+/).safeParse(codes[0].value)
 
             if (success) {
-                if (!qrCode)
+                if (!qrCode) {
                     setQrCode(data)
+                    alert(data)
+                }
 
             } else {
                 const { success, data } = z.string().url().safeParse(codes[0].value)
@@ -65,11 +67,11 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
         if (onCloseFinish)
             onCloseFinish()
 
-        setQrCode("")
+        // setQrCode("")
     }
 
     return (
-        <BottomSheet onOpenFinish={onOpenFinish} height={height * 0.90} open={open} onCloseFinish={onCloseFinished}>
+        <BottomSheet showDragIcon={false} onOpenFinish={onOpenFinish} height={height * 0.90} open={open} onCloseFinish={onCloseFinished}>
             {device &&
                 <PagerView scrollEnabled={false} style={{ flex: 1 }} initialPage={currentPage} ref={pageFef}>
                     <ZStack key={"1"} flex={1}>
@@ -139,7 +141,7 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                     />
                                 </HStack>
                                 <VStack alignItems={"center"} borderRadius={"10px"} mt={"10px"} py={"7px"} px={"15px"} bg={colors.darkGray} >
-                                    <Heading  textTransform={"capitalize"} fontSize={scale(28)} color={colors.white}>{MAKE_FULL_NAME_SHORTEN(user?.fullName || "")}</Heading>
+                                    <Heading textTransform={"capitalize"} fontSize={scale(28)} color={colors.white}>{MAKE_FULL_NAME_SHORTEN(user?.fullName || "")}</Heading>
                                     <Text textTransform={"lowercase"} fontSize={scale(15)} color={colors.lightSkyGray}>{user?.username}</Text>
                                 </VStack>
                             </VStack>

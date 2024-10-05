@@ -25,6 +25,7 @@ import phoneIcon from './phone.png';
 import cars from './cars.png';
 import house from './house.png';
 import bills from './bills.png';
+import checked from './checked.png';
 
 
 
@@ -49,6 +50,7 @@ export {
     idMock,
     idFront,
     idBack,
+    checked,
     idFrontMock,
     welcome,
     welcomeSignup,

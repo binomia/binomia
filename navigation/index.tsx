@@ -15,7 +15,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Network from 'expo-network';
 import { useLazyQuery } from '@apollo/client';
 import { UserApolloQueries } from '@/apollo/query/userQuery';
-import { UserAuthSchema } from '@/auth/userAuth';
+import TransactionsStack from './TransactionsStack';
 
 const RootTab: React.FC = () => {
     const Tab = createBottomTabNavigator();
@@ -45,10 +45,10 @@ const RootTab: React.FC = () => {
     })
 
     return (
-        <Tab.Navigator screenOptions={tabBarIcon} >
+        <Tab.Navigator screenOptions={tabBarIcon} initialRouteName='Transactions' >
             <Tab.Group screenOptions={{ headerShown: false }} >
                 <Tab.Screen options={{ tabBarShowLabel: true, title: "" }} name='Home' component={HomeStack} />
-                <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Transactions' component={HomeStack} />
+                <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Transactions' component={TransactionsStack} />
                 <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Profile' component={HomeStack} />
             </Tab.Group>
         </Tab.Navigator>

@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { Text, StyledProps, Pressable, Spinner, FlatList, HStack, VStack, Heading } from 'native-base';
+import React from 'react'
+import { Text, StyledProps, Pressable, FlatList, VStack, Heading } from 'native-base';
 import { StyleSheet, Dimensions } from 'react-native';
 import colors from '@/colors';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -9,16 +9,15 @@ import * as Haptics from 'expo-haptics';
 
 
 interface Props extends StyledProps {
-    onPressButtom?: (value: string) => void
+    onChange?: (value: string) => void
     maxAmount?: number
 }
 
 
 const { width } = Dimensions.get("window")
-const NumberKeyPad: React.FC<Props> = ({ onPressButtom = (_: string) => { }, maxAmount = 5e5 }): JSX.Element => {
+const KeyNumberPad: React.FC<Props> = ({ onChange = (_: string) => { }, maxAmount = 5e5 }): JSX.Element => {
     const [value, setValue] = React.useState<string>("0")
     const [valueScale, setValueScale] = React.useState<number>(0)
-    const [runAnimation, setRunAnimation] = React.useState<boolean>(false)
 
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
 
@@ -38,7 +37,7 @@ const NumberKeyPad: React.FC<Props> = ({ onPressButtom = (_: string) => { }, max
             const newValueParseed = isNaN(Number.parseFloat(newValue)) ? "0" : parseFloat(newValue).toFixed(2)
 
             setValue(newValue)
-            onPressButtom(newValueParseed)
+            onChange(newValueParseed)
 
         } else {
             const newValue = value + number
@@ -59,14 +58,13 @@ const NumberKeyPad: React.FC<Props> = ({ onPressButtom = (_: string) => { }, max
 
 
             setValue(newValue)
-            onPressButtom(newValueParseed)
+            onChange(newValueParseed)
         }
     }
 
     return (
         <VStack space={2} alignItems={"center"} justifyContent={"space-between"}>
             <Heading mb={"40px"} fontSize={scale(45 + valueScale)} color={"mainGreen"} textAlign={"center"}>{FORMAT_CURRENCY(Number(value))}</Heading>
-
             <FlatList columnWrapperStyle={styles.ColumnWrapperStyle} contentContainerStyle={{ alignItems: "center", gap: 20 }} data={["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "x"]} numColumns={3} renderItem={({ item }) => (
                 item === "x" ?
                     <Pressable key={`number-key-pad-key-${item}`} onPress={() => onInputChange(item)} style={styles.OuterButton} _pressed={styles.OuterButtonPressed}>
@@ -78,11 +76,12 @@ const NumberKeyPad: React.FC<Props> = ({ onPressButtom = (_: string) => { }, max
                     </Pressable>
             )} />
         </VStack>
+        
     )
 }
 
 
-export default NumberKeyPad
+export default KeyNumberPad
 
 const styles = StyleSheet.create({
     OuterButton: {
