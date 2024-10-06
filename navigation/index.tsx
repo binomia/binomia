@@ -45,7 +45,7 @@ const RootTab: React.FC = () => {
     })
 
     return (
-        <Tab.Navigator screenOptions={tabBarIcon} initialRouteName='Transactions' >
+        <Tab.Navigator screenOptions={tabBarIcon} initialRouteName='Home' >
             <Tab.Group screenOptions={{ headerShown: false }} >
                 <Tab.Screen options={{ tabBarShowLabel: true, title: "" }} name='Home' component={HomeStack} />
                 <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Transactions' component={TransactionsStack} />
@@ -100,10 +100,6 @@ export const Navigation: React.FC = () => {
             } catch (error) {
                 console.log({ error });
             }
-
-            await delay(3000); // Wait for 5 seconds
-            await SplashScreen.hideAsync();
-
         })()
     }, [])
 

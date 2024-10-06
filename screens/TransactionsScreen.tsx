@@ -100,7 +100,7 @@ const TransactionsScreen: React.FC = () => {
 							<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} width={"70px"} height={"70px"} alignItems={"center"} justifyContent={"center"} onPress={() => navigation.navigate("SearchUserScreen")}>
 								<AntDesign name="pluscircle" size={24} color="white" />
 							</Pressable>
-							<Heading textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>Nueva</Heading>
+							<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>Nueva</Heading>
 						</VStack>
 						<FlatList
 							scrollEnabled={false}
@@ -119,7 +119,7 @@ const TransactionsScreen: React.FC = () => {
 												textStyle={styles.textStyle}
 											/>
 										}
-										<VStack justifyContent={"center"}>
+										<VStack mt={"5px"} justifyContent={"center"}>
 											<Heading textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>{item.fullName.slice(0, 7)}...</Heading>
 										</VStack>
 									</VStack>

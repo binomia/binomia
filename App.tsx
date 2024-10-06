@@ -25,7 +25,7 @@ const db = drizzle(expo);
 
 
 LogBox.ignoreAllLogs();
-SplashScreen.preventAutoHideAsync();
+// SplashScreen.preventAutoHideAsync();
 
 const App: React.FC = () => {
 	const { success, error } = useMigrations(db, migrations);
@@ -33,6 +33,7 @@ const App: React.FC = () => {
 	const cameraPermission = useCameraPermission()
 	const microphonePermission = useMicrophonePermission()
 
+	const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 	const onLayoutRootView = useCallback(async () => {
 		try {
 			if (!cameraPermission.hasPermission) {
@@ -43,23 +44,19 @@ const App: React.FC = () => {
 				await microphonePermission.requestPermission();
 			};
 
+			await delay(4000); // Wait for 5 seconds
+			await SplashScreen.hideAsync();
+
 		} catch (error) {
-			console.log({ error });
+			console.error({ error });
 		}
 
 	}, []);
 
-	if (error) {
-		return (
-			<View>
-				<Text>Migration error: {error.message}</Text>
-			</View>
-		);
-	}
-	if (!success) {
-		console.log("Migration is in progress...", success);
-		return <ActivityIndicator style={{ flex: 1, justifyContent: "center", alignItems: "center" }} />
-	}
+	useEffect(() => {
+		console.log("sqlite", error);
+
+	}, [])
 
 	return (
 		<SQLiteProvider databaseName={DATABASE_NAME}>
