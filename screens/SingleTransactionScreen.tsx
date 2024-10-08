@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native'
@@ -21,26 +21,26 @@ type Props = {
 
 const { height } = Dimensions.get('window')
 const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { } }) => {
-	const { account, user } = useSelector((state: any) => state.globalReducer)
+	const { transaction } = useSelector((state: any) => state.transactionReducer)
 	const [openDetail, setOpenDetail] = useState<boolean>(false)
 
 
 	const details = [
-		{
-			title: "id",
-			value: "#A2M0YYASDFF"
-		},
+		// {
+		// 	title: "id",
+		// 	value: transaction.id
+		// },
 		{
 			title: "Fecha",
-			value: moment().format("YYYY-MM-DD")
+			value: moment(Number(transaction.createdAt)).format("lll")
 		},
 		{
 			title: "Enviado a",
-			value: "Banco Central"
+			value: transaction.fullName
 		},
-		{
+		{ 
 			title: "Monto",
-			value: "250.00"
+			value: transaction.amount
 		}
 	]
 
@@ -49,7 +49,7 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 			case "Monto":
 				return {
 					title,
-					value: FORMAT_CURRENCY(Number(value)),
+ 					value: transaction.isFromMe ? "-" : "+" + FORMAT_CURRENCY(Number(value)),
 					color: colors.mainGreen
 				}
 
@@ -61,6 +61,11 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 				}
 		}
 	}
+
+	useEffect(() => {
+		console.log(JSON.stringify(transaction, null, 2));
+
+	}, [transaction])
 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
@@ -85,24 +90,24 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 				<VStack flex={1} pb={"40px"} justifyContent={"space-between"}>
 					<VStack mt={"50px"} alignItems={"center"} borderRadius={10}>
 						<HStack>
-							{false ?
-								<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: "" }} />
+							{transaction.profileImageUrl ?
+								<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: transaction.profileImageUrl }} />
 								:
 								<DefaultIcon
-									value={"Kamari Chizimu"}
-									contentContainerStyle={[styles.contentContainerStyle, { width: 70, height: 70, backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT("Kamari Chizimu") }]}
+									value={transaction?.fullName || ""}
+									contentContainerStyle={[styles.contentContainerStyle, { width: 70, height: 70, backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "") }]}
 									textStyle={styles.textStyle}
 								/>
 							}
 						</HStack>
 						<VStack mt={"10px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN("Kamari Chizimu")}</Heading>
-							<Text color={colors.lightSkyGray}>{"Enviaste a $sclerotic_carrot_54"}</Text>
+							<Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
+							<Text color={colors.lightSkyGray}>{transaction.username}</Text>
 						</VStack>
 					</VStack>
 					<VStack mb={"50px"} alignItems={"center"}>
-						<Heading textTransform={"capitalize"} fontSize={scale(40)} color={"mainGreen"}>{FORMAT_CURRENCY(200)}</Heading>
-						<Text mb={"10px"} color={colors.lightSkyGray}>{moment("2024-01-01").format("lll")}</Text>
+						<Heading textTransform={"capitalize"} fontSize={scale(40)} color={transaction.isFromMe ? "red" : "mainGreen"}>{transaction.isFromMe ? "-" : "+"}{FORMAT_CURRENCY(transaction?.amount)}</Heading>
+						<Text mb={"10px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
 						<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(60)} h={scale(60)} source={checked} />
 					</VStack>
 					<HStack justifyContent={"center"}>
@@ -119,7 +124,7 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 								renderItem={({ item, index }) => (
 									<HStack key={`detail-tx-${index}`} mb={"10px"} w={"100%"} justifyContent={"space-between"} alignItems={"center"}>
 										<Text fontSize={scale(14)} color={colors.white}>{handleValue(item.title, item.value).title}</Text>
-										<Text fontSize={scale(14)} color={handleValue(item.title, item.value).color}>{handleValue(item.title, item.value).value}</Text>
+										<Text fontSize={scale(14)} textTransform={"capitalize"} color={handleValue(item.title, item.value).color}>{handleValue(item.title, item.value).value}</Text>
 									</HStack>
 								)}
 							/>

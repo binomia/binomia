@@ -26,11 +26,14 @@ import cars from './cars.png';
 import house from './house.png';
 import bills from './bills.png';
 import checked from './checked.png';
+import noTransactions from './no-transactions.png';
+
 
 
 
 export {
     pendingVerificationSVG,
+    noTransactions,
     bills,
     cars,
     house,

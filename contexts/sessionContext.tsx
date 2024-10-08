@@ -133,6 +133,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 setJwt(jwt)
             }
         })()
+        // onLogout()
     }, [])
 
 

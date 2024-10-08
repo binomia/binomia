@@ -47,7 +47,6 @@ const SearchUserScreen: React.FC = () => {
 
 				if (data.searchUsers.length > 0) {
 					data.searchUsers.forEach(async (user: any) => {
-						// await deleteSearchedUser(user.id) rosa elena victoriano severino
 						await insertSearchedUser(user)
 					})
 				}
@@ -61,6 +60,13 @@ const SearchUserScreen: React.FC = () => {
 	const fetchSearchedUser = async () => {
 		const searchedUsers = await getSearchedUsers()
 		setUsers(searchedUsers)
+
+		console.log(JSON.stringify(searchedUsers, null, 2));
+
+		searchedUsers.forEach(async (user: any) => {
+			await deleteSearchedUser(user.id)
+		})
+		
 	}
 
 	const onSelectUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>) => {
