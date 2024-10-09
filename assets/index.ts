@@ -32,6 +32,7 @@ import privacyIcon from './privacy.png';
 import limitIcon from './limit.png';
 import notificacionIcon from './notificacion.png';
 import soportIcon from './soport.png';
+import addressIcon from './address.png';
 
 
 
@@ -39,6 +40,7 @@ import soportIcon from './soport.png';
 
 export {
     userIcon,
+    addressIcon,
     soportIcon,
     notificacionIcon,
     privacyIcon,

@@ -1,43 +1,49 @@
 import { StyleSheet, } from 'react-native'
 import React, { useContext, useEffect } from 'react'
 import { Heading, Image, VStack, Text, HStack, Divider, FlatList, Pressable } from 'native-base'
-import { limitIcon, logo, notificacionIcon, privacyIcon, soportIcon, userIcon } from '@/assets'
+import { limitIcon, notificacionIcon, privacyIcon, soportIcon, userIcon } from '@/assets'
 import DefaultIcon from 'react-native-default-icon'
 import { useSelector } from 'react-redux'
 import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Feather from '@expo/vector-icons/Feather';
 import Button from '@/components/global/Button'
 import { SessionContext } from '@/contexts/sessionContext'
+import { useNavigation } from '@react-navigation/native'
 
 
 const ProfileScreen: React.FC = () => {
     const { user } = useSelector((state: any) => state.globalReducer)
+    const navigation = useNavigation<any>()
     const { onLogout } = useContext(SessionContext)
 
     const data = [
         {
             name: "Personal",
+            path: "PersonalScreen",
             icon: userIcon,
         },
         {
             name: "Privacidad & Seguridad",
+            path: "PersonalScreen",
             icon: privacyIcon,
         },
         {
             name: "Limites",
+            path: "PersonalScreen",
             icon: limitIcon,
         },
         {
             name: "Notificaciones",
+            path: "PersonalScreen",
             icon: notificacionIcon,
         },
         {
             name: "Soporte",
+            path: "PersonalScreen",
             icon: soportIcon,
-        },
+        }
     ]
 
     useEffect(() => {
@@ -68,17 +74,17 @@ const ProfileScreen: React.FC = () => {
                         scrollEnabled={false}
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={({ item, index }) => (
-                            <Pressable _pressed={{ opacity: 0.5 }} onPress={() => { }}>
+                            <Pressable _pressed={{ opacity: 0.5 }} onPress={() => navigation.navigate(item.path)}>
                                 <HStack key={`personal${item.name}`} space={2} pl={"10px"} py={"8px"} alignItems={"center"}>
                                     <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
                                         <Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
                                     </HStack>
                                     <VStack width={"90%"} h={"30px"} borderRadius={10}>
                                         <HStack pr={"10px"} justifyContent={"space-between"} alignItems={"center"}>
-                                            <Text fontWeight={"semibold"} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
+                                            <Text textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
                                             <Feather name="chevron-right" size={24} color="white" />
                                         </HStack>
-                                        <Divider mt={index !== 4 ? "10px" : "0px"} width={"100%"} h={"0.5px"} bg={index !== 4 ? colors.gray : colors.lightGray} />
+                                        {index !== 4 ? <Divider mt={"10px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
                                     </VStack>
                                 </HStack>
                             </Pressable>
@@ -86,7 +92,7 @@ const ProfileScreen: React.FC = () => {
                 </VStack>
             </VStack>
             <HStack mb={"30px"} justifyContent={"center"}>
-                <Button bg={"lightGray"} color='red' title='Cerrar Sesion' onPress={onLogout} w={'80%'} />
+                <Button fontWeight={"bold"} bg={"lightGray"} color='red' title='Cerrar Sesion' onPress={onLogout} w={'80%'} />
             </HStack>
         </VStack>
     )
