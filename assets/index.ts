@@ -27,11 +27,22 @@ import house from './house.png';
 import bills from './bills.png';
 import checked from './checked.png';
 import noTransactions from './no-transactions.png';
+import userIcon from './user.png';
+import privacyIcon from './privacy.png';
+import limitIcon from './limit.png';
+import notificacionIcon from './notificacion.png';
+import soportIcon from './soport.png';
+
 
 
 
 
 export {
+    userIcon,
+    soportIcon,
+    notificacionIcon,
+    privacyIcon,
+    limitIcon,
     pendingVerificationSVG,
     noTransactions,
     bills,

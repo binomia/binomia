@@ -14,7 +14,7 @@ export default {
     blue: "rgba(25, 123, 210, 1)",
     lightSkyGray: '#B2B2B2',
     lightRed: '#fbecf1',
-    gray: '#cccccc',
+    gray: 'rgba(217, 217, 217,0.3)',
     red: 'rgb(255, 69, 58)',
     green: "#0DB1AD",
     lightPurple: '#EEEBF4',
