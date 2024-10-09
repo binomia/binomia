@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
 import DefaultIcon from 'react-native-default-icon';
-import { StyleSheet, SafeAreaView, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView, ZStack } from 'native-base'
+import { StyleSheet, SafeAreaView, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity, RefreshControl } from 'react-native'
+import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
@@ -12,20 +12,17 @@ import { FORMAT_CURRENCY, FORMAT_DATE, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_
 import { useSqlite } from '@/hooks/useSqlite';
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import Button from '@/components/global/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation } from '@react-navigation/native';
 import SingleTransactionScreen from './SingleTransactionScreen';
 import SendTransaction from '@/components/transaction/SendTransaction';
-import KeyNumberPad from '@/components/global/KeyNumberPad';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { noTransactions } from '@/assets';
 
-const { height, width } = Dimensions.get('window')
+const { height } = Dimensions.get('window')
 const TransactionsScreen: React.FC = () => {
 	const dispatch = useDispatch()
 	const { user } = useSelector((state: any) => state.globalReducer)
@@ -33,8 +30,9 @@ const TransactionsScreen: React.FC = () => {
 
 	const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
 	const [accountTransactions] = useLazyQuery(TransactionApolloQueries.accountTransactions())
-	const { getSearchedUsers, insertSearchedUser, deleteSearchedUser } = useSqlite()
+	const { getSearchedUsers, insertSearchedUser } = useSqlite()
 
+	const [refreshing, setRefreshing] = useState(false);
 	const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
 	const [transactions, setTransactions] = useState<any[]>([])
 	const [showSingleTransaction, setShowSingleTransaction] = useState<boolean>(false);
@@ -60,13 +58,6 @@ const TransactionsScreen: React.FC = () => {
 				})
 
 				setUsers(data.searchUsers.length > 0 ? data.searchUsers : [])
-
-				if (data.searchUsers.length > 0) {
-					data.searchUsers.forEach(async (user: any) => {
-						// await deleteSearchedUser(user.id) rosa elena victoriano severino
-						await insertSearchedUser(user)
-					})
-				}
 			}
 
 		} catch (error) {
@@ -88,9 +79,37 @@ const TransactionsScreen: React.FC = () => {
 					"accountId": 1
 				}
 			})
-			// console.log(JSON.stringify(data.accountTransactions[0], null, 2));
-			formatTransaction(data.accountTransactions[0])
+
 			setTransactions(data.accountTransactions)
+
+			data.accountTransactions.forEach(async (transaction: any) => {
+				const isFromMe = transaction.from.user.id === user.id
+				if (!isFromMe) {
+					const userData: z.infer<typeof UserAuthSchema.singleSearchUserData> = {
+						id: transaction.from.user.id,
+						dniNumber: transaction.from.user.dniNumber,
+						fullName: transaction.from.user.fullName,
+						profileImageUrl: transaction.from.user.profileImageUrl,
+						username: transaction.from.user.username,
+						email: transaction.from.user.email,
+						status: transaction.from.user.status
+					}
+
+					await insertSearchedUser(userData)
+				} else {
+					const userData: z.infer<typeof UserAuthSchema.singleSearchUserData> = {
+						id: transaction.to.user.id,
+						dniNumber: transaction.to.user.dniNumber,
+						fullName: transaction.to.user.fullName,
+						profileImageUrl: transaction.to.user.profileImageUrl,
+						username: transaction.to.user.username,
+						email: transaction.to.user.email,
+						status: transaction.to.user.status
+					}
+
+					await insertSearchedUser(userData)
+				}
+			})
 
 		} catch (error) {
 			console.error(error)
@@ -128,8 +147,18 @@ const TransactionsScreen: React.FC = () => {
 			fullName: isFromMe ? user.fullName : transaction.to.user.fullName,
 			username: isFromMe ? user.username : transaction.to.user.username
 		}
+
 		return data
 	}
+
+	const onRefresh = useCallback(async () => {
+		setRefreshing(true);
+
+		await accountTransactions()
+		setTimeout(() => {
+			setRefreshing(false);
+		}, 2000);
+	}, []);
 
 
 	useEffect(() => {
@@ -140,54 +169,57 @@ const TransactionsScreen: React.FC = () => {
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
-				<ScrollView contentContainerStyle={{ flex: 1 }}>
-					<VStack pt={"20px"}>
-						<VStack>
-							<VStack px={"20px"} w={"100%"} alignItems={"center"}>
-								<Input h={"50px"} w={"100%"} placeholder='Buscar...' onChangeText={(value) => handleSearch(value.toLowerCase())} />
-							</VStack>
-							<ScrollView px={"20px"} horizontal contentContainerStyle={styles.ScrollView} >
-								<VStack mr={"20px"} width={"70px"} height={"70px"} justifyContent={"center"} alignItems={"center"}>
-									<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} width={"70px"} height={"70px"} alignItems={"center"} justifyContent={"center"} onPress={() => navigation.navigate("SearchUserScreen")}>
-										<AntDesign name="pluscircle" size={24} color="white" />
-									</Pressable>
-									<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>Nueva</Heading>
-								</VStack>
-								<FlatList
-									scrollEnabled={false}
-									showsVerticalScrollIndicator={true}
-									data={users}
-									contentContainerStyle={{ flexDirection: "row", gap: 20, }}
-									renderItem={({ item, index }) => (
-										<Pressable _pressed={{ opacity: 0.5 }} borderRadius={100} alignItems={"center"} key={`search_user_${index}-${item.username}`} onPress={() => onSelectUser(item)}>
-											<VStack alignItems={"center"} borderRadius={10}>
-												{item.profileImageUrl ?
-													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: item.profileImageUrl }} />
-													:
-													<DefaultIcon
-														value={item.fullName}
-														contentContainerStyle={[styles.contentContainerStyle, { width: 70, height: 70, backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.fullName) }]}
-														textStyle={styles.textStyle}
-													/>
-												}
-												<VStack mt={"5px"} justifyContent={"center"}>
-													<Heading textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>{item.fullName.slice(0, 7)}...</Heading>
-												</VStack>
-											</VStack>
-										</Pressable>
 
-									)}
-								/>
-							</ScrollView>
+				<VStack pt={"20px"}>
+					<VStack>
+						<VStack px={"20px"} w={"100%"} alignItems={"center"}>
+							<Input h={"50px"} w={"100%"} placeholder='Buscar...' onChangeText={(value) => handleSearch(value.toLowerCase())} />
 						</VStack>
-						{transactions.length > 0 ?
-							<VStack>
-								<Heading px={"20px"} fontSize={scale(20)} color={"white"}>Transacciones</Heading>
+						<ScrollView px={"20px"} horizontal={true} contentContainerStyle={styles.ScrollView} >
+							<VStack mr={"20px"} width={"70px"} height={"70px"} justifyContent={"center"} alignItems={"center"}>
+								<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} width={"70px"} height={"70px"} alignItems={"center"} justifyContent={"center"} onPress={() => navigation.navigate("SearchUserScreen")}>
+									<AntDesign name="pluscircle" size={24} color="white" />
+								</Pressable>
+								<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>Nueva</Heading>
+							</VStack>
+							<FlatList
+								scrollEnabled={false}
+								showsVerticalScrollIndicator={true}
+								data={users}
+								contentContainerStyle={{ flexDirection: "row", gap: 20, }}
+								renderItem={({ item, index }) => (
+									<Pressable _pressed={{ opacity: 0.5 }} borderRadius={100} alignItems={"center"} key={`search_user_${index}-${item.username}`} onPress={() => onSelectUser(item)}>
+										<VStack alignItems={"center"} borderRadius={10}>
+											{item.profileImageUrl ?
+												<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: item.profileImageUrl }} />
+												:
+												<DefaultIcon
+													value={item.fullName}
+													contentContainerStyle={[styles.contentContainerStyle, { width: 70, height: 70, backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.fullName) }]}
+													textStyle={styles.textStyle}
+												/>
+											}
+											<VStack mt={"5px"} justifyContent={"center"}>
+												<Heading textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>{item.fullName.slice(0, 7)}...</Heading>
+											</VStack>
+										</VStack>
+									</Pressable>
+
+								)}
+							/>
+						</ScrollView>
+					</VStack>
+					{transactions.length > 0 ?
+						<VStack w={"100%"} h={"auto"}>
+							<Heading px={"20px"} fontSize={scale(20)} color={"white"}>Transacciones</Heading>
+							<ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} >
 								<FlatList
 									px={"20px"}
 									h={"100%"}
 									mt={"10px"}
+									scrollEnabled={false}
 									data={transactions}
+
 									renderItem={({ item, index }) => (
 										<TouchableOpacity key={`search_user_${index}-${item.transactionId}`} onPress={() => onSelectTransaction(item)}>
 											<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
@@ -213,25 +245,26 @@ const TransactionsScreen: React.FC = () => {
 										</TouchableOpacity>
 									)}
 								/>
-							</VStack> : (
-								<VStack w={"100%"} h={"50%"} mt={"20px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
-									<Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
-									<VStack justifyContent={"center"} alignItems={"center"}>
-										<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
-										<Text fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
-									</VStack>
+							</ScrollView>
+						</VStack>
+						: (
+							<VStack w={"100%"} h={"50%"} mt={"20px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
+								<Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
+								<VStack justifyContent={"center"} alignItems={"center"}>
+									<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
+									<Text fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
 								</VStack>
-							)}
-						<BottomSheet openTime={300} height={height} onCloseFinish={onCloseFinish} open={showSingleTransaction}>
-							<SingleTransactionScreen onClose={onCloseFinish} />
-						</BottomSheet>
-						<SendTransaction open={showSendTransaction} onCloseFinish={onCloseFinish} onSendFinish={() => {
+							</VStack>
+						)}
+					<BottomSheet openTime={300} height={height} onCloseFinish={onCloseFinish} open={showSingleTransaction}>
+						<SingleTransactionScreen onClose={onCloseFinish} />
+					</BottomSheet>
+					<SendTransaction open={showSendTransaction} onCloseFinish={onCloseFinish} onSendFinish={() => {
 
-						}} />
-					</VStack>
-				</ScrollView>
+					}} />
+				</VStack>
 			</SafeAreaView>
-		</TouchableWithoutFeedback>
+		</TouchableWithoutFeedback >
 	)
 }
 

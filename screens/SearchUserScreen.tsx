@@ -47,7 +47,7 @@ const SearchUserScreen: React.FC = () => {
 
 				if (data.searchUsers.length > 0) {
 					data.searchUsers.forEach(async (user: any) => {
-						await insertSearchedUser(user)
+						// await insertSearchedUser(user)
 					})
 				}
 			}
