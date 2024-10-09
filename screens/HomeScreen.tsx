@@ -32,7 +32,7 @@ const HomeScreen: React.FC = () => {
 
     const fetchUser = async () => {
         try {
-            const user = await getSessionUser()
+            const user = await getSessionUser()            
 
             const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user.data.sessionUser)
             const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)

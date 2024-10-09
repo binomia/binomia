@@ -12,23 +12,28 @@ const LimitsScreen: React.FC = () => {
 
     const formatLimit = (amount: number, limit: number) => {
         if (amount === 0)
-            return amount
+            return String(0)
 
-        return amount / limit * 100
+        return parseFloat(String((amount / limit) * 100)).toFixed(0)
     }
 
     const data = [
         {
             title: `Enviado ${FORMAT_CURRENCY(account.sentAmount)} de ${FORMAT_CURRENCY(account.withdrawLimit)}`,
-            value: formatLimit(account.sentAmount, account.withdrawLimit)
+            value: account.sentAmount,
+            percentage: formatLimit(account.sentAmount, account.withdrawLimit)
+
         },
         {
             title: `Recibido ${FORMAT_CURRENCY(account.receivedAmount)} de ${FORMAT_CURRENCY(account.receiveLimit)}`,
-            value: formatLimit(account.receivedAmount, account.receiveLimit)
+            value: account.receivedAmount,
+            percentage: formatLimit(account.receivedAmount, account.receiveLimit)
         },
         {
             title: `Retirado ${FORMAT_CURRENCY(account.withdrawAmount)} de ${FORMAT_CURRENCY(account.withdrawLimit)}`,
-            value: formatLimit(account.withdrawAmount, account.withdrawLimit)
+            value: account.withdrawAmount,
+            percentage: formatLimit(account.withdrawAmount, account.withdrawLimit)
+
         }
     ]
 
@@ -50,13 +55,15 @@ const LimitsScreen: React.FC = () => {
                         <HStack bg={"lightGray"} w={"100%"} space={2} pl={"10px"} py={"18px"} >
                             <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
                                 <CircularProgress
-                                    radius={23}
-                                    value={item.value}
-                                    valuePrefix={'$'}
+                                    radius={25}
+                                    showProgressValue={false}
+                                    value={Number(item.percentage)}
+                                    title={`${item.percentage}%`}
+                                    titleStyle={{ color: colors.white, fontSize: 10, fontWeight: "bold" }}
                                     circleBackgroundColor={colors.lightGray}
                                     inActiveStrokeColor={colors.mainGreen}
                                     inActiveStrokeOpacity={0.2}
-                                    activeStrokeWidth={3}
+                                    activeStrokeWidth={5}
                                 />
                             </HStack>
                             <VStack flex={1} px={"10px"}>
@@ -66,7 +73,7 @@ const LimitsScreen: React.FC = () => {
                                     </HStack>
                                 </HStack>
                                 <ZStack w={"100%"} h={"7px"} bg={colors.darkGray} borderRadius={10}>
-                                    <HStack w={`${item.value}%`} h={"100%"} borderRadius={10} bg={colors.mainGreen} />
+                                    <HStack w={`${item.percentage}%`} h={`100%`} borderRadius={10} bg={colors.mainGreen} />
                                 </ZStack>
                             </VStack>
                         </HStack>

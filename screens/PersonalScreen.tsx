@@ -1,20 +1,14 @@
 import { StyleSheet, } from 'react-native'
-import React, { useContext, useEffect } from 'react'
-import { Heading, Image, VStack, Text, HStack, Divider, FlatList, Pressable, Switch } from 'native-base'
-import { addressIcon, idIcon, limitIcon, mailIcon, notificacionIcon, phoneIcon, privacyIcon, soportIcon, userIcon } from '@/assets'
-import DefaultIcon from 'react-native-default-icon'
+import React from 'react'
+import { Image, VStack, Text, HStack, Divider, FlatList } from 'native-base'
+import { addressIcon, idIcon, mailIcon, phoneIcon, userIcon } from '@/assets'
 import { useSelector } from 'react-redux'
-import { FORMAT_CEDULA, FORMAT_PHONE_NUMBER, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { FORMAT_PHONE_NUMBER } from '@/helpers'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
-import Feather from '@expo/vector-icons/Feather';
-import Button from '@/components/global/Button'
-import { SessionContext } from '@/contexts/sessionContext'
-
 
 const PersonalScreen: React.FC = () => {
     const { user } = useSelector((state: any) => state.globalReducer)
-    const { onLogout } = useContext(SessionContext)
 
     const data = [
         {
@@ -35,10 +29,6 @@ const PersonalScreen: React.FC = () => {
         }
     ]
 
-    useEffect(() => {
-        console.log(JSON.stringify(user, null, 2));
-    }, [])
-
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
             <VStack borderRadius={10} w={"100%"} h={"auto"} mt={"50px"}>
@@ -57,7 +47,7 @@ const PersonalScreen: React.FC = () => {
                             <VStack flex={1}>
                                 <HStack justifyContent={"space-between"} alignItems={"center"}>
                                     <HStack h={"30px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
-                                        <Text numberOfLines={3} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
+                                        <Text textTransform={index === 0 ? "capitalize" : "lowercase"} numberOfLines={3} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
                                     </HStack>
                                 </HStack>
                                 {index !== 3 ? <Divider mt={"7px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
@@ -70,7 +60,7 @@ const PersonalScreen: React.FC = () => {
                     </HStack>
                     <VStack width={"90%"} borderRadius={10}>
                         <HStack pr={"10px"} w={"100%"} justifyContent={"space-between"} alignItems={"center"}>
-                            <Text numberOfLines={3} fontSize={scale(15)} color={colors.white}>{"Calle 2 #13 Las Palmeras, Guaricano, Santo Domingo Norte"}</Text>
+                            <Text textTransform={"capitalize"} numberOfLines={3} fontSize={scale(15)} color={colors.white}>{user.address}</Text>
                         </HStack>
                     </VStack>
                 </HStack>

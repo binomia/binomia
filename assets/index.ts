@@ -43,12 +43,14 @@ import faceIdIcon from './icons/face-id.png';
 import receiveIcon from './icons/back.png';
 import sendMoneyIcon from './icons/return-right.png';
 import askingForMoneyIcon from './icons/asking.png';
+import whatsappIcon from './icons/whatsapp.png';
 
 
 
 
 
 export {
+    whatsappIcon,
     faceIdIcon,
     askingForMoneyIcon,
     sendMoneyIcon,

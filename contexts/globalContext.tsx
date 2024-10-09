@@ -1,6 +1,7 @@
 import { globalContextInitialState } from "@/mocks";
 import { GlobalContextType } from "@/types";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
+// import LocalAuthentication from "expo-local-authentication"
 
 
 
@@ -24,6 +25,22 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     const [showCloseButton, setShowCloseButton] = useState<boolean>(globalContextInitialState.showCloseButton);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
 
+    // const setLocalAuthentication = async () => {
+    //     const hasHardwareAsync = await LocalAuthentication.hasHardwareAsync();
+
+    //     if (hasHardwareAsync) {
+    //         const supportedAuthTypesAsync = await LocalAuthentication.supportedAuthenticationTypesAsync();
+    //         console.log(supportedAuthTypesAsync);
+            
+    //         // const canAuthenticateAsync = await LocalAuthentication.authenticateAsync();
+
+    //     }
+
+    // }
+
+    useEffect(() => {
+        // setLocalAuthentication()
+    }, [])
 
     const resetAllStates = () => {
         setEmail("")

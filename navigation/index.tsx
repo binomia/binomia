@@ -67,6 +67,47 @@ export const Navigation: React.FC = () => {
 
     const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+    const setNotifications = async () => {
+        const [whatsappNotification, emailNotification, smsNotification, pushNotification] = await Promise.all([
+            getItem("whatsappNotification"),
+            getItem("emailNotification"),
+            getItem("smsNotification"),
+            getItem("pushNotification")
+        ])
+
+        if (!whatsappNotification) {
+            await setItem("whatsappNotification", "true");
+            await dispatch(globalActions.setWhatsappNotification(true));
+
+        } else {            
+            await dispatch(globalActions.setWhatsappNotification(whatsappNotification === "true"));
+        }
+
+        if (!emailNotification) {
+            await setItem("emailNotification", "true");
+            await dispatch(globalActions.setEmailNotification(true));
+
+        } else {
+            await dispatch(globalActions.setEmailNotification(emailNotification === "true"));
+        }
+
+        if (!smsNotification) {
+            await setItem("smsNotification", "true");
+            await dispatch(globalActions.setSmsNotification(true));
+
+        } else {
+            await dispatch(globalActions.setSmsNotification(smsNotification === "true"));
+        }
+
+        if (!pushNotification) {
+            await setItem("pushNotification", "true");
+            await dispatch(globalActions.setPushNotification(true));
+
+        } else {
+            await dispatch(globalActions.setPushNotification(pushNotification === "true"));
+        }
+    }
+
     useEffect(() => {
         (async () => {
             try {
@@ -97,6 +138,11 @@ export const Navigation: React.FC = () => {
 
                 setItem("applicationId", applicationId)
                 await dispatch(globalActions.setApplicationId(applicationId))
+
+                await setNotifications();
+
+                await delay(4000); // Wait for 5 seconds
+                await SplashScreen.hideAsync();
 
             } catch (error) {
                 console.log({ error });

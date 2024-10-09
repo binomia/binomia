@@ -29,6 +29,11 @@ export class UserAuthSchema {
 
     static searchUserData = z.array(UserAuthSchema.singleSearchUserData).min(0)
 
+    // allowWithdraw
+    //   allowSend
+    //   allowReceive
+    //   allowAsk
+
     static accountsData = z.object({
         id: z.number(),
         balance: z.number(),
@@ -38,6 +43,10 @@ export class UserAuthSchema {
         withdrawLimit: z.number(),
         withdrawAmount: z.number(),
         receivedAmount: z.number(),
+        allowWithdraw: z.boolean(),
+        allowSend: z.boolean(),
+        allowReceive: z.boolean(),
+        allowAsk: z.boolean(),
         sentAmount: z.number(),
         hash: z.string(),
         currency: z.string(),

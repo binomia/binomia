@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { not } from 'drizzle-orm';
 import * as Device from 'expo-device';
 
 const globalSlice = createSlice({
@@ -10,6 +11,10 @@ const globalSlice = createSlice({
         applicationId: "",
         jwt: "",
         allowFaceId: false,
+        whatsappNotifications: true,
+        emailNotifications: true,
+        smsNotifications: true,
+        pushNotifications: true,
         network: {
             isConnected: false,
             type: "unknown",
@@ -27,6 +32,18 @@ const globalSlice = createSlice({
         }
     },
     reducers: {
+        setPushNotification: (state, action) => {
+            state.pushNotifications = action.payload
+        },
+        setSmsNotification: (state, action) => {
+            state.smsNotifications = action.payload
+        },
+        setEmailNotification: (state, action) => {
+            state.emailNotifications = action.payload
+        },
+        setWhatsappNotification: (state, action) => {
+            state.whatsappNotifications = action.payload
+        },
         setAllowFaceId: (state, action) => {
             state.allowFaceId = action.payload
         },

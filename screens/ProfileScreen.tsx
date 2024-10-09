@@ -1,5 +1,5 @@
 import { StyleSheet, } from 'react-native'
-import React, { useContext, useEffect } from 'react'
+import React, { useContext } from 'react'
 import { Heading, Image, VStack, Text, HStack, Divider, FlatList, Pressable } from 'native-base'
 import { limitIcon, notificacionIcon, privacyIcon, soportIcon, userIcon } from '@/assets'
 import DefaultIcon from 'react-native-default-icon'
@@ -36,7 +36,7 @@ const ProfileScreen: React.FC = () => {
         },
         {
             name: "Notificaciones",
-            path: "PersonalScreen",
+            path: "NotificationsScreen",
             icon: notificacionIcon,
         },
         {
@@ -46,9 +46,7 @@ const ProfileScreen: React.FC = () => {
         }
     ]
 
-    useEffect(() => {
-        console.log(user);
-    }, [])
+  
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>

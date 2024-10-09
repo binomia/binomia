@@ -1,75 +1,52 @@
-import { StyleSheet, } from 'react-native'
 import React from 'react'
 import { Image, VStack, Text, HStack, Divider, FlatList, Switch } from 'native-base'
-import {  askingForMoneyIcon, faceIdIcon, receiveIcon, sendMoneyIcon, } from '@/assets'
+import { mailIcon, notificacionIcon, phoneIcon, whatsappIcon } from '@/assets'
 import { useDispatch, useSelector } from 'react-redux'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
 import { globalActions } from '@/redux/slices/globalSlice'
-import { useMutation } from '@apollo/client'
-import { AccountApolloQueries } from '@/apollo/query'
+import useAsyncStorage from '@/hooks/useAsyncStorage'
 
-const PrivacyScreen: React.FC = () => {
+const NotificationsScreen: React.FC = () => {
     const dispatch = useDispatch()
-    const { allowFaceId, account } = useSelector((state: any) => state.globalReducer)
-    const [updateAccountPermissions] = useMutation(AccountApolloQueries.updateAccountPermissions())
+    const { setItem } = useAsyncStorage()
+    const { smsNotifications, whatsappNotifications, emailNotifications, pushNotifications } = useSelector((state: any) => state.globalReducer)
 
     const data = [
         {
-            name: "Recibir Dinero",
-            icon: receiveIcon,
-            allow: account.allowReceive
+            name: "Notificaciónes Mobil",
+            icon: notificacionIcon,
+            allow: pushNotifications
         },
         {
-            name: "Enviar Dinero",
-            icon: sendMoneyIcon,
-            allow: account.allowSend
+            name: "Correo Electrónico",
+            icon: mailIcon,
+            allow: emailNotifications
         },
         {
-            name: "Solicitarme Dinero",
-            icon: askingForMoneyIcon,
-            allow: account.allowAsk
+            name: "Mensajes SMS",
+            icon: phoneIcon,
+            allow: smsNotifications
         }
     ]
 
     const onSwitchChange = async (name: string, allow: boolean) => {
         try {
-            if (name === "allowFaceId") {
-                await dispatch(globalActions.setAllowFaceId(allow))
+            if (name === "whatsapp") {
+                await setItem("whatsappNotification", allow ? "true" : "false")
+                await dispatch(globalActions.setWhatsappNotification(allow))
 
-            } else if (name === "Recibir Dinero") {
+            } else if (name === "Notificaciónes Mobil") {
+                await setItem("pushNotification", allow ? "true" : "false")
+                await dispatch(globalActions.setPushNotification(allow))
 
-                const account = await updateAccountPermissions({
-                    variables: {
-                        data: {
-                            allowReceive: allow
-                        }
-                    }
-                })
+            } else if (name === "Correo Electrónico") {
+                await setItem("emailNotification", allow ? "true" : "false")
+                await dispatch(globalActions.setEmailNotification(allow))
 
-                await dispatch(globalActions.setAccount(account.data.updateAccountPermissions))
-
-            } else if (name === "Enviar Dinero") {
-                const account = await updateAccountPermissions({
-                    variables: {
-                        data: {
-                            allowSend: allow
-                        }
-                    }
-                })
-
-                await dispatch(globalActions.setAccount(account.data.updateAccountPermissions))
-
-            } else if (name === "Solicitarme Dinero") {
-                const account = await updateAccountPermissions({
-                    variables: {
-                        data: {
-                            allowAsk: allow
-                        }
-                    }
-                })
-
-                await dispatch(globalActions.setAccount(account.data.updateAccountPermissions))
+            } else if (name === "Mensajes SMS") {
+                await setItem("smsNotification", allow ? "true" : "false")
+                await dispatch(globalActions.setSmsNotification(allow))
             }
 
         } catch (error) {
@@ -82,13 +59,13 @@ const PrivacyScreen: React.FC = () => {
             <VStack w={"100%"} h={"auto"} mt={"50px"}>
                 <HStack bg={"lightGray"} w={"100%"} borderRadius={10} space={2} pl={"10px"} py={"8px"} mb={"30px"}>
                     <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
-                        <Image alt='logo-image' resizeMode='contain' w={"17px"} h={"17px"} source={faceIdIcon} />
+                        <Image alt='logo-image' resizeMode='contain' w={"17px"} h={"17px"} source={whatsappIcon} />
                     </HStack>
                     <HStack flex={1} justifyContent={"space-between"} alignItems={"center"}>
                         <HStack h={"30px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
-                            <Text numberOfLines={3} fontSize={scale(15)} color={colors.white}>{"Face ID"}</Text>
+                            <Text numberOfLines={3} fontSize={scale(15)} color={colors.white}>{"Whatsapp"}</Text>
                         </HStack>
-                        <Switch isChecked={allowFaceId} onChange={() => onSwitchChange("allowFaceId", !allowFaceId)} mr={"10px"} />
+                        <Switch isChecked={whatsappNotifications} onChange={() => onSwitchChange("whatsapp", !whatsappNotifications)} mr={"10px"} />
                     </HStack>
                 </HStack>
                 <FlatList
@@ -119,27 +96,4 @@ const PrivacyScreen: React.FC = () => {
     )
 }
 
-export default PrivacyScreen
-
-
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: 55,
-        height: 55,
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 30,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    }
-})
+export default NotificationsScreen

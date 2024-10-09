@@ -1,10 +1,11 @@
 import * as SecureStore from 'expo-secure-store';
+import { useEffect } from 'react';
 
 
 const useAsyncStorage = () => {
-    const setItem = async (key: string, cookie: string): Promise<void> => {
+    const setItem = async (key: string, value: string): Promise<void> => {
         try {
-            await SecureStore.setItemAsync(key, cookie);
+            await SecureStore.setItemAsync(key, value);
         } catch (error) {
             console.error(`Failed to save '${key}':`, error);
         }

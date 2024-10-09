@@ -15,21 +15,17 @@ import { store } from '@/redux';
 
 import { drizzle } from "drizzle-orm/expo-sqlite";
 import { openDatabaseSync, SQLiteProvider } from "expo-sqlite/next";
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import migrations from './drizzle/migrations';
-import { DATABASE_NAME } from '@/constants';
 
+import { DATABASE_NAME } from '@/constants';
 
 const expo = openDatabaseSync(DATABASE_NAME);
 const db = drizzle(expo);
 
 
 LogBox.ignoreAllLogs();
-// SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync();
 
 const App: React.FC = () => {
-	const { success, error } = useMigrations(db, migrations);
-
 	const cameraPermission = useCameraPermission()
 	const microphonePermission = useMicrophonePermission()
 
@@ -44,19 +40,25 @@ const App: React.FC = () => {
 				await microphonePermission.requestPermission();
 			};
 
-			await delay(4000); // Wait for 5 seconds
-			await SplashScreen.hideAsync();
+			// const [whatsappNotification, emailNotification, smsNotification, pushNotification] = await Promise.all([
+			// 	getItem("whatsappNotification"),
+			// 	getItem("emailNotification"),
+			// 	getItem("smsNotification"),
+			// 	getItem("pushNotification")
+			// ])
+
+			// await dispatch(globalActions.setNotifications({
+			// 	whatsappNotification: Boolean(whatsappNotification),
+			// 	emailNotification: Boolean(emailNotification),
+			// 	smsNotification: Boolean(smsNotification),
+			// 	pushNotification: Boolean(pushNotification),
+			// }));
 
 		} catch (error) {
 			console.error({ error });
 		}
 
 	}, []);
-
-	useEffect(() => {
-		console.log("sqlite", error);
-
-	}, [])
 
 	return (
 		<SQLiteProvider databaseName={DATABASE_NAME}>
