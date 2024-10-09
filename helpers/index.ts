@@ -121,3 +121,10 @@ export const MAKE_FULL_NAME_SHORTEN = (fullName: string) => {
         ? `${firstName} ${middleNameInitial} ${lastNameInitial}`
         : `${firstName} ${lastNameInitial}`;
 }
+
+export const CAPITALIZE_WORDS = (text: string) => {
+    return text
+        .split(" ")
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+}

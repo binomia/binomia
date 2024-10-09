@@ -41,7 +41,7 @@ const ProfileScreen: React.FC = () => {
         },
         {
             name: "Soporte",
-            path: "PersonalScreen",
+            path: "SupportScreen",
             icon: soportIcon,
         }
     ]

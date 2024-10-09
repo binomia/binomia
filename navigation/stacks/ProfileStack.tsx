@@ -10,6 +10,7 @@ import PersonalScreen from '@/screens/PersonalScreen';
 import PrivacyScreen from '@/screens/PrivacyScreen';
 import LimitsScreen from '@/screens/LimitsScreen';
 import NotificationsScreen from '@/screens/NotificationsScreen';
+import SupportScreen from '@/screens/SupportScreen';
 
 
 const { width, height } = Dimensions.get('window')
@@ -55,6 +56,7 @@ const ProfileStack: React.FC = () => {
             <Stack.Screen name='PrivacyScreen' options={{ title: 'Privacidad & Seguridad', ...headerStyles }} component={PrivacyScreen} />
             <Stack.Screen name='LimitsScreen' options={{ title: 'Limites', ...headerStyles }} component={LimitsScreen} />
             <Stack.Screen name='NotificationsScreen' options={{ title: 'Notificaciones', ...headerStyles }} component={NotificationsScreen} />
+            <Stack.Screen name='SupportScreen' options={{ title: 'Soporte', ...headerStyles }} component={SupportScreen} />
         </Stack.Navigator >
     )
 }
