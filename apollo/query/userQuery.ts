@@ -86,6 +86,18 @@ export class UserApolloQueries {
                         currency
                         createdAt
                         updatedAt
+                        transactionId
+                        withdrawAmount
+                        receivedAmount
+                        sentAmount
+                        amount
+                        deliveredAmount
+                        voidedAmount
+                        transactionType
+                        location {
+                            latitude
+                            longitude
+                        }
                     }
                 }
             }

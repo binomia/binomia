@@ -1,7 +1,7 @@
 import { StyleSheet, } from 'react-native'
 import React, { useContext, useEffect } from 'react'
-import { Heading, Image, VStack, Text, HStack, Divider, FlatList, Pressable } from 'native-base'
-import { addressIcon, limitIcon, notificacionIcon, privacyIcon, soportIcon, userIcon } from '@/assets'
+import { Heading, Image, VStack, Text, HStack, Divider, FlatList, Pressable, Switch } from 'native-base'
+import { addressIcon, idIcon, limitIcon, mailIcon, notificacionIcon, phoneIcon, privacyIcon, soportIcon, userIcon } from '@/assets'
 import DefaultIcon from 'react-native-default-icon'
 import { useSelector } from 'react-redux'
 import { FORMAT_CEDULA, FORMAT_PHONE_NUMBER, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
@@ -23,20 +23,16 @@ const PersonalScreen: React.FC = () => {
         },
         {
             name: user.email,
-            icon: privacyIcon,
+            icon: mailIcon,
         },
         {
             name: FORMAT_PHONE_NUMBER(user.phone),
-            icon: limitIcon,
+            icon: phoneIcon,
         },
         {
             name: user.dniNumber,
-            icon: notificacionIcon,
-        },
-        {
-            name: "Soporte",
-            icon: soportIcon,
-        },
+            icon: idIcon,
+        }
     ]
 
     useEffect(() => {
@@ -49,22 +45,24 @@ const PersonalScreen: React.FC = () => {
                 <FlatList
                     bg={"lightGray"}
                     data={data}
+                    borderRadius={10}
+                    pb={"5px"}
                     scrollEnabled={false}
                     keyExtractor={(index) => index.toString()}
                     renderItem={({ item, index }) => (
-                        <Pressable _pressed={{ opacity: 0.5 }} onPress={() => { }}>
-                            <HStack key={`personal${item.name}`} space={2} pl={"10px"} py={"8px"} alignItems={"center"}>
-                                <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
-                                    <Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
-                                </HStack>
-                                <VStack width={"90%"} h={"30px"} borderRadius={10}>
-                                    <HStack pr={"10px"} justifyContent={"space-between"} alignItems={"center"}>
-                                        <Text fontSize={scale(15)} color={colors.white}>{item.name}</Text>
-                                    </HStack>
-                                    {index !== 4 ? <Divider mt={"10px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
-                                </VStack>
+                        <HStack bg={"lightGray"} w={"100%"} borderRadius={10} h={"50px"} py={"10px"} space={2} pl={"10px"} >
+                            <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
+                                <Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
                             </HStack>
-                        </Pressable>
+                            <VStack flex={1}>
+                                <HStack justifyContent={"space-between"} alignItems={"center"}>
+                                    <HStack h={"30px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
+                                        <Text numberOfLines={3} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
+                                    </HStack>
+                                </HStack>
+                                {index !== 3 ? <Divider mt={"7px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
+                            </VStack>
+                        </HStack>
                     )} />
                 <HStack borderRadius={10} bg={"lightGray"} space={2} pl={"10px"} py={"8px"} mt={"30px"}>
                     <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>

@@ -9,6 +9,7 @@ const globalSlice = createSlice({
         user: {},
         applicationId: "",
         jwt: "",
+        allowFaceId: false,
         network: {
             isConnected: false,
             type: "unknown",
@@ -26,6 +27,9 @@ const globalSlice = createSlice({
         }
     },
     reducers: {
+        setAllowFaceId: (state, action) => {
+            state.allowFaceId = action.payload
+        },
         setAccount: (state, action) => {
             state.account = action.payload
         },

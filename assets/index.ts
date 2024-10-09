@@ -18,27 +18,44 @@ import transationsOff from './transationsOff.png';
 import transationsOn from './transationsOn.png';
 import profileOff from './profileOff.png';
 import profileOn from './profileOn.png';
-import qrIcon from './qr.png';
-import sendIcon from './sendIcon.png';
-import receiveIcon from './receiveIcon.png';
-import phoneIcon from './phone.png';
+
+import phone from './phone.png';
 import cars from './cars.png';
 import house from './house.png';
 import bills from './bills.png';
 import checked from './checked.png';
 import noTransactions from './no-transactions.png';
+
+// icons
+import qrIcon from './qr.png';
+import sendIcon from './sendIcon.png';
+import bagIcon from './receiveIcon.png';
 import userIcon from './user.png';
 import privacyIcon from './privacy.png';
 import limitIcon from './limit.png';
 import notificacionIcon from './notificacion.png';
 import soportIcon from './soport.png';
-import addressIcon from './address.png';
+import addressIcon from './icons/address.png';
+import idIcon from './icons/id.png';
+import phoneIcon from './icons/phone.png';
+import mailIcon from './mail.png';
+import faceIdIcon from './icons/face-id.png';
+import receiveIcon from './icons/back.png';
+import sendMoneyIcon from './icons/return-right.png';
+import askingForMoneyIcon from './icons/asking.png';
 
 
 
 
 
 export {
+    faceIdIcon,
+    askingForMoneyIcon,
+    sendMoneyIcon,
+    bagIcon,
+    idIcon,
+    phone,
+    mailIcon,
     userIcon,
     addressIcon,
     soportIcon,

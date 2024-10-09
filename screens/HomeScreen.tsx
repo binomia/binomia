@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Heading, HStack, Image, Pressable, VStack, Text, Stack } from 'native-base';
 import colors from '@/colors';
 import Button from '@/components/global/Button';
-import { bills, cars, house, phoneIcon, receiveIcon, sendIcon } from '@/assets';
+import { bagIcon, bills, cars, house, phoneIcon, receiveIcon, sendIcon } from '@/assets';
 
 import { useLazyQuery } from '@apollo/client';
 import { useDispatch } from 'react-redux';
@@ -74,7 +74,7 @@ const HomeScreen: React.FC = () => {
                             onPress={async () => navigation.navigate("SearchUserScreen")}
                         />
                         <Button
-                            leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={receiveIcon} />}
+                            leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={bagIcon} />}
                             w={"49%"} bg={"darkGray"}
                             mt={"20px"}
                             borderRadius={"10px"}
