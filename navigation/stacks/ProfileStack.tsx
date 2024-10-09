@@ -7,6 +7,8 @@ import QRScannerScreen from '@/screens/QRScannerScreen';
 import { useState } from 'react';
 import ProfileScreen from '@/screens/ProfileScreen';
 import PersonalScreen from '@/screens/PersonalScreen';
+import PrivacyScreen from '@/screens/PrivacyScreen';
+import LimitsScreen from '@/screens/LimitsScreen';
 
 
 const { width, height } = Dimensions.get('window')
@@ -49,6 +51,8 @@ const ProfileStack: React.FC = () => {
         <Stack.Navigator initialRouteName='ProfileScreen' screenOptions={{ headerTintColor: colors.white, headerStyle: {} }} >
             <Stack.Screen name='ProfileScreen' options={{ headerRight, title: '', ...headerStyles }} component={ProfileScreen} />
             <Stack.Screen name='PersonalScreen' options={{ title: 'Personal', ...headerStyles }} component={PersonalScreen} />
+            <Stack.Screen name='PrivacyScreen' options={{ title: 'Privacidad & Seguridad', ...headerStyles }} component={PrivacyScreen} />
+            <Stack.Screen name='LimitsScreen' options={{ title: 'Limites', ...headerStyles }} component={LimitsScreen} />
         </Stack.Navigator >
     )
 }

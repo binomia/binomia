@@ -26,12 +26,12 @@ const ProfileScreen: React.FC = () => {
         },
         {
             name: "Privacidad & Seguridad",
-            path: "PersonalScreen",
+            path: "PrivacyScreen",
             icon: privacyIcon,
         },
         {
             name: "Limites",
-            path: "PersonalScreen",
+            path: "LimitsScreen",
             icon: limitIcon,
         },
         {
