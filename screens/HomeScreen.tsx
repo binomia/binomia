@@ -1,13 +1,12 @@
 import { StyleSheet, Dimensions } from 'react-native'
 import React, { useEffect, useState } from 'react'
-
-import { Heading, HStack, Image, Pressable, VStack, Text, Stack } from 'native-base';
+import { Heading, HStack, Image, Pressable, VStack, Text } from 'native-base';
 import colors from '@/colors';
 import Button from '@/components/global/Button';
-import { bagIcon, bills, cars, house, phoneIcon, receiveIcon, sendIcon } from '@/assets';
+import { bagIcon, bills, cars, house, phone, sendIcon } from '@/assets';
 
 import { useLazyQuery } from '@apollo/client';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { UserApolloQueries } from '@/apollo/query';
 import { UserAuthSchema } from '@/auth/userAuth';
 import { z } from 'zod';
@@ -18,43 +17,11 @@ import { useNavigation } from '@react-navigation/native';
 import QRScannerScreen from './QRScannerScreen';
 
 
-
-
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
-    const dispatch = useDispatch()
+    const { account } = useSelector((state: any) => state.globalReducer)
     const navigation = useNavigation<any>();
-    const [getSessionUser] = useLazyQuery(UserApolloQueries.sessionUser());
-
     const [showBottomSheet, setShowBottomSheet] = useState(false)
-    const [account, setAccount] = useState<z.infer<typeof UserAuthSchema.accountsData>>()
-
-
-    const fetchUser = async () => {
-        try {
-            const user = await getSessionUser()            
-
-            const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user.data.sessionUser)
-            const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
-            const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account)
-
-            setAccount(accountsData)
-            await Promise.all([
-                dispatch(globalActions.setUser(userProfileData)),
-                dispatch(globalActions.setKyc(kycData)),
-                dispatch(globalActions.setAccount(accountsData))
-            ])
-
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    useEffect(() => {
-        fetchUser()
-    }, [])
-
-
 
     return (
         <VStack p={"20px"} w={width} bg={colors.darkGray} variant={"body"} flex={1} alignItems={"center"}>
@@ -88,7 +55,7 @@ const HomeScreen: React.FC = () => {
                 <Heading size={"xl"} color={"white"}>Servicios</Heading>
                 <HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
                     <Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={"150px"} justifyContent={"center"} alignItems={"center"}>
-                        <Image resizeMode='contain' alt='send-image-icon' w={"50px"} h={"50px"} source={phoneIcon} />
+                        <Image resizeMode='contain' alt='send-image-icon' w={"50px"} h={"50px"} source={phone} />
                         <Text color={"white"}>Recargas</Text>
                     </Pressable>
                     <Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={"150px"} justifyContent={"center"} alignItems={"center"}>

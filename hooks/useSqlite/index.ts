@@ -20,7 +20,6 @@ export const useSqlite = () => {
             const response = await db.select().from(searchedUsersSchema).where(eq(searchedUsersSchema.id, id)).limit(1)
             if (response.length === 0) return null
 
-            console.log(response, "getOneSearchedUser");
             const user = await UserAuthSchema.singleSearchUserData.parseAsync(response[0])
             return user
 
@@ -51,7 +50,6 @@ export const useSqlite = () => {
             const userExists = await getOneSearchedUser(userData.id)
             if (userExists) return
 
-            console.log(JSON.stringify(userData, null, 2), "userExists");
             await db.insert(searchedUsersSchema).values(userData);
             console.log(`User with id ${userData.id} inserted successfully`);
 

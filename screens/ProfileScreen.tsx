@@ -45,9 +45,6 @@ const ProfileScreen: React.FC = () => {
             icon: soportIcon,
         }
     ]
-
-  
-
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
             <VStack>
@@ -106,7 +103,7 @@ const styles = StyleSheet.create({
         borderRadius: 100
     },
     textStyle: {
-        fontSize: 30,
+        fontSize: 50,
         color: 'white',
         marginBottom: 2,
         textTransform: 'capitalize',

@@ -62,10 +62,6 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 		}
 	}
 
-	useEffect(() => {
-		console.log(JSON.stringify(transaction, null, 2));
-
-	}, [transaction])
 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>

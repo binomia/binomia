@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { CreateUserDataType, SessionContextType, SessionPropsType, VerificationDataType } from "@/types";
-import { useMutation } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { SessionApolloQueries, UserApolloQueries } from "@/apollo/query";
 import * as Updates from 'expo-updates';
 import { notificationServer } from "@/rpc/notificationRPC";
@@ -8,6 +8,7 @@ import { GENERATE_SIX_DIGIT_TOKEN } from "@/helpers";
 import useAsyncStorage from "@/hooks/useAsyncStorage";
 import { useSelector, useDispatch } from "react-redux";
 import { globalActions } from "@/redux/slices/globalSlice";
+import { UserAuthSchema } from "@/auth/userAuth";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -37,6 +38,27 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const [invalidCredentials, setInvalidCredentials] = useState<boolean>(false);
     const [login] = useMutation(SessionApolloQueries.login());
     const [createUser] = useMutation(UserApolloQueries.createUser());
+    const [getSessionUser] = useLazyQuery(UserApolloQueries.sessionUser());
+
+
+    const fetchSessionUser = async () => {
+        try {
+            const user = await getSessionUser()
+
+            const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user.data.sessionUser)
+            const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
+            const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account)
+
+            await Promise.all([
+                dispatch(globalActions.setUser(userProfileData)),
+                dispatch(globalActions.setKyc(kycData)),
+                dispatch(globalActions.setAccount(accountsData))
+            ])
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     const sendVerificationCode = async (to: string) => {
         try {
@@ -130,6 +152,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
             if (jwt) {
                 await dispatch(globalActions.setJwt(jwt))
+                await fetchSessionUser()
                 setJwt(jwt)
             }
         })()

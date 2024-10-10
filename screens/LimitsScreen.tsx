@@ -37,10 +37,6 @@ const LimitsScreen: React.FC = () => {
         }
     ]
 
-    useEffect(() => {
-        console.log(JSON.stringify(account, null, 2));
-    }, [])
-
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
             <VStack borderRadius={10} w={"100%"} h={"auto"} mt={"50px"}>
