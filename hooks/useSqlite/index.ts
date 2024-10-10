@@ -5,11 +5,13 @@ import { z } from "zod";
 import { UserAuthSchema } from "@/auth/userAuth";
 import { eq, desc } from "drizzle-orm";
 import { useEffect } from "react";
+import { useSelector } from "react-redux";
 
 
 
 export const useSqlite = () => {
     const dbContext = useSQLiteContext();
+    const { user } = useSelector((state: any) => state.globalReducer);
     const db = drizzle(dbContext);
 
     const getOneSearchedUser = async (id: number) => {
@@ -42,15 +44,16 @@ export const useSqlite = () => {
         }
     }
 
-    const insertSearchedUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>): Promise<void> => {
+    const insertSearchedUser = async (userData: z.infer<typeof UserAuthSchema.singleSearchUserData>): Promise<void> => {
         try {
+            if (userData.id === user.id) return
 
-            const userExists = await getOneSearchedUser(user.id)
+            const userExists = await getOneSearchedUser(userData.id)
             if (userExists) return
 
-            console.log(JSON.stringify(user, null, 2), "userExists");
-            await db.insert(searchedUsersSchema).values(user);
-            console.log(`User with id ${user.id} inserted successfully`);
+            console.log(JSON.stringify(userData, null, 2), "userExists");
+            await db.insert(searchedUsersSchema).values(userData);
+            console.log(`User with id ${userData.id} inserted successfully`);
 
         } catch (error) {
             console.error(error);

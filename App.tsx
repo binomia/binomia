@@ -1,5 +1,5 @@
-import { LogBox, StyleSheet, StatusBar, View, Text, ActivityIndicator } from 'react-native';
-import { useCallback, useEffect } from 'react';
+import { LogBox, StyleSheet, StatusBar, View } from 'react-native';
+import { useCallback } from 'react';
 import { SessionContextProvider } from '@/contexts/sessionContext';
 import { ApolloProvider } from '@apollo/client';
 import { NativeBaseProvider } from "native-base";
@@ -13,14 +13,9 @@ import { useCameraPermission, useMicrophonePermission } from 'react-native-visio
 import { Provider } from 'react-redux';
 import { store } from '@/redux';
 
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { openDatabaseSync, SQLiteProvider } from "expo-sqlite/next";
 
+import { SQLiteProvider } from "expo-sqlite/next";
 import { DATABASE_NAME } from '@/constants';
-
-const expo = openDatabaseSync(DATABASE_NAME);
-const db = drizzle(expo);
-
 
 LogBox.ignoreAllLogs();
 SplashScreen.preventAutoHideAsync();
@@ -29,7 +24,6 @@ const App: React.FC = () => {
 	const cameraPermission = useCameraPermission()
 	const microphonePermission = useMicrophonePermission()
 
-	const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 	const onLayoutRootView = useCallback(async () => {
 		try {
 			if (!cameraPermission.hasPermission) {
@@ -39,20 +33,6 @@ const App: React.FC = () => {
 			if (!microphonePermission.hasPermission) {
 				await microphonePermission.requestPermission();
 			};
-
-			// const [whatsappNotification, emailNotification, smsNotification, pushNotification] = await Promise.all([
-			// 	getItem("whatsappNotification"),
-			// 	getItem("emailNotification"),
-			// 	getItem("smsNotification"),
-			// 	getItem("pushNotification")
-			// ])
-
-			// await dispatch(globalActions.setNotifications({
-			// 	whatsappNotification: Boolean(whatsappNotification),
-			// 	emailNotification: Boolean(emailNotification),
-			// 	smsNotification: Boolean(smsNotification),
-			// 	pushNotification: Boolean(pushNotification),
-			// }));
 
 		} catch (error) {
 			console.error({ error });

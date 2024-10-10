@@ -81,34 +81,28 @@ const TransactionsScreen: React.FC = () => {
 			})
 
 			setTransactions(data.accountTransactions)
-
 			data.accountTransactions.forEach(async (transaction: any) => {
-				const isFromMe = transaction.from.user.id === user.id
-				if (!isFromMe) {
-					const userData: z.infer<typeof UserAuthSchema.singleSearchUserData> = {
-						id: transaction.from.user.id,
-						dniNumber: transaction.from.user.dniNumber,
-						fullName: transaction.from.user.fullName,
-						profileImageUrl: transaction.from.user.profileImageUrl,
-						username: transaction.from.user.username,
-						email: transaction.from.user.email,
-						status: transaction.from.user.status
-					}
-
-					await insertSearchedUser(userData)
-				} else {
-					const userData: z.infer<typeof UserAuthSchema.singleSearchUserData> = {
-						id: transaction.to.user.id,
-						dniNumber: transaction.to.user.dniNumber,
-						fullName: transaction.to.user.fullName,
-						profileImageUrl: transaction.to.user.profileImageUrl,
-						username: transaction.to.user.username,
-						email: transaction.to.user.email,
-						status: transaction.to.user.status
-					}
-
-					await insertSearchedUser(userData)
+				const userFromData: z.infer<typeof UserAuthSchema.singleSearchUserData> = {
+					id: transaction.from.user.id,
+					dniNumber: transaction.from.user.dniNumber,
+					fullName: transaction.from.user.fullName,
+					profileImageUrl: transaction.from.user.profileImageUrl,
+					username: transaction.from.user.username,
+					email: transaction.from.user.email,
+					status: transaction.from.user.status
 				}
+				const userToData: z.infer<typeof UserAuthSchema.singleSearchUserData> = {
+					id: transaction.to.user.id,
+					dniNumber: transaction.to.user.dniNumber,
+					fullName: transaction.to.user.fullName,
+					profileImageUrl: transaction.to.user.profileImageUrl,
+					username: transaction.to.user.username,
+					email: transaction.to.user.email,
+					status: transaction.to.user.status
+				}
+
+				await insertSearchedUser(userToData)
+				await insertSearchedUser(userFromData)
 			})
 
 		} catch (error) {
@@ -140,12 +134,14 @@ const TransactionsScreen: React.FC = () => {
 
 	const formatTransaction = (transaction: any) => {
 		const isFromMe = transaction.from.user.id === user.id
+		console.log({ isFromMe, fullName: transaction.to.user.fullName });
+
 		const data = {
 			isFromMe,
 			profileImageUrl: isFromMe ? user.profileImageUrl : transaction.to.user.profileImageUrl,
 			amount: transaction.amount,
-			fullName: isFromMe ? user.fullName : transaction.to.user.fullName,
-			username: isFromMe ? user.username : transaction.to.user.username
+			fullName: isFromMe ? user.fullName : transaction.from.user.fullName,
+			username: isFromMe ? user.username : transaction.from.user.username
 		}
 
 		return data

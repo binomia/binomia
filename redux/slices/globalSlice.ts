@@ -5,6 +5,7 @@ import * as Device from 'expo-device';
 const globalSlice = createSlice({
     name: 'global',
     initialState: {
+        appInBackgroundTime: 0,
         account: {},
         kyc: {},
         user: {},
@@ -32,6 +33,9 @@ const globalSlice = createSlice({
         }
     },
     reducers: {
+        setAppInBackgroundTime: (state, action) => {
+            state.appInBackgroundTime = action.payload
+        },
         setPushNotification: (state, action) => {
             state.pushNotifications = action.payload
         },

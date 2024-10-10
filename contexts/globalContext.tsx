@@ -1,8 +1,8 @@
+import useAsyncStorage from "@/hooks/useAsyncStorage";
 import { globalContextInitialState } from "@/mocks";
 import { GlobalContextType } from "@/types";
 import { createContext, useEffect, useState } from "react";
-// import LocalAuthentication from "expo-local-authentication"
-
+import { AppState } from "react-native";
 
 
 export const GlobalContext = createContext<GlobalContextType>(globalContextInitialState);
@@ -25,22 +25,7 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     const [showCloseButton, setShowCloseButton] = useState<boolean>(globalContextInitialState.showCloseButton);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
 
-    // const setLocalAuthentication = async () => {
-    //     const hasHardwareAsync = await LocalAuthentication.hasHardwareAsync();
-
-    //     if (hasHardwareAsync) {
-    //         const supportedAuthTypesAsync = await LocalAuthentication.supportedAuthenticationTypesAsync();
-    //         console.log(supportedAuthTypesAsync);
-            
-    //         // const canAuthenticateAsync = await LocalAuthentication.authenticateAsync();
-
-    //     }
-
-    // }
-
-    useEffect(() => {
-        // setLocalAuthentication()
-    }, [])
+    const { getItem, setItem } = useAsyncStorage();
 
     const resetAllStates = () => {
         setEmail("")
@@ -60,6 +45,31 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
         setShowPassword(false)
         setDisabledButton(true)
     }
+
+    useEffect(() => {
+        const subscription = AppState.addEventListener('change', async (nextAppState) => {
+            if (nextAppState === 'background') {
+                const now = Date.now();
+
+                await setItem("appInBackgroundTime", now.toString());
+                console.log('App has gone to the background', now);
+            }
+
+            if (nextAppState === 'active') {
+                const now = Date.now();
+                const appInBackgroundTime = await getItem("appInBackgroundTime");
+
+                if (appInBackgroundTime) {
+                    const duration = (now - Number(appInBackgroundTime)) / 1000;
+                    console.log('App has come back to the foreground: ', duration);
+                }
+            }
+        });
+
+        return () => {
+            subscription.remove();
+        };
+    }, []);
 
 
     const data = {

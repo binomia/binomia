@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
 import DefaultIcon from 'react-native-default-icon';
-import { StyleSheet, SafeAreaView, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
+import { StyleSheet, SafeAreaView, Keyboard, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
@@ -18,7 +18,7 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 const SearchUserScreen: React.FC = () => {
 	const dispatch = useDispatch()
 	const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
-	const { getSearchedUsers, insertSearchedUser, deleteSearchedUser } = useSqlite()
+	const { getSearchedUsers } = useSqlite()
 
 	const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
 	const [showSendTransaction, setShowSendTransaction] = useState<boolean>(false);
@@ -44,12 +44,6 @@ const SearchUserScreen: React.FC = () => {
 				})
 
 				setUsers(data.searchUsers.length > 0 ? data.searchUsers : [])
-
-				if (data.searchUsers.length > 0) {
-					data.searchUsers.forEach(async (user: any) => {
-						// await insertSearchedUser(user)
-					})
-				}
 			}
 
 		} catch (error) {
@@ -60,13 +54,6 @@ const SearchUserScreen: React.FC = () => {
 	const fetchSearchedUser = async () => {
 		const searchedUsers = await getSearchedUsers()
 		setUsers(searchedUsers)
-
-		console.log(JSON.stringify(searchedUsers, null, 2));
-
-		searchedUsers.forEach(async (user: any) => {
-			await deleteSearchedUser(user.id)
-		})
-		
 	}
 
 	const onSelectUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>) => {
