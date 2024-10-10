@@ -3,12 +3,12 @@ import colors from '@/colors'
 import Input from '@/components/global/Input'
 import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, SafeAreaView, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity, RefreshControl } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView } from 'native-base'
+import { Heading, Image, Text, VStack, FlatList, HStack, Pressable } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
-import { FORMAT_CURRENCY, FORMAT_DATE, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { useSqlite } from '@/hooks/useSqlite';
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
@@ -135,7 +135,7 @@ const TransactionsScreen: React.FC = () => {
 	const formatTransaction = (transaction: any) => {
 		const isFromMe = transaction.from.user.id === user.id
 		console.log(transaction.from.user.profileImageUrl);
-		
+
 		const data = {
 			isFromMe,
 			profileImageUrl: isFromMe ? user.profileImageUrl : transaction.from.user.profileImageUrl,
@@ -165,83 +165,82 @@ const TransactionsScreen: React.FC = () => {
 	return (
 		<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 			<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
-
 				<VStack pt={"20px"}>
 					<VStack>
 						<VStack px={"20px"} w={"100%"} alignItems={"center"}>
 							<Input h={"50px"} w={"100%"} placeholder='Buscar...' onChangeText={(value) => handleSearch(value.toLowerCase())} />
 						</VStack>
-						<ScrollView px={"20px"} horizontal={true} contentContainerStyle={styles.ScrollView} >
-							<VStack mr={"20px"} width={"70px"} height={"70px"} justifyContent={"center"} alignItems={"center"}>
-								<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} width={"70px"} height={"70px"} alignItems={"center"} justifyContent={"center"} onPress={() => navigation.navigate("SearchUserScreen")}>
-									<AntDesign name="pluscircle" size={24} color="white" />
-								</Pressable>
-								<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>Nueva</Heading>
-							</VStack>
+						<HStack px={"20px"} style={styles.ScrollView} >
 							<FlatList
-								scrollEnabled={false}
-								showsVerticalScrollIndicator={true}
-								data={users}
-								contentContainerStyle={{ flexDirection: "row", gap: 20, }}
+								h={"100%"}
+								showsVerticalScrollIndicator={false}
+								horizontal={true}
+								data={[users[0], ...users]}
+								contentContainerStyle={{ flexDirection: "row", gap: 20, justifyContent: "center", alignItems: "center" }}
 								renderItem={({ item, index }) => (
-									<Pressable _pressed={{ opacity: 0.5 }} borderRadius={100} alignItems={"center"} key={`search_user_${index}-${item.username}`} onPress={() => onSelectUser(item)}>
-										<VStack alignItems={"center"} borderRadius={10}>
-											{item.profileImageUrl ?
-												<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: item.profileImageUrl }} />
-												:
-												<DefaultIcon
-													value={item.fullName}
-													contentContainerStyle={[styles.contentContainerStyle, { width: 70, height: 70, backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.fullName) }]}
-													textStyle={styles.textStyle}
-												/>
-											}
-											<VStack mt={"5px"} justifyContent={"center"}>
-												<Heading textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>{item.fullName.slice(0, 7)}...</Heading>
-											</VStack>
+									index === 0 ? (
+										<VStack justifyContent={"center"} alignItems={"center"}>
+											<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} width={"70px"} height={"70px"} alignItems={"center"} justifyContent={"center"} onPress={() => navigation.navigate("SearchUserScreen")}>
+												<AntDesign name="pluscircle" size={24} color="white" />
+											</Pressable>
+											<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>Nueva</Heading>
 										</VStack>
-									</Pressable>
-
+									) : (
+										<Pressable _pressed={{ opacity: 0.5 }} borderRadius={100} alignItems={"center"} key={`search_user_${index}-${item.username}`} onPress={() => onSelectUser(item)}>
+											<VStack alignItems={"center"} borderRadius={10}>
+												{item.profileImageUrl ?
+													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: item.profileImageUrl }} />
+													:
+													<DefaultIcon
+														value={item.fullName}
+														contentContainerStyle={[styles.contentContainerStyle, { width: 70, height: 70, backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.fullName) }]}
+														textStyle={styles.textStyle}
+													/>
+												}
+												<VStack mt={"5px"} justifyContent={"center"}>
+													<Heading textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>{item.fullName.slice(0, 7)}...</Heading>
+												</VStack>
+											</VStack>
+										</Pressable>
+									)
 								)}
 							/>
-						</ScrollView>
+						</HStack>
 					</VStack>
 					{transactions.length > 0 ?
-						<VStack w={"100%"} h={"auto"}>
+						<VStack w={"100%"} >
 							<Heading px={"20px"} fontSize={scale(20)} color={"white"}>Transacciones</Heading>
-							<ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} >
-								<FlatList
-									px={"20px"}
-									h={"100%"}
-									mt={"10px"}
-									scrollEnabled={false}
-									data={transactions}
-
-									renderItem={({ item, index }) => (
-										<TouchableOpacity key={`search_user_${index}-${item.transactionId}`} onPress={() => onSelectTransaction(item)}>
-											<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
-												<HStack>
-													{formatTransaction(item).profileImageUrl ?
-														<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: formatTransaction(item).profileImageUrl }} />
-														:
-														<DefaultIcon
-															value={formatTransaction(item).fullName}
-															contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "") }]}
-															textStyle={styles.textStyle}
-														/>
-													}
-													<VStack ml={"10px"} justifyContent={"center"}>
-														<Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
-														<Text color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
-													</VStack>
-												</HStack>
+							<FlatList
+								px={"20px"}
+								h={"100%"}
+								mt={"10px"}
+								refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+								data={transactions}
+								renderItem={({ item, index }) => (
+									<TouchableOpacity key={`search_user_${index}-${item.transactionId}`} onPress={() => onSelectTransaction(item)}>
+										<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
+											<HStack>
+												{formatTransaction(item).profileImageUrl ?
+													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: formatTransaction(item).profileImageUrl }} />
+													:
+													<DefaultIcon
+														value={formatTransaction(item).fullName}
+														contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "") }]}
+														textStyle={styles.textStyle}
+													/>
+												}
 												<VStack ml={"10px"} justifyContent={"center"}>
-													<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(14)} color={formatTransaction(item).isFromMe ? "red" : "mainGreen"}>{formatTransaction(item).isFromMe ? "-" : "+"}{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
+													<Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
+													<Text color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
 												</VStack>
 											</HStack>
-										</TouchableOpacity>
-									)}
-								/>
-							</ScrollView>
+											<VStack ml={"10px"} justifyContent={"center"}>
+												<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(14)} color={formatTransaction(item).isFromMe ? "red" : "mainGreen"}>{formatTransaction(item).isFromMe ? "-" : "+"}{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
+											</VStack>
+										</HStack>
+									</TouchableOpacity>
+								)}
+							/>
 						</VStack>
 						: (
 							<VStack w={"100%"} h={"50%"} mt={"20px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>

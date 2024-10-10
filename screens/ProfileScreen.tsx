@@ -17,6 +17,7 @@ import { useCloudinary } from '@/hooks/useCloudinary'
 import { useMutation } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
 import { globalActions } from '@/redux/slices/globalSlice'
+import ImageView from "react-native-image-viewing";
 
 
 const data = [
@@ -56,6 +57,9 @@ const ProfileScreen: React.FC = () => {
     const [profileImage, setProfileImage] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [updateUser] = useMutation(UserApolloQueries.updateUser())
+    const [visible, setIsVisible] = useState(false);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+
 
     const pickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -82,6 +86,15 @@ const ProfileScreen: React.FC = () => {
         }
     };
 
+    const onOpenPreviewImage = () => {
+        setIsVisible(true);
+        setPreviewImage(profileImage)
+    };
+    const onClosePreviewImage = () => {
+        setIsVisible(false);
+        setPreviewImage(null)
+    };
+
     useEffect(() => {
         setProfileImage(user?.profileImageUrl)
     }, [])
@@ -93,7 +106,9 @@ const ProfileScreen: React.FC = () => {
                 <VStack mt={"30px"} alignItems={"center"} >
                     <ZStack w={scale(100)} h={scale(100)} borderRadius={100} justifyContent={"flex-end"} alignItems={"flex-end"}>
                         {profileImage ?
-                            <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(100)} h={scale(100)} source={{ uri: profileImage }} />
+                            <Pressable onPress={() => onOpenPreviewImage()} _pressed={{ opacity: 0.5 }}>
+                                <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(100)} h={scale(100)} source={{ uri: profileImage }} />
+                            </Pressable>
                             :
                             <DefaultIcon
                                 value={user?.fullName}
@@ -142,6 +157,15 @@ const ProfileScreen: React.FC = () => {
             <HStack mb={"30px"} justifyContent={"center"}>
                 <Button fontWeight={"bold"} bg={"lightGray"} color='red' title='Cerrar Sesion' onPress={onLogout} w={'80%'} />
             </HStack>
+            {previewImage ?
+                <ImageView
+                    images={[{ uri: previewImage }]}
+                    imageIndex={0}
+                    visible={visible}
+                    onRequestClose={onClosePreviewImage}
+                />
+                : null
+            }
         </VStack>
     )
 }
