@@ -133,6 +133,32 @@ export class UserApolloQueries {
         `
     }
 
+    static updateUser = () => {
+        return gql`
+            mutation UpdateUser($data: UpdateUserDataInput!) {
+                updateUser(data: $data) {
+                    id
+                    fullName
+                    username
+                    phone
+                    email
+                    dniNumber
+                    password
+                    profileImageUrl
+                    addressAgreementSigned
+                    userAgreementSigned
+                    idFrontUrl
+                    status
+                    idBackUrl
+                    faceVideoUrl
+                    address
+                    createdAt
+                    updatedAt
+                }
+            }
+        `
+    }
+
     static createUser = () => {
         return gql`
             mutation CreateUser($data: UserInput!) {

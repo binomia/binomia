@@ -134,9 +134,11 @@ const TransactionsScreen: React.FC = () => {
 
 	const formatTransaction = (transaction: any) => {
 		const isFromMe = transaction.from.user.id === user.id
+		console.log(transaction.from.user.profileImageUrl);
+		
 		const data = {
 			isFromMe,
-			profileImageUrl: isFromMe ? user.profileImageUrl : transaction.to.user.profileImageUrl,
+			profileImageUrl: isFromMe ? user.profileImageUrl : transaction.from.user.profileImageUrl,
 			amount: transaction.amount,
 			fullName: isFromMe ? user.fullName : transaction.from.user.fullName,
 			username: isFromMe ? user.username : transaction.from.user.username
