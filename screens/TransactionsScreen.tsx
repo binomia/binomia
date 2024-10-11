@@ -30,7 +30,7 @@ const TransactionsScreen: React.FC = () => {
 
 	const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
 	const [accountTransactions] = useLazyQuery(TransactionApolloQueries.accountTransactions())
-	const { getSearchedUsers, insertSearchedUser } = useSqlite()
+	const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
 
 	const [refreshing, setRefreshing] = useState(false);
 	const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
@@ -66,8 +66,9 @@ const TransactionsScreen: React.FC = () => {
 	}
 
 	const fetchSearchedUser = async () => {
-		const searchedUsers = await getSearchedUsers()
-		setUsers(searchedUsers)
+		const sugestedUsers = await getSugestedUsers()
+		const _users = await UserAuthSchema.searchUserData.parseAsync(sugestedUsers.data.sugestedUsers)
+		setUsers(_users)
 	}
 
 	const fetchAccountTransactions = async () => {
@@ -81,29 +82,6 @@ const TransactionsScreen: React.FC = () => {
 			})
 
 			setTransactions(data.accountTransactions)
-			data.accountTransactions.forEach(async (transaction: any) => {
-				const userFromData: z.infer<typeof UserAuthSchema.singleSearchUserData> = {
-					id: transaction.from.user.id,
-					dniNumber: transaction.from.user.dniNumber,
-					fullName: transaction.from.user.fullName,
-					profileImageUrl: transaction.from.user.profileImageUrl,
-					username: transaction.from.user.username,
-					email: transaction.from.user.email,
-					status: transaction.from.user.status
-				}
-				const userToData: z.infer<typeof UserAuthSchema.singleSearchUserData> = {
-					id: transaction.to.user.id,
-					dniNumber: transaction.to.user.dniNumber,
-					fullName: transaction.to.user.fullName,
-					profileImageUrl: transaction.to.user.profileImageUrl,
-					username: transaction.to.user.username,
-					email: transaction.to.user.email,
-					status: transaction.to.user.status
-				}
-
-				await insertSearchedUser(userToData)
-				await insertSearchedUser(userFromData)
-			})
 
 		} catch (error) {
 			console.error(error)
@@ -133,15 +111,14 @@ const TransactionsScreen: React.FC = () => {
 	}
 
 	const formatTransaction = (transaction: any) => {
-		const isFromMe = transaction.from.user.id === user.id
-		console.log(transaction.from.user.profileImageUrl);
+		const isFromMe = transaction.to.user.id === user.id
 
 		const data = {
-			isFromMe,
-			profileImageUrl: isFromMe ? user.profileImageUrl : transaction.from.user.profileImageUrl,
+			isFromMe: !isFromMe,
+			profileImageUrl: isFromMe ? user.profileImageUrl : transaction.to.user.profileImageUrl,
 			amount: transaction.amount,
-			fullName: isFromMe ? user.fullName : transaction.from.user.fullName,
-			username: isFromMe ? user.username : transaction.from.user.username
+			fullName: isFromMe ? user.fullName : transaction.to.user.fullName,
+			username: isFromMe ? user.username : transaction.to.user.username
 		}
 
 		return data

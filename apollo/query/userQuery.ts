@@ -168,4 +168,30 @@ export class UserApolloQueries {
             }
         `
     }
+    
+    static sugestedUsers = () => {
+        return gql`
+            query SugestedUsers {
+                sugestedUsers {
+                    id
+                    fullName
+                    username
+                    phone
+                    email
+                    dniNumber
+                    password
+                    profileImageUrl
+                    addressAgreementSigned
+                    userAgreementSigned
+                    idFrontUrl
+                    status
+                    idBackUrl
+                    faceVideoUrl
+                    address
+                    createdAt
+                    updatedAt
+                }
+            }
+        `
+    }
 }

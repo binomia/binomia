@@ -16,8 +16,8 @@ import { useCloudinary } from '@/hooks/useCloudinary'
 import { useMutation } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
 import { globalActions } from '@/redux/slices/globalSlice'
-import ImageView from "react-native-image-viewing";
 import { profileScreenData } from '@/mocks'
+import ImageView from "react-native-image-viewing";
 
 
 const ProfileScreen: React.FC = () => {

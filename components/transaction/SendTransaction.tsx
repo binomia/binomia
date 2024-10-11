@@ -35,11 +35,10 @@ const SearchUserScreen: React.FC<Props> = ({ open = false, onSendFinish = () => 
     const [visible, setVisible] = useState<boolean>(open);
 
     const handleOnSend = async () => {
-        try {
+        try {            
             const transactionData = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(input),
-                description: "Transferencia",
                 location
             })
 
@@ -49,8 +48,7 @@ const SearchUserScreen: React.FC<Props> = ({ open = false, onSendFinish = () => 
                 }
             })
 
-            // onSendFinish()
-            console.log(JSON.stringify(transaction.data, null, 2));
+            handleOnClose()
 
         } catch (error: any) {
             console.error(error.message);
@@ -105,9 +103,7 @@ const SearchUserScreen: React.FC<Props> = ({ open = false, onSendFinish = () => 
                     </VStack>
                     <VStack mb={"20px"}>
                         <KeyNumberPad
-                            onChange={(value: string) => {
-                                console.log(value, input);
-                                console.log(JSON.stringify({ receiver }, null, 2));
+                            onChange={(value: string) => {                              
                                 setInput(value);
                             }}
                         />
