@@ -1,25 +1,5 @@
 import { z } from 'zod'
 
-
-// {
-//     "faceVideoUrl": "https://res.cloudinary.com/brayhandeaza/video/upload/v1727661924/dinero/video/1727661920886.mp4",
-//     "fullName": "Rosa elena Victoriano severino",
-//     "phone": "8496352186",
-//     "username": "224-0082268-4",
-//     "email": "lpmrloki@gmail.com",
-//     "dni": "224-0082268-4",
-//     "sex": "m" -> gender,
-//     "address": "Villa",
-//     "dob": "1989-12-11",
-//     "dniExpiration": "2024-12-11",
-//     "imageUrl": "" -> profileImageUrl,
-//     "password": "123456",
-//     "addressAgreement": true,
-//     "userAgreement": true,
-//     "idBackUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727661902/dinero/cedulas/1727661901878.jpg",
-//     "idFrontUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727661868/dinero/cedulas/1727661866948.jpg"
-//   }
-
 export class UserJoiSchema {
     static createUser = z.object({
         fullName: z.string(),
@@ -43,6 +23,28 @@ export class UserJoiSchema {
         maritalStatus: z.string().optional().nullable().default(null),
         bloodType: z.string().optional().nullable().default(null)
     })
+
+    static updateUser = z.object({
+        fullName: z.string().nullish().optional(),
+        username: z.string().nullish().optional(),
+        phone: z.string().length(10).nullish().optional(),
+        email: z.string().email().nullish().optional(),
+        profileImageUrl: z.string().url().nullish().optional(),
+        addressAgreementSigned: z.boolean().nullish().optional(),
+        userAgreementSigned: z.boolean().nullish().optional(),
+        idFrontUrl: z.string().url().nullish().optional(),
+        idBackUrl: z.string().url().nullish().optional(),
+        faceVideoUrl: z.string().url().nullish().optional(),
+        address: z.string().nullish().optional(),
+        dob: z.string().nullish().optional(),
+        dniExpiration: z.string().nullish().optional(),
+        occupation: z.string().optional().nullish().optional(),
+        gender: z.string().optional().nullish().optional(),
+        maritalStatus: z.string().optional().nullish().optional(),
+        bloodType: z.string().optional().nullish().optional()
+    }).refine(data => Object.values(data).some(value => value !== undefined && value !== null), {
+        message: "At least one property must be provided"
+    });
 
 
     static login = z.object({

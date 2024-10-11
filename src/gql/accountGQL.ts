@@ -12,10 +12,23 @@ const type = () => {
             hash: String
             currency: String
         }
+        input AccountPermissionsInput {
+            allowReceive: Boolean
+            allowWithdraw: Boolean
+            allowSend: Boolean
+            allowAsk: Boolean
+        }
 
         type OnlyAccountType {
             id:  Int
             balance: Float
+            sentAmount: Float
+            receivedAmount: Float
+            withdrawAmount: Float
+            allowReceive: Boolean
+            allowWithdraw: Boolean
+            allowSend: Boolean
+            allowAsk: Boolean
             status: String
             sendLimit: Float
             receiveLimit: Float
@@ -25,10 +38,18 @@ const type = () => {
             createdAt: String
             updatedAt: String
         }
+       
         type AccountTypeWithTransactions {
             id:  Int
             balance: Float
             status: String
+            sentAmount: Float
+            receivedAmount: Float
+            withdrawAmount: Float
+            allowReceive: Boolean
+            allowWithdraw: Boolean
+            allowSend: Boolean
+            allowAsk: Boolean
             sendLimit: Float
             receiveLimit: Float
             withdrawLimit: Float
@@ -43,6 +64,13 @@ const type = () => {
             id:  Int
             balance: Float
             status: String
+            sentAmount: Float
+            receivedAmount: Float
+            withdrawAmount: Float
+            allowReceive: Boolean
+            allowWithdraw: Boolean
+            allowSend: Boolean
+            allowAsk: Boolean
             sendLimit: Float
             receiveLimit: Float
             withdrawLimit: Float
@@ -57,9 +85,16 @@ const type = () => {
             id:  Int
             balance: Float
             status: String
+            sentAmount: Float
+            receivedAmount: Float
+            withdrawAmount: Float
             sendLimit: Float
             receiveLimit: Float
             withdrawLimit: Float
+            allowReceive: Boolean
+            allowWithdraw: Boolean
+            allowSend: Boolean
+            allowAsk: Boolean
             hash: String
             currency: String
             createdAt: String
@@ -75,25 +110,27 @@ const query = () => {
         accounts(page: Int!, pageSize: Int!): [AccountType]
         account(hash: String!): AccountType
         searchAccounts(search: AccountInput!, limit: Int): [AccountType]
-        accountTransactions(page: Int!, pageSize: Int!, accountId: Int!): [TransactionType]
+        accountLimit: TransactionsWithAccountType
     `
 }
 
 const mutation = () => {
-    
- }
+    return `
+        updateAccountPermissions(data: AccountPermissionsInput): OnlyAccountType
+    `
+}
 const subscription = () => { }
 
-const { accounts, account, accountTransactions } = AccountController
+const { accounts, account, updateAccountPermissions, accountLimit } = AccountController
 const resolvers = {
     query: {
         accounts,
         account,
-        accountTransactions
+        accountLimit
     },
 
     mutation: {
-
+        updateAccountPermissions
     },
 
     subscription: {

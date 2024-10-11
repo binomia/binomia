@@ -3,10 +3,8 @@ import { db } from "@/config"
 
 
 const SessionModel = db.define('sessions', {
-	sid: {
-		type: STRING,
-		primaryKey: true
-	},
+	sid: STRING,
+	deviceId: STRING,
 	jwt: STRING,
 	expires: DATE,
 	data: JSONB

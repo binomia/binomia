@@ -1,7 +1,11 @@
 import { ZERO_ENCRYPTION_KEY } from '@/constants';
+import { AccountModel, CardsModel, SessionModel, UsersModel } from '@/models';
+import KYCModel from '@/models/kycModel';
 import bcrypt from 'bcryptjs';
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
+import { STRING } from 'sequelize';
+import { z } from 'zod'
 
 
 const getGqlBody = (fieldNodes: any[], schema: string) => {
@@ -11,6 +15,7 @@ const getGqlBody = (fieldNodes: any[], schema: string) => {
 
     const gqlSchemas = [
         "user",
+        "kyc",
         "users",
         "account",
         "accounts",
@@ -18,6 +23,8 @@ const getGqlBody = (fieldNodes: any[], schema: string) => {
         "cards",
         "receiver",
         "sender",
+        "to",
+        "from",
         "transactions",
         "transaction"
     ];
@@ -101,26 +108,88 @@ export const generateUUID = (): string => {
 
 export const checkForProtectedRequests = async (req: any) => {
     try {
-        const token = req.headers.authorization || '';
-        if (!token)
-            throw new GraphQLError('Unauthorized access')
-
+        const sessionAuthIdentifier = await z.string().length(64).transform((val) => val.trim()).parseAsync(req.headers["session-auth-identifier"]);
+        const token = await z.string().min(1).transform((val) => val.trim()).parseAsync(req.headers["authorization"]);
         const jwtToken = token.split(' ')[1];
-        jwt.verify(jwtToken, ZERO_ENCRYPTION_KEY, (err: any, decoded: any) => {
-            if (err)
-                throw new GraphQLError("Unauthorized access: " + err)
 
-            else if (decoded.sid !== req.session.id || decoded.userId !== req.session.userId)
-                throw new GraphQLError("Unauthorized access")
+        const jwtVerifyAsync = new Promise((resolve, reject) => {
+            jwt.verify(jwtToken, ZERO_ENCRYPTION_KEY, (err, payload) => {
+                if (err)
+                    reject(err);
+                else
+                    resolve(payload);
+            });
+        });
 
-            else if (jwtToken !== req.session.jwt)
-                throw new Error("Unauthorized access")
+
+        await jwtVerifyAsync.then(async (data: any) => {
+            const jwtData = await z.object({
+                sid: z.string().min(1).transform((val) => val.trim())
+            }).parseAsync(data);
 
 
-            req.jwtData = decoded
+            const session = await SessionModel.findOne({
+                where: {
+                    sid: jwtData.sid,
+                },
+                include: [{
+                    model: UsersModel,
+                    as: 'user',
+                    include: [
+                        {
+                            model: AccountModel,
+                            as: 'account'
+                        },
+                        {
+                            model: CardsModel,
+                            as: 'cards'
+                        },
+                        {
+                            model: KYCModel,
+                            as: 'kyc'
+                        }
+                    ]
+                }]
+            })
+
+            if (!session)
+                throw new GraphQLError("INVALID_SESSION: No session found")
+
+            // console.log(session.toJSON());
+
+
+            if (jwtToken !== session.dataValues.jwt || sessionAuthIdentifier !== session.dataValues.deviceId)
+                throw new Error("INVALID_SESSION: Invalid token data")
+
+            else
+                req.session = session.toJSON()
+
+        }).catch((error: any) => {
+            const message = error.message === "jwt expired" ? "INVALID_SESSION: Session expired" : error.message
+            throw new GraphQLError(message, {
+                extensions: {
+                    code: "INVALID_SESSION",
+                    http: {
+                        status: 500
+                    }
+                }
+            })
         })
 
-    } catch (error) {
-        throw new GraphQLError("Unauthorized access")
+    } catch (error: any) {
+        throw error
     }
+}
+
+
+export const GET_LAST_SUNDAY_DATE = (): Date => {
+    const now: Date = new Date();
+    const dayOfWeek = now.getDay();
+    const daysSinceLastSunday = dayOfWeek === 0 ? 7 : dayOfWeek;
+
+    const lastSunday = new Date(now);
+    lastSunday.setDate(now.getDate() - daysSinceLastSunday);
+    lastSunday.setHours(0, 0, 0, 1);
+
+    return lastSunday;
 }

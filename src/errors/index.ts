@@ -20,13 +20,13 @@ export class CustomError extends Error {
 
         this.stack = new Error().stack
         this.message = message
-        this.extensions = {
-            code,
-            http: {
-                status: errorCode[code]
-            },
-            stacktrace: null
-        }
+        // this.extensions = {
+        //     code,
+        //     http: {
+        //         status: errorCode[code]
+        //     },
+        //     stacktrace: null
+        // }
         // this.extensions.code = 'INTERNAL_SERVER_ERROR_Hello_Hello'
     }
 }

@@ -14,48 +14,69 @@ const type = () => {
             amount: Float
             transactionType: String
             currency: String
-            description: String
             location: TransactionLocationInput
         }
 
         type TransactionType {
             transactionId: String
             amount: Float
-            deliveredAmount: Float
-            balanceAfterTransaction: Float
-            balanceBeforeTransaction: Float
+            deliveredAmount: Float         
             voidedAmount: Float
             transactionType: String
             currency: String
-            description: String
             status: String
-            sender: AccountTypeWithUser
-            receiver: AccountTypeWithUser
             location: TransactionLocationType
             createdAt: String
             updatedAt: String
+            from: AccountTypeWithUser
+            to: AccountTypeWithUser
         }
 
         type TransactionLocationType {
             latitude: Float
             longitude: Float
-        }   
+        } 
 
+        type TransactionCreatedType {
+            transactionId: String
+            amount: Float
+            deliveredAmount: Float
+            voidedAmount: Float
+            transactionType: String
+            currency: String
+            status: String
+            location: TransactionLocationType
+            createdAt: String
+            updatedAt: String
+            receiver: OnlyUserType
+        }   
 
         type OnlyTransactionType {
             transactionId: String
             amount: Float
             deliveredAmount: Float
-            balanceAfterTransaction: Float
-            balanceBeforeTransaction: Float
             voidedAmount: Float
             transactionType: String
             currency: String
-            description: String
             status: String
             location: TransactionLocationType
             createdAt: String
             updatedAt: String
+        }
+
+        type TransactionsWithAccountType {
+            transactionId: String
+            amount: Float
+            deliveredAmount: Float
+            voidedAmount: Float
+            transactionType: String
+            currency: String
+            status: String
+            location: TransactionLocationType
+            fromAccount: OnlyAccountType
+            toAccount: OnlyAccountType
+            createdAt: String
+            updatedAt: String            
         }
     `
 }
@@ -64,12 +85,14 @@ const type = () => {
 const query = () => {
     return `
         transaction: TransactionType
+        accountTransactions(page: Int!, pageSize: Int!, accountId: Int!): [TransactionType]
+
     `
 }
 
 const mutation = () => {
     return `
-        createTransaction(data: TransactionInput!): TransactionType
+        createTransaction(data: TransactionInput!): TransactionCreatedType
     `
 }
 
@@ -77,9 +100,10 @@ const subscription = () => {
     return ``
 }
 
-const {  createTransaction } = TransactionsController
+const { createTransaction, accountTransactions } = TransactionsController
 const resolvers = {
     query: {
+        accountTransactions
     },
     mutation: {
         createTransaction

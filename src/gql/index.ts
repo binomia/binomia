@@ -30,6 +30,7 @@ export const typeDefs = `
     type Mutation {
         ${userGQL.mutation()}
         ${cardGQL.mutation()}
+        ${accountGQL.mutation()}
         ${transactionGQL.mutation()}
         ${globalGQL.mutation()}
         ${kycGQL.mutation()}

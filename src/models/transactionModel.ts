@@ -17,16 +17,6 @@ const TransactionsModel = db.define('transactions', {
 		allowNull: false,
 		defaultValue: 0
 	},
-	balanceAfterTransaction: {
-		type: DECIMAL,
-		allowNull: false,
-		defaultValue: 0
-	},
-	balanceBeforeTransaction: {
-		type: DECIMAL,
-		allowNull: false,
-		defaultValue: 0
-	},
 	voidedAmount: {
 		type: DECIMAL,
 		allowNull: false,
@@ -37,10 +27,6 @@ const TransactionsModel = db.define('transactions', {
 		allowNull: false
 	},
 	currency: {
-		type: STRING,
-		allowNull: false
-	},
-	description: {
 		type: STRING,
 		allowNull: false
 	},

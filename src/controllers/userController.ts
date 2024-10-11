@@ -1,15 +1,17 @@
-import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel } from '@/models'
+import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel, SessionModel } from '@/models'
 import { Op } from 'sequelize'
 import { getQueryResponseFields, checkForProtectedRequests } from '@/helpers'
 import { ZERO_ENCRYPTION_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
-import { UserJoiSchema } from '@/joi';
+import { GlobalZodSchema, UserJoiSchema } from '@/joi';
 import { UserModelType, VerificationDataType } from '@/types';
-import { Request, Response } from "express"
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { Cryptography } from '@/helpers/cryptography';
 import { authServer } from '@/rpc';
+import { generate } from 'short-uuid';
+import { z } from 'zod'
+
 
 export class UsersController {
     static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -69,20 +71,20 @@ export class UsersController {
         }
     }
 
-    static user = async (_: unknown, ___: any, context: any, { fieldNodes }: { fieldNodes: any }) => {
+    static user = async (_: unknown, ___: any, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            await checkForProtectedRequests(context.req);
+            await checkForProtectedRequests(req);
             const fields = getQueryResponseFields(fieldNodes, 'user')
 
             const user = await UsersModel.findOne({
                 where: {
-                    id: context.req.jwtData.userId
+                    id: req.session.userId
                 },
                 attributes: fields['user'],
                 include: [
                     {
                         model: CardsModel,
-                        as: 'card'
+                        as: 'cards'
                     },
                     {
                         model: AccountModel,
@@ -104,31 +106,44 @@ export class UsersController {
                                 attributes: fields['transactions']
                             }
                         ]
+                    },
+                    {
+                        model: kycModel,
+                        as: 'kyc',
+                        attributes: fields['kyc']
                     }
                 ]
             })
 
+
             if (!user) return null
 
-            const incomingTransactions = user.dataValues.account.dataValues.incomingTransactions
-            const outgoingTransactions = user.dataValues.account.dataValues.outgoingTransactions
+            console.log(user.toJSON());
 
-            const transactions = incomingTransactions.concat(outgoingTransactions)
 
-            const account = user.dataValues.account.dataValues
-            account.transactions = transactions
+            const userData = Object.assign({}, user.toJSON(), {
+                transactions: [
+                    ...user.toJSON().account.incomingTransactions,
+                    ...user.toJSON().account.outgoingTransactions,
+                ]
+            })
 
-            const cardEncrypted = user.dataValues.card.dataValues
-            const decryptedCardData = await Cryptography.decrypt(cardEncrypted.data)
-            const card = Object.assign({}, cardEncrypted, JSON.parse(decryptedCardData))
+            const decryptedCardData = userData.card ? await Cryptography.decrypt(userData.card.data) : null
+            const card = decryptedCardData ? JSON.parse(decryptedCardData) : null
 
-            if (card.data)
-                delete card.data
-
-            return Object.assign({}, user.dataValues, {
-                account,
+            return Object.assign({}, userData, {
                 card
             })
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
+    static sessionUser = async (_: unknown, ___: any, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            await checkForProtectedRequests(req);
+            return req.session.user
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -214,12 +229,18 @@ export class UsersController {
     static createUser = async (_: unknown, { data }: { data: any }, { __, req }: { __: any, req: any }) => {
         try {
             const validatedData = await UserJoiSchema.createUser.parseAsync(data)
+
+            console.log(req.headers);
+            const registerHeader = await GlobalZodSchema.registerHeader.parseAsync(req.headers)
+            console.log(registerHeader);
+
+
             const regexPattern = new RegExp('^\\d{3}-\\d{7}-\\d{1}');
-            
+
             if (!regexPattern.test(validatedData.dniNumber))
                 throw new GraphQLError('Invalid `dni` format');
-            
-            
+
+
             const userExists = await UsersModel.findOne({
                 where: {
                     [Op.or]: [
@@ -229,16 +250,13 @@ export class UsersController {
                 },
                 attributes: ["email", "username", "dniNumber"]
             })
-            
-            if (userExists?.dataValues.dniNumber === validatedData.dniNumber)
-                throw new GraphQLError('A user with dni: ' + validatedData.dniNumber + ' already exists');
-            
-            if (userExists?.dataValues.email === validatedData.email)
+
+            if (userExists?.toJSON().email === validatedData.email)
                 throw new GraphQLError('A user with email: ' + validatedData.email + ' already exists');
 
-            if (userExists?.dataValues.username === validatedData.username)
+            if (userExists?.toJSON().username === validatedData.username)
                 throw new GraphQLError('A user with username: ' + validatedData.username + ' already exists');
-            
+
 
             const kycExists = await kycModel.findOne({
                 where: {
@@ -249,7 +267,7 @@ export class UsersController {
             if (kycExists)
                 throw new GraphQLError('The dni: ' + validatedData.dniNumber + ' already belong to a existing user');
 
-            
+
 
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(validatedData.password, salt);
@@ -258,19 +276,18 @@ export class UsersController {
                 password: hashedPassword
             }))
 
+            const userData = user.toJSON()
+
             const account = await AccountModel.create({
-                userId: user.dataValues.id,
+                username: user.dataValues.username,
                 currency: "DOP",
             })
 
-            const kycStatus = "validated"
-
-            
             const kyc = await kycModel.create({
-                userId: user.dataValues.id,
+                userId: userData.id,
                 dniNumber: validatedData.dniNumber,
                 dob: validatedData.dob,
-                status: kycStatus,
+                status: "validated",
                 expiration: validatedData.dniExpiration,
                 occupation: validatedData.occupation,
                 gender: validatedData.gender,
@@ -278,17 +295,51 @@ export class UsersController {
                 bloodType: validatedData.bloodType
             })
 
+            const sid = `${generate()}${generate()}${generate()}`
             const token = jwt.sign({
-                userId: user.dataValues.id,
-                sid: req.session.id
+                userId: userData.id,
+                sid
             }, ZERO_ENCRYPTION_KEY);
 
+            const expires = new Date(Date.now() + 1000 * 60 * 60 * 24) // 1 day
+
+            await SessionModel.create({
+                sid,
+                deviceId: registerHeader['session-auth-identifier'],
+                jwt: token,
+                userId: user.dataValues.id,
+                expires,
+                data: registerHeader.device || {}
+            })
+
             return {
-                ...user.dataValues,
-                accounts: [account],
-                kyc: kyc.dataValues,
+                ...userData,
+                accounts: [account.toJSON()],
+                kyc: kyc.toJSON(),
                 token
             }
+
+        } catch (error: any) {
+            throw new GraphQLError(error);
+        }
+    }
+
+    static updateUser = async (_: unknown, { data }: { data: any }, { req }: { req: any }) => {
+        try {
+            await checkForProtectedRequests(req);
+            const validatedData = await UserJoiSchema.updateUser.parseAsync(data)
+            console.log(Boolean(validatedData));
+            const user = await UsersModel.findOne({
+                where: {
+                    id: req.session.user.id
+                }
+            })
+
+            if (!user)
+                throw new GraphQLError('User not found');
+
+            const userUpdated = await user.update(validatedData)
+            return userUpdated
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -298,34 +349,38 @@ export class UsersController {
     static login = async (_: unknown, { email, password }: { email: string, password: string }, { res, req }: { res: any, req: any }) => {
         try {
             const validatedData = await UserJoiSchema.login.parseAsync({ email, password })
+            const deviceId = await z.string().length(64).transform((val) => val.trim()).parseAsync(req.headers["session-auth-identifier"]);
 
             const user = await UsersModel.findOne({
                 where: { email }
             })
 
+
             if (!user)
                 throw new GraphQLError(`Not found user with email: ${validatedData.email}`);
 
-            const isMatch = await bcrypt.compare(password, user.dataValues.password);
+            const isMatch = await bcrypt.compare(password, user.toJSON().password);
             if (!isMatch)
                 throw new GraphQLError('Incorrect password');
 
-            // Generate a JWT
-            const token = jwt.sign({
+            const sid = `${generate()}${generate()}${generate()}`
+            const expires = new Date(Date.now() + 1000 * 60 * 60 * 24) // 1 day
+            const token = jwt.sign({ sid }, ZERO_ENCRYPTION_KEY, { expiresIn: "1d" });
+
+            await SessionModel.create({
+                sid,
+                deviceId,
+                jwt: token,
                 userId: user.dataValues.id,
-                sid: req.session.id
-            }, ZERO_ENCRYPTION_KEY);
-
-
-
-            req.session.jwt = token
-            req.session.userId = user.dataValues.id
-
-            console.log(req.session);
+                expires,
+                data: req.headers.device ? JSON.stringify(req.headers.device) : {}
+            })
 
             return token
 
         } catch (error: any) {
+            console.error(error);
+
             throw new GraphQLError(error.message);
         }
     }

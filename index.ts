@@ -6,8 +6,6 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
-import session, { } from 'express-session';
-import SequelizeStore from 'connect-session-sequelize';
 
 import { typeDefs } from './src/gql'
 import { resolvers } from './src/gql'
@@ -18,12 +16,6 @@ import os from "os";
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import express from 'express';
-import { errorCode } from './src/errors';
-import { GraphQLError } from "graphql";
-import { SessionModel, UsersModel, CardsModel, TransactionsModel, AccountModel } from './src/models';
-import { SESSION_SECRET_SECRET_KEY } from "./src/constants";
-import { Op, Sequelize } from "sequelize";
-import { seedDatabase } from "seed";
 
 
 
@@ -31,15 +23,9 @@ export const app: express.Express = express();
 const httpServer = createServer(app);
 
 
-const formatError = (formattedError: any, error: unknown) => {
-    throw new GraphQLError(formattedError.message, {
-        extensions: {
-            code: formattedError.extensions.code || 'INTERNAL_SERVER_ERROR',
-            http: {
-                status: errorCode[formattedError.extensions.code] || 500
-            }
-        }
-    })
+const formatError = (_: any, error: any) => {
+    const errorData = JSON.parse(error.message)
+    return errorData.length > 0 ? errorData[0] : error
 }
 
 
@@ -52,65 +38,16 @@ const formatError = (formattedError: any, error: unknown) => {
         console.log('\nUnable to connect to the database:', err);
     })
 
-    // Define the session model
-    const Store = SequelizeStore(session.Store)
-    const SessionStore = new Store({
-        db,
-        table: "sessions",
-        tableName: 'sessions',
-        extendDefaultFields(defaults, session) {
-            return {
-                sid: session.id,
-                jwt: session.jwt,
-                userId: session.userId,
-                expires: session.expires,
-                data: {
-                    hello: 'world',
-                },
-            };
-        },
-    });
-
-    app.use(
-        session({
-            secret: SESSION_SECRET_SECRET_KEY, // Replace with your own secret
-            store: SessionStore,
-            rolling: true,
-            resave: false, // Don't resave session if unmodified
-            saveUninitialized: false, // Don't create session until something stored
-            cookie: {
-                secure: false
-            }
-        })
-    );
-
-
 
     app.get('/seed', async (_, res) => {
         // await UsersModel.findOne({
         //     where: {
-        //         id: 2
+        //         id: 14
         //     },
         //     include: [
         //         {
-        //             model: AccountModel,
-        //             as: 'account',
-        //             include: [
-        //                 {
-        //                     model: TransactionsModel,
-        //                     limit: 10,
-        //                     order: [['createdAt', 'DESC']],
-        //                     as: 'incomingTransactions',
-        //                     isMultiAssociation: true
-        //                 },
-        //                 {
-        //                     model: TransactionsModel,
-        //                     limit: 10,
-        //                     order: [['createdAt', 'DESC']],
-        //                     as: 'outgoingTransactions',
-
-        //                 }
-        //             ]
+        //             model: SessionModel,
+        //             as: 'sessions',
         //         }
         //     ]
         // }).then((users) => {
@@ -118,9 +55,10 @@ const formatError = (formattedError: any, error: unknown) => {
         //     res.json(users)
         // }).catch((err) => {
         //     console.log(err);
+        //     res.json({err})
         // })
 
-        await seedDatabase()
+        // await seedDatabase()
         res.json({ success: true })
     })
 
@@ -153,7 +91,10 @@ const formatError = (formattedError: any, error: unknown) => {
     await server.start()
 
     app.use(
-        cors(),
+        cors({
+            origin: '*',
+            credentials: true
+        }),
         bodyParser.json(),
         expressMiddleware(server, {
             context: async ({ req, res }) => {

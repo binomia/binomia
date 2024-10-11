@@ -1,5 +1,5 @@
 import { db } from "@/config";
-import { STRING, FLOAT } from "sequelize";
+import { STRING, FLOAT, BOOLEAN } from "sequelize";
 import short from 'short-uuid';
 
 
@@ -53,6 +53,26 @@ const AccountModel = db.define('accounts', {
         type: STRING,
         allowNull: false,
         defaultValue: "DOP"
+    },
+    allowReceive: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowSend: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowWithdraw: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowAsk: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
     }
 })
 

@@ -25,13 +25,31 @@ const type = () => {
             dniExpiration: String
         }
 
+        input UpdateUserDataInput {
+            fullName: String
+            username: String
+            phone: String
+            addressAgreementSigned: Boolean
+            userAgreementSigned: Boolean
+            profileImageUrl: String
+            idFrontUrl: String
+            idBackUrl: String
+            faceVideoUrl: String
+            occupation: String
+            dniNumber: String
+            maritalStatus: String
+            address: String
+            dob: String
+            dniExpiration: String
+        }
+
         input TokenAngSignInput {
             token: String
             signature: String
         }
 
         type UserType {
-            id:  Int
+            id: Int
             fullName: String
             username: String
             phone: String
@@ -46,7 +64,7 @@ const type = () => {
             idBackUrl: String
             faceVideoUrl: String
             address: String
-            accounts: [AccountTypeWithTransactions]
+            account: AccountTypeWithTransactions
             cards: [OnlyCardType]
             kyc: OnlyKYCType
             createdAt: String
@@ -99,6 +117,7 @@ const type = () => {
 const query = () => {
     return `
         user: UserType
+        sessionUser: UserType
         userByEmail(email: String!): Boolean
         searchUsers(search: UserInput!, limit: Int): [UserType]
     `
@@ -107,7 +126,7 @@ const query = () => {
 const mutation = () => {
     return `            
         createUser(data: UserInput!): UserCreatedType 
-        updateUser(uuid:  Int!, data: UserInput!): UserType
+        updateUser(data: UpdateUserDataInput!): OnlyUserType
         sendMessage(message: String): String
         login(email: String!, password: String!): String
         updateUserPassword(email: String!, password: String!, data: TokenAngSignInput!): OnlyUserType
@@ -122,16 +141,18 @@ const subscription = () => {
     `
 }
 
-const { userByEmail, updateUserPassword, user, createUser, searchUsers, login } = UsersController
+const { userByEmail, sessionUser, updateUserPassword, updateUser, user, createUser, searchUsers, login } = UsersController
 const resolvers = {
     query: {
         user,
+        sessionUser,
         searchUsers,
         userByEmail
     },
 
     mutation: {
         createUser,
+        updateUser,
         updateUserPassword,
         login
     },

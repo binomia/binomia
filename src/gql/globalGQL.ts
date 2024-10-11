@@ -10,6 +10,7 @@ const type = () => {
 
 const query = () => {
     return `
+        test: String
     `
 }
 
@@ -23,11 +24,13 @@ const subscription = () => {
     return ``
 }
 
-const { signData } = GlobalController
+const { signData, test } = GlobalController
 const resolvers = {
-    query: {},
+    query: {
+        test
+    },
     mutation: {
-        signData
+        signData,
     },
     subscription: {}
 }

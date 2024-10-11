@@ -1,6 +1,7 @@
 import { AccountModel, TransactionsModel, UsersModel } from '@/models'
-import { checkForProtectedRequests, getQueryResponseFields } from '@/helpers'
+import { checkForProtectedRequests, GET_LAST_SUNDAY_DATE, getQueryResponseFields } from '@/helpers'
 import { GraphQLError } from 'graphql';
+import { AccountZodSchema } from '@/joi';
 import { Op } from 'sequelize';
 
 export class AccountController {
@@ -52,65 +53,77 @@ export class AccountController {
         }
     }
 
-
-    static accountTransactions = async (_: unknown, { page, pageSize, accountId }: { page: number, pageSize: number, accountId: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+    static updateAccountPermissions = async (_: unknown, { data }: { data: any }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            await checkForProtectedRequests(context.req);
-            const fields = getQueryResponseFields(fieldNodes, 'transactions')
+            await checkForProtectedRequests(req);
 
-            const _pageSize = pageSize > 50 ? 50 : pageSize
-            const limit = _pageSize;
-            const offset = (page - 1) * _pageSize;
+            const accountPermissions = await AccountZodSchema.updateAccountPermissions.parseAsync(data)
+            const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
 
 
-            const transactions = await TransactionsModel.findAll({
-                limit,
-                offset,
-                order: [['createdAt', 'DESC']],
-                attributes: fields['transactions'],
+            const account = await AccountModel.findOne({
+                where: {
+                    id: req.session.user.account.id
+                },
+                attributes: fields['updateAccount'],
+                include: [{
+                    model: UsersModel,
+                    as: 'user',
+                    attributes: fields['user']
+                }]
+            })
+
+            if (!account) {
+                throw new GraphQLError('Account not found');
+            }
+
+            const updatedAccount = await account.update(accountPermissions)
+            return updatedAccount
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
+    static accountLimit = async (_: unknown, { data }: { data: any }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            await checkForProtectedRequests(req);
+            const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
+
+            const account = await TransactionsModel.findAll({
                 where: {
                     [Op.or]: [
                         {
-                            senderId: accountId
+                            [Op.and]: [
+                                { fromAccount: req.session.user.account.id },
+                                { createdAt: { [Op.gte]: GET_LAST_SUNDAY_DATE() } }
+                            ]
                         },
                         {
-                            receiverId: accountId
+                            [Op.and]: [
+                                { toAccount: req.session.user.account.id },
+                                { createdAt: { [Op.gte]: GET_LAST_SUNDAY_DATE() } }
+                            ]
                         }
                     ]
                 },
                 include: [
                     {
                         model: AccountModel,
-                        as: 'sender',
-                        attributes: fields['sender'],
-                        include: [
-                            {
-                                model: UsersModel,
-                                as: 'user',
-                                attributes: fields['user']
-                            }
-                        ]
+                        as: 'from',
+                        attributes: ["id"]
                     },
                     {
                         model: AccountModel,
-                        as: 'receiver',
-                        attributes: fields['receiver'],
-                        include: [
-                            {
-                                model: UsersModel,
-                                as: 'user',
-                                attributes: fields['user']
-                            }
-                        ]
+                        as: 'to',
+                        attributes: ["id"]
                     }
                 ]
             })
 
-            if (!transactions) return []
+            console.log(account);
 
-            console.log(transactions);
-
-            return transactions
+            return account
 
         } catch (error: any) {
             throw new GraphQLError(error.message);

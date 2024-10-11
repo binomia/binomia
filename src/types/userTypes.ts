@@ -4,7 +4,6 @@ export type UserModelType = {
     username: string
     password: string
     phone: string
-    imageUrl: string
     email: string
     dniNumber: string
     profileImageUrl: string
