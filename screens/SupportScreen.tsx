@@ -1,33 +1,17 @@
 import { Linking, StyleSheet, } from 'react-native'
 import React from 'react'
 import { Image, VStack, Text, HStack, Divider, FlatList, Pressable } from 'native-base'
-import { mailIcon, phoneIcon, whatsappIcon } from '@/assets'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
 import Feather from '@expo/vector-icons/Feather';
-import { CAPITALIZE_WORDS, FORMAT_PHONE_NUMBER } from '@/helpers'
+import { CAPITALIZE_WORDS } from '@/helpers'
 import { SUPPORT_PHONE_NUMBER } from '@/constants'
 import { useSelector } from 'react-redux'
+import { supportScreenData } from '@/mocks'
 
 const SupportScreen: React.FC = () => {
     const {user} = useSelector((state: any) => state.globalReducer)
-    const data = [
-        {
-            name: FORMAT_PHONE_NUMBER(SUPPORT_PHONE_NUMBER),
-            icon: phoneIcon,
-            onPress: () => openPhone(),
-        },
-        {
-            name: "soporte@dinero.com.do",
-            icon: mailIcon,
-            onPress: () => openEmail(),
-        },
-        {
-            name: "Whatsapp",
-            icon: whatsappIcon,
-            onPress: () => openWhatsApp()
-        }
-    ]
+
 
     const openEmail = async () => {
         try {
@@ -67,7 +51,7 @@ const SupportScreen: React.FC = () => {
             <VStack borderRadius={10} w={"100%"} h={"auto"} mt={"50px"}>
                 <FlatList
                     bg={"lightGray"}
-                    data={data}
+                    data={supportScreenData({ openEmail, openPhone, openWhatsApp })}
                     borderRadius={10}
                     pb={"4px"}
                     scrollEnabled={false}

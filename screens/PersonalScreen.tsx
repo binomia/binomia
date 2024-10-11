@@ -1,40 +1,21 @@
 import { StyleSheet, } from 'react-native'
 import React from 'react'
 import { Image, VStack, Text, HStack, Divider, FlatList } from 'native-base'
-import { addressIcon, idIcon, mailIcon, phoneIcon, userIcon } from '@/assets'
+import { addressIcon } from '@/assets'
 import { useSelector } from 'react-redux'
-import { FORMAT_PHONE_NUMBER } from '@/helpers'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
+import { personalScreenData } from '@/mocks'
 
 const PersonalScreen: React.FC = () => {
     const { user } = useSelector((state: any) => state.globalReducer)
-
-    const data = [
-        {
-            name: user.fullName,
-            icon: userIcon,
-        },
-        {
-            name: user.email,
-            icon: mailIcon,
-        },
-        {
-            name: FORMAT_PHONE_NUMBER(user.phone),
-            icon: phoneIcon,
-        },
-        {
-            name: user.dniNumber,
-            icon: idIcon,
-        }
-    ]
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
             <VStack borderRadius={10} w={"100%"} h={"auto"} mt={"50px"}>
                 <FlatList
                     bg={"lightGray"}
-                    data={data}
+                    data={personalScreenData(user)}
                     borderRadius={10}
                     pb={"5px"}
                     scrollEnabled={false}

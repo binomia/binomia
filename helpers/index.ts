@@ -128,3 +128,11 @@ export const CAPITALIZE_WORDS = (text: string) => {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
 }
+
+
+export const FORMAT_LIMIT = (amount: number, limit: number) => {
+    if (amount === 0)
+        return String(0)
+
+    return parseFloat(String((amount / limit) * 100)).toFixed(0)
+}

@@ -1,7 +1,6 @@
 import { StyleSheet, } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
 import { Heading, Image, VStack, Text, HStack, Divider, FlatList, Pressable, ZStack, Spinner } from 'native-base'
-import { limitIcon, notificacionIcon, privacyIcon, soportIcon, userIcon } from '@/assets'
 import DefaultIcon from 'react-native-default-icon'
 import { useDispatch, useSelector } from 'react-redux'
 import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
@@ -18,35 +17,8 @@ import { useMutation } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
 import { globalActions } from '@/redux/slices/globalSlice'
 import ImageView from "react-native-image-viewing";
+import { profileScreenData } from '@/mocks'
 
-
-const data = [
-    {
-        name: "Personal",
-        path: "PersonalScreen",
-        icon: userIcon,
-    },
-    {
-        name: "Privacidad & Seguridad",
-        path: "PrivacyScreen",
-        icon: privacyIcon,
-    },
-    {
-        name: "Limites",
-        path: "LimitsScreen",
-        icon: limitIcon,
-    },
-    {
-        name: "Notificaciones",
-        path: "NotificationsScreen",
-        icon: notificacionIcon,
-    },
-    {
-        name: "Soporte",
-        path: "SupportScreen",
-        icon: soportIcon,
-    }
-]
 
 const ProfileScreen: React.FC = () => {
     const dispatch = useDispatch()
@@ -68,8 +40,8 @@ const ProfileScreen: React.FC = () => {
             aspect: [4, 3],
             quality: 1,
         });
-        setIsLoading(true)
         if (!result.canceled) {
+            setIsLoading(true)
             const url = await uploadImage(result.assets[0].uri)
             const updatedUser = await updateUser({
                 variables: {
@@ -133,7 +105,7 @@ const ProfileScreen: React.FC = () => {
                 </VStack>
                 <VStack px={"10px"} borderRadius={10} w={"100%"} h={"auto"} mt={"50px"} bg={"lightGray"}>
                     <FlatList
-                        data={data}
+                        data={profileScreenData}
                         scrollEnabled={false}
                         keyExtractor={(item, index) => index.toString()}
                         renderItem={({ item, index }) => (

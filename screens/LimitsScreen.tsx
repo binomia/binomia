@@ -1,41 +1,14 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { VStack, Text, HStack, FlatList, ZStack } from 'native-base'
 import { useSelector } from 'react-redux'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
 import CircularProgress from 'react-native-circular-progress-indicator';
-import { FORMAT_CURRENCY } from '@/helpers'
+import { limitsScreenData } from '@/mocks'
 
 
 const LimitsScreen: React.FC = () => {
-    const { user, account } = useSelector((state: any) => state.globalReducer)
-
-    const formatLimit = (amount: number, limit: number) => {
-        if (amount === 0)
-            return String(0)
-
-        return parseFloat(String((amount / limit) * 100)).toFixed(0)
-    }
-
-    const data = [
-        {
-            title: `Enviado ${FORMAT_CURRENCY(account.sentAmount)} de ${FORMAT_CURRENCY(account.withdrawLimit)}`,
-            value: account.sentAmount,
-            percentage: formatLimit(account.sentAmount, account.withdrawLimit)
-
-        },
-        {
-            title: `Recibido ${FORMAT_CURRENCY(account.receivedAmount)} de ${FORMAT_CURRENCY(account.receiveLimit)}`,
-            value: account.receivedAmount,
-            percentage: formatLimit(account.receivedAmount, account.receiveLimit)
-        },
-        {
-            title: `Retirado ${FORMAT_CURRENCY(account.withdrawAmount)} de ${FORMAT_CURRENCY(account.withdrawLimit)}`,
-            value: account.withdrawAmount,
-            percentage: formatLimit(account.withdrawAmount, account.withdrawLimit)
-
-        }
-    ]
+    const { account } = useSelector((state: any) => state.globalReducer)
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
@@ -44,7 +17,7 @@ const LimitsScreen: React.FC = () => {
                     bg={"lightGray"}
                     borderRadius={10}
                     px={"10px"}
-                    data={data}
+                    data={limitsScreenData(account)}
                     scrollEnabled={false}
                     keyExtractor={(index) => index.toString()}
                     renderItem={({ item }) => (

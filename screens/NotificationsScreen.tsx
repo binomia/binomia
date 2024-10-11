@@ -1,34 +1,18 @@
 import React from 'react'
 import { Image, VStack, Text, HStack, Divider, FlatList, Switch } from 'native-base'
-import { mailIcon, notificacionIcon, phoneIcon, whatsappIcon } from '@/assets'
+import { whatsappIcon } from '@/assets'
 import { useDispatch, useSelector } from 'react-redux'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
 import { globalActions } from '@/redux/slices/globalSlice'
 import useAsyncStorage from '@/hooks/useAsyncStorage'
+import { notificationsScreenData } from '@/mocks'
 
 const NotificationsScreen: React.FC = () => {
     const dispatch = useDispatch()
     const { setItem } = useAsyncStorage()
     const { smsNotifications, whatsappNotifications, emailNotifications, pushNotifications } = useSelector((state: any) => state.globalReducer)
 
-    const data = [
-        {
-            name: "Notificaciónes Mobil",
-            icon: notificacionIcon,
-            allow: pushNotifications
-        },
-        {
-            name: "Correo Electrónico",
-            icon: mailIcon,
-            allow: emailNotifications
-        },
-        {
-            name: "Mensajes SMS",
-            icon: phoneIcon,
-            allow: smsNotifications
-        }
-    ]
 
     const onSwitchChange = async (name: string, allow: boolean) => {
         try {
@@ -72,7 +56,7 @@ const NotificationsScreen: React.FC = () => {
                     bg={"lightGray"}
                     borderRadius={10}
                     pb={"3px"}
-                    data={data}
+                    data={notificationsScreenData({ pushNotifications, emailNotifications, smsNotifications })}
                     scrollEnabled={false}
                     keyExtractor={(index) => index.toString()}
                     renderItem={({ item, index }) => (

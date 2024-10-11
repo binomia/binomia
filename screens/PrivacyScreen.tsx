@@ -1,36 +1,20 @@
 import { StyleSheet, } from 'react-native'
 import React from 'react'
 import { Image, VStack, Text, HStack, Divider, FlatList, Switch } from 'native-base'
-import {  askingForMoneyIcon, faceIdIcon, receiveIcon, sendMoneyIcon, } from '@/assets'
+import { faceIdIcon } from '@/assets'
 import { useDispatch, useSelector } from 'react-redux'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
 import { globalActions } from '@/redux/slices/globalSlice'
 import { useMutation } from '@apollo/client'
 import { AccountApolloQueries } from '@/apollo/query'
+import { privacyScreenData } from '@/mocks'
 
 const PrivacyScreen: React.FC = () => {
     const dispatch = useDispatch()
     const { allowFaceId, account } = useSelector((state: any) => state.globalReducer)
     const [updateAccountPermissions] = useMutation(AccountApolloQueries.updateAccountPermissions())
 
-    const data = [
-        {
-            name: "Recibir Dinero",
-            icon: receiveIcon,
-            allow: account.allowReceive
-        },
-        {
-            name: "Enviar Dinero",
-            icon: sendMoneyIcon,
-            allow: account.allowSend
-        },
-        {
-            name: "Solicitarme Dinero",
-            icon: askingForMoneyIcon,
-            allow: account.allowAsk
-        }
-    ]
 
     const onSwitchChange = async (name: string, allow: boolean) => {
         try {
@@ -95,7 +79,7 @@ const PrivacyScreen: React.FC = () => {
                     bg={"lightGray"}
                     borderRadius={10}
                     pb={"3px"}
-                    data={data}
+                    data={privacyScreenData(account)}
                     scrollEnabled={false}
                     keyExtractor={(index) => index.toString()}
                     renderItem={({ item, index }) => (
