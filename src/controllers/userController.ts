@@ -384,4 +384,65 @@ export class UsersController {
             throw new GraphQLError(error.message);
         }
     }
+
+    static sugestedUsers = async (_: unknown, { username }: { username: string }, { req }: { req: any }) => {
+        try {
+            await checkForProtectedRequests(req);
+            const transactions = await TransactionsModel.findAll({
+                where: {
+                    [Op.or]: [
+                        { fromAccount: req.session.user.account.id },
+                        { toAccount: req.session.user.account.id }
+                    ]
+                },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'from',
+                        attributes: ["id"],
+                        include: [
+                            {
+                                model: UsersModel,
+                                as: 'user',
+                                // attributes: ["id"]
+                            }
+                        ]
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'to',
+                        attributes: ["id"],
+                        include: [
+                            {
+                                model: UsersModel,
+                                as: 'user',
+                                // attributes: []
+                            }
+                        ]
+                    }
+                ]
+            })
+
+            const users = transactions.reduce((acc: any[], item: any) => {
+                // Check if the 'from' user is not the current user and is not already in the array
+                if (item.from && item.from.user.id !== req.session.user.id &&
+                    !acc.some((user) => user.id === item.from.user.id)) {
+                    acc.push(item.from.user.toJSON());
+                }
+
+                // Check if the 'to' user is not the current user and is not already in the array
+                if (item.to && item.to.user.id !== req.session.user.id &&
+                    !acc.some((user) => user.id === item.to.user.id)) {
+                    acc.push(item.to.user.toJSON());
+                }
+
+                return acc;
+            }, []);
+
+            return users
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
 }

@@ -3,6 +3,7 @@ import { GraphQLError } from 'graphql';
 import { Cryptography } from '@/helpers/cryptography';
 import { ZERO_SIGN_PRIVATE_KEY, ZERO_ENCRYPTION_KEY } from '@/constants';
 import { AccountModel, TransactionsModel, UsersModel } from '@/models';
+import { Op } from 'sequelize';
 
 
 export class GlobalController {
@@ -28,30 +29,56 @@ export class GlobalController {
     static test = async (_: unknown, { hash }: { hash: string }, { req }: { req: any }) => {
         try {
             await checkForProtectedRequests(req);
-            // console.log(context.req.session);
-            const account = await AccountModel.findOne({
+            const transactions = await TransactionsModel.findAll({
                 where: {
-                    username: req.session.user.username
+                    [Op.or]: [
+                        { fromAccount: req.session.user.account.id },
+                        { toAccount: req.session.user.account.id }
+                    ]
                 },
                 include: [
                     {
-                        model: TransactionsModel,
-                        as: 'incomingTransactions',
-                        limit: 1,
-                        order: [['createdAt', 'DESC']],
-                        attributes: ['id', 'createdAt', 'updatedAt', 'amount', 'fromAccount', 'toAccount', 'status']
+                        model: AccountModel,
+                        as: 'from',
+                        attributes: ["id"],
+                        include: [
+                            {
+                                model: UsersModel,
+                                as: 'user',
+                                // attributes: ["id"]
+                            }
+                        ]
                     },
                     {
-                        model: TransactionsModel,
-                        as: 'outgoingTransactions',
-                        limit: 1,
-                        order: [['createdAt', 'DESC']],
-                        attributes: ['id', 'createdAt', 'updatedAt', 'amount', 'fromAccount', 'toAccount', 'status']
-                    },
+                        model: AccountModel,
+                        as: 'to',
+                        attributes: ["id"],
+                        include: [
+                            {
+                                model: UsersModel,
+                                as: 'user',
+                                // attributes: []
+                            }
+                        ]
+                    }
                 ]
             })
 
-            console.log(account?.toJSON());
+            const users = transactions.reduce((acc: any[], item: any) => {
+                // Check if the 'from' user is not the current user and is not already in the array
+                if (item.from && item.from.user.id !== req.session.user.id &&
+                    !acc.some((user) => user.id === item.from.user.id)) {
+                    acc.push(item.from.user.toJSON());
+                }
+
+                // Check if the 'to' user is not the current user and is not already in the array
+                if (item.to && item.to.user.id !== req.session.user.id &&
+                    !acc.some((user) => user.id === item.to.user.id)) {
+                    acc.push(item.to.user.toJSON());
+                }
+
+                return acc;
+            }, []);
 
             return null
 
