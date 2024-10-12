@@ -1,0 +1,13 @@
+node_modules
+.vscode*
+
+*.env
+
+# Lock files
+yarn.lock
+package-lock.json
+
+# Logs
+*.log
+*.log.*
+npm-debug.log*
