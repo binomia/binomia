@@ -9,7 +9,6 @@ import { UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
-import { useSqlite } from '@/hooks/useSqlite';
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
 import { useDispatch, useSelector } from 'react-redux';
@@ -108,6 +107,9 @@ const TransactionsScreen: React.FC = () => {
 
 	const onCloseFinish = () => {
 		setShowSingleTransaction(false)
+	}
+	const onSendCloseFinish = () => {
+		setShowSendTransaction(false)
 	}
 
 	const formatTransaction = (transaction: any) => {
@@ -231,9 +233,7 @@ const TransactionsScreen: React.FC = () => {
 					<BottomSheet openTime={300} height={height} onCloseFinish={onCloseFinish} open={showSingleTransaction}>
 						<SingleTransactionScreen onClose={onCloseFinish} />
 					</BottomSheet>
-					<SendTransaction open={showSendTransaction} onCloseFinish={onCloseFinish} onSendFinish={() => {
-
-					}} />
+					<SendTransaction open={showSendTransaction} onCloseFinish={onSendCloseFinish} onSendFinish={onSendCloseFinish} />
 				</VStack>
 			</SafeAreaView>
 		</TouchableWithoutFeedback >

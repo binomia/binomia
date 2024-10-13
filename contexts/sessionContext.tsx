@@ -49,6 +49,9 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
             const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account)
 
+            console.log({ userProfileData, kycData, accountsData });
+            
+
             await Promise.all([
                 dispatch(globalActions.setUser(userProfileData)),
                 dispatch(globalActions.setKyc(kycData)),
@@ -56,6 +59,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             ])
 
         } catch (error) {
+            await onLogout()
             console.error(error);
         }
     }

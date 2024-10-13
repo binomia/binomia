@@ -68,7 +68,7 @@ const ProfileScreen: React.FC = () => {
     };
 
     useEffect(() => {
-        setProfileImage(user?.profileImageUrl)
+        setProfileImage(user?.profileImageUrl || null)
     }, [])
 
 
@@ -78,8 +78,8 @@ const ProfileScreen: React.FC = () => {
                 <VStack mt={"30px"} alignItems={"center"} >
                     <ZStack w={scale(100)} h={scale(100)} borderRadius={100} justifyContent={"flex-end"} alignItems={"flex-end"}>
                         {profileImage ?
-                            <Pressable onPress={() => onOpenPreviewImage()} _pressed={{ opacity: 0.5 }}>
-                                <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(100)} h={scale(100)} source={{ uri: profileImage }} />
+                            <Pressable w={scale(100)} h={scale(100)} borderRadius={100} onPress={() => onOpenPreviewImage()} _pressed={{ opacity: 0.5 }}>
+                                <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={{ uri: profileImage }} />
                             </Pressable>
                             :
                             <DefaultIcon
@@ -119,7 +119,7 @@ const ProfileScreen: React.FC = () => {
                                             <Text textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
                                             <Feather name="chevron-right" size={24} color="white" />
                                         </HStack>
-                                        {index !== 4 ? <Divider mt={"10px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
+                                        {index !== 5 ? <Divider mt={"10px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
                                     </VStack>
                                 </HStack>
                             </Pressable>

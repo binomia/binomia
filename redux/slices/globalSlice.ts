@@ -7,6 +7,8 @@ const globalSlice = createSlice({
     initialState: {
         appInBackgroundTime: 0,
         account: {},
+        card: {},
+        cards: [],
         kyc: {},
         user: {},
         applicationId: "",
@@ -33,6 +35,12 @@ const globalSlice = createSlice({
         }
     },
     reducers: {
+        setCard: (state, action) => {
+            state.card = action.payload
+        },
+        setCards: (state, action) => {
+            state.cards = action.payload
+        },
         setAppInBackgroundTime: (state, action) => {
             state.appInBackgroundTime = action.payload
         },

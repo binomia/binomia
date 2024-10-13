@@ -1,4 +1,4 @@
-import { askingForMoneyIcon, idIcon, limitIcon, mailIcon, notificacionIcon, phoneIcon, privacyIcon, receiveIcon, sendMoneyIcon, soportIcon, userIcon, whatsappIcon } from "@/assets";
+import { askingForMoneyIcon, bankIcon, idIcon, limitIcon, mailIcon, notificacionIcon, phoneIcon, privacyIcon, receiveIcon, sendMoneyIcon, soportIcon, userIcon, whatsappIcon } from "@/assets";
 import { SUPPORT_PHONE_NUMBER } from "@/constants";
 import { FORMAT_CURRENCY, FORMAT_LIMIT, FORMAT_PHONE_NUMBER } from "@/helpers";
 import { GlobalContextType } from "@/types";
@@ -56,6 +56,11 @@ export const profileScreenData = [
         name: "Personal",
         path: "PersonalScreen",
         icon: userIcon,
+    },
+    {
+        name: "Deposito & Retiros",
+        path: "BankingScreen",
+        icon: bankIcon,
     },
     {
         name: "Privacidad & Seguridad",

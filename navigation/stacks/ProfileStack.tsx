@@ -11,6 +11,7 @@ import PrivacyScreen from '@/screens/PrivacyScreen';
 import LimitsScreen from '@/screens/LimitsScreen';
 import NotificationsScreen from '@/screens/NotificationsScreen';
 import SupportScreen from '@/screens/SupportScreen';
+import BankingScreen from '@/screens/BankingScreen';
 
 
 const { width, height } = Dimensions.get('window')
@@ -53,6 +54,7 @@ const ProfileStack: React.FC = () => {
         <Stack.Navigator initialRouteName='ProfileScreen' screenOptions={{ headerTintColor: colors.white, headerStyle: {} }} >
             <Stack.Screen name='ProfileScreen' options={{ headerRight, title: '', ...headerStyles }} component={ProfileScreen} />
             <Stack.Screen name='PersonalScreen' options={{ title: 'Personal', ...headerStyles }} component={PersonalScreen} />
+            <Stack.Screen name='BankingScreen' options={{ title: 'Deposito & Retiros', ...headerStyles }} component={BankingScreen} />
             <Stack.Screen name='PrivacyScreen' options={{ title: 'Privacidad & Seguridad', ...headerStyles }} component={PrivacyScreen} />
             <Stack.Screen name='LimitsScreen' options={{ title: 'Limites', ...headerStyles }} component={LimitsScreen} />
             <Stack.Screen name='NotificationsScreen' options={{ title: 'Notificaciones', ...headerStyles }} component={NotificationsScreen} />

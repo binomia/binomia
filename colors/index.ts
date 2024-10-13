@@ -3,9 +3,9 @@ export default {
     lightGreen: 'rgba(29, 155, 72, 0.3)',
     lightGray: "#2C2C2C",
     darkGray: "#1E1E1E",
-
-
     white: '#FFFFFF',
+
+
     primaryBlack: '#1E1E1E',
     placeholderTextColor: '#535353',
     primaryBlue: '#007AFF',
@@ -14,6 +14,7 @@ export default {
     blue: "rgba(25, 123, 210, 1)",
     lightSkyGray: '#B2B2B2',
     lightRed: '#fbecf1',
+    pureGray: 'rgba(217, 217, 217,1)',
     gray: 'rgba(217, 217, 217,0.3)',
     red: 'rgb(255, 69, 58)',
     green: "#0DB1AD",

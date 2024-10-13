@@ -3,6 +3,8 @@ import { globalContextInitialState } from "@/mocks";
 import { GlobalContextType } from "@/types";
 import { createContext, useEffect, useState } from "react";
 import { AppState } from "react-native";
+import * as Contacts from 'expo-contacts';
+import { useContacts } from "@/hooks/useContacts";
 
 
 export const GlobalContext = createContext<GlobalContextType>(globalContextInitialState);
@@ -26,6 +28,7 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
 
     const { getItem, setItem } = useAsyncStorage();
+    const { getContacts, getContact } = useContacts();
 
     const resetAllStates = () => {
         setEmail("")
@@ -44,6 +47,11 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
         setUserAgreement(false)
         setShowPassword(false)
         setDisabledButton(true)
+    }
+
+    const getAppInBackgroundTime = async () => {
+        const appInBackgroundTime = await getItem("appInBackgroundTime");
+        return appInBackgroundTime;
     }
 
     useEffect(() => {
@@ -69,6 +77,13 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
         return () => {
             subscription.remove();
         };
+    }, []);
+
+    useEffect(() => {
+        (async () => {
+            const contact = await getContact("+18297809087")
+            console.log(JSON.stringify(contact, null, 4));
+        })();
     }, []);
 
 
