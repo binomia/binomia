@@ -13,6 +13,8 @@ import DepositOrWithdrawTransaction from '@/components/transaction/DepositOrWith
 import { globalActions } from '@/redux/slices/globalSlice'
 import Cards from '@/components/cards'
 import CardModification from '@/components/cards/CardModification'
+import { RefreshControl } from 'react-native'
+import AddOrEditCard from '@/components/cards/AddOrEditCard'
 
 
 const BankingScreen: React.FC = () => {
@@ -135,6 +137,7 @@ const BankingScreen: React.FC = () => {
                     data={transactions}
                     showsHorizontalScrollIndicator={false}
                     scrollEnabled={true}
+                    refreshControl={<RefreshControl refreshing={false} onRefresh={() => { }} />}
                     renderItem={({ item, index }) => (
                         <Pressable mb={"25px"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} >
                             <HStack >

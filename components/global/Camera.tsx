@@ -113,7 +113,6 @@ const CameraComponent: React.FC<Props> = ({ open, onCloseFinish, setVideo, setIm
     const takePicture = async () => {
         if (ref.current) {
             const photo = await ref.current.takePhoto();
-            console.log("photo", photo.path);
             setPreviewUrl(photo.path)
         }
     }
@@ -169,7 +168,6 @@ const CameraComponent: React.FC<Props> = ({ open, onCloseFinish, setVideo, setIm
                                     imageUri={previewUrl}
                                     fixedAspectRatio={1.5}
                                     onEditingCancel={() => {
-                                        console.log("onEditingCancel");
                                         setPreviewUrl("")
                                     }}
 

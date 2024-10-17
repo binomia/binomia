@@ -25,6 +25,8 @@ import house from './house.png';
 import bills from './bills.png';
 import checked from './checked.png';
 import noTransactions from './no-transactions.png';
+import cardHolder from './card-holder.png';
+import cardBackHolder from './card-back-holder.png';
 
 // icons
 import qrIcon from './qr.png';
@@ -55,6 +57,8 @@ import editIcon from './icons/edit.png';
 
 
 export {
+    cardBackHolder,
+    cardHolder,
     deleteIcon,
     editIcon,
     depositIcon,

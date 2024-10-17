@@ -47,10 +47,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
             const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user.data.sessionUser)
             const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
-            const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account)
-
-            console.log({ userProfileData, kycData, accountsData });
-            
+            const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account)            
 
             await Promise.all([
                 dispatch(globalActions.setUser(userProfileData)),

@@ -34,7 +34,6 @@ const ChangePassword: React.FC<Props> = ({ nextPage, cancelBottomSheet }: Props)
         try {
             setLoading(true)
             if (password === confirmPassword) {
-                console.log(verificationData);
                 const updateUser = await updateUserPassword({
                     variables: {
                         email: verificationData.email.toLowerCase(),
@@ -45,16 +44,12 @@ const ChangePassword: React.FC<Props> = ({ nextPage, cancelBottomSheet }: Props)
                         }
                     }
                 })
-
-                console.log(
-                    updateUser?.data?.updateUserPassword
-                );
                 nextPage()
                 setLoading(false)
             }
 
         } catch (error: any) {
-            console.log(error);
+            console.error(error);
             setLoading(false)
         }
     }

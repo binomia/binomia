@@ -82,7 +82,6 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     useEffect(() => {
         (async () => {
             const contact = await getContact("+18297809087")
-            console.log(JSON.stringify(contact, null, 4));
         })();
     }, []);
 
