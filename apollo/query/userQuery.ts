@@ -75,6 +75,15 @@ export class UserApolloQueries {
                         createdAt
                         updatedAt
                     }
+                    cards {
+                        id
+                        cardNumber
+                        cvv
+                        expirationDate
+                        cardHolderName
+                        createdAt
+                        updatedAt
+                    }
                     account {
                         id
                         balance

@@ -72,9 +72,9 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
 
     return (
         <BottomSheet showDragIcon={false} onOpenFinish={onOpenFinish} height={height * 0.90} open={open} onCloseFinish={onCloseFinished}>
-            {device &&
-                <PagerView scrollEnabled={false} style={{ flex: 1 }} initialPage={currentPage} ref={pageFef}>
-                    <ZStack key={"1"} flex={1}>
+            <PagerView scrollEnabled={false} style={{ flex: 1 }} initialPage={currentPage} ref={pageFef}>
+                <ZStack key={"1"} flex={1}>
+                    {device &&
                         <Camera
                             codeScanner={codeScanner}
                             ref={ref}
@@ -84,96 +84,99 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                             isActive
                             focusable
                         />
-                        <VStack space={2} w={"100%"} h={"90%"} alignItems={"center"} justifyContent={"space-between"}>
-                            <VStack alignItems={"center"} pt={"30px"}>
-                                <HStack w={width * 0.85} h={width * 0.85} alignItems={"center"} justifyContent={"center"} borderRadius={"25px"} borderWidth={3} borderColor={colors.white} />
-                                <HStack borderRadius={"10px"} mt={"10px"} py={"7px"} px={"15px"} bg={colors.darkGray} >
-                                    <Text color={colors.white}>{qrCode ? qrCode : "Escanea el Codigo QR"}</Text>
-                                </HStack>
-                            </VStack>
-                            <HStack w={width * 0.85}>
-                                <HStack p={"3px"} h={55} borderRadius={50} bg={"rgba(0,0,0,0.5)"} w={"100%"} justifyContent={"space-between"}>
-                                    <Button
-                                        bg={currentPage === 0 ? "mainGreen" : "rgba(0,0,0,0.5)"}
-                                        disabled={currentPage === 0}
-                                        w={"49%"}
-                                        h={"100%"}
-                                        onPress={() => {
-                                            pageFef.current?.setPageWithoutAnimation(0)
-                                            setCurrentPage(0)
-                                        }}
-                                        title="Escanea"
-                                    />
-                                    <Button
-                                        bg={currentPage === 1 ? "mainGreen" : null}
-                                        w={"49%"}
-                                        h={"100%"}
-                                        onPress={() => {
-                                            pageFef.current?.setPageWithoutAnimation(1)
-                                            setCurrentPage(1)
-                                        }}
-                                        title="Mi Codigo"
-                                    />
-                                </HStack>
+                    }
+                    <VStack space={2} w={"100%"} h={"90%"} alignItems={"center"} justifyContent={"space-between"}>
+                        <VStack alignItems={"center"} pt={"30px"}>
+                            <HStack w={width * 0.85} h={width * 0.85} alignItems={"center"} justifyContent={"center"} borderRadius={"25px"} borderWidth={3} borderColor={colors.white} />
+                            <HStack borderRadius={"10px"} mt={"10px"} py={"7px"} px={"15px"} bg={colors.darkGray} >
+                                <Text color={colors.white}>{qrCode ? qrCode : "Escanea el Codigo QR"}</Text>
                             </HStack>
                         </VStack>
-                    </ZStack>
-                    <VStack key={"2"} flex={1}>
-                        <VStack space={2} w={"100%"} h={"90%"} alignItems={"center"} justifyContent={"space-between"}>
-                            <VStack alignItems={"center"} pt={"30px"}>
-                                <HStack w={width * 0.85} h={width * 0.85} alignItems={"center"} borderWidth={0} borderColor={colors.gray} justifyContent={"center"} borderRadius={"20px"} bg={colors.lightGray} >
-                                    <QRCodeStyled
-                                        color={"#535353"}
-                                        data={'#simple'}
-                                        pieceLiquidRadius={0}
-                                        logo={{
-                                            href: logo
-                                        }}
-                                        padding={20}
-                                        aria-hidden
-                                        style={{
-                                            backgroundColor: "transparent"
-                                        }}
-                                        outerEyesOptions={{ borderRadius: 30 }}
-                                        innerEyesOptions={{ borderRadius: 20, color: colors.mainGreen }}
-                                        pieceSize={width / 29}
-                                        pieceBorderRadius={5}
-                                    />
-                                </HStack>
-                                <VStack alignItems={"center"} borderRadius={"10px"} mt={"10px"} py={"7px"} px={"15px"} bg={colors.darkGray} >
-                                    <Heading textTransform={"capitalize"} fontSize={scale(28)} color={colors.white}>{MAKE_FULL_NAME_SHORTEN(user?.fullName || "")}</Heading>
-                                    <Text textTransform={"lowercase"} fontSize={scale(15)} color={colors.lightSkyGray}>{user?.username}</Text>
-                                </VStack>
-                            </VStack>
-                            <HStack w={width * 0.85}>
-                                <HStack h={55} borderRadius={"25px"} bg={"rgba(0,0,0,0.5)"} p={"3px"} w={"100%"} justifyContent={"space-between"}>
-                                    <Button
-                                        bg={currentPage === 0 ? "mainGreen" : null}
-                                        disabled={currentPage === 0}
-                                        w={"49%"}
-                                        h={"100%"}
-                                        onPress={() => {
-                                            pageFef.current?.setPageWithoutAnimation(0)
-                                            setCurrentPage(0)
-                                        }}
-                                        title="Escanea"
-                                    />
-                                    <Button
-                                        w={"49%"}
-                                        h={"100%"}
-                                        bg={currentPage === 1 ? "mainGreen" : null}
-                                        onPress={() => {
-                                            pageFef.current?.setPageWithoutAnimation(1)
-                                            setCurrentPage(1)
-                                        }}
-                                        title="Mi Codigo"
-                                    />
-                                </HStack>
+                        <HStack w={width * 0.85}>
+                            <HStack p={"3px"} h={55} borderRadius={50} bg={"rgba(0,0,0,0.5)"} w={"100%"} justifyContent={"space-between"}>
+                                <Button
+                                    bg={currentPage === 0 ? "mainGreen" : "rgba(0,0,0,0.5)"}
+                                    disabled={currentPage === 0}
+                                    w={"49%"}
+                                    h={"100%"}
+                                    onPress={() => {
+                                        pageFef.current?.setPageWithoutAnimation(0)
+                                        setCurrentPage(0)
+                                    }}
+                                    title="Escanea"
+                                />
+                                <Button
+                                    bg={currentPage === 1 ? "mainGreen" : null}
+                                    w={"49%"}
+                                    h={"100%"}
+                                    onPress={() => {
+                                        pageFef.current?.setPageWithoutAnimation(1)
+                                        setCurrentPage(1)
+                                    }}
+                                    title="Mi Codigo"
+                                />
                             </HStack>
-                        </VStack>
+                        </HStack>
                     </VStack>
-                </PagerView>
-            }
+                </ZStack>
+                <VStack key={"2"} flex={1}>
+                    <VStack space={2} w={"100%"} h={"90%"} alignItems={"center"} justifyContent={"space-between"}>
+                        <VStack alignItems={"center"} pt={"30px"}>
+                            <HStack w={width * 0.9} h={width * 0.9} alignItems={"center"} borderWidth={0} borderColor={colors.gray} justifyContent={"center"} borderRadius={"20px"} bg={colors.lightGray} >
+                                <QRCodeStyled
+                                    color={"#535353"}
+                                    data={user?.username}
+                                    pieceLiquidRadius={0}
+                                    pieceStrokeWidth={0.5}
+                                    pieceStroke={colors.darkGray}
+                                    logo={{
+                                        href: logo
+                                    }}
+                                    padding={20}
+                                    aria-hidden
+                                    style={{
+                                        backgroundColor: "transparent"
+                                    }}
+                                    outerEyesOptions={{ borderRadius: 30 }}
+                                    innerEyesOptions={{ borderRadius: 20, color: colors.mainGreen }}
+                                    pieceSize={width / 27}
+                                    pieceBorderRadius={5}
+                                />
+                            </HStack>
+                            <VStack alignItems={"center"} borderRadius={"10px"} mt={"10px"} py={"7px"} px={"15px"} bg={colors.darkGray} >
+                                <Heading textTransform={"capitalize"} fontSize={scale(28)} color={colors.white}>{MAKE_FULL_NAME_SHORTEN(user?.fullName || "")}</Heading>
+                                <Text textTransform={"lowercase"} fontSize={scale(15)} color={colors.lightSkyGray}>{user?.username}</Text>
+                            </VStack>
+                        </VStack>
+                        <HStack w={width * 0.85}>
+                            <HStack h={55} borderRadius={"25px"} bg={"rgba(0,0,0,0.5)"} p={"3px"} w={"100%"} justifyContent={"space-between"}>
+                                <Button
+                                    bg={currentPage === 0 ? "mainGreen" : null}
+                                    disabled={currentPage === 0}
+                                    w={"49%"}
+                                    h={"100%"}
+                                    onPress={() => {
+                                        pageFef.current?.setPageWithoutAnimation(0)
+                                        setCurrentPage(0)
+                                    }}
+                                    title="Escanea"
+                                />
+                                <Button
+                                    w={"49%"}
+                                    h={"100%"}
+                                    bg={currentPage === 1 ? "mainGreen" : null}
+                                    onPress={() => {
+                                        pageFef.current?.setPageWithoutAnimation(1)
+                                        setCurrentPage(1)
+                                    }}
+                                    title="Mi Codigo"
+                                />
+                            </HStack>
+                        </HStack>
+                    </VStack>
+                </VStack>
+            </PagerView>
+
         </BottomSheet>
     )
 }

@@ -1,5 +1,5 @@
-import { LogBox, StyleSheet, StatusBar, View } from 'react-native';
-import { useCallback } from 'react';
+import { LogBox, StyleSheet, StatusBar, View, Platform } from 'react-native';
+import { useCallback, useEffect } from 'react';
 import { SessionContextProvider } from '@/contexts/sessionContext';
 import { ApolloProvider } from '@apollo/client';
 import { NativeBaseProvider } from "native-base";
@@ -12,6 +12,7 @@ import { GlobalContextProvider } from './contexts/globalContext';
 import { useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
 import { Provider } from 'react-redux';
 import { store } from '@/redux';
+
 
 
 import { SQLiteProvider } from "expo-sqlite/next";
@@ -39,6 +40,7 @@ const App: React.FC = () => {
 		}
 
 	}, []);
+
 
 	return (
 		<SQLiteProvider databaseName={DATABASE_NAME}>

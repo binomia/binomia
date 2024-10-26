@@ -136,3 +136,7 @@ export const FORMAT_LIMIT = (amount: number, limit: number) => {
 
     return parseFloat(String((amount / limit) * 100)).toFixed(0)
 }
+
+export const FORMAT_FULL_NAME = (fullName: string, length: number = 15) => {
+    return fullName.length > length ? fullName.slice(0, length - 3) + "..." : fullName
+}

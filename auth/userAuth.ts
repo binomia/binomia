@@ -27,12 +27,26 @@ export class UserAuthSchema {
         status: z.string(),
     })
 
-    static searchUserData = z.array(UserAuthSchema.singleSearchUserData).min(0)
+    // id
+    //   cardNumber
+    //   cvv
+    //   expirationDate
+    //   cardHolderName
+    //   createdAt
+    //   updatedAt
 
-    // allowWithdraw
-    //   allowSend
-    //   allowReceive
-    //   allowAsk
+    static cardData = z.object({
+        id: z.number(),
+        cardNumber: z.string(),
+        cvv: z.string(),
+        expirationDate: z.string(),
+        cardHolderName: z.string(),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+    })
+
+    static cardsData = z.array(UserAuthSchema.cardData).min(0)
+    static searchUserData = z.array(UserAuthSchema.singleSearchUserData).min(0)
 
     static accountsData = z.object({
         id: z.number(),

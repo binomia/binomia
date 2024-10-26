@@ -51,12 +51,16 @@ import depositIcon from './icons/deposit.png';
 import withdrawIcon from './icons/withdraw.png';
 import deleteIcon from './icons/delete.png';
 import editIcon from './icons/edit.png';
+import bankTabIconOn from './icons/bankTabIconOn.png';
+import bankTabIconOff from './icons/bankTabIconOff.png';
 
 
 
 
 
 export {
+    bankTabIconOn,
+    bankTabIconOff,
     cardBackHolder,
     cardHolder,
     deleteIcon,

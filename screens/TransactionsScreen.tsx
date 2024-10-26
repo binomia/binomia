@@ -8,7 +8,7 @@ import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
-import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { FORMAT_CURRENCY, FORMAT_FULL_NAME, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,11 +20,13 @@ import SendTransaction from '@/components/transaction/SendTransaction';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { noTransactions } from '@/assets';
+import { TransactionAuthSchema } from '@/auth/transactionAuth';
+import { FormatTransactionType } from '@/types';
 
 const { height } = Dimensions.get('window')
 const TransactionsScreen: React.FC = () => {
 	const dispatch = useDispatch()
-	const { user } = useSelector((state: any) => state.globalReducer)
+	const { user, account } = useSelector((state: any) => state.globalReducer)
 	const navigation = useNavigation<any>();
 
 	const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
@@ -75,10 +77,13 @@ const TransactionsScreen: React.FC = () => {
 			const { data } = await accountTransactions({
 				variables: {
 					"page": 1,
-					"pageSize": 2,
-					"accountId": 1
+					"pageSize": 10,
+					"accountId": account.id
 				}
 			})
+
+			console.log(JSON.stringify(data.accountTransactions, null, 2));
+			
 
 			setTransactions(data.accountTransactions)
 
@@ -105,34 +110,38 @@ const TransactionsScreen: React.FC = () => {
 		setShowSingleTransaction(true)
 	}
 
-	const onCloseFinish = () => {
+	const onCloseFinishSingleTransaction = () => {
 		setShowSingleTransaction(false)
 	}
+
 	const onSendCloseFinish = () => {
 		setShowSendTransaction(false)
 	}
 
-	const formatTransaction = (transaction: any) => {
-		const isFromMe = transaction.to.user.id === user.id
+	const formatTransaction = (_transaction: any) => {
+		const transaction = TransactionAuthSchema.singleTransaction.parse(_transaction)
+		const isFromMe = transaction.from.user?.id === user.id
 
-		const data = {
-			isFromMe: !isFromMe,
-			profileImageUrl: isFromMe ? user.profileImageUrl : transaction.to.user.profileImageUrl,
+		const profileImageUrl = isFromMe ? transaction.to.user?.profileImageUrl : transaction.from.user?.profileImageUrl
+		const fullName = isFromMe ? transaction.to.user?.fullName : transaction.from.user?.fullName
+		const username = isFromMe ? transaction.from.user?.username : transaction.to.user?.username
+
+		return {
+			isFromMe,
+			profileImageUrl: profileImageUrl || "",
 			amount: transaction.amount,
-			fullName: isFromMe ? user.fullName : transaction.to.user.fullName,
-			username: isFromMe ? user.username : transaction.to.user.username
+			fullName: fullName || "",
+			username: username || ""
 		}
-
-		return data
 	}
 
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
 
-		await accountTransactions()
+		await fetchAccountTransactions()
 		setTimeout(() => {
 			setRefreshing(false);
-		}, 2000);
+		}, 1000);
 	}, []);
 
 
@@ -160,15 +169,15 @@ const TransactionsScreen: React.FC = () => {
 									index === 0 ? (
 										<VStack justifyContent={"center"} alignItems={"center"}>
 											<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} width={"70px"} height={"70px"} alignItems={"center"} justifyContent={"center"} onPress={() => navigation.navigate("SearchUserScreen")}>
-												<AntDesign name="pluscircle" size={24} color="white" />
+												<AntDesign name="pluscircle" size={30} color="white" />
 											</Pressable>
-											<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>Nueva</Heading>
+											<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>Nueva</Heading>
 										</VStack>
 									) : (
 										<Pressable _pressed={{ opacity: 0.5 }} borderRadius={100} alignItems={"center"} key={`search_user_${index}-${item.username}`} onPress={() => onSelectUser(item)}>
 											<VStack alignItems={"center"} borderRadius={10}>
 												{item.profileImageUrl ?
-													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: item.profileImageUrl }} />
+													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"70px"} h={"70px"} source={{ uri: item.profileImageUrl }} />
 													:
 													<DefaultIcon
 														value={item.fullName}
@@ -177,7 +186,7 @@ const TransactionsScreen: React.FC = () => {
 													/>
 												}
 												<VStack mt={"5px"} justifyContent={"center"}>
-													<Heading textTransform={"capitalize"} fontSize={scale(10)} color={"white"}>{item.fullName.slice(0, 7)}...</Heading>
+													<Heading textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>{FORMAT_FULL_NAME(item.fullName)}</Heading>
 												</VStack>
 											</VStack>
 										</Pressable>
@@ -199,22 +208,22 @@ const TransactionsScreen: React.FC = () => {
 									<TouchableOpacity key={`search_user_${index}-${item.transactionId}`} onPress={() => onSelectTransaction(item)}>
 										<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
 											<HStack>
-												{formatTransaction(item).profileImageUrl ?
-													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: formatTransaction(item).profileImageUrl }} />
+												{typeof formatTransaction(item).profileImageUrl === "string" ?
+													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"65px"} h={"65px"} source={{ uri: formatTransaction(item).profileImageUrl }} />
 													:
 													<DefaultIcon
-														value={formatTransaction(item).fullName}
+														value={formatTransaction(item).fullName || ""}
 														contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "") }]}
 														textStyle={styles.textStyle}
 													/>
 												}
 												<VStack ml={"10px"} justifyContent={"center"}>
-													<Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
-													<Text color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
+													<Heading textTransform={"capitalize"} fontSize={scale(16)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
+													<Text fontSize={scale(12)} color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
 												</VStack>
 											</HStack>
 											<VStack ml={"10px"} justifyContent={"center"}>
-												<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(14)} color={formatTransaction(item).isFromMe ? "red" : "mainGreen"}>{formatTransaction(item).isFromMe ? "-" : "+"}{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
+												<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(16)} color={formatTransaction(item).isFromMe ? "red" : "mainGreen"}>{formatTransaction(item).isFromMe ? "-" : "+"}{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
 											</VStack>
 										</HStack>
 									</TouchableOpacity>
@@ -230,8 +239,8 @@ const TransactionsScreen: React.FC = () => {
 								</VStack>
 							</VStack>
 						)}
-					<BottomSheet openTime={300} height={height} onCloseFinish={onCloseFinish} open={showSingleTransaction}>
-						<SingleTransactionScreen onClose={onCloseFinish} />
+					<BottomSheet openTime={300} height={height} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
+						<SingleTransactionScreen onClose={onCloseFinishSingleTransaction} />
 					</BottomSheet>
 					<SendTransaction open={showSendTransaction} onCloseFinish={onSendCloseFinish} onSendFinish={onSendCloseFinish} />
 				</VStack>

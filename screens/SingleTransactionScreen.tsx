@@ -26,10 +26,6 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 
 
 	const details = [
-		// {
-		// 	title: "id",
-		// 	value: transaction.id
-		// },
 		{
 			title: "Fecha",
 			value: moment(Number(transaction.createdAt)).format("lll")
@@ -38,28 +34,39 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 			title: "Enviado a",
 			value: transaction.fullName
 		},
-		{ 
+		{
 			title: "Monto",
 			value: transaction.amount
 		}
 	]
 
 	const handleValue = (title: string, value: string) => {
-		switch (title) {
-			case "Monto":
-				return {
-					title,
- 					value: transaction.isFromMe ? "-" : "+" + FORMAT_CURRENCY(Number(value)),
-					color: colors.mainGreen
-				}
+		if (title === "Monto")
+			return {
+				title,
+				value: transaction.isFromMe ? "-" + FORMAT_CURRENCY(Number(value)) : "+" + FORMAT_CURRENCY(Number(value)),
+				color: transaction.isFromMe ? colors.red : colors.mainGreen
+			}
 
-			default:
-				return {
-					title,
-					value,
-					color: colors.white
-				}
+		if (title === "Enviado a")
+			return {
+				title: transaction.isFromMe ? title : "Enviado por",
+				value,
+				color: colors.white
+			}
+
+		return {
+			title,
+			value,
+			color: colors.white
 		}
+	}
+
+	const handleShare = async () => {
+		const isAvailableAsync = await Sharing.isAvailableAsync()
+		if (!isAvailableAsync) return
+
+		await Sharing.shareAsync("http://test.com")
 	}
 
 
@@ -75,9 +82,7 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 					<Stack>
 						<Heading mb={"20px"} size={"sm"} color={colors.white} textAlign={"center"}>Transaccion</Heading>
 					</Stack>
-					<TouchableOpacity onPress={() => Sharing.shareAsync("test", {
-						mimeType: 'text/plain',
-					})}>
+					<TouchableOpacity onPress={handleShare}>
 						<Stack w={"50px"} alignItems={"center"} justifyContent={"center"}>
 							<Entypo name="share" size={24} color="white" />
 						</Stack>
@@ -87,7 +92,7 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 					<VStack mt={"50px"} alignItems={"center"} borderRadius={10}>
 						<HStack>
 							{transaction.profileImageUrl ?
-								<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: transaction.profileImageUrl }} />
+								<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"70px"} h={"70px"} source={{ uri: transaction.profileImageUrl }} />
 								:
 								<DefaultIcon
 									value={transaction?.fullName || ""}
@@ -97,14 +102,14 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 							}
 						</HStack>
 						<VStack mt={"10px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
-							<Text color={colors.lightSkyGray}>{transaction.username}</Text>
+							<Heading textTransform={"capitalize"} fontSize={scale(18)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
+							<Text fontSize={scale(14)} color={colors.lightSkyGray}>{transaction.username}</Text>
 						</VStack>
 					</VStack>
 					<VStack mb={"50px"} alignItems={"center"}>
 						<Heading textTransform={"capitalize"} fontSize={scale(40)} color={transaction.isFromMe ? "red" : "mainGreen"}>{transaction.isFromMe ? "-" : "+"}{FORMAT_CURRENCY(transaction?.amount)}</Heading>
-						<Text mb={"10px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-						<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(60)} h={scale(60)} source={checked} />
+						<Text mb={"20px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
+						<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(70)} h={scale(70)} source={checked} />
 					</VStack>
 					<HStack justifyContent={"center"}>
 						<Button onPress={() => setOpenDetail(true)} w={"80%"} bg={"mainGreen"} color='white' title={"Ver Detalles"} />

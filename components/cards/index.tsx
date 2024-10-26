@@ -10,8 +10,7 @@ import CardModification from './CardModification'
 import { globalActions } from '@/redux/slices/globalSlice'
 import { useDispatch } from 'react-redux'
 import { FlagsList } from 'aws-sdk/clients/guardduty'
-import { Octicons } from '@expo/vector-icons'
-import AddOrEditCard from './AddOrEditCard'
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 
 type Props = {
@@ -45,7 +44,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => 
             brand: 'MasterCard',
             bankName: "Banco Popular",
             last4Digits: "2180"
-        },
+        }
     ]
 
     const onPressCard = async (card: any) => {
@@ -56,19 +55,21 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => 
 
     return (
         <BottomSheet openTime={300} height={height} onCloseFinish={() => onCloseFinish()} open={open}>
-            <VStack mt={Constants.default.statusBarHeight - 10} variant={"body"} h={"100%"}>
+            <VStack mt={Constants.default.statusBarHeight - 10} variant={"body"} flex={1}>
                 <HStack space={5} px={"10px"} justifyContent={"space-between"}>
                     <TouchableOpacity onPress={() => onCloseFinish()}>
-                        <Stack w={"50px"}>
+                        <Stack >
                             <Ionicons name="chevron-back-outline" size={30} color="white" />
                         </Stack>
                     </TouchableOpacity>
                     <Stack>
                         <Heading size={"sm"} color={colors.white} textAlign={"center"}>Tarjetas</Heading>
                     </Stack>
-                    <Stack w={"50px"} />
+                    <Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} onPress={() => { }}>
+                        <AntDesign name="pluscircle" size={25} color="white" />
+                    </Pressable>
                 </HStack>
-                <VStack mt={"50px"}>
+                <VStack mt={"50px"} flex={0.95}>
                     <HStack justifyContent={"space-between"} alignItems={"center"}>
                         <Heading size={"xl"} color={colors.white}>Tarjetas</Heading>
                     </HStack>
@@ -76,7 +77,8 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => 
                         ref={ref}
                         mt={"10px"}
                         data={cards}
-                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{paddingBottom: 100}}                                           
+                        showsVerticalScrollIndicator={false}
                         scrollEnabled={true}
                         renderItem={({ item, index }) => (
                             <Pressable onPress={() => onPressCard(item)} w={"100%"} key={`card-${index}-${item.last4Digits}`} _pressed={{ opacity: 0.5 }} flexDirection={"row"} p={"15px"} borderRadius={10} bg={colors.lightGray} mt={"15px"} mr={"10px"} alignItems={"center"}>
@@ -90,7 +92,6 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => 
                     />
                 </VStack>
                 <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
-                <AddOrEditCard open={true} />
             </VStack>
         </BottomSheet>
     )

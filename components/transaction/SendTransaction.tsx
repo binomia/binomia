@@ -84,8 +84,8 @@ const SearchUserScreen: React.FC<Props> = ({ open = false, onSendFinish = () => 
                         </HStack>
                         <HStack px={"20px"} mt={"20px"} alignItems={"center"} justifyContent={"space-between"} mb={"20px"}>
                             <HStack space={2}>
-                                {false ?
-                                    <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: "" }} />
+                                {receiver.profileImageUrl ?
+                                    <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: receiver.profileImageUrl }} />
                                     :
                                     <DefaultIcon
                                         value={receiver?.fullName || ""}

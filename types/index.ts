@@ -90,3 +90,11 @@ export type GlobalContextType = {
 
     resetAllStates: () => void
 }
+
+export type FormatTransactionType =  {
+    isFromMe: boolean
+    profileImageUrl?: string
+    amount: number
+    fullName?: string
+    username?: string
+}

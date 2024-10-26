@@ -1,24 +1,6 @@
 import { z } from 'zod'
 
-
-// {
-//     id
-//     balance
-//     status
-//     sendLimit
-//     receiveLimit
-//     withdrawLimit
-//     hash
-//     currency
-//     createdAt
-//     updatedAt
-// }
-
-// withdrawAmount
-// receivedAmount
-// sentAmount
-
-export class TransactionAuthSchema {
+export class AccountAuthSchema {
     static account = z.object({
         id: z.number().optional(),
         balance: z.number().optional(),

@@ -47,12 +47,14 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
             const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user.data.sessionUser)
             const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
-            const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account)            
+            const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account) 
+            const cardsData = await UserAuthSchema.cardsData.parseAsync(user.data.sessionUser.cards)                
 
             await Promise.all([
                 dispatch(globalActions.setUser(userProfileData)),
                 dispatch(globalActions.setKyc(kycData)),
-                dispatch(globalActions.setAccount(accountsData))
+                dispatch(globalActions.setAccount(accountsData)),
+                dispatch(globalActions.setCards(cardsData))
             ])
 
         } catch (error) {

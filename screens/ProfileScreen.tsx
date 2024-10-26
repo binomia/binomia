@@ -119,7 +119,7 @@ const ProfileScreen: React.FC = () => {
                                             <Text textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
                                             <Feather name="chevron-right" size={24} color="white" />
                                         </HStack>
-                                        {index !== 5 ? <Divider mt={"10px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
+                                        {index !== 4 ? <Divider mt={"10px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
                                     </VStack>
                                 </HStack>
                             </Pressable>

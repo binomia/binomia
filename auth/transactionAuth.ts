@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { AccountAuthSchema } from './accountAuth'
+import { UserAuthSchema } from './userAuth'
 
 export class TransactionAuthSchema {
     static createTransaction = z.object({
@@ -9,6 +11,28 @@ export class TransactionAuthSchema {
         location: z.object({
             latitude: z.number(),
             longitude: z.number(),
+        })
+    })
+
+    static singleTransaction = z.object({
+        transactionId: z.string(),
+        amount: z.number(),
+        deliveredAmount: z.number(),
+        voidedAmount: z.number(),
+        transactionType: z.string(),
+        currency: z.string(),
+        status: z.string(),
+        location: z.object({
+            latitude: z.number(),
+            longitude: z.number(),
+        }),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+        from: AccountAuthSchema.account.extend({
+            user: UserAuthSchema.userProfileData
+        }),
+        to: AccountAuthSchema.account.extend({
+            user: UserAuthSchema.userProfileData
         })
     })
 }

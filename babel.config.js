@@ -11,9 +11,7 @@ module.exports = function (api) {
 				moduleName: 'env',
 				path: '.env',
 			}],
-			['react-native-reanimated/plugin', {
-				globals: ['__frameToBase64'],
-			}]
+			'react-native-reanimated/plugin'
 		]
 	};
 };
