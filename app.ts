@@ -8,8 +8,23 @@ import bodyParser from "body-parser";
 import { validateSchema } from "@/auth/zodSchemas";
 import cluster from "cluster";
 import os from "os";
+import { createServer } from "http";
+import { initSocket } from "@/sockets";
+import { Server } from "socket.io";
+import { initRedisEventSubcription } from "@/redis";
+
 
 const app: Express = express();
+const server = new JSONRPCServer();
+
+const httpServer = createServer(app);
+const io = new Server(httpServer);
+
+initSocket(io);
+initRedisEventSubcription(io)
+initMethods(server);
+
+
 app.use(bodyParser.json());
 app.use(cors({
     methods: ["POST"],
@@ -17,17 +32,10 @@ app.use(cors({
 }));
 
 
-
-const server = new JSONRPCServer();
-
-// Define a method
-initMethods(server);
-
-
 app.post("/", async (req: Request, res: Response) => {
     try {
         console.log("request received");
-        
+
         // const body = await validateSchema(req.body);
         // console.log(body);
 
@@ -60,15 +68,25 @@ app.put("*", unAuthorizedResponse);
 app.delete("*", unAuthorizedResponse);
 
 
-if (cluster.isPrimary) {
-    const cpus = os.cpus().length;
-    for (let i = 0; i < cpus; i++) {
-        cluster.fork();
-    }
-} else {
-    app.listen(8000, () => {
-        console.log(`[JSON-RPC]: Server is running at http://${ip()}:8000`);
-    });
-}
+// if (cluster.isPrimary) {
+//     console.log(`Master ${process.pid} is running`);
+
+//     for (let i = 0; i < os.cpus().length; i++) {
+//         cluster.fork();
+//     }
+
+//     cluster.on("exit", (worker, code, signal) => {
+//         console.log(`worker ${worker.process.pid} died`);
+//         cluster.fork();
+//     });
+
+// } else {
+//     httpServer.listen(8000, () => {
+//         console.log(`[JSON-RPC]: Server is running at http://${ip()}:8000`);
+//     });
+// }
 
 
+httpServer.listen(8000, () => {
+    console.log(`[JSON-RPC]: Server is running at http://${ip()}:8000`);
+});
