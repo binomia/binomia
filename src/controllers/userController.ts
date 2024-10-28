@@ -200,8 +200,9 @@ export class UsersController {
         }
     }
 
-    static searchUsers = async (_: any, { search, limit }: { search: UserModelType, limit: number }, __: any, { fieldNodes }: { fieldNodes: any }) => {
+    static searchUsers = async (_: any, { search, limit }: { search: UserModelType, limit: number }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
+            await checkForProtectedRequests(req);
             const fields = getQueryResponseFields(fieldNodes, "users")
 
             const searchFilter = []
@@ -215,7 +216,10 @@ export class UsersController {
                 limit,
                 attributes: fields['users'],
                 where: {
-                    [Op.or]: searchFilter
+                    [Op.and]: [
+                        { [Op.or]: searchFilter },
+                        { id: { [Op.ne]: req.session.userId} }
+                    ]
                 }
             })
 
@@ -364,8 +368,8 @@ export class UsersController {
                 throw new GraphQLError('Incorrect password');
 
             const sid = `${generate()}${generate()}${generate()}`
-            const expires = new Date(Date.now() + 1000 * 60 * 60 * 24) // 1 day
-            const token = jwt.sign({ sid }, ZERO_ENCRYPTION_KEY, { expiresIn: "1d" });
+            const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days
+            const token = jwt.sign({ sid, username: user.toJSON().username }, ZERO_ENCRYPTION_KEY, { expiresIn: "1d" });
 
             await SessionModel.create({
                 sid,

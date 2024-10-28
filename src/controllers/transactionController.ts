@@ -5,8 +5,9 @@ import { TransactionJoiSchema } from '@/joi/transactionJoiSchema';
 import { TransactionCreateType, TransactionAuthorizationType } from '@/types';
 import { authServer } from '@/rpc';
 import { Cryptography } from '@/helpers/cryptography';
-import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
+import { REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
+import { publisher, subClient } from '@/redis';
 
 
 export class TransactionsController {
@@ -88,7 +89,6 @@ export class TransactionsController {
                 ]
             })
 
-
             if (!receiverAccount)
                 throw new GraphQLError("receiver account not found");
 
@@ -138,11 +138,36 @@ export class TransactionsController {
                 balance: receiverAccount.toJSON().balance + validatedData.amount
             })
 
-            return Object.assign(transaction.toJSON(), {}, {
-                receiver: receiverAccount.toJSON().user
+            const transactionData = await transaction.reload({
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'from',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'to',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    }
+                ]
             })
 
+            await publisher.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
+                transaction: transactionData.toJSON(),
+                recipientSocketRoom: receiverAccount.toJSON().user.username
+            }))
+            
+            return transactionData.toJSON()
+
         } catch (error: any) {
+            console.log(error);
             throw new GraphQLError(error.message);
         }
     }
@@ -203,8 +228,7 @@ export class TransactionsController {
             return transactions
 
         } catch (error: any) {
-            console.error(error);
-            throw new GraphQLError(error.message);
+            throw new GraphQLError(error);
         }
     }
 }

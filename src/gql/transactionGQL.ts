@@ -8,6 +8,7 @@ const type = () => {
             latitude: Float
             longitude: Float
         }
+            
         input TransactionInput {
             receiver: String
             signature: String

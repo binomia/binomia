@@ -108,7 +108,7 @@ const type = () => {
 const query = () => {
     return `
         accounts(page: Int!, pageSize: Int!): [AccountType]
-        account(hash: String!): AccountType
+        account: OnlyAccountType
         searchAccounts(search: AccountInput!, limit: Int): [AccountType]
         accountLimit: TransactionsWithAccountType
     `

@@ -31,19 +31,16 @@ export class AccountController {
         }
     }
 
-    static account = async (_: unknown, { hash }: { hash: string }, __: any, { fieldNodes }: { fieldNodes: any }) => {
+    static account = async (_: unknown, { hash }: { hash: string }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
+            await checkForProtectedRequests(req);
+
             const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
             const user = await AccountModel.findOne({
                 where: {
-                    hash
+                    hash: req.session.user.account.hash
                 },
-                attributes: fields['accounts'],
-                include: [{
-                    model: UsersModel,
-                    as: 'user',
-                    attributes: fields['user']
-                }]
+                attributes: fields['account']
             })
 
             return user

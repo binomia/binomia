@@ -23,9 +23,12 @@ export const app: express.Express = express();
 const httpServer = createServer(app);
 
 
-const formatError = (_: any, error: any) => {
-    const errorData = JSON.parse(error.message)
-    return errorData.length > 0 ? errorData[0] : error
+const formatError = (formattedError: any, _: any) => {
+    console.log({ formattedError });
+
+    return {
+        message: formattedError.message
+    }
 }
 
 

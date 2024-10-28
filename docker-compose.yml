@@ -7,16 +7,15 @@ services:
     ports:
       - 3000:3000
     env_file: .env
-    depends_on:
-      - postgres
     volumes:
-      - .:/app
-      - /node_modules
-    command: npm start
+      - ./:/app
+      - /app/node_modules
+    command: npm run dev
 
   # postgres:
-  postgres:
-    image: postgres
-    ports:
-      - 5432:5432
-    env_file: .env
+  # postgres:
+  #   image: postgres
+  #   ports:
+  #     - 5432:5432
+  #   env_file: .env
+
