@@ -1,5 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Heading, HStack, Image, Pressable, VStack, Text } from 'native-base';
 import colors from '@/colors';
 import Button from '@/components/global/Button';
@@ -7,7 +7,7 @@ import { bagIcon, bills, cars, house, phone, sendIcon } from '@/assets';
 
 import { useLazyQuery } from '@apollo/client';
 import { useDispatch, useSelector } from 'react-redux';
-import { UserApolloQueries } from '@/apollo/query';
+import { AccountApolloQueries, UserApolloQueries } from '@/apollo/query';
 import { UserAuthSchema } from '@/auth/userAuth';
 import { z } from 'zod';
 import { globalActions } from '@/redux/slices/globalSlice';
@@ -15,13 +15,34 @@ import { FORMAT_CURRENCY } from '@/helpers';
 import { scale } from 'react-native-size-matters';
 import { useNavigation } from '@react-navigation/native';
 import QRScannerScreen from './QRScannerScreen';
+import { SocketContext } from '@/contexts/socketContext';
+import { SOCKET_EVENTS } from '@/constants';
 
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
-    const { account } = useSelector((state: any) => state.globalReducer)
+    const { account, applicationId } = useSelector((state: any) => state.globalReducer)
+    const dispatch = useDispatch()
+
     const navigation = useNavigation<any>();
     const [showBottomSheet, setShowBottomSheet] = useState(false)
+    const socket = useContext(SocketContext);
+    const [getAccount] = useLazyQuery(AccountApolloQueries.account());
+
+    const onPress = async () => {
+        socket.emit("test", {
+            message: "test"
+        })
+    }
+
+    useEffect(() => {
+        socket.on(`${SOCKET_EVENTS.TRANSACTION_RECEIVED}@${account.username}`, async (data: any) => {
+            console.log(JSON.stringify(data.to, null, 2));
+            dispatch(globalActions.setAccount(data.to))
+        })
+    }, [])
+
+
 
     return (
         <VStack p={"20px"} w={width} bg={colors.darkGray} variant={"body"} flex={1} alignItems={"center"}>
@@ -54,7 +75,7 @@ const HomeScreen: React.FC = () => {
             <VStack w={"100%"} pt={"30px"} px={"5px"}>
                 <Heading size={"xl"} color={"white"}>Servicios</Heading>
                 <HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
-                    <Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={"150px"} justifyContent={"center"} alignItems={"center"}>
+                    <Pressable onPress={() => onPress()} _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={"150px"} justifyContent={"center"} alignItems={"center"}>
                         <Image resizeMode='contain' alt='send-image-icon' w={"50px"} h={"50px"} source={phone} />
                         <Text color={"white"}>Recargas</Text>
                     </Pressable>

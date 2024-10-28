@@ -79,10 +79,13 @@ export const FORMAT_DATE = (value: string) => {
 
 
 export const FORMAT_CURRENCY = (value: number) => {
+    if (isNaN(value))
+        return "$0.00";
+
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
-    }).format(value)
+    }).format(value);
 }
 
 export const GENERATE_RAMDOM_COLOR_BASE_ON_TEXT = (test: string): string => {

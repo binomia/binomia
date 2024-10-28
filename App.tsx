@@ -12,14 +12,14 @@ import { GlobalContextProvider } from './contexts/globalContext';
 import { useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
 import { Provider } from 'react-redux';
 import { store } from '@/redux';
-
-
-
+import { io } from 'socket.io-client';
 import { SQLiteProvider } from "expo-sqlite/next";
-import { DATABASE_NAME } from '@/constants';
+import { DATABASE_NAME, NOTIFICATION_SERVER_URL } from '@/constants';
+import { SocketContextProvider } from './contexts/socketContext';
 
 LogBox.ignoreAllLogs();
 SplashScreen.preventAutoHideAsync();
+
 
 const App: React.FC = () => {
 	const cameraPermission = useCameraPermission()

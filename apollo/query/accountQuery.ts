@@ -26,4 +26,26 @@ export class AccountApolloQueries {
             }
         `
     }
+    static account = () => {
+        return gql`
+            query Account {
+                account {
+                    id
+                    balance
+                    status
+                    sentAmount
+                    receivedAmount
+                    withdrawAmount
+                    sendLimit
+                    receiveLimit
+                    withdrawLimit
+                    allowReceive
+                    allowWithdraw
+                    allowSend
+                    allowAsk
+                    hash
+                }
+            }
+        `
+    }
 }

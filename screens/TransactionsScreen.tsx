@@ -83,7 +83,7 @@ const TransactionsScreen: React.FC = () => {
 			})
 
 			console.log(JSON.stringify(data.accountTransactions, null, 2));
-			
+
 
 			setTransactions(data.accountTransactions)
 
@@ -200,7 +200,10 @@ const TransactionsScreen: React.FC = () => {
 							<Heading px={"20px"} fontSize={scale(20)} color={"white"}>Transacciones</Heading>
 							<FlatList
 								px={"20px"}
-								h={"100%"}
+								h={"65%"}
+								scrollEnabled={true}
+								contentContainerStyle={{ paddingBottom: 80}}
+								showsVerticalScrollIndicator={false}
 								mt={"10px"}
 								refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
 								data={transactions}
@@ -208,8 +211,8 @@ const TransactionsScreen: React.FC = () => {
 									<TouchableOpacity key={`search_user_${index}-${item.transactionId}`} onPress={() => onSelectTransaction(item)}>
 										<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
 											<HStack>
-												{typeof formatTransaction(item).profileImageUrl === "string" ?
-													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"65px"} h={"65px"} source={{ uri: formatTransaction(item).profileImageUrl }} />
+												{formatTransaction(item).profileImageUrl ?
+													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(55)} h={scale(55)} source={{ uri: formatTransaction(item).profileImageUrl }} />
 													:
 													<DefaultIcon
 														value={formatTransaction(item).fullName || ""}

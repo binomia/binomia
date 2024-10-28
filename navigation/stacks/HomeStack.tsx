@@ -11,6 +11,7 @@ import { GlobalContext } from '@/contexts/globalContext';
 import HomeScreen from '@/screens/HomeScreen';
 import QRScannerScreen from '@/screens/QRScannerScreen';
 import SearchUserScreen from '@/screens/SearchUserScreen';
+import SendTransactionScreen from '@/components/transaction/SendTransaction';
 
 
 const { width, height } = Dimensions.get('window')

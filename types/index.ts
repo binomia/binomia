@@ -1,4 +1,5 @@
 import { UserAuthSchema } from "@/auth/userAuth"
+import { Socket } from "socket.io-client";
 import z from "zod";
 
 export type SessionContextType = {
@@ -98,3 +99,11 @@ export type FormatTransactionType =  {
     fullName?: string
     username?: string
 }
+
+export type SocketContextType =  {
+    emit: (event: string, data: any) => void,
+    on: (event: string, callback: (data: any) => void) => void
+}
+
+
+

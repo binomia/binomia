@@ -9,26 +9,35 @@ import { UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
 import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
-import { useSqlite } from '@/hooks/useSqlite';
 import { scale } from 'react-native-size-matters';
 import SendTransaction from '@/components/transaction/SendTransaction';
 import { useDispatch } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 
+
 const SearchUserScreen: React.FC = () => {
 	const dispatch = useDispatch()
 	const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
-	const { getSearchedUsers } = useSqlite()
+	const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
 
 	const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
+	const [sugestedUsers, setSugestedUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
 	const [showSendTransaction, setShowSendTransaction] = useState<boolean>(false);
 
+
+
+	const fetchSugestedUsers = async () => {
+		const sugestedUsers = await getSugestedUsers()
+		const _users = await UserAuthSchema.searchUserData.parseAsync(sugestedUsers.data.sugestedUsers)
+		setUsers(_users)
+		setSugestedUsers(_users)
+	}
 
 
 	const handleSearch = async (value: string) => {
 		try {
 			if (value === "") {
-				await fetchSearchedUser()
+				setUsers(sugestedUsers)
 
 			} else {
 				const { data } = await searchUser({
@@ -51,10 +60,6 @@ const SearchUserScreen: React.FC = () => {
 		}
 	}
 
-	const fetchSearchedUser = async () => {
-		const searchedUsers = await getSearchedUsers()
-		setUsers(searchedUsers)
-	}
 
 	const onSelectUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>) => {
 		await dispatch(transactionActions.setReceiver(user))
@@ -62,7 +67,7 @@ const SearchUserScreen: React.FC = () => {
 	}
 
 	useEffect(() => {
-		fetchSearchedUser()
+		fetchSugestedUsers()
 	}, [])
 
 	return (

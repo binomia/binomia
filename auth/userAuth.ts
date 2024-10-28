@@ -15,7 +15,25 @@ export class UserAuthSchema {
         idBackUrl: z.string().url(),
         faceVideoUrl: z.string().url(),
         address: z.string(),
-    }).nullable().default(null)
+    }).partial().nullable().default(null)
+
+    static singleUser = z.object({
+        id: z.number(),
+        fullName: z.string(),
+        username: z.string(),
+        email: z.string().email(),
+        dniNumber: z.string().regex(/^[0-9]{3}-[0-9]{7}-[0-9]{1}$/),
+        phone: z.string().length(10),
+        profileImageUrl: z.string().url().optional().nullable().default(null),
+        addressAgreementSigned: z.boolean().default(false),
+        userAgreementSigned: z.boolean().default(false),
+        idFrontUrl: z.string().url(),
+        idBackUrl: z.string().url(),
+        faceVideoUrl: z.string().url(),
+        address: z.string(),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+    })
 
     static singleSearchUserData = z.object({
         id: z.number(),
@@ -27,13 +45,6 @@ export class UserAuthSchema {
         status: z.string(),
     })
 
-    // id
-    //   cardNumber
-    //   cvv
-    //   expirationDate
-    //   cardHolderName
-    //   createdAt
-    //   updatedAt
 
     static cardData = z.object({
         id: z.number(),

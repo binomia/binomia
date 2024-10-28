@@ -92,18 +92,18 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 					<VStack mt={"50px"} alignItems={"center"} borderRadius={10}>
 						<HStack>
 							{transaction.profileImageUrl ?
-								<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"70px"} h={"70px"} source={{ uri: transaction.profileImageUrl }} />
+								<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(70)} h={scale(70)} source={{ uri: transaction.profileImageUrl }} />
 								:
 								<DefaultIcon
 									value={transaction?.fullName || ""}
-									contentContainerStyle={[styles.contentContainerStyle, { width: 70, height: 70, backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "") }]}
+									contentContainerStyle={[styles.contentContainerStyle, { width: scale(70), height: scale(70), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "") }]}
 									textStyle={styles.textStyle}
 								/>
 							}
 						</HStack>
 						<VStack mt={"10px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(18)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
-							<Text fontSize={scale(14)} color={colors.lightSkyGray}>{transaction.username}</Text>
+							<Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
+							<Text fontSize={scale(16)} color={colors.lightSkyGray}>{transaction.username}</Text>
 						</VStack>
 					</VStack>
 					<VStack mb={"50px"} alignItems={"center"}>

@@ -7,7 +7,7 @@ import { bankTabIconOff, bankTabIconOn, homeOff, homeOn, profileOff, profileOn, 
 import colors from '@/colors';
 import HomeStack from './stacks/HomeStack';
 import useAsyncStorage from '@/hooks/useAsyncStorage';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { globalActions } from '@/redux/slices/globalSlice';
 import * as Crypto from 'expo-crypto';
 import { useLocation } from "@/hooks/useLocation";
@@ -16,12 +16,12 @@ import * as Network from 'expo-network';
 import TransactionsStack from './stacks/TransactionsStack';
 import ProfileStack from './stacks/ProfileStack';
 import BankingStack from './stacks/BankingStack';
-
+import { SocketContextProvider } from '@/contexts/socketContext';
 
 
 const RootTab: React.FC = () => {
     const Tab = createBottomTabNavigator();
-
+    
     const tabBarIcon = ({ route }: { route: any }) => ({
         headerShown: false,
         tabBarStyle: {
@@ -49,20 +49,23 @@ const RootTab: React.FC = () => {
         }
     })
 
+    
     return (
-        <Tab.Navigator screenOptions={tabBarIcon} initialRouteName='Home' >
-            <Tab.Group screenOptions={{ headerShown: false }} >
-                <Tab.Screen options={{ tabBarShowLabel: true, title: "" }} name='Home' component={HomeStack} />
-                <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Banking' component={BankingStack} />
-                <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Transactions' component={TransactionsStack} />
-                <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Profile' component={ProfileStack} />
-            </Tab.Group>
-        </Tab.Navigator>
+        <SocketContextProvider>
+            <Tab.Navigator screenOptions={tabBarIcon} initialRouteName='Home' >
+                <Tab.Group screenOptions={{ headerShown: false }} >
+                    <Tab.Screen options={{ tabBarShowLabel: true, title: "" }} name='Home' component={HomeStack} />
+                    <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Banking' component={BankingStack} />
+                    <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Transactions' component={TransactionsStack} />
+                    <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Profile' component={ProfileStack} />
+                </Tab.Group>
+            </Tab.Navigator>
+        </SocketContextProvider>
     )
 }
 
-export const Navigation: React.FC = () => {
 
+export const Navigation: React.FC = () => {
     const { setItem, getItem } = useAsyncStorage()
     const dispatch = useDispatch()
     const [jwt, setJwt] = useState<string | null>(null);
@@ -123,8 +126,6 @@ export const Navigation: React.FC = () => {
                     })
                     setItem("applicationId", applicationId)
                 }
-                
-                console.log({ _applicationId });
 
                 const [ip, network] = await Promise.all([Network.getIpAddressAsync(), Network.getNetworkStateAsync()])
                 const location = await getLocation()

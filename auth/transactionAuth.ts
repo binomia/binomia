@@ -35,4 +35,21 @@ export class TransactionAuthSchema {
             user: UserAuthSchema.userProfileData
         })
     })
+    static singleSentTransaction = z.object({
+        transactionId: z.string(),
+        amount: z.number(),
+        deliveredAmount: z.number(),
+        voidedAmount: z.number(),
+        transactionType: z.string(),
+        currency: z.string(),
+        status: z.string(),
+        location: z.object({
+            latitude: z.number(),
+            longitude: z.number(),
+        }),
+        createdAt: z.string(),
+        updatedAt: z.string(),
+        from: UserAuthSchema.userProfileData,
+        to: UserAuthSchema.userProfileData
+    })
 }
