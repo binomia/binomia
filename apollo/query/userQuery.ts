@@ -44,6 +44,32 @@ export class UserApolloQueries {
         `
     }
 
+    static searchSingleUser = () => {
+        return gql`
+        query SearchSingleUser($search: UserInput!) {
+            searchSingleUser(search: $search) {
+                id
+                fullName
+                username
+                phone
+                email
+                password
+                dniNumber
+                profileImageUrl
+                addressAgreementSigned
+                userAgreementSigned
+                idFrontUrl
+                status
+                idBackUrl
+                faceVideoUrl
+                address
+                createdAt
+                updatedAt
+            }
+        }
+        `
+    }
+
     static sessionUser = () => {
         return gql`
             query SessionUser {

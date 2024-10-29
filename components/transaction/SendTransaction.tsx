@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import colors from '@/colors'
-import Input from '@/components/global/Input'
 import DefaultIcon from 'react-native-default-icon';
-import { StyleSheet, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native'
+import { StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Stack } from 'native-base'
-
 import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
-import { useSqlite } from '@/hooks/useSqlite';
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -70,7 +67,6 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onSendFinish = (
                 createdAt: transactionSent.createdAt
             }))
 
-            // console.log(JSON.stringify(transactionSent, null, 2), "sent");
             setShowSingleTransaction(true)
 
         } catch (error: any) {
@@ -105,7 +101,7 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onSendFinish = (
 
     const onChange = (value: string) => {
         console.log(value);
-        
+
         if (Number(value) >= 10)
             setShowPayButton(true)
         else

@@ -25,7 +25,6 @@ const SearchUserScreen: React.FC = () => {
 	const [showSendTransaction, setShowSendTransaction] = useState<boolean>(false);
 
 
-
 	const fetchSugestedUsers = async () => {
 		const sugestedUsers = await getSugestedUsers()
 		const _users = await UserAuthSchema.searchUserData.parseAsync(sugestedUsers.data.sugestedUsers)
