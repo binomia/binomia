@@ -1,103 +1,42 @@
-import "dotenv/config"
-import { createServer } from 'http';
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@apollo/server/express4';
-import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { makeExecutableSchema } from '@graphql-tools/schema';
-import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
+import cluster from "cluster";
+import http from "http";
+import os from "os";
+import { Server } from "socket.io";
+import { setupMaster, setupWorker } from "@socket.io/sticky";
+import { createAdapter, setupPrimary } from "@socket.io/cluster-adapter";
 
-import { typeDefs, resolvers } from './src/gql'
+const PORT = process.env.PORT || 8000;
+if (cluster.isPrimary) {
+    console.log(`Master ${process.pid} started on http://localhost:${PORT}`);
 
-import cors from 'cors';
-import bodyParser from 'body-parser';
-import express from 'express';
+    const httpServer = http.createServer();
 
+    setupMaster(httpServer, {
+        loadBalancingMethod: "least-connection"
+    });
 
+    setupPrimary();
+    httpServer.listen(PORT);
 
-export const app: express.Express = express();
-const httpServer = createServer(app);
-
-
-const formatError = (formattedError: any, _: any) => {
-    console.log({ formattedError });
-
-    return {
-        message: formattedError.message
+    for (let i = 0; i < os.cpus().length; i++) {
+        cluster.fork();
     }
+
+    cluster.on("exit", (worker) => {
+        console.log(`Worker ${worker.process.pid} died`);
+        cluster.fork();
+    });
+
+} else {
+    console.log(`Worker ${process.pid} started on http://localhost:${PORT}`);
+
+    const httpServer = http.createServer();
+    const io = new Server(httpServer);
+
+    io.adapter(createAdapter());
+    setupWorker(io);
+
+    io.on("connection", (socket) => {
+        console.log("a user connected:", socket.id);
+    });
 }
-
-
-(async () => {
-    app.get('/seed', async (_, res) => {
-        // await UsersModel.findOne({
-        //     where: {
-        //         id: 14
-        //     },
-        //     include: [
-        //         {
-        //             model: SessionModel,
-        //             as: 'sessions',
-        //         }
-        //     ]
-        // }).then((users) => {
-
-        //     res.json(users)
-        // }).catch((err) => {
-        //     console.log(err);
-        //     res.json({err})
-        // })
-
-        // await seedDatabase()
-        res.json({ success: true })
-    })
-
-
-    const schema = makeExecutableSchema({ typeDefs, resolvers })
-    const wsServer: WebSocketServer = new WebSocketServer({
-        server: httpServer,
-        path: '/'
-    })
-
-    const serverCleanup = useServer({ schema }, wsServer)
-    const server: ApolloServer = new ApolloServer({
-        schema,
-        formatError,
-        plugins: [
-            ApolloServerPluginDrainHttpServer({ httpServer }),
-            {
-                async serverWillStart() {
-                    return {
-                        async drainServer() {
-                            await serverCleanup.dispose()
-                        }
-                    }
-                }
-            },
-        ],
-
-    })
-
-    await server.start()
-
-    app.use(
-        cors({
-            origin: '*',
-            credentials: true
-        }),
-        bodyParser.json(),
-        expressMiddleware(server, {
-            context: async ({ req, res }) => {
-                return { req, res }
-            }
-        })
-    )
-
-    const PORT = process.env.PORT || 8001
-    httpServer.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`)
-    })
-})()
-
-
-
