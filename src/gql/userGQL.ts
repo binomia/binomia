@@ -120,6 +120,7 @@ const query = () => {
         sessionUser: UserType
         userByEmail(email: String!): Boolean
         searchUsers(search: UserInput!, limit: Int): [UserType]
+        searchSingleUser(search: UserInput!): UserType
         sugestedUsers: [OnlyUserType]
     `
 }
@@ -142,12 +143,13 @@ const subscription = () => {
     `
 }
 
-const { userByEmail, sessionUser, updateUserPassword, updateUser, sugestedUsers, user, createUser, searchUsers, login } = UsersController
+const { userByEmail, sessionUser, searchSingleUser, updateUserPassword, updateUser, sugestedUsers, user, createUser, searchUsers, login } = UsersController
 const resolvers = {
     query: {
         user,
         sessionUser,
         searchUsers,
+        searchSingleUser,
         userByEmail,
         sugestedUsers
     },

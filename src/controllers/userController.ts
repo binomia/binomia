@@ -166,6 +166,7 @@ export class UsersController {
         }
     }
 
+
     static updateUserPassword = async (_: unknown, { email, password, data }: { email: string, password: string, data: VerificationDataType }) => {
         try {
             const validatedData = await UserJoiSchema.updateUserPassword.parseAsync({ email, password })
@@ -200,6 +201,35 @@ export class UsersController {
         }
     }
 
+    static searchSingleUser = async (_: any, { search, limit }: { search: UserModelType, limit: number }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            await checkForProtectedRequests(req);
+            const fields = getQueryResponseFields(fieldNodes, "users")
+
+            const searchFilter = []
+            for (const [key, value] of Object.entries(search)) {
+                if (value) {
+                    searchFilter.push({ [key]: { [Op.like]: `%${value}%` } }) // change like to ilike for postgres
+                }
+            }
+
+            const users = await UsersModel.findOne({
+                limit,
+                attributes: fields['users'],
+                where: {
+                    [Op.and]: [
+                        { [Op.or]: searchFilter },
+                        { id: { [Op.ne]: req.session.userId} }
+                    ]
+                }
+            })
+
+            return users
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
     static searchUsers = async (_: any, { search, limit }: { search: UserModelType, limit: number }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             await checkForProtectedRequests(req);
