@@ -53,12 +53,14 @@ import deleteIcon from './icons/delete.png';
 import editIcon from './icons/edit.png';
 import bankTabIconOn from './icons/bankTabIconOn.png';
 import bankTabIconOff from './icons/bankTabIconOff.png';
+import creditCard from './icons/credit-card.png';
 
 
 
 
 
 export {
+    creditCard,
     bankTabIconOn,
     bankTabIconOff,
     cardBackHolder,

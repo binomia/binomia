@@ -21,7 +21,7 @@ import { SOCKET_EVENTS } from '@/constants';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
-    const { account, applicationId } = useSelector((state: any) => state.globalReducer)
+    const { account } = useSelector((state: any) => state.globalReducer)
     const dispatch = useDispatch()
 
     const navigation = useNavigation<any>();
@@ -66,12 +66,11 @@ const HomeScreen: React.FC = () => {
                             w={"49%"} bg={"darkGray"}
                             mt={"20px"}
                             borderRadius={"10px"}
-                            title="Recibir" onPress={() => setShowBottomSheet(true)}
+                            title="Depositar" onPress={() => navigation.navigate("BankingScreen")}
                         />
                     </HStack>
                 </VStack>
             </VStack>
-
             <VStack w={"100%"} pt={"30px"} px={"5px"}>
                 <Heading size={"xl"} color={"white"}>Servicios</Heading>
                 <HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>

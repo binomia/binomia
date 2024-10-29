@@ -169,7 +169,7 @@ const TransactionsScreen: React.FC = () => {
 									renderItem={({ item, index }) => (
 										index === 0 ? (
 											<VStack justifyContent={"center"} alignItems={"center"}>
-												<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} width={"70px"} height={"70px"} alignItems={"center"} justifyContent={"center"} onPress={() => navigation.navigate("SearchUserScreen")}>
+												<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} w={scale(55)} h={scale(55)} alignItems={"center"} justifyContent={"center"} onPress={() => navigation.navigate("SearchUserScreen")}>
 													<AntDesign name="pluscircle" size={30} color="white" />
 												</Pressable>
 												<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>Nueva</Heading>
@@ -178,7 +178,7 @@ const TransactionsScreen: React.FC = () => {
 											<Pressable _pressed={{ opacity: 0.5 }} borderRadius={100} alignItems={"center"} key={`search_user_${index}-${item.username}`} onPress={() => onSelectUser(item)}>
 												<VStack alignItems={"center"} borderRadius={10}>
 													{item.profileImageUrl ?
-														<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"70px"} h={"70px"} source={{ uri: item.profileImageUrl }} />
+														<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(55)} h={scale(55)} source={{ uri: item.profileImageUrl }} />
 														:
 														<DefaultIcon
 															value={item.fullName}
@@ -209,7 +209,7 @@ const TransactionsScreen: React.FC = () => {
 											<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
 												<HStack>
 													{formatTransaction(item).profileImageUrl ?
-														<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(50)} h={scale(50)} source={{ uri: formatTransaction(item).profileImageUrl }} />
+														<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(item).profileImageUrl }} />
 														:
 														<DefaultIcon
 															value={formatTransaction(item).fullName || ""}
@@ -256,8 +256,8 @@ export default TransactionsScreen
 
 const styles = StyleSheet.create({
 	contentContainerStyle: {
-		width: 55,
-		height: 55,
+		width: 40,
+		height: 40,
 		borderRadius: 100
 	},
 	textStyle: {

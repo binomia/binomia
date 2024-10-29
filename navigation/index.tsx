@@ -7,7 +7,7 @@ import { bankTabIconOff, bankTabIconOn, homeOff, homeOn, profileOff, profileOn, 
 import colors from '@/colors';
 import HomeStack from './stacks/HomeStack';
 import useAsyncStorage from '@/hooks/useAsyncStorage';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { globalActions } from '@/redux/slices/globalSlice';
 import * as Crypto from 'expo-crypto';
 import { useLocation } from "@/hooks/useLocation";
@@ -15,13 +15,12 @@ import * as SplashScreen from 'expo-splash-screen';
 import * as Network from 'expo-network';
 import TransactionsStack from './stacks/TransactionsStack';
 import ProfileStack from './stacks/ProfileStack';
-import BankingStack from './stacks/BankingStack';
 import { SocketContextProvider } from '@/contexts/socketContext';
 
 
 const RootTab: React.FC = () => {
     const Tab = createBottomTabNavigator();
-    
+
     const tabBarIcon = ({ route }: { route: any }) => ({
         headerShown: false,
         tabBarStyle: {
@@ -32,16 +31,16 @@ const RootTab: React.FC = () => {
         tabBarIcon: ({ focused }: any) => {
             switch (route.name) {
                 case "Home":
-                    return <Image resizeMode='contain' w={'25px'} h={'25px'} source={focused ? homeOn : homeOff} alt='home-on' />
+                    return <Image resizeMode='contain' tintColor={focused ? colors.mainGreen : colors.pureGray} w={'25px'} h={'25px'} source={focused ? homeOn : homeOff} alt='home-on' />
 
                 case "Banking":
                     return <Image resizeMode='contain' w={'25px'} h={'25px'} source={focused ? bankTabIconOn : bankTabIconOff} alt='home-on' />
 
                 case "Transactions":
-                    return <Image resizeMode="center" w={'25px'} h={'25px'} source={focused ? transationsOn : transationsOff} alt='home-on' />
+                    return <Image resizeMode="center" tintColor={focused ? colors.mainGreen : colors.pureGray} w={'25px'} h={'25px'} source={focused ? transationsOn : transationsOff} alt='home-on' />
 
                 case "Profile":
-                    return <Image resizeMode='contain' w={'25px'} h={'25px'} source={focused ? profileOn : profileOff} alt='home-on' />
+                    return <Image resizeMode='contain' tintColor={focused ? colors.mainGreen : colors.pureGray} w={'25px'} h={'25px'} source={focused ? profileOn : profileOff} alt='home-on' />
 
                 default:
                     break
@@ -49,13 +48,12 @@ const RootTab: React.FC = () => {
         }
     })
 
-    
+
     return (
         <SocketContextProvider>
             <Tab.Navigator screenOptions={tabBarIcon} initialRouteName='Home' >
                 <Tab.Group screenOptions={{ headerShown: false }} >
                     <Tab.Screen options={{ tabBarShowLabel: true, title: "" }} name='Home' component={HomeStack} />
-                    <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Banking' component={BankingStack} />
                     <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Transactions' component={TransactionsStack} />
                     <Tab.Screen options={{ headerShown: false, tabBarShowLabel: true, title: "" }} name='Profile' component={ProfileStack} />
                 </Tab.Group>
