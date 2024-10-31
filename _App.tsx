@@ -20,13 +20,14 @@ import { SocketContextProvider } from './contexts/socketContext';
 LogBox.ignoreAllLogs();
 SplashScreen.preventAutoHideAsync();
 
-
 const App: React.FC = () => {
 	const cameraPermission = useCameraPermission()
 	const microphonePermission = useMicrophonePermission()
 
+
 	const onLayoutRootView = useCallback(async () => {
 		try {
+			const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 			if (!cameraPermission.hasPermission) {
 				await cameraPermission.requestPermission();
 			};
@@ -34,6 +35,9 @@ const App: React.FC = () => {
 			if (!microphonePermission.hasPermission) {
 				await microphonePermission.requestPermission();
 			};
+
+			await delay(5000); // Wait for 5 seconds
+			await SplashScreen.hideAsync();
 
 		} catch (error) {
 			console.error({ error });

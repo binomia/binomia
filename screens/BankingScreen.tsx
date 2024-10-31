@@ -16,10 +16,12 @@ import { Dimensions, RefreshControl } from 'react-native'
 import SingleTransactionScreen from './SingleTransactionScreen'
 import { transactionActions } from '@/redux/slices/transactionSlice'
 import { transactionsMocks } from '@/mocks'
+import { useNavigation } from '@react-navigation/native'
 
 
 const { height } = Dimensions.get('window')
 const BankingScreen: React.FC = () => {
+    const navigation = useNavigation<any>()
     const dispatch = useDispatch()
     const { user } = useSelector((state: any) => state.globalReducer)
     const [showMakeTransaction, setShowMakeTransaction] = useState<boolean>(false)
@@ -43,7 +45,8 @@ const BankingScreen: React.FC = () => {
         setTransactionTitle(title)
 
         await dispatch(globalActions.setCard(cards[0]))
-        setShowMakeTransaction(true)
+        navigation.navigate("Deposit")
+        // setShowMakeTransaction(true)
     }
 
     const handleCloseMakeTransaction = async () => {
@@ -133,7 +136,7 @@ const BankingScreen: React.FC = () => {
             <BottomSheet openTime={300} height={height} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
                 <SingleTransactionScreen onClose={onCloseFinishSingleTransaction} />
             </BottomSheet>
-            <DepositOrWithdrawTransaction title={transactionTitle} onCloseFinish={handleCloseMakeTransaction} open={showMakeTransaction} />
+            {/* <DepositOrWithdrawTransaction title={transactionTitle} onCloseFinish={handleCloseMakeTransaction} open={showMakeTransaction} /> */}
             <Cards onCloseFinish={() => setShowAllCards(false)} open={showAllCards} />
             <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
         </VStack>

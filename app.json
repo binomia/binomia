@@ -1,115 +1,116 @@
 {
-  "expo": {
-    "name": "Dinero",
-    "slug": "dinero",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "dark",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#000"
-    },
-    "ios": {
-      "buildNumber": "1",
-      "supportsTablet": true,
-      "bundleIdentifier": "com.dinero.com",
-      "infoPlist": {
-        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
-        "NSMicrophoneUsageDescription": "$(PRODUCT_NAME) needs access to your Microphone."
-      }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000"
-      },
-      "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
-      ],
-      "package": "com.dinero.com"
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "extra": {
-      "eas": {
-        "projectId": "503da74a-617d-4f18-8972-76c1d007f278"
-      }
-    },
-    "owner": "lpmrloki",
-    "plugins": [
-      "react-native-document-scanner-plugin",
-      [
-        "expo-contacts",
-        {
-          "contactsPermission": "Allow $(PRODUCT_NAME) to access your contacts."
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
-        }
-      ],
-      [
-        "expo-local-authentication",
-        {
-          "faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
-        }
-      ],
-      [
-        "expo-location",
-        {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
-        }
-      ],
-      [
-        "expo-barcode-scanner",
-        {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access camera."
-        }
-      ],
-      [
-        "expo-build-properties",
-        {
-          "android": {
-            "compileSdkVersion": 34,
-            "targetSdkVersion": 34,
-            "buildToolsVersion": "34.0.0"
-          },
-          "ios": {
-            "deploymentTarget": "16.0"
-          }
-        }
-      ],
-      [
-        "react-native-vision-camera",
-        {
-          "cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera.",
-          "enableMicrophonePermission": true,
-          "microphonePermissionText": "$(PRODUCT_NAME) needs access to your Microphone.",
-          "enableCodeScanner": true
-        }
-      ],
-      [
-        "expo-secure-store",
-        {
-          "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
-        }
-      ],
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-          "recordAudioAndroid": true
-        }
-      ],
-      "expo-build-properties",
-      "expo-router"
-    ]
-  }
+	"expo": {
+		"name": "Dinero",
+		"slug": "dinero",
+		 "scheme": "dinero-app",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"icon": "./assets/icon.png",
+		"userInterfaceStyle": "dark",
+		"splash": {
+			"image": "./assets/splash.png",
+			"resizeMode": "contain",
+			"backgroundColor": "#000"
+		},
+		"ios": {
+			"buildNumber": "1",
+			"supportsTablet": true,
+			"bundleIdentifier": "com.dinero.com",
+			"infoPlist": {
+				"NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
+				"NSMicrophoneUsageDescription": "$(PRODUCT_NAME) needs access to your Microphone."
+			}
+		},
+		"android": {
+			"adaptiveIcon": {
+				"foregroundImage": "./assets/adaptive-icon.png",
+				"backgroundColor": "#000"
+			},
+			"permissions": [
+				"android.permission.CAMERA",
+				"android.permission.RECORD_AUDIO"
+			],
+			"package": "com.dinero.com"
+		},
+		"web": {
+			"favicon": "./assets/favicon.png"
+		},
+		"extra": {
+			"eas": {
+				"projectId": "503da74a-617d-4f18-8972-76c1d007f278"
+			}
+		},
+		"owner": "lpmrloki",
+		"plugins": [
+			"react-native-document-scanner-plugin",
+			[
+				"expo-contacts",
+				{
+					"contactsPermission": "Allow $(PRODUCT_NAME) to access your contacts."
+				}
+			],
+			[
+				"expo-image-picker",
+				{
+					"photosPermission": "The app accesses your photos to let you share them with your friends."
+				}
+			],
+			[
+				"expo-local-authentication",
+				{
+					"faceIDPermission": "Allow $(PRODUCT_NAME) to use Face ID."
+				}
+			],
+			[
+				"expo-location",
+				{
+					"locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+				}
+			],
+			[
+				"expo-barcode-scanner",
+				{
+					"cameraPermission": "Allow $(PRODUCT_NAME) to access camera."
+				}
+			],
+			[
+				"expo-build-properties",
+				{
+					"android": {
+						"compileSdkVersion": 31,
+						"targetSdkVersion": 31,
+						"buildToolsVersion": "31.0.0"
+					},
+					"ios": {
+						"deploymentTarget": "16.0"
+					}
+				}
+			],
+			[
+				"react-native-vision-camera",
+				{
+					"cameraPermissionText": "$(PRODUCT_NAME) needs access to your Camera.",
+					"enableMicrophonePermission": true,
+					"microphonePermissionText": "$(PRODUCT_NAME) needs access to your Microphone.",
+					"enableCodeScanner": true
+				}
+			],
+			[
+				"expo-secure-store",
+				{
+					"faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+				}
+			],
+			[
+				"expo-camera",
+				{
+					"cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+					"microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+					"recordAudioAndroid": true
+				}
+			],
+			"expo-build-properties",
+			"expo-router"
+		]
+	}
 }

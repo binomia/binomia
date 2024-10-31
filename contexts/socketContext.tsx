@@ -40,9 +40,14 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
             const decoded = jwtDecode(jwt);
             const { username } = await AccountAuthSchema.jwtDecoded.parseAsync(decoded)
 
+            
+
             const socket = io(NOTIFICATION_SERVER_URL, {
                 query: { username }
             });
+
+            console.log("red");
+            
 
 
             socket.on("connect", () => {

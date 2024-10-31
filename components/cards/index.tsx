@@ -15,13 +15,14 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 
 type Props = {
     open?: boolean
+    justSelecting?: boolean
     onCloseFinish?: () => void
 }
 
 
 const { height } = Dimensions.get('window')
 
-const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => {
+const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justSelecting = false }) => {
     const ref = React.useRef<FlagsList>(null);
     const dispatch = useDispatch()
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
@@ -49,7 +50,12 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => 
 
     const onPressCard = async (card: any) => {
         await dispatch(globalActions.setCard(card))
-        setShowCardModification(true)
+
+        if (justSelecting) {
+            onCloseFinish()
+        } else {
+            setShowCardModification(true)
+        }
     }
 
 

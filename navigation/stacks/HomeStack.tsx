@@ -1,8 +1,8 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { VStack, Image } from 'native-base';
+import { VStack, Image, HStack, Heading, Text } from 'native-base';
 import colors from '@/colors';
 import { creditCard, logo, qrIcon } from '@/assets';
-import { TouchableOpacity } from 'react-native';
+import { Pressable, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import HomeScreen from '@/screens/HomeScreen';
 import QRScannerScreen from '@/screens/QRScannerScreen';
@@ -51,7 +51,6 @@ const HomeStack: React.FC = () => {
         )
     }
 
-
     const headerStyles = {
         headerTitleStyle: { color: colors.white },
         headerShadowVisible: false,
@@ -70,6 +69,4 @@ const HomeStack: React.FC = () => {
     )
 }
 
-
 export default HomeStack
-

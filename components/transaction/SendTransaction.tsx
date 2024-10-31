@@ -16,6 +16,7 @@ import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { globalActions } from '@/redux/slices/globalSlice';
 import SingleTransactionScreen from '@/screens/SingleTransactionScreen';
+import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 
 type Props = {
     open?: boolean
@@ -24,8 +25,9 @@ type Props = {
 }
 
 const { height } = Dimensions.get('window')
-const SendTransactionScreen: React.FC<Props> = ({ open = false, onSendFinish = () => { }, onCloseFinish = () => { } }) => {
+const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => {
     const dispatch = useDispatch();
+    const { authenticate } = useLocalAuthentication();
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { location, account, user } = useSelector((state: any) => state.globalReducer)
     const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
@@ -35,9 +37,18 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onSendFinish = (
     const [showSingleTransaction, setShowSingleTransaction] = useState<boolean>(false);
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
 
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     const handleOnSend = async () => {
         try {
+            const authentication = await authenticate()
+
+            await delay(1500)
+            if (!authentication?.success) {
+                return
+            }
+
+            authentication?.success
             const transactionData = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(input),

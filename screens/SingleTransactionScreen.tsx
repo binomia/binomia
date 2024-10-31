@@ -73,7 +73,7 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
 			<VStack px={"10px"} pt={"20px"} h={"100%"}>
-				<HStack px={"10px"} justifyContent={"space-between"}>
+				<HStack justifyContent={"space-between"}>
 					<TouchableOpacity onPress={() => onClose(false)}>
 						<Stack w={"50px"}>
 							<Ionicons name="chevron-back-outline" size={30} color="white" />

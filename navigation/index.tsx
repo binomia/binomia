@@ -1,21 +1,23 @@
 import * as React from 'react';
+import * as Crypto from 'expo-crypto';
+import * as SplashScreen from 'expo-splash-screen';
+import * as Network from 'expo-network';
 import SignUpStack from '@/navigation/stacks/SignUpStack';
+import colors from '@/colors';
+import HomeStack from './stacks/HomeStack';
+import useAsyncStorage from '@/hooks/useAsyncStorage';
+import TransactionsStack from './stacks/TransactionsStack';
+import ProfileStack from './stacks/ProfileStack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useEffect, useState } from 'react';
 import { Image } from 'native-base';
 import { bankTabIconOff, bankTabIconOn, homeOff, homeOn, profileOff, profileOn, transationsOff, transationsOn } from '@/assets';
-import colors from '@/colors';
-import HomeStack from './stacks/HomeStack';
-import useAsyncStorage from '@/hooks/useAsyncStorage';
 import { useDispatch } from 'react-redux';
 import { globalActions } from '@/redux/slices/globalSlice';
-import * as Crypto from 'expo-crypto';
 import { useLocation } from "@/hooks/useLocation";
-import * as SplashScreen from 'expo-splash-screen';
-import * as Network from 'expo-network';
-import TransactionsStack from './stacks/TransactionsStack';
-import ProfileStack from './stacks/ProfileStack';
 import { SocketContextProvider } from '@/contexts/socketContext';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import DepositOrWithdrawTransaction from '@/components/transaction/DepositOrWithdrawTransaction';
 
 
 const RootTab: React.FC = () => {
@@ -130,11 +132,10 @@ export const Navigation: React.FC = () => {
 
 
                 const jwt = await getItem("jwt");
-                if (!jwt) {
-                    await delay(3000); // Wait for 5 seconds
-                    await SplashScreen.hideAsync();
+                if (!jwt) {                    
                     return;
                 };
+
                 setJwt(jwt);
 
                 await Promise.all([
@@ -143,11 +144,7 @@ export const Navigation: React.FC = () => {
                 ])
 
                 await dispatch(globalActions.setApplicationId(applicationId))
-
                 await setNotifications();
-
-                await delay(4000); // Wait for 5 seconds
-                await SplashScreen.hideAsync();
 
             } catch (error) {
                 console.log({ error });
@@ -160,3 +157,21 @@ export const Navigation: React.FC = () => {
     )
 }
 
+
+
+export default () => {
+    const Stack = createNativeStackNavigator();
+    const headerStyles = {
+        headerTitleStyle: { color: colors.white },
+        headerShadowVisible: false,
+        headerStyle: {
+            backgroundColor: colors.primaryBlack,
+        }
+    }
+    return (
+        <Stack.Navigator initialRouteName='MainNavigation' screenOptions={{ headerTintColor: colors.white, headerStyle: {} }}>
+            <Stack.Screen name='MainNavigation' options={{ presentation: "containedModal", headerBackTitle: '', title: '', ...headerStyles, headerShown: false }} component={Navigation} />
+            <Stack.Screen name='Deposit' options={{ presentation: "containedModal", headerBackTitle: '', title: '', ...headerStyles, headerShown: false }} component={DepositOrWithdrawTransaction} />
+        </Stack.Navigator>
+    )
+}

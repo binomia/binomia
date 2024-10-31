@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import colors from '@/colors'
-import Input from '@/components/global/Input'
-import DefaultIcon from 'react-native-default-icon';
-import { StyleSheet, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Stack } from 'native-base'
-
-import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
-import { useSqlite } from '@/hooks/useSqlite';
+import { Dimensions, TouchableOpacity, SafeAreaView } from 'react-native'
+import { Heading, Image, Text, VStack, HStack, Stack, Pressable } from 'native-base'
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import Button from '@/components/global/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import KeyNumberPad from '../global/KeyNumberPad';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
+import Cards from '../cards';
+import { depositIcon } from '@/assets';
+import * as Constants from 'expo-constants'
+import { useNavigation } from '@react-navigation/native';
+
 
 type Props = {
     title?: string
@@ -25,21 +24,37 @@ type Props = {
 }
 
 const { height } = Dimensions.get('window')
-const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Deposito", open = false, onSendFinish = () => { }, onCloseFinish = () => { } }) => {
+const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Deposito", open = true, onSendFinish = () => { }, onCloseFinish = () => { } }) => {
     const dispatch = useDispatch();
+    const navigation = useNavigation<any>()
+
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { card } = useSelector((state: any) => state.globalReducer)
     const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
 
     const [input, setInput] = useState<string>("0");
     const [visible, setVisible] = useState<boolean>(open);
+    const [showAllCards, setShowAllCards] = useState<boolean>(false)
+    const [showPayButton, setShowPayButton] = useState<boolean>(false);
 
+
+    const onChange = (value: string) => {
+        console.log(value);
+
+        if (Number(value) >= 10)
+            setShowPayButton(true)
+        else
+            setShowPayButton(false)
+
+        setInput(value)
+    }
 
     const handleOnClose = async () => {
         await dispatch(transactionActions.setReceiver({}))
 
         onCloseFinish()
         setVisible(false)
+        navigation.goBack()
     }
 
     useEffect(() => {
@@ -47,69 +62,36 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Deposito", ope
     }, [open])
 
     return (
-        <BottomSheet  openTime={300} height={height} onCloseFinish={() => handleOnClose()} open={visible}>
-            <VStack py={"40px"} h={"100%"} justifyContent={"space-between"}>
-                <VStack>
-                    <HStack mb={"20px"} space={5} px={"10px"} justifyContent={"space-between"}>
-                        <TouchableOpacity onPress={() => handleOnClose()}>
-                            <Stack w={"50px"}>
-                                <Ionicons name="chevron-back-outline" size={30} color="white" />
-                            </Stack>
-                        </TouchableOpacity>
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray}}>
+            <VStack variant={"body"} h={"100%"} justifyContent={"space-between"}>
+                <VStack >
+                    <HStack alignItems={"center"} justifyContent={"space-between"}>
                         <Stack>
-                            <Heading size={"sm"} color={colors.white} textAlign={"center"}>{title}</Heading>
-                        </Stack>
-                        <Stack w={"50px"} />
-                    </HStack>
-                    <HStack px={"20px"} mt={"20px"} alignItems={"center"} justifyContent={"space-between"} mb={"20px"}>
-                        <HStack space={2}>
-                            <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: card?.logo }} />
-                            <VStack justifyContent={"center"}>
-                                <Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{card?.brand} {card?.last4Digits}</Heading>
-                                <Text color={colors.pureGray}>{card?.bankName}</Text>
-                            </VStack>
                             <TouchableOpacity onPress={() => handleOnClose()}>
-                                <Stack w={"50px"}>
-                                    <Ionicons name="chevron-forward-outline" size={30} color="white" />
-                                </Stack>
+                                <Ionicons name="chevron-back-outline" size={30} color="white" />
                             </TouchableOpacity>
+                        </Stack>
+                        <HStack space={2}>
+                            <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: card?.logo }} />
+                            <VStack justifyContent={"center"}>
+                                <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{card?.brand} {card?.last4Digits}</Heading>
+                                <Text fontSize={scale(13)} color={colors.pureGray}>{card?.bankName}</Text>
+                            </VStack>
                         </HStack>
-                        <Button opacity={Number(input) > 0 ? 1 : 0.5} disabled={Number(input) <= 0} onPress={onSendFinish} h={"40px"} w={"110px"} title={title === "Deposito" ? "Depositar" : "Retirar"} bg={Number(input) > 0 ? "mainGreen" : "lightGray"} borderRadius={100} color={Number(input) > 0 ? colors.white : colors.mainGreen} />
+                        <Pressable opacity={showPayButton ? 1 : 0.5} disabled={!showPayButton} shadow={2} w={scale(50)} h={scale(50)} justifyContent={"center"} alignItems={"center"} _pressed={{ opacity: 0.5 }} bg={showPayButton ? "mainGreen" : "lightGray"} p={"5px"} borderRadius={100}>
+                            <Image alt='logo-image' tintColor={showPayButton ? colors.white : colors.mainGreen} resizeMode='contain' w={scale(25)} h={scale(25)} source={depositIcon} />
+                        </Pressable>
                     </HStack>
                 </VStack>
                 <VStack mb={"20px"}>
                     <KeyNumberPad
-                        onChange={(value: string) => {
-                            setInput(value);
-                        }}
+                        onChange={(value: string) => onChange(value)}
                     />
                 </VStack>
+                <Cards justSelecting={true} onCloseFinish={() => setShowAllCards(false)} open={showAllCards} />
             </VStack>
-        </BottomSheet>
+        </SafeAreaView>
     )
 }
 
 export default DepositOrWithdrawTransaction
-
-
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: 55,
-        height: 55,
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 30,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    }
-})
