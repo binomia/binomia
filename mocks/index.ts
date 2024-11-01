@@ -54,27 +54,27 @@ export const globalContextInitialState: GlobalContextType = {
 export const profileScreenData = [
     {
         name: "Personal",
-        path: "PersonalScreen",
+        path: "/personal",
         icon: userIcon,
     },
     {
         name: "Privacidad & Seguridad",
-        path: "PrivacyScreen",
+        path: "/privacy",
         icon: privacyIcon,
     },
     {
         name: "Limites",
-        path: "LimitsScreen",
+        path: "/limits",
         icon: limitIcon,
     },
     {
         name: "Notificaciones",
-        path: "NotificationsScreen",
+        path: "/notifications",
         icon: notificacionIcon,
     },
     {
         name: "Soporte",
-        path: "SupportScreen",
+        path: "/support",
         icon: soportIcon,
     }
 ]

@@ -15,13 +15,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation } from '@react-navigation/native';
-import SingleTransactionScreen from './SingleTransactionScreen';
+import SingleTransactionScreen from '@/components/transaction/SingleTransaction';
 import SendTransaction from '@/components/transaction/SendTransaction';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { noTransactions } from '@/assets';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
-import { FormatTransactionType } from '@/types';
+import { router } from 'expo-router';
 
 const { height } = Dimensions.get('window')
 const TransactionsScreen: React.FC = () => {
@@ -169,7 +169,7 @@ const TransactionsScreen: React.FC = () => {
 									renderItem={({ item, index }) => (
 										index === 0 ? (
 											<VStack key={"transations-screen-" + index} justifyContent={"center"} alignItems={"center"}>
-												<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} w={scale(55)} h={scale(55)} alignItems={"center"} justifyContent={"center"} onPress={() => navigation.navigate("SearchUserScreen")}>
+												<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} w={scale(55)} h={scale(55)} alignItems={"center"} justifyContent={"center"} onPress={() => router.navigate("/user")}>
 													<AntDesign name="pluscircle" size={30} color="white" />
 												</Pressable>
 												<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>Nueva</Heading>
@@ -231,7 +231,7 @@ const TransactionsScreen: React.FC = () => {
 								/>
 							</VStack>
 							: (
-								<VStack key={"transations-screen-no-transactions"+ Date.now()} w={"100%"} h={"50%"} mt={"20px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
+								<VStack key={"transations-screen-no-transactions" + Date.now()} w={"100%"} h={"50%"} mt={"20px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
 									<Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
 									<VStack justifyContent={"center"} alignItems={"center"}>
 										<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>

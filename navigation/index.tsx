@@ -132,7 +132,7 @@ export const Navigation: React.FC = () => {
 
 
                 const jwt = await getItem("jwt");
-                if (!jwt) {                    
+                if (!jwt) {
                     return;
                 };
 

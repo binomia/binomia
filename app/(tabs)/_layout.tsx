@@ -1,31 +1,32 @@
 import { Tabs } from 'expo-router';
 import { Image } from 'native-base';
 import React from 'react';
-
 import colors from '@/colors';
-import { homeOff, homeOn } from '@/assets';
-import { HomeHeaderLeft, HomeHeaderRight } from '@/components/navigation/HeaderBar';
+import { homeOff, homeOn, profileOff, profileOn, transationsOff, transationsOn } from '@/assets';
+import { HomeHeaderRight } from '@/components/navigation/HeaderBar';
 
-export default function TabLayout() {
-	const defaultHeaderStyles = {
-		backgroundColor: colors.darkGray,
-		shadowOpacity: 0
-	}
+export default () => {
 	const defaultTabStyles = {
-		backgroundColor: colors.darkGray,
-		borderTopWidth: 0,
-		elevation: 0,
+		tabBarStyle: {
+			backgroundColor: colors.darkGray,
+			borderTopWidth: 0,
+			elevation: 0,
+		}
 	}
 
-	const defaultscreenOptions = {
-		headerStyle: { ...defaultHeaderStyles },
-		tabBarStyle: { ...defaultTabStyles }
+	const defaultHeaderOptions = {
+		headerTintColor: colors.white,
+		headerStyle: {
+
+			backgroundColor: colors.darkGray,
+			shadowOpacity: 0,
+		}
 	}
+
 	return (
-		<Tabs
-			screenOptions={{ ...defaultscreenOptions, headerLeft: () => <HomeHeaderLeft />, headerRight: () => <HomeHeaderRight /> }}>
+		<Tabs screenOptions={{ headerShown: false, ...defaultTabStyles }}>
 			<Tabs.Screen
-				name="index"
+				name="(home)"
 				options={{
 					title: '',
 					tabBarIcon: ({ color, focused }) => (
@@ -34,11 +35,22 @@ export default function TabLayout() {
 				}}
 			/>
 			<Tabs.Screen
-				name="transactions"
+				name="(transactions)"
+				options={{
+					...defaultHeaderOptions,
+					headerRight: () => <HomeHeaderRight p='15px' />,
+					title: '',
+					tabBarIcon: ({ color, focused }) => (
+						<Image resizeMode='contain' tintColor={focused ? colors.mainGreen : colors.pureGray} w={'25px'} h={'25px'} source={focused ? transationsOn : transationsOff} alt='home-on' />
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="(profile)"
 				options={{
 					title: '',
 					tabBarIcon: ({ color, focused }) => (
-						<Image resizeMode='contain' tintColor={focused ? colors.mainGreen : colors.pureGray} w={'25px'} h={'25px'} source={focused ? homeOn : homeOff} alt='home-on' />
+						<Image resizeMode='contain' tintColor={focused ? colors.mainGreen : colors.pureGray} w={'25px'} h={'25px'} source={focused ? profileOn : profileOff} alt='home-on' />
 					),
 				}}
 			/>

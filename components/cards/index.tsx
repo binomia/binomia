@@ -60,12 +60,12 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
 
 
     return (
-        <BottomSheet openTime={300} height={height} onCloseFinish={() => onCloseFinish()} open={open}>
-            <VStack mt={Constants.default.statusBarHeight - 10} variant={"body"} flex={1}>
-                <HStack space={5} px={"10px"} justifyContent={"space-between"}>
+        <BottomSheet draggable={false} openTime={300} height={height} onCloseFinish={() => onCloseFinish()} open={open}>
+            <VStack mt={"20px"} variant={"body"} flex={1}>
+                <HStack alignItems={"center"} justifyContent={"space-between"}>
                     <TouchableOpacity onPress={() => onCloseFinish()}>
                         <Stack >
-                            <Ionicons name="chevron-back-outline" size={30} color="white" />
+                            <Ionicons name="close" size={30} color="white" />
                         </Stack>
                     </TouchableOpacity>
                     <Stack>
