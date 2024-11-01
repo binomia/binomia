@@ -1,6 +1,5 @@
 import * as React from 'react';
 import * as Crypto from 'expo-crypto';
-import * as SplashScreen from 'expo-splash-screen';
 import * as Network from 'expo-network';
 import SignUpStack from '@/navigation/stacks/SignUpStack';
 import colors from '@/colors';

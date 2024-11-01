@@ -9,6 +9,10 @@ import useAsyncStorage from "@/hooks/useAsyncStorage";
 import { useSelector, useDispatch } from "react-redux";
 import { globalActions } from "@/redux/slices/globalSlice";
 import { UserAuthSchema } from "@/auth/userAuth";
+import { router } from "expo-router";
+import * as Crypto from 'expo-crypto';
+import * as Network from 'expo-network';
+import { useLocation } from "@/hooks/useLocation";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -30,6 +34,7 @@ export const SessionContext = createContext<SessionPropsType>({
 export const SessionContextProvider = ({ children }: SessionContextType) => {
     const dispatch = useDispatch()
     const state = useSelector((state: any) => state.globalReducer)
+    const { getLocation } = useLocation()
     const { setItem, getItem, deleteItem } = useAsyncStorage()
     const [jwt, setJwt] = useState<string>("");
     const [applicationId, setApplicationId] = useState<string>("");
@@ -47,8 +52,8 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
             const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user.data.sessionUser)
             const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
-            const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account) 
-            const cardsData = await UserAuthSchema.cardsData.parseAsync(user.data.sessionUser.cards)                
+            const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account)
+            const cardsData = await UserAuthSchema.cardsData.parseAsync(user.data.sessionUser.cards)
 
             await Promise.all([
                 dispatch(globalActions.setUser(userProfileData)),
@@ -141,11 +146,97 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             setInvalidCredentials(true)
         }
     }
+    const setNotifications = async () => {
+        const [whatsappNotification, emailNotification, smsNotification, pushNotification] = await Promise.all([
+            getItem("whatsappNotification"),
+            getItem("emailNotification"),
+            getItem("smsNotification"),
+            getItem("pushNotification")
+        ])
+
+        if (!whatsappNotification) {
+            await setItem("whatsappNotification", "true");
+            await dispatch(globalActions.setWhatsappNotification(true));
+
+        } else {
+            await dispatch(globalActions.setWhatsappNotification(whatsappNotification === "true"));
+        }
+
+        if (!emailNotification) {
+            await setItem("emailNotification", "true");
+            await dispatch(globalActions.setEmailNotification(true));
+
+        } else {
+            await dispatch(globalActions.setEmailNotification(emailNotification === "true"));
+        }
+
+        if (!smsNotification) {
+            await setItem("smsNotification", "true");
+            await dispatch(globalActions.setSmsNotification(true));
+
+        } else {
+            await dispatch(globalActions.setSmsNotification(smsNotification === "true"));
+        }
+
+        if (!pushNotification) {
+            await setItem("pushNotification", "true");
+            await dispatch(globalActions.setPushNotification(true));
+
+        } else {
+            await dispatch(globalActions.setPushNotification(pushNotification === "true"));
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const _applicationId = await getItem("applicationId")
+
+                let applicationId = _applicationId;
+                if (!applicationId) {
+                    applicationId = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, Crypto.randomUUID().toString(), {
+                        encoding: Crypto.CryptoEncoding.HEX
+                    })
+                    setItem("applicationId", applicationId)
+                }
+
+                const [ip, network] = await Promise.all([Network.getIpAddressAsync(), Network.getNetworkStateAsync()])
+                const location = await getLocation()
+
+
+                const jwt = await getItem("jwt");
+                if (!jwt) {
+                    return;
+                };
+
+                setJwt(jwt);
+
+                await Promise.all([
+                    dispatch(globalActions.setNetwork({ ...network, ip })),
+                    dispatch(globalActions.setLocation(location))
+                ])
+
+                await dispatch(globalActions.setApplicationId(applicationId))
+                await setNotifications();
+
+            } catch (error) {
+                console.log({ error });
+            }
+        })()
+    }, [])
 
     useEffect(() => {
         (async () => {
             const jwt = await getItem("jwt");
-            const applicationId = await getItem("applicationId")
+            const _applicationId = await getItem("applicationId")
+
+                let applicationId = _applicationId;
+                if (!applicationId) {
+                    applicationId = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, Crypto.randomUUID().toString(), {
+                        encoding: Crypto.CryptoEncoding.HEX
+                    })
+                    setItem("applicationId", applicationId)
+                }
 
 
             if (applicationId) {
@@ -157,12 +248,24 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 await dispatch(globalActions.setJwt(jwt))
                 await fetchSessionUser()
                 setJwt(jwt)
+                
+                const [ip, network] = await Promise.all([Network.getIpAddressAsync(), Network.getNetworkStateAsync()])
+                const location = await getLocation()
+
+                await Promise.all([
+                    dispatch(globalActions.setNetwork({ ...network, ip })),
+                    dispatch(globalActions.setLocation(location))
+                ])
+
+                await dispatch(globalActions.setApplicationId(applicationId))
+                await setNotifications();
+
+            } else {
+                router.navigate("/welcome")
             }
         })()
         // onLogout()
     }, [])
-
-
 
     const value = {
         onLogin,

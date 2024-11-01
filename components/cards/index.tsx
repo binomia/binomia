@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, Stack } from 'native-base'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
-import { Dimensions, TouchableOpacity } from 'react-native'
+import { Dimensions, SafeAreaView, TouchableOpacity } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import BottomSheet from '../global/BottomSheet'
 import * as Constants from "expo-constants"
@@ -61,44 +61,46 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
 
     return (
         <BottomSheet draggable={false} openTime={300} height={height} onCloseFinish={() => onCloseFinish()} open={open}>
-            <VStack mt={"20px"} variant={"body"} flex={1}>
-                <HStack alignItems={"center"} justifyContent={"space-between"}>
-                    <TouchableOpacity onPress={() => onCloseFinish()}>
-                        <Stack >
-                            <Ionicons name="close" size={30} color="white" />
+            <SafeAreaView style={{ flex: 1 }}>
+                <VStack variant={"body"} flex={1}>
+                    <HStack alignItems={"center"} justifyContent={"space-between"}>
+                        <TouchableOpacity onPress={() => onCloseFinish()}>
+                            <Stack >
+                                <Ionicons name="close" size={30} color="white" />
+                            </Stack>
+                        </TouchableOpacity>
+                        <Stack>
+                            <Heading size={"sm"} color={colors.white} textAlign={"center"}>Tarjetas</Heading>
                         </Stack>
-                    </TouchableOpacity>
-                    <Stack>
-                        <Heading size={"sm"} color={colors.white} textAlign={"center"}>Tarjetas</Heading>
-                    </Stack>
-                    <Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} onPress={() => { }}>
-                        <AntDesign name="pluscircle" size={25} color="white" />
-                    </Pressable>
-                </HStack>
-                <VStack mt={"50px"} flex={0.95}>
-                    <HStack justifyContent={"space-between"} alignItems={"center"}>
-                        <Heading size={"xl"} color={colors.white}>Tarjetas</Heading>
+                        <Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} onPress={() => { }}>
+                            <AntDesign name="pluscircle" size={25} color="white" />
+                        </Pressable>
                     </HStack>
-                    <FlatList
-                        ref={ref}
-                        mt={"10px"}
-                        data={cards}
-                        contentContainerStyle={{paddingBottom: 100}}                                           
-                        showsVerticalScrollIndicator={false}
-                        scrollEnabled={true}
-                        renderItem={({ item, index }) => (
-                            <Pressable onPress={() => onPressCard(item)} w={"100%"} key={`card-${index}-${item.last4Digits}`} _pressed={{ opacity: 0.5 }} flexDirection={"row"} p={"15px"} borderRadius={10} bg={colors.lightGray} mt={"15px"} mr={"10px"} alignItems={"center"}>
-                                <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={{ uri: item.logo }} />
-                                <VStack ml={"10px"}>
-                                    <Heading fontSize={scale(15)} color={colors.white}>{item.brand} {item.last4Digits}</Heading>
-                                    <Text fontSize={scale(15)} color={colors.pureGray}>{item.bankName}</Text>
-                                </VStack>
-                            </Pressable>
-                        )}
-                    />
+                    <VStack mt={"50px"} flex={0.95}>
+                        <HStack justifyContent={"space-between"} alignItems={"center"}>
+                            <Heading size={"xl"} color={colors.white}>Tarjetas</Heading>
+                        </HStack>
+                        <FlatList
+                            ref={ref}
+                            mt={"10px"}
+                            data={cards}
+                            contentContainerStyle={{ paddingBottom: 100 }}
+                            showsVerticalScrollIndicator={false}
+                            scrollEnabled={true}
+                            renderItem={({ item, index }) => (
+                                <Pressable onPress={() => onPressCard(item)} w={"100%"} key={`card-${index}-${item.last4Digits}`} _pressed={{ opacity: 0.5 }} flexDirection={"row"} p={"15px"} borderRadius={10} bg={colors.lightGray} mt={"15px"} mr={"10px"} alignItems={"center"}>
+                                    <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={{ uri: item.logo }} />
+                                    <VStack ml={"10px"}>
+                                        <Heading fontSize={scale(15)} color={colors.white}>{item.brand} {item.last4Digits}</Heading>
+                                        <Text fontSize={scale(15)} color={colors.pureGray}>{item.bankName}</Text>
+                                    </VStack>
+                                </Pressable>
+                            )}
+                        />
+                    </VStack>
+                    <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
                 </VStack>
-                <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
-            </VStack>
+            </SafeAreaView>
         </BottomSheet>
     )
 }

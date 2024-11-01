@@ -1,9 +1,16 @@
 import { Tabs } from 'expo-router';
 import { Image } from 'native-base';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import colors from '@/colors';
 import { homeOff, homeOn, profileOff, profileOn, transationsOff, transationsOn } from '@/assets';
 import { HomeHeaderRight } from '@/components/navigation/HeaderBar';
+import { globalActions } from '@/redux/slices/globalSlice';
+import * as Crypto from 'expo-crypto';
+import * as Network from 'expo-network';
+import { useDispatch } from 'react-redux';
+import useAsyncStorage from '@/hooks/useAsyncStorage';
+import { useLocation } from '@/hooks/useLocation';
+
 
 export default () => {
 	const defaultTabStyles = {
@@ -22,6 +29,7 @@ export default () => {
 			shadowOpacity: 0,
 		}
 	}
+
 
 	return (
 		<Tabs screenOptions={{ headerShown: false, ...defaultTabStyles }}>

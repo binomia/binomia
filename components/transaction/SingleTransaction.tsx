@@ -72,7 +72,7 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
-			<VStack px={"10px"} pt={"20px"} h={"100%"}>
+			<VStack px={"10px"} h={"100%"}>
 				<HStack justifyContent={"space-between"}>
 					<TouchableOpacity onPress={() => onClose(false)}>
 						<Stack w={"50px"}>

@@ -1,8 +1,9 @@
 import { creditCard, logo, qrIcon } from "@/assets"
-import { VStack, Image, Pressable} from "native-base"
+import { VStack, Image, Pressable, HStack, Text } from "native-base"
 import { useState } from "react"
 import QRScanner from "../global/QRScanner"
 import Cards from "../cards"
+import { router } from "expo-router"
 
 
 
@@ -38,5 +39,26 @@ export const HeaderBankingRight: React.FC = () => {
             </Pressable>
             <Cards onCloseFinish={() => setShowAllCards(false)} open={showAllCards} />
         </VStack>
+    )
+}
+export const WelcomeLeft: React.FC = () => {
+    return (
+        <HStack>
+            <Image alt='logo-image' w={"115px"} h={"30px"} source={logo} />
+        </HStack>
+    )
+}
+export const WelcomeRight: React.FC = () => {
+    return (
+        <Pressable onPress={() => router.navigate("/login")}>
+            <Text fontSize={"16px"} fontWeight={"extrabold"} color={"mainGreen"}>Iniciar Sesión</Text>
+        </Pressable>
+    )
+}
+export const LoginRight: React.FC = () => {
+    return (
+        <Pressable onPress={() => router.navigate("/register")}>
+            <Text fontSize={"16px"} fontWeight={"extrabold"} color={"mainGreen"}>Registrarse</Text>
+        </Pressable>
     )
 }
