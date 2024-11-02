@@ -34,24 +34,22 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
     }
 
     useEffect(() => {
+
         getItem("jwt").then(async (jwt) => {
             if (!jwt) return
 
             const decoded = jwtDecode(jwt);
             const { username } = await AccountAuthSchema.jwtDecoded.parseAsync(decoded)
 
-            
-
             const socket = io(NOTIFICATION_SERVER_URL, {
                 query: { username }
             });
 
             console.log("red");
-            
+
 
 
             socket.on("connect", () => {
-
                 socket.on(SOCKET_EVENTS.TRANSACTION_RECEIVED, async (data: any) => {
                     // console.log(JSON.stringify(data.to, null, 2));
                     dispatch(globalActions.setAccount(data.to))
@@ -63,6 +61,8 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
             return () => {
                 socket.off("connect");
             }
+        }).catch((error) => {
+            console.error({ error });
         })
 
     }, [])
@@ -74,7 +74,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
 
     return (
         <SocketContext.Provider value={data}>
-            {children}            
+            {children}
         </SocketContext.Provider>
     )
 }

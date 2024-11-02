@@ -19,8 +19,8 @@ export class AccountAuthSchema {
 
     static jwtDecoded = z.object({
         sid: z.string(),
-        iat: z.number(),
-        exp: z.number(),
+        iat: z.number().optional(),
+        exp: z.number().optional(),
         username: z.string()
     })
 }

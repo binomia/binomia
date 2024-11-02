@@ -21,6 +21,8 @@ import { useCameraPermission, useMicrophonePermission } from 'react-native-visio
 import useAsyncStorage from '@/hooks/useAsyncStorage';
 import { useLocation } from '@/hooks/useLocation';
 import { globalActions } from '@/redux/slices/globalSlice';
+import { SocketContextProvider } from '@/contexts/socketContext';
+
 
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -74,14 +76,16 @@ export default function RootLayout() {
 					<NativeBaseProvider theme={theme}>
 						<SessionContextProvider>
 							<GlobalContextProvider>
-								<View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-									<Stack>
-										<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-										<Stack.Screen name="(signup)" options={{ headerShown: false }} />
-										<Stack.Screen name="(modals)" options={{ headerShown: false, presentation: "containedModal" }} />
-										<Stack.Screen name="+not-found" />
-									</Stack>
-								</View>
+								<SocketContextProvider>
+									<View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+										<Stack>
+											<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+											<Stack.Screen name="(signup)" options={{ headerShown: false }} />
+											<Stack.Screen name="(modals)" options={{ headerShown: false, presentation: "containedModal" }} />
+											<Stack.Screen name="+not-found" />
+										</Stack>
+									</View>
+								</SocketContextProvider>
 							</GlobalContextProvider>
 						</SessionContextProvider>
 					</NativeBaseProvider>
