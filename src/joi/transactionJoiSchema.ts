@@ -1,4 +1,5 @@
 import Joi from 'joi'
+import { z } from 'zod'
 
 
 export class TransactionJoiSchema {
@@ -11,5 +12,17 @@ export class TransactionJoiSchema {
             latitude: Joi.number().required(),
             longitude: Joi.number().required()
         }).required()
+    })
+
+    static validateTransaction = z.object({
+        amount: z.number(),
+        currency: z.string(),
+        transactionType: z.string(),
+        sender: z.object({}).passthrough(),
+        receiver: z.object({}).passthrough(),
+        location: z.object({
+            latitude: z.number(),
+            longitude: z.number()
+        })
     })
 }

@@ -24,7 +24,7 @@ const httpServer = createServer(app);
 
 
 const formatError = (formattedError: any, _: any) => {
-    console.log({ formattedError });
+    console.log(JSON.stringify(formattedError, null, 2));
 
     return {
         message: formattedError.message

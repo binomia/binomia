@@ -4,7 +4,7 @@ import KYCModel from '@/models/kycModel';
 import bcrypt from 'bcryptjs';
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
-import { STRING } from 'sequelize';
+import { Op, STRING } from 'sequelize';
 import { z } from 'zod'
 
 
@@ -130,7 +130,10 @@ export const checkForProtectedRequests = async (req: any) => {
 
             const session = await SessionModel.findOne({
                 where: {
-                    sid: jwtData.sid,
+                    [Op.and]: [
+                        { sid: jwtData.sid },
+                        { verified: true }
+                    ]
                 },
                 include: [{
                     model: UsersModel,
@@ -154,10 +157,7 @@ export const checkForProtectedRequests = async (req: any) => {
 
             if (!session)
                 throw new GraphQLError("INVALID_SESSION: No session found")
-
-            // console.log(session.toJSON());
-
-
+            
             if (jwtToken !== session.dataValues.jwt || sessionAuthIdentifier !== session.dataValues.deviceId)
                 throw new Error("INVALID_SESSION: Invalid token data")
 
@@ -192,4 +192,9 @@ export const GET_LAST_SUNDAY_DATE = (): Date => {
     lastSunday.setHours(0, 0, 0, 1);
 
     return lastSunday;
+}
+
+export const GENERATE_SIX_DIGIT_TOKEN = (): string => {
+    const token = Math.floor(100000 + Math.random() * 900000);
+    return token.toString();
 }

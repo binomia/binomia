@@ -111,6 +111,18 @@ const type = () => {
             createdAt: String
             updatedAt: String
         }
+
+        type LoginType {
+            user: UserType
+            sid: String
+            token: String
+            code: String
+            needVerification: Boolean
+            signature: String
+        }
+        type VerifySessionType {
+            token: String           
+        }
     `
 }
 
@@ -130,7 +142,8 @@ const mutation = () => {
         createUser(data: UserInput!): UserCreatedType 
         updateUser(data: UpdateUserDataInput!): OnlyUserType
         sendMessage(message: String): String
-        login(email: String!, password: String!): String
+        login(email: String!, password: String!): LoginType
+        verifySession(sid: String!, code: String!, signature: String!): UserType
         updateUserPassword(email: String!, password: String!, data: TokenAngSignInput!): OnlyUserType
     `
 }
@@ -143,7 +156,7 @@ const subscription = () => {
     `
 }
 
-const { userByEmail, sessionUser, searchSingleUser, updateUserPassword, updateUser, sugestedUsers, user, createUser, searchUsers, login } = UsersController
+const { userByEmail, sessionUser, verifySession, searchSingleUser, updateUserPassword, updateUser, sugestedUsers, user, createUser, searchUsers, login } = UsersController
 const resolvers = {
     query: {
         user,
@@ -158,7 +171,8 @@ const resolvers = {
         createUser,
         updateUser,
         updateUserPassword,
-        login
+        login,
+        verifySession
     },
 
     subscription: {

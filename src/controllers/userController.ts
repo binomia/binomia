@@ -1,7 +1,7 @@
 import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel, SessionModel } from '@/models'
 import { Op } from 'sequelize'
-import { getQueryResponseFields, checkForProtectedRequests } from '@/helpers'
-import { ZERO_ENCRYPTION_KEY } from '@/constants'
+import { getQueryResponseFields, checkForProtectedRequests, GENERATE_SIX_DIGIT_TOKEN } from '@/helpers'
+import { REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
 import { GlobalZodSchema, UserJoiSchema } from '@/joi';
 import { UserModelType, VerificationDataType } from '@/types';
@@ -11,6 +11,8 @@ import { Cryptography } from '@/helpers/cryptography';
 import { authServer } from '@/rpc';
 import { generate } from 'short-uuid';
 import { z } from 'zod'
+import { publisher, subClient } from '@/redis';
+import KYCModel from '@/models/kycModel';
 
 
 export class UsersController {
@@ -219,7 +221,7 @@ export class UsersController {
                 where: {
                     [Op.and]: [
                         { [Op.or]: searchFilter },
-                        { id: { [Op.ne]: req.session.userId} }
+                        { id: { [Op.ne]: req.session.userId } }
                     ]
                 }
             })
@@ -248,7 +250,7 @@ export class UsersController {
                 where: {
                     [Op.and]: [
                         { [Op.or]: searchFilter },
-                        { id: { [Op.ne]: req.session.userId} }
+                        { id: { [Op.ne]: req.session.userId } }
                     ]
                 }
             })
@@ -386,9 +388,23 @@ export class UsersController {
             const deviceId = await z.string().length(64).transform((val) => val.trim()).parseAsync(req.headers["session-auth-identifier"]);
 
             const user = await UsersModel.findOne({
-                where: { email }
+                where: { email },
+                attributes: ["id", "password", "username", "email", "status", "phone", "dniNumber"],
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'account'
+                    },
+                    {
+                        model: CardsModel,
+                        as: 'cards'
+                    },
+                    {
+                        model: KYCModel,
+                        as: 'kyc'
+                    }
+                ]
             })
-
 
             if (!user)
                 throw new GraphQLError(`Not found user with email: ${validatedData.email}`);
@@ -397,12 +413,23 @@ export class UsersController {
             if (!isMatch)
                 throw new GraphQLError('Incorrect password');
 
+            const session = await SessionModel.findOne({
+                where: {
+                    [Op.and]: [
+                        { userId: user.toJSON().id },
+                        { deviceId },
+                        { verified: true }
+                    ]
+                }
+            })
+
             const sid = `${generate()}${generate()}${generate()}`
             const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days
-            const token = jwt.sign({ sid, username: user.toJSON().username }, ZERO_ENCRYPTION_KEY, { expiresIn: "1d" });
+            const token = jwt.sign({ sid, username: user.toJSON().username }, ZERO_ENCRYPTION_KEY);
 
-            await SessionModel.create({
+            const sessionCreated = await SessionModel.create({
                 sid,
+                verified: session ? true : false,
                 deviceId,
                 jwt: token,
                 userId: user.dataValues.id,
@@ -410,11 +437,95 @@ export class UsersController {
                 data: req.headers.device ? JSON.stringify(req.headers.device) : {}
             })
 
-            return token
+            if (session)
+                return {
+                    user: user.toJSON(),
+                    sid: sessionCreated.toJSON().sid,
+                    token,
+                    needVerification: false
+                }
+
+            else {
+                const code = GENERATE_SIX_DIGIT_TOKEN()
+                const hash = await Cryptography.hash(JSON.stringify({
+                    sid: sessionCreated.toJSON().sid,
+                    code,
+                    ZERO_ENCRYPTION_KEY,
+                }))
+                const signature = Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+                await publisher.publish(REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE, JSON.stringify({
+                    data: {
+                        user: user.toJSON(),
+                        sid: sessionCreated.toJSON().sid,
+                        code,
+                    }
+                }))
+
+                return {
+                    sid: sessionCreated.toJSON().sid,
+                    token,
+                    code,
+                    signature,
+                    needVerification: true
+                }
+            }
 
         } catch (error: any) {
             console.error(error);
+            throw new GraphQLError(error.message);
+        }
+    }
 
+    static verifySession = async (_: unknown, { sid, code, signature }: { sid: string, code: string, signature: string }) => {
+        try {
+            const session = await SessionModel.findOne({
+                where: {
+                    [Op.and]: [
+                        { sid },
+                        { verified: false }
+                    ]
+                },
+                include: [{
+                    model: UsersModel,
+                    as: 'user',
+                    include: [
+                        {
+                            model: AccountModel,
+                            as: 'account'
+                        },
+                        {
+                            model: CardsModel,
+                            as: 'cards'
+                        },
+                        {
+                            model: KYCModel,
+                            as: 'kyc'
+                        }
+                    ]
+                }]
+            })
+
+            if (!session)
+                throw new GraphQLError('Session not found or already verified');
+
+            const hash = await Cryptography.hash(JSON.stringify({
+                sid,
+                code,
+                ZERO_ENCRYPTION_KEY,
+            }))
+
+            const verified = await Cryptography.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
+
+            console.log({ verified });
+
+            if (!verified)
+                throw new GraphQLError('Failed to verify session');
+
+            await session.update({ verified })
+            return session.toJSON().user
+
+        } catch (error: any) {
+            console.error({ verifySession: error });
             throw new GraphQLError(error.message);
         }
     }

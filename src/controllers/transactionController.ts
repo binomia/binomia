@@ -7,7 +7,7 @@ import { authServer } from '@/rpc';
 import { Cryptography } from '@/helpers/cryptography';
 import { REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
-import { publisher, subClient } from '@/redis';
+import { publisher } from '@/redis';
 
 
 export class TransactionsController {
@@ -21,33 +21,17 @@ export class TransactionsController {
                 where: { username: sender.username },
                 include: [
                     {
-                        model: TransactionsModel,
-                        as: 'incomingTransactions',
-                        limit: 1,
-                        order: [['createdAt', 'DESC']],
-                        attributes: ['id', 'createdAt', 'updatedAt', 'amount', 'fromAccount', 'toAccount', 'status']
-                    },
-                    {
-                        model: TransactionsModel,
-                        as: 'outgoingTransactions',
-                        limit: 1,
-                        order: [['createdAt', 'DESC']],
-                        attributes: ['id', 'createdAt', 'updatedAt', 'amount', 'fromAccount', 'toAccount', 'status']
-                    },
-                    {
-                        model: TransactionsModel,
-                        as: 'incomingTransactions',
-                        limit: 1,
-                        order: [['createdAt', 'DESC']],
-                        attributes: ['id', 'createdAt', 'updatedAt', 'amount', 'fromAccount', 'toAccount', 'status']
-                    },
-                    {
-                        model: TransactionsModel,
-                        as: 'outgoingTransactions',
-                        limit: 1,
-                        order: [['createdAt', 'DESC']],
-                        attributes: ['id', 'createdAt', 'updatedAt', 'amount', 'fromAccount', 'toAccount', 'status']
-                    },
+                        model: UsersModel,
+                        as: 'user',
+                        attributes: { exclude: ['createdAt', 'dniNumber', 'updatedAt', 'faceVideoUrl', 'idBackUrl', 'idFrontUrl', 'profileImageUrl', 'password'] },
+                        include: [
+                            {
+                                model: kycModel,
+                                as: 'kyc',
+                                attributes: ['id', 'dniNumber', 'dob', 'status', 'expiration']
+                            }
+                        ]
+                    }
                 ]
             })
 
@@ -71,20 +55,6 @@ export class TransactionsController {
                                 attributes: ['id', 'dniNumber', 'dob', 'status', 'expiration']
                             }
                         ]
-                    },
-                    {
-                        model: TransactionsModel,
-                        as: 'incomingTransactions',
-                        limit: 1,
-                        order: [['createdAt', 'DESC']],
-                        attributes: ['id', 'createdAt', 'updatedAt', 'amount', 'fromAccount', 'toAccount', 'status']
-                    },
-                    {
-                        model: TransactionsModel,
-                        as: 'outgoingTransactions',
-                        limit: 1,
-                        order: [['createdAt', 'DESC']],
-                        attributes: ['id', 'createdAt', 'updatedAt', 'amount', 'fromAccount', 'toAccount', 'status']
                     }
                 ]
             })
@@ -108,16 +78,21 @@ export class TransactionsController {
             }))
 
             const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
-            // const transactionAuthorization: TransactionAuthorizationType = await authServer("authorizeTransaction", {
+            // const transactionAuthorizationData = {
             //     amount: validatedData.amount,
             //     currency: validatedData.currency,
             //     transactionType: validatedData.transactionType,
-            //     location: validatedData.location,
-            //     userId: sender.id,
-            //     sender,
-            //     receiver: receiverAccount.toJSON(),
+            //     // location: validatedData.location,
+            //     // userId: sender.id,
+            //     // sender,
+            //     // receiver: receiverAccount.toJSON(),
             //     signature
-            // });
+            // }
+
+            // const transactionAuthorization: TransactionAuthorizationType = await authServer("echo", {});
+
+            // if (transactionAuthorization.status !== "approved")
+            //     throw new Error("Transaction authorization failed");
 
 
             const transaction = await TransactionsModel.create({
@@ -163,11 +138,10 @@ export class TransactionsController {
                 transaction: transactionData.toJSON(),
                 recipientSocketRoom: receiverAccount.toJSON().user.username
             }))
-            
+
             return transactionData.toJSON()
 
         } catch (error: any) {
-            console.log(error);
             throw new GraphQLError(error.message);
         }
     }
