@@ -1,5 +1,4 @@
 import { UserAuthSchema } from "@/auth/userAuth"
-import { Socket } from "socket.io-client";
 import z from "zod";
 
 export type SessionContextType = {
@@ -12,6 +11,12 @@ export type VerificationDataType = {
     signature: string,
     email: string
 }
+export type SessionVerificationDataType = {
+    token: string
+    sid: string
+    signature: string,
+    code: string
+}
 
 export type CreateUserDataType = z.infer<typeof UserAuthSchema.createUser>
 
@@ -22,9 +27,11 @@ export type SessionPropsType = {
     sendVerificationCode: (to: string) => any
     setVerificationCode: (to: string) => any
     setVerificationData: (token: VerificationDataType) => any
+    setSessionVerificationData: (token: SessionVerificationDataType) => any
     setInvalidCredentials: (value: boolean) => void
     invalidCredentials: boolean
     verificationData: VerificationDataType
+    sessionVerificationData: SessionVerificationDataType
     verificationCode: string
     jwt: string
     applicationId: string

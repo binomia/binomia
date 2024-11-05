@@ -9,8 +9,8 @@
 		"userInterfaceStyle": "dark",
 		"splash": {
 			"image": "./assets/splash.png",
-			"resizeMode": "contain",
-			"backgroundColor": "#000"
+			"resizeMode": "cover",
+			"backgroundColor": "#1D9B48"
 		},
 		"ios": {
 			"buildNumber": "1",

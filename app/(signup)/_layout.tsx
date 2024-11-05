@@ -1,6 +1,6 @@
 import 'react-native-reanimated';
 import { Stack } from 'expo-router';
-import { HomeHeaderRight, LoginRight, WelcomeLeft, WelcomeRight } from '@/components/navigation/HeaderBar';
+import {  LoginRight, WelcomeLeft, WelcomeRight } from '@/components/navigation/HeaderBar';
 import colors from '@/colors';
 
 

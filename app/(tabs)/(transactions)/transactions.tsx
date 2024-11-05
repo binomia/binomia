@@ -14,7 +14,6 @@ import BottomSheet from '@/components/global/BottomSheet';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { useNavigation } from '@react-navigation/native';
 import SingleTransactionScreen from '@/components/transaction/SingleTransaction';
 import SendTransaction from '@/components/transaction/SendTransaction';
 import { transactionActions } from '@/redux/slices/transactionSlice';
@@ -27,7 +26,6 @@ const { height } = Dimensions.get('window')
 const TransactionsScreen: React.FC = () => {
 	const dispatch = useDispatch()
 	const { user, account } = useSelector((state: any) => state.globalReducer)
-	const navigation = useNavigation<any>();
 
 	const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
 	const [accountTransactions] = useLazyQuery(TransactionApolloQueries.accountTransactions())
@@ -241,7 +239,7 @@ const TransactionsScreen: React.FC = () => {
 							)
 						}
 					</ScrollView>
-					<BottomSheet openTime={300} height={height} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
+					<BottomSheet showDragIcon={false} draggable={false} openTime={300} height={height} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
 						<SingleTransactionScreen onClose={onCloseFinishSingleTransaction} />
 					</BottomSheet>
 					<SendTransaction open={showSendTransaction} onCloseFinish={onSendCloseFinish} onSendFinish={onSendCloseFinish} />

@@ -1,34 +1,27 @@
 import 'react-native-reanimated';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useCallback, useEffect, useState } from 'react';
-import * as Crypto from 'expo-crypto';
-import * as Network from 'expo-network';
+import React, { useCallback, useEffect } from 'react';
 import { NativeBaseProvider } from 'native-base';
 import { theme } from '@/themes';
 import { DATABASE_NAME } from '@/constants';
 import { SQLiteProvider } from "expo-sqlite/next";
-import { Provider, useDispatch } from 'react-redux';
+import { Provider } from 'react-redux';
 import { store } from '@/redux';
 import { ApolloProvider } from '@apollo/client';
 import { apolloClient } from '@/apollo';
 import { SessionContextProvider } from '@/contexts/sessionContext';
 import { GlobalContextProvider } from '@/contexts/globalContext';
-import { View } from 'react-native';
+import { LogBox, View } from 'react-native';
 import { useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
-import useAsyncStorage from '@/hooks/useAsyncStorage';
-import { useLocation } from '@/hooks/useLocation';
-import { globalActions } from '@/redux/slices/globalSlice';
 import { SocketContextProvider } from '@/contexts/socketContext';
 
 
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+LogBox.ignoreAllLogs();
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+export default () => {
 	const cameraPermission = useCameraPermission()
 	const microphonePermission = useMicrophonePermission()
 

@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { CreateUserDataType, SessionContextType, SessionPropsType, VerificationDataType } from "@/types";
+import { CreateUserDataType, SessionContextType, SessionPropsType, SessionVerificationDataType, VerificationDataType } from "@/types";
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { SessionApolloQueries, UserApolloQueries } from "@/apollo/query";
 import * as Updates from 'expo-updates';
@@ -13,6 +13,7 @@ import { router } from "expo-router";
 import * as Crypto from 'expo-crypto';
 import * as Network from 'expo-network';
 import { useLocation } from "@/hooks/useLocation";
+import { SessionAuthSchema } from "@/auth/sessionAuth";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -21,9 +22,11 @@ export const SessionContext = createContext<SessionPropsType>({
     sendVerificationCode: (_: string) => { },
     setVerificationCode: (_: string) => { },
     setVerificationData: (_: VerificationDataType) => { },
+    setSessionVerificationData: (_: SessionVerificationDataType) => { },
     setInvalidCredentials: (_: boolean) => { },
     invalidCredentials: false,
     verificationData: { token: "", signature: "", email: "" },
+    sessionVerificationData: { signature: "", token: "", code: "", sid: "" },
     verificationCode: "",
     jwt: "",
     applicationId: "",
@@ -39,6 +42,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const [jwt, setJwt] = useState<string>("");
     const [applicationId, setApplicationId] = useState<string>("");
     const [verificationData, setVerificationData] = useState<VerificationDataType>({ token: "", signature: "", email: "" });
+    const [sessionVerificationData, setSessionVerificationData] = useState<SessionVerificationDataType>({ signature: "", token: "", sid: "", code: "" });
     const [verificationCode, setVerificationCode] = useState<string>("");
     const [invalidCredentials, setInvalidCredentials] = useState<boolean>(false);
     const [login] = useMutation(SessionApolloQueries.login());
@@ -102,7 +106,6 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
     const onLogin = async ({ email, password }: { email: string, password: string }): Promise<any> => {
         try {
-
             const data = await login({
                 variables: { email, password },
                 context: {
@@ -114,18 +117,18 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 }
             });
 
-            if (data.data.login) {
-                await setItem("jwt", data.data.login)
-                await Updates.reloadAsync();
-
-                return data.data.login
+            if (!data.data.login.needVerification && data.data.login.token) {
+                await setItem("jwt", data.data.login.token)
+                await fetchSessionUser()
+                router.navigate("(home)")
+                // await Updates.reloadAsync();
             }
 
-            return data
-        } catch (error) {
-            console.log({ error });
+            return data.data.login
 
+        } catch (error) {
             setInvalidCredentials(true)
+            return error
         }
     }
 
@@ -230,13 +233,13 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             const jwt = await getItem("jwt");
             const _applicationId = await getItem("applicationId")
 
-                let applicationId = _applicationId;
-                if (!applicationId) {
-                    applicationId = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, Crypto.randomUUID().toString(), {
-                        encoding: Crypto.CryptoEncoding.HEX
-                    })
-                    setItem("applicationId", applicationId)
-                }
+            let applicationId = _applicationId;
+            if (!applicationId) {
+                applicationId = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, Crypto.randomUUID().toString(), {
+                    encoding: Crypto.CryptoEncoding.HEX
+                })
+                setItem("applicationId", applicationId)
+            }
 
 
             if (applicationId) {
@@ -248,7 +251,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 await dispatch(globalActions.setJwt(jwt))
                 await fetchSessionUser()
                 setJwt(jwt)
-                
+
                 const [ip, network] = await Promise.all([Network.getIpAddressAsync(), Network.getNetworkStateAsync()])
                 const location = await getLocation()
 
@@ -276,6 +279,8 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
         setVerificationCode,
         setVerificationData,
         setInvalidCredentials,
+        setSessionVerificationData,
+        sessionVerificationData,
         invalidCredentials,
         verificationData,
         verificationCode,

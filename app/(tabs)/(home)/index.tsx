@@ -22,7 +22,6 @@ const HomeScreen: React.FC = () => {
 	const { account } = useSelector((state: any) => state.globalReducer)
 	const dispatch = useDispatch()
 
-	const navigation = useNavigation<any>();
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const socket = useContext(SocketContext);
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());

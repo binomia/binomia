@@ -50,7 +50,7 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
             //     return
             // }
 
-           
+
             const transactionData = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(input),
@@ -130,47 +130,49 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
 
 
     return (
-        <BottomSheet openTime={300} height={height} onCloseFinish={handleOnClose} open={visible}>
-            {!showSingleTransaction ?
-                <VStack h={"100%"} justifyContent={"space-between"}>
-                    <VStack>
-                        <HStack justifyContent={"space-between"}>
-                            <TouchableOpacity onPress={() => handleOnClose()}>
-                                <Stack w={"50px"}>
-                                    <Ionicons name="chevron-back-outline" size={30} color="white" />
+        <BottomSheet draggable={false} showDragIcon={false} openTime={300} height={height} onCloseFinish={handleOnClose} open={visible}>
+            <SafeAreaView style={{ flex: 1 }}>
+                {!showSingleTransaction ?
+                    <VStack h={"100%"} justifyContent={"space-between"}>
+                        <VStack>
+                            <HStack px={"10px"} justifyContent={"space-between"}>
+                                <TouchableOpacity onPress={() => handleOnClose()}>
+                                    <Stack w={"50px"}>
+                                        <Ionicons name="chevron-back-outline" size={30} color="white" />
+                                    </Stack>
+                                </TouchableOpacity>
+                                <Stack>
+                                    <Heading mb={"20px"} size={"sm"} color={colors.white} textAlign={"center"}>Enviar</Heading>
                                 </Stack>
-                            </TouchableOpacity>
-                            <Stack>
-                                <Heading mb={"20px"} size={"sm"} color={colors.white} textAlign={"center"}>Enviar</Heading>
-                            </Stack>
-                            <Stack w={"50px"} />
-                        </HStack>
-                        <HStack px={"20px"} mt={"20px"} alignItems={"center"} justifyContent={"space-between"} mb={"20px"}>
-                            <HStack space={2}>
-                                {receiver.profileImageUrl ?
-                                    <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: receiver.profileImageUrl }} />
-                                    :
-                                    <DefaultIcon
-                                        value={receiver?.fullName || ""}
-                                        contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(receiver?.fullName || "") }]}
-                                        textStyle={styles.textStyle}
-                                    />
-                                }
-                                <VStack justifyContent={"center"}>
-                                    <Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(receiver?.fullName || "")}</Heading>
-                                    <Text color={colors.lightSkyGray}>{receiver?.username}</Text>
-                                </VStack>
+                                <Stack w={"50px"} />
                             </HStack>
-                            <Button opacity={showPayButton ? 1 : 0.5} disabled={!showPayButton} onPress={handleOnSend} h={"40px"} w={"100px"} title={"Pagar"} bg={showPayButton ? "mainGreen" : "lightGray"} borderRadius={100} color={showPayButton ? colors.white : colors.mainGreen} />
-                        </HStack>
+                            <HStack px={"20px"} mt={"20px"} alignItems={"center"} justifyContent={"space-between"} mb={"20px"}>
+                                <HStack space={2}>
+                                    {receiver.profileImageUrl ?
+                                        <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: receiver.profileImageUrl }} />
+                                        :
+                                        <DefaultIcon
+                                            value={receiver?.fullName || ""}
+                                            contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(receiver?.fullName || "") }]}
+                                            textStyle={styles.textStyle}
+                                        />
+                                    }
+                                    <VStack justifyContent={"center"}>
+                                        <Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(receiver?.fullName || "")}</Heading>
+                                        <Text color={colors.lightSkyGray}>{receiver?.username}</Text>
+                                    </VStack>
+                                </HStack>
+                                <Button opacity={showPayButton ? 1 : 0.5} disabled={!showPayButton} onPress={handleOnSend} h={"40px"} w={"100px"} title={"Pagar"} bg={showPayButton ? "mainGreen" : "lightGray"} borderRadius={100} color={showPayButton ? colors.white : colors.mainGreen} />
+                            </HStack>
+                        </VStack>
+                        <VStack mb={"40px"}>
+                            <KeyNumberPad onChange={(value: string) => onChange(value)} />
+                        </VStack>
                     </VStack>
-                    <VStack mb={"40px"}>
-                        <KeyNumberPad onChange={(value: string) => onChange(value)} />
-                    </VStack>
-                </VStack>
-                :
-                <SingleTransactionScreen onClose={handleOnClose} />
-            }
+                    :
+                    <SingleTransactionScreen onClose={handleOnClose} />
+                }
+            </SafeAreaView>
         </BottomSheet>
     )
 }
