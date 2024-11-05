@@ -13,7 +13,7 @@ const globalSlice = createSlice({
         user: {},
         applicationId: "",
         jwt: "",
-        allowFaceId: false,
+        allowFaceId: true,
         whatsappNotifications: true,
         emailNotifications: true,
         smsNotifications: true,
