@@ -21,7 +21,7 @@ import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { noTransactions } from '@/assets';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { router } from 'expo-router';
-import TransactionSkeleton from '@/components/transaction/transactionSckeleton';
+import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
 
 
 const { height } = Dimensions.get('window')

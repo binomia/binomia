@@ -15,6 +15,7 @@ import QRScannerScreen from '@/components/global/QRScanner';
 import { SocketContext } from '@/contexts/socketContext';
 import { SOCKET_EVENTS } from '@/constants';
 import { Link, router } from 'expo-router';
+import HomeSkeleton from '@/components/home/homeSkeleton';
 
 
 const { width } = Dimensions.get('window');
@@ -27,7 +28,9 @@ const HomeScreen: React.FC = () => {
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
 
 	const [refreshing, setRefreshing] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 
+	const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 	const onPress = async () => {
 		socket.emit("test", {
@@ -53,66 +56,74 @@ const HomeScreen: React.FC = () => {
 
 	useEffect(() => {
 		socket.on(`${SOCKET_EVENTS.TRANSACTION_RECEIVED}@${account.username}`, async (data: any) => {
-			console.log(JSON.stringify(data.to, null, 2));
 			dispatch(globalActions.setAccount(data.to))
 		})
 	}, [])
 
+	useEffect(() => {
+		(async () => {
+			await delay(2000)
+			setIsLoading(false)
+		})()
+	}, [])
+
 	return (
-		<VStack p={"20px"} w={width} bg={colors.darkGray} variant={"body"} flex={1} alignItems={"center"}>
-			<ScrollView contentContainerStyle={{ flex: 1 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
-				<VStack w={"100%"} justifyContent={"center"} alignItems={"center"} borderRadius={"10px"}>
-					<VStack bg={colors.lightGray} p={"20px"} w={"100%"} justifyContent={"space-between"} borderRadius={"10px"} h={scale(160)}>
-						<VStack>
-							<Heading size={"lg"} color={"white"}>Balance</Heading>
-							<Heading fontSize={scale(28)} color={"white"}>{FORMAT_CURRENCY(account?.balance || 0)}</Heading>
+		isLoading ? <HomeSkeleton /> : (
+			<VStack p={"20px"} w={width} bg={colors.darkGray} variant={"body"} flex={1} alignItems={"center"}>
+				<ScrollView contentContainerStyle={{ flex: 1 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+					<VStack w={"100%"} justifyContent={"center"} alignItems={"center"} borderRadius={"10px"}>
+						<VStack bg={colors.lightGray} p={"20px"} w={"100%"} justifyContent={"space-between"} borderRadius={"10px"} h={scale(160)}>
+							<VStack>
+								<Heading size={"lg"} color={"white"}>Balance</Heading>
+								<Heading fontSize={scale(28)} color={"white"}>{FORMAT_CURRENCY(account?.balance || 0)}</Heading>
+							</VStack>
+							<HStack w={"100%"} alignItems={"center"} justifyContent={"space-between"} >
+								<Button
+									leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={bagIcon} />}
+									w={"49%"}
+									bg={"darkGray"}
+									mt={"20px"}
+									borderRadius={"10px"}
+									title="Depositar" onPress={() => router.navigate("/user")}
+								/>
+								<Button
+									leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={bagIcon} />}
+									w={"49%"}
+									bg={"darkGray"}
+									mt={"20px"}
+									borderRadius={"10px"}
+									title="Depositar" onPress={() => router.navigate("/banking")}
+								/>
+							</HStack>
 						</VStack>
-						<HStack w={"100%"} alignItems={"center"} justifyContent={"space-between"} >
-							<Button
-								leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={bagIcon} />}
-								w={"49%"}
-								bg={"darkGray"}
-								mt={"20px"}
-								borderRadius={"10px"}
-								title="Depositar" onPress={() => router.navigate("/user")}
-							/>
-							<Button
-								leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={bagIcon} />}
-								w={"49%"}
-								bg={"darkGray"}
-								mt={"20px"}
-								borderRadius={"10px"}
-								title="Depositar" onPress={() => router.navigate("/banking")}
-							/>
+					</VStack>
+					<VStack w={"100%"} pt={"30px"} px={"5px"}>
+						<Heading fontSize={scale(24)} color={"white"}>Servicios</Heading>
+						<HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
+							<Pressable onPress={() => onPress()} _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
+								<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={phone} />
+								<Text color={"white"}>Recargas</Text>
+							</Pressable>
+							<Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
+								<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={cars} />
+								<Text color={"white"}>Seguros</Text>
+							</Pressable>
+						</HStack>
+						<HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
+							<Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
+								<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={house} />
+								<Text color={"white"}>Electricidad</Text>
+							</Pressable>
+							<Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
+								<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={bills} />
+								<Text color={"white"}>Facturas</Text>
+							</Pressable>
 						</HStack>
 					</VStack>
-				</VStack>
-				<VStack w={"100%"} pt={"30px"} px={"5px"}>
-					<Heading fontSize={scale(24)} color={"white"}>Servicios</Heading>
-					<HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
-						<Pressable onPress={() => onPress()} _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
-							<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={phone} />
-							<Text color={"white"}>Recargas</Text>
-						</Pressable>
-						<Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
-							<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={cars} />
-							<Text color={"white"}>Seguros</Text>
-						</Pressable>
-					</HStack>
-					<HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
-						<Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
-							<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={house} />
-							<Text color={"white"}>Electricidad</Text>
-						</Pressable>
-						<Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
-							<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={bills} />
-							<Text color={"white"}>Facturas</Text>
-						</Pressable>
-					</HStack>
-				</VStack>
-				<QRScannerScreen defaultPage={1} open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
-			</ScrollView>
-		</VStack>
+					<QRScannerScreen defaultPage={1} open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
+				</ScrollView>
+			</VStack>
+		)
 	)
 }
 
