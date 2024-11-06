@@ -68,13 +68,14 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Deposito", ope
                             <Ionicons name="close" size={30} color="white" />
                         </TouchableOpacity>
                     </Stack>
-                    <HStack space={2}>
-                        <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: card?.logo }} />
+                    <Pressable onPress={() => setShowAllCards(true)} _pressed={{ opacity: 0.5 }}  flexDirection={"row"}  alignItems={"center"}>
+                        <Image mr={"10px"} borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: card?.logo }} />
                         <VStack justifyContent={"center"}>
                             <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{card?.brand} {card?.last4Digits}</Heading>
                             <Text fontSize={scale(13)} color={colors.pureGray}>{card?.bankName}</Text>
                         </VStack>
-                    </HStack>
+                        <Ionicons style={{ marginBottom: 20 }}  name="chevron-forward" size={25} color={colors.gray} />
+                    </Pressable>
                     <Pressable opacity={showPayButton ? 1 : 0.5} disabled={!showPayButton} shadow={2} w={scale(50)} h={scale(50)} justifyContent={"center"} alignItems={"center"} _pressed={{ opacity: 0.5 }} bg={showPayButton ? "mainGreen" : "lightGray"} p={"5px"} borderRadius={100}>
                         <Image alt='logo-image' tintColor={showPayButton ? colors.white : colors.mainGreen} resizeMode='contain' w={scale(25)} h={scale(25)} source={depositIcon} />
                     </Pressable>

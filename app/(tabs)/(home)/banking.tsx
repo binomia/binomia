@@ -3,7 +3,7 @@ import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, ScrollView }
 import { useDispatch, useSelector } from 'react-redux'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
-import { depositIcon, withdrawIcon } from '@/assets'
+import { depositIcon, noTransactions, withdrawIcon } from '@/assets'
 import AntDesign from '@expo/vector-icons/AntDesign';
 import moment from 'moment'
 import { FORMAT_CURRENCY } from '@/helpers'
@@ -22,14 +22,13 @@ import DepositOrWithdrawTransaction from '@/components/transaction/DepositOrWith
 
 const { height } = Dimensions.get('window')
 const BankingScreen: React.FC = () => {
-    const navigation = useNavigation<any>()
     const dispatch = useDispatch()
     const { user } = useSelector((state: any) => state.globalReducer)
     const [showMakeTransaction, setShowMakeTransaction] = useState<boolean>(false)
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
-    const [transactionTitle, setTransactionTitle] = useState<string>("Deposito")
     const [showSingleTransaction, setShowSingleTransaction] = useState<boolean>(false);
+    const [transactions, setTransactions] = useState<any[]>(transactionsMocks)
 
 
     const cards = [
@@ -43,8 +42,6 @@ const BankingScreen: React.FC = () => {
 
 
     const handleMakeTransaction = async (title: string) => {
-        setTransactionTitle(title)
-
         await dispatch(globalActions.setCard(cards[0]))
         router.navigate("/deposit")
         // setShowMakeTransaction(true)
@@ -113,25 +110,35 @@ const BankingScreen: React.FC = () => {
                 </HStack>
                 <VStack mt={"40px"}>
                     <Heading fontSize={scale(19)} color={colors.white}>Transacciones</Heading>
-                    <FlatList
-                        mt={"20px"}
-                        data={transactionsMocks}
-                        scrollEnabled={false}
-                        renderItem={({ item, index }) => (
-                            <Pressable key={`transaction-banking-${index}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(item)} mb={"25px"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} >
-                                <HStack >
-                                    <HStack w={"50px"} h={"50px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
-                                        <AntDesign name={formatTransaction(item).icon as any} size={24} color={formatTransaction(item).isFromMe ? colors.mainGreen : colors.red} />
+                    {transactions.length <= 0 ? (
+                        <VStack key={"transations-screen-no-transactions" + Date.now()} w={"100%"} h={"50%"} mt={"100px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
+                            <Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
+                            <VStack justifyContent={"center"} alignItems={"center"}>
+                                <Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
+                                <Text fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
+                            </VStack>
+                        </VStack>
+                    ) : (
+                        <FlatList
+                            mt={"20px"}
+                            data={transactions}
+                            scrollEnabled={false}
+                            renderItem={({ item, index }) => (
+                                <Pressable key={`transaction-banking-${index}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(item)} mb={"25px"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} >
+                                    <HStack >
+                                        <HStack w={"50px"} h={"50px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
+                                            <AntDesign name={formatTransaction(item).icon as any} size={24} color={formatTransaction(item).isFromMe ? colors.mainGreen : colors.red} />
+                                        </HStack>
+                                        <VStack ml={"10px"} justifyContent={"center"}>
+                                            <Heading textTransform={"capitalize"} fontSize={scale(13)} color={colors.white}>{formatTransaction(item).fullName}</Heading>
+                                            <Text fontSize={scale(12)} color={colors.pureGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
+                                        </VStack>
                                     </HStack>
-                                    <VStack ml={"10px"} justifyContent={"center"}>
-                                        <Heading textTransform={"capitalize"} fontSize={scale(13)} color={colors.white}>{formatTransaction(item).fullName}</Heading>
-                                        <Text fontSize={scale(12)} color={colors.pureGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
-                                    </VStack>
-                                </HStack>
-                                <Heading fontSize={scale(12)} color={formatTransaction(item).isFromMe ? colors.mainGreen : colors.red} >{formatTransaction(item).isFromMe ? "+" : "-"}{FORMAT_CURRENCY(item.amount)}</Heading>
-                            </Pressable>
-                        )}
-                    />
+                                    <Heading fontSize={scale(12)} color={formatTransaction(item).isFromMe ? colors.mainGreen : colors.red} >{formatTransaction(item).isFromMe ? "+" : "-"}{FORMAT_CURRENCY(item.amount)}</Heading>
+                                </Pressable>
+                            )}
+                        />
+                    )}
                 </VStack>
             </ScrollView>
             <BottomSheet openTime={300} height={height} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
