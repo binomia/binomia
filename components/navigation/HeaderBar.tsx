@@ -1,4 +1,4 @@
-import { creditCard, logo, qrIcon } from "@/assets"
+import { creditCard, logo, qrIcon, recurrenceIcon } from "@/assets"
 import { VStack, Image, Pressable, HStack, Text } from "native-base"
 import { useState } from "react"
 import QRScanner from "../global/QRScanner"
@@ -24,6 +24,29 @@ export const HomeHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
                 <Image alt='logo-image' w={"25px"} h={"25px"} source={qrIcon} />
             </Pressable>
             <QRScanner open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
+        </VStack>
+    )
+}
+export const TransactionsHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
+    const [showBottomSheet, setShowBottomSheet] = useState(false)
+
+    return (
+        <VStack p={p}>
+            <Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.navigate("recurrences")}>
+                <Image alt='logo-image' tintColor={"white"} w={"25px"} h={"25px"} source={recurrenceIcon} />
+            </Pressable>
+        </VStack>
+    )
+}
+
+export const RecurrencesHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
+    const [showBottomSheet, setShowBottomSheet] = useState(false)
+
+    return (
+        <VStack p={p}>
+            <Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.navigate("recurrences")}>
+                <Image alt='logo-image' tintColor={"white"} w={"25px"} h={"25px"} source={recurrenceIcon} />
+            </Pressable>
         </VStack>
     )
 }

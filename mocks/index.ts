@@ -357,3 +357,64 @@ export const transactionsMocks = [
         }
     }
 ]
+
+export const recurenceWeeklyData = [
+    [
+        { title: "Cada Domingo", id: "everySunday" },
+        { title: "Cada Lunes", id: "everyMonday" },
+    ],
+    [
+        { title: "Cada Martes", id: "everyTuesday" },
+        { title: "Cada Miercoles", id: "everyWednesday" },
+    ],
+    [
+        { title: "Cada Jueves", id: "everyThursday" },
+        { title: "Cada Viernes", id: "everyFriday" },
+    ],
+    [
+        { title: "Cada Sabado", id: "everySaturday" }
+    ]
+]
+
+export const recurenceMonthlyData = [
+    [
+        { title: "Día 1 de cada mes", id: "everyFirst", day: "1" },
+        { title: "Día 2 de cada mes", id: "everySecond", day: "2" },
+        { title: "Día 3 de cada mes", id: "everyThird", day: "3" },
+        { title: "Día 4 de cada mes", id: "everyFourth", day: "4" },
+        { title: "Día 5 de cada mes", id: "everyFifth", day: "5" },
+    ],
+    [
+        { title: "Día 6 de cada mes", id: "everySixth", day: "6" },
+        { title: "Día 7 de cada mes", id: "everySeventh", day: "7" },
+        { title: "Día 8 de cada mes", id: "everyEighth", day: "8" },
+        { title: "Día 9 de cada mes", id: "everyNinth", day: "9" },
+        { title: "Día 10 de cada mes", id: "everyTenth", day: "10" },
+    ],
+    [
+        { title: "Día 11 de cada mes", id: "everyEleventh", day: "11" },
+        { title: "Día 12 de cada mes", id: "everyTwelfth", day: "12" },
+        { title: "Día 13 de cada mes", id: "everyThirteenth", day: "13" },
+        { title: "Día 14 de cada mes", id: "everyFourteenth", day: "14" },
+        { title: "Día 15 de cada mes", id: "everyFifteenth", day: "15" },
+    ],
+    [
+        { title: "Día 16 de cada mes", id: "everySixteenth", day: "16" },
+        { title: "Día 17 de cada mes", id: "everySeventeenth", day: "17" },
+        { title: "Día 18 de cada mes", id: "everyEighteenth", day: "18" },
+        { title: "Día 19 de cada mes", id: "everyNineteenth", day: "19" },
+        { title: "Día 20 de cada mes", id: "everyTwentieth", day: "20" },
+    ],
+    [
+        { title: "Día 21 de cada mes", id: "everyTwentyFirst", day: "21" },
+        { title: "Día 22 de cada mes", id: "everyTwentySecond", day: "22" },
+        { title: "Día 23 de cada mes", id: "everyTwentyThird", day: "23" },
+        { title: "Día 24 de cada mes", id: "everyTwentyFourth", day: "24" },
+        { title: "Día 25 de cada mes", id: "everyTwentyFifth", day: "25" },
+    ],
+    [
+        { title: "Día 26 de cada mes", id: "everyTwentySixth", day: "26" },
+        { title: "Día 27 de cada mes", id: "everyTwentySeventh", day: "27" },
+        { title: "Día 28 de cada mes", id: "everyTwentyEighth", day: "28" },
+    ]
+]

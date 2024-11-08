@@ -33,8 +33,8 @@ export class TransactionApolloQueries {
     }
     static accountTransactions = () => {
         return gql`
-            query AccountTransactions($page: Int!, $pageSize: Int!, $accountId: Int!) {
-                accountTransactions(page: $page, pageSize: $pageSize, accountId: $accountId) {
+            query AccountTransactions($page: Int!, $pageSize: Int!) {
+                accountTransactions(page: $page, pageSize: $pageSize) {
                     transactionId
                     amount
                     deliveredAmount

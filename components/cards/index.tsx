@@ -5,7 +5,6 @@ import { scale } from 'react-native-size-matters'
 import { Dimensions, SafeAreaView, TouchableOpacity } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import BottomSheet from '../global/BottomSheet'
-import * as Constants from "expo-constants"
 import CardModification from './CardModification'
 import { globalActions } from '@/redux/slices/globalSlice'
 import { useDispatch } from 'react-redux'

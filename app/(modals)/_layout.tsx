@@ -27,6 +27,7 @@ export default () => {
 	return (
 		<Stack screenOptions={{ ...defaultscreenOptions }}>
 			<Stack.Screen name="deposit" options={{ headerShown: false }} />
+			<Stack.Screen name='recurrences' options={{ headerShown: false }} />
 		</Stack>
 	);
 }

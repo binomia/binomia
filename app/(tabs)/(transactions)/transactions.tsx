@@ -80,8 +80,7 @@ const TransactionsScreen: React.FC = () => {
 			const { data } = await accountTransactions({
 				variables: {
 					"page": 1,
-					"pageSize": 10,
-					"accountId": account.id
+					"pageSize": 10
 				}
 			})
 

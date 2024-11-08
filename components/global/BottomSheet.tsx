@@ -4,15 +4,8 @@ import { BottomSheet as RNBottomSheet, BottomSheetRef, BottomSheetProps } from '
 
 
 interface Props extends BottomSheetProps {
-    // children?: JSX.Element
-    // onCloseFinish?: Function
-    // height?: number
     open?: boolean
-    // showDragIcon?: boolean
-    // draggable?: boolean
     backdropBg?: string
-    // sheetBg?: string
-    // sheetStyle?: object
 }
 
 
@@ -28,8 +21,6 @@ const BottomSheet: React.FC<Props> = ({
     sheetStyle = { backgroundColor: colors.darkGray },
 }: Props) => {
     const bottomSheet = useRef<BottomSheetRef>(null);
-    const [isfinishedOpen, setFinishedOpen] = useState<boolean>(false);
-
 
     useEffect(() => {
         if (open) {
@@ -39,15 +30,12 @@ const BottomSheet: React.FC<Props> = ({
         }
     }, [open])
 
-    const onOpenFinish = () => {
-        setFinishedOpen(true)
-
-    }
-
+   
     return (
         <RNBottomSheet
             onCloseFinish={() => onCloseFinish()}
             openTime={openTime}
+            closeTime={500}
             showDragIcon={showDragIcon}
             sheetStyle={sheetStyle}
             backdropBackgroundColor={backdropBg}
@@ -55,7 +43,6 @@ const BottomSheet: React.FC<Props> = ({
             dragIconStyle={{ backgroundColor: 'white' }}
             ref={bottomSheet}
             draggable={draggable}
-            onOpenFinish={() => onOpenFinish()}
         >
             <>
                 {children}
