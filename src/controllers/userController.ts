@@ -5,13 +5,13 @@ import { REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY 
 import { GraphQLError } from 'graphql';
 import { GlobalZodSchema, UserJoiSchema } from '@/joi';
 import { UserModelType, VerificationDataType } from '@/types';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
 import { Cryptography } from '@/helpers/cryptography';
 import { authServer } from '@/rpc';
 import { generate } from 'short-uuid';
 import { z } from 'zod'
-import { publisher, subClient } from '@/redis';
+import { publisher } from '@/redis';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import KYCModel from '@/models/kycModel';
 
 
@@ -120,9 +120,6 @@ export class UsersController {
 
             if (!user) return null
 
-            console.log(user.toJSON());
-
-
             const userData = Object.assign({}, user.toJSON(), {
                 transactions: [
                     ...user.toJSON().account.incomingTransactions,
@@ -167,7 +164,6 @@ export class UsersController {
             throw new GraphQLError(error.message);
         }
     }
-
 
     static updateUserPassword = async (_: unknown, { email, password, data }: { email: string, password: string, data: VerificationDataType }) => {
         try {

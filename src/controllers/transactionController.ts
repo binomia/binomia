@@ -146,7 +146,7 @@ export class TransactionsController {
         }
     }
 
-    static accountTransactions = async (_: unknown, { page, pageSize, accountId }: { page: number, pageSize: number, accountId: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+    static accountTransactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             await checkForProtectedRequests(context.req);
             const fields = getQueryResponseFields(fieldNodes, 'transactions')
@@ -197,7 +197,6 @@ export class TransactionsController {
 
             if (!transactions)
                 throw new GraphQLError('No transactions found');
-
 
             return transactions
 

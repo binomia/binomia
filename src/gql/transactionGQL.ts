@@ -86,7 +86,7 @@ const type = () => {
 const query = () => {
     return `
         transaction: TransactionType
-        accountTransactions(page: Int!, pageSize: Int!, accountId: Int!): [TransactionType]
+        accountTransactions(page: Int!, pageSize: Int!): [TransactionType]
 
     `
 }
