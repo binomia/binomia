@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native'
@@ -103,7 +103,7 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 						</HStack>
 						<VStack mt={"10px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
 							<Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
-							<Text fontSize={scale(16)} color={colors.lightSkyGray}>{transaction.username}</Text>
+							<Text fontSize={scale(16)} color={colors.lightSkyGray}>Enviado a {transaction.username}</Text>
 						</VStack>
 					</VStack>
 					<VStack mb={"50px"} alignItems={"center"}>

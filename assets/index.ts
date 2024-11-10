@@ -18,7 +18,7 @@ import transationsOff from './transationsOff.png';
 import transationsOn from './transationsOn.png';
 import profileOff from './profileOff.png';
 import profileOn from './profileOn.png';
-
+import noCard from './no-card.png';
 import phone from './phone.png';
 import cars from './cars.png';
 import house from './house.png';
@@ -27,6 +27,8 @@ import checked from './checked.png';
 import noTransactions from './no-transactions.png';
 import cardHolder from './card-holder.png';
 import cardBackHolder from './card-back-holder.png';
+import mastercardLogo from './mastercard.png';
+import visaLogo from './visa.png';
 
 // icons
 import qrIcon from './qr.png';
@@ -57,10 +59,10 @@ import creditCard from './icons/credit-card.png';
 import recurrenceIcon from './icons/recurrence.png';
 
 
-
-
-
 export {
+    noCard,
+    mastercardLogo,
+    visaLogo,
     recurrenceIcon,
     creditCard,
     bankTabIconOn,

@@ -4,6 +4,8 @@ import { useState } from "react"
 import QRScanner from "../global/QRScanner"
 import Cards from "../cards"
 import { router } from "expo-router"
+import colors from "@/colors"
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 
 
 
@@ -57,7 +59,7 @@ export const HeaderBankingRight: React.FC = () => {
 
     return (
         <VStack>
-            <Pressable onPress={() => setShowAllCards(true)}>
+            <Pressable onPress={() => router.navigate("cards")}>
                 <Image alt='HeaderBankingRight-logo-image' w={"25px"} h={"25px"} source={creditCard} />
             </Pressable>
             <Cards onCloseFinish={() => setShowAllCards(false)} open={showAllCards} />

@@ -31,6 +31,31 @@ export class TransactionApolloQueries {
             }
         `
     }
+    static accountBankingTransactions = () => {
+        return gql`
+            query AccountBankingTransactions($page: Int!, $pageSize: Int!) {
+                accountBankingTransactions(page: $page, pageSize: $pageSize) {
+                    transactionId
+                    amount
+                    deliveredAmount
+                    voidedAmount
+                    transactionType
+                    currency
+                    status
+                    data
+                    currency
+                    createdAt
+                    updatedAt
+                    location {
+                        latitude
+                        longitude
+                    }
+                    createdAt
+                    updatedAt                    
+                }
+            }
+        `
+    }
     static accountTransactions = () => {
         return gql`
             query AccountTransactions($page: Int!, $pageSize: Int!) {

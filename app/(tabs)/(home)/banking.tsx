@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, ScrollView } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import colors from '@/colors'
@@ -8,60 +8,58 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import moment from 'moment'
 import { FORMAT_CURRENCY } from '@/helpers'
 import BottomSheet from '@/components/global/BottomSheet'
-import SingleTransaction from '@/components/transaction/SingleTransaction'
 import { globalActions } from '@/redux/slices/globalSlice'
 import Cards from '@/components/cards'
 import CardModification from '@/components/cards/CardModification'
 import { Dimensions, RefreshControl } from 'react-native'
 import { transactionActions } from '@/redux/slices/transactionSlice'
-import { transactionsMocks } from '@/mocks'
-import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
-import DepositOrWithdrawTransaction from '@/components/transaction/DepositOrWithdrawTransaction'
+import { TransactionApolloQueries } from '@/apollo/query/transactionQuery'
+import { useLazyQuery } from '@apollo/client'
+import SingleTransactionBanking from '@/components/transaction/SingleBankingTransaction'
 
 
 const { height } = Dimensions.get('window')
 const BankingScreen: React.FC = () => {
     const dispatch = useDispatch()
-    const { user } = useSelector((state: any) => state.globalReducer)
-    const [showMakeTransaction, setShowMakeTransaction] = useState<boolean>(false)
+    const { user, cards } = useSelector((state: any) => state.globalReducer)
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
     const [showSingleTransaction, setShowSingleTransaction] = useState<boolean>(false);
-    const [transactions, setTransactions] = useState<any[]>(transactionsMocks)
+    const [transactions, setTransactions] = useState<any[]>([])
+    const [accountBankingTransactions] = useLazyQuery(TransactionApolloQueries.accountBankingTransactions())
+    const [refreshing, setRefreshing] = useState(false);
 
 
-    const cards = [
-        {
-            logo: "https://logos-world.net/wp-content/uploads/2020/09/Mastercard-Logo.png",
-            brand: 'MasterCard',
-            bankName: "Banco Popular",
-            last4Digits: "2180"
+    const fetchAccountBankingTransactions = async (page: number = 1, pageSize: number = 10) => {
+        try {
+            const { data } = await accountBankingTransactions({
+                variables: { page, pageSize }
+            })
+
+            setTransactions(data.accountBankingTransactions)
+
+        } catch (error) {
+            console.error({ accountBankingTransactions: error });
         }
-    ]
+    }
 
 
     const handleMakeTransaction = async (title: string) => {
         await dispatch(globalActions.setCard(cards[0]))
+
         router.navigate("/deposit")
-        // setShowMakeTransaction(true)
     }
-
-    const handleCloseMakeTransaction = async () => {
-        await dispatch(globalActions.setCard({}))
-        setShowMakeTransaction(false)
-    }
-
 
     const formatTransaction = (transaction: any) => {
-        const isFromMe = transaction.to.user.id === user.id
+        const isDeposit = transaction.transactionType === "deposit"
         const data = {
-            icon: isFromMe ? "arrowdown" : "arrowup",
-            isFromMe: !isFromMe,
-            profileImageUrl: isFromMe ? user.profileImageUrl : transaction.to.user.profileImageUrl,
+            icon: isDeposit ? "arrowup" : "arrowdown",
+            isDeposit: isDeposit,
+            transactionType: isDeposit ? "Deposito" : "Retiro",
             amount: transaction.amount,
-            fullName: isFromMe ? user.fullName : transaction.to.user.fullName,
-            username: isFromMe ? user.username : transaction.to.user.username
+            fullName: user.fullName,
+            username: user.username
         }
 
         return data
@@ -74,9 +72,10 @@ const BankingScreen: React.FC = () => {
             const data = {
                 id: transaction.id,
                 fullName: formatTransaction(transaction).fullName,
-                profileImageUrl: formatTransaction(transaction).profileImageUrl,
+                icon: formatTransaction(transaction).icon,
                 username: formatTransaction(transaction).username,
-                isFromMe: formatTransaction(transaction).isFromMe,
+                transactionType: formatTransaction(transaction).transactionType,
+                isDeposit: formatTransaction(transaction).isDeposit,
                 amount: transaction.amount,
                 createdAt: transaction.createdAt
             }
@@ -95,9 +94,24 @@ const BankingScreen: React.FC = () => {
         setShowSingleTransaction(false)
     }
 
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        await fetchAccountBankingTransactions().catch(error => console.log(error))
+
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 1000);
+    }, []);
+
+    useEffect(() => {
+        fetchAccountBankingTransactions()
+    }, [])
+
+
+
     return (
         <VStack variant={"body"} h={"100%"}>
-            <ScrollView showsHorizontalScrollIndicator={false} refreshControl={<RefreshControl refreshing={false} onRefresh={() => { }} />}  >
+            <ScrollView showsHorizontalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}  >
                 <HStack borderRadius={10} w={"100%"} mt={"50px"} space={2} justifyContent={"space-between"}>
                     <Pressable onPress={() => handleMakeTransaction("Deposito")} _pressed={{ opacity: 0.5 }} w={"48%"} h={"150px"} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
                         <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={depositIcon} />
@@ -127,22 +141,22 @@ const BankingScreen: React.FC = () => {
                                 <Pressable key={`transaction-banking-${index}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(item)} mb={"25px"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} >
                                     <HStack >
                                         <HStack w={"50px"} h={"50px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
-                                            <AntDesign name={formatTransaction(item).icon as any} size={24} color={formatTransaction(item).isFromMe ? colors.mainGreen : colors.red} />
+                                            <AntDesign name={formatTransaction(item).icon as any} size={24} color={formatTransaction(item).isDeposit ? colors.mainGreen : colors.red} />
                                         </HStack>
                                         <VStack ml={"10px"} justifyContent={"center"}>
                                             <Heading textTransform={"capitalize"} fontSize={scale(13)} color={colors.white}>{formatTransaction(item).fullName}</Heading>
                                             <Text fontSize={scale(12)} color={colors.pureGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
                                         </VStack>
                                     </HStack>
-                                    <Heading fontSize={scale(12)} color={formatTransaction(item).isFromMe ? colors.mainGreen : colors.red} >{formatTransaction(item).isFromMe ? "+" : "-"}{FORMAT_CURRENCY(item.amount)}</Heading>
+                                    <Heading fontSize={scale(12)} color={formatTransaction(item).isDeposit ? colors.mainGreen : colors.red} >{formatTransaction(item).isDeposit ? "+" : "-"}{FORMAT_CURRENCY(item.amount)}</Heading>
                                 </Pressable>
                             )}
                         />
                     )}
                 </VStack>
             </ScrollView>
-            <BottomSheet openTime={300} height={height} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
-                <SingleTransaction onClose={onCloseFinishSingleTransaction} />
+            <BottomSheet openTime={300} height={height * 0.45} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
+                <SingleTransactionBanking onClose={onCloseFinishSingleTransaction} />
             </BottomSheet>
             <Cards onCloseFinish={() => setShowAllCards(false)} open={showAllCards} />
             <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />

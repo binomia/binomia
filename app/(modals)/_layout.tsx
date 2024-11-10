@@ -8,6 +8,7 @@ export default () => {
 	const defaultHeaderStyles = {
 		backgroundColor: colors.darkGray,
 		shadowOpacity: 0,
+		paddingLeft: 0
 	}
 	const defaultTabStyles = {
 		backgroundColor: colors.darkGray,
@@ -28,6 +29,7 @@ export default () => {
 		<Stack screenOptions={{ ...defaultscreenOptions }}>
 			<Stack.Screen name="deposit" options={{ headerShown: false }} />
 			<Stack.Screen name='recurrences' options={{ headerShown: false }} />
+			<Stack.Screen name='cards' options={{ headerShown: false }} />
 		</Stack>
 	);
 }

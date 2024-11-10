@@ -6,6 +6,18 @@ export type SessionContextType = {
 }
 
 
+export type CardType = {
+    id: number
+    last4Number: string
+    hash: string
+    brand: string
+    alias: string
+    data: string
+    createdAt: string
+    updatedAt: string
+}
+
+
 export type VerificationDataType = {
     token: string
     signature: string,

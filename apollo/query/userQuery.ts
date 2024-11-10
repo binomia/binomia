@@ -103,10 +103,12 @@ export class UserApolloQueries {
                     }
                     cards {
                         id
-                        cardNumber
-                        cvv
-                        expirationDate
-                        cardHolderName
+                        last4Number
+                        isPrimary
+                        hash
+                        brand
+                        alias
+                        data
                         createdAt
                         updatedAt
                     }

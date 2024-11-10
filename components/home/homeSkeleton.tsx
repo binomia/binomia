@@ -10,7 +10,7 @@ type Props = {}
 const HomeSkeleton: React.FC<Props> = ({ }) => {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
-            <Center w="100%">
+            <Center w="100%" p={"20px"}>
                 <VStack w="100%" maxW="400" space={2} overflow="hidden">
                     <HStack w={"100%"} h={"250px"}>
                         <ZStack w={"100%"} h={"80%"} mt={"40px"}>

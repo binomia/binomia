@@ -5,7 +5,9 @@ const transactionSlice = createSlice({
     initialState: {
         sender: {},
         receiver: {},
-        transaction: {}
+        transaction: {},
+        transactionDeytails: {},
+        createTransactionBody: {}
     },
     reducers: {
         setSender: (state, action) => {
@@ -16,6 +18,12 @@ const transactionSlice = createSlice({
         },
         setTransaction: (state, action) => {
             state.transaction = action.payload
+        },
+        setCreateTransactionBody: (state, action) => {
+            state.createTransactionBody = action.payload
+        },
+        setTransactionDetails: (state, action) => {
+            state.transactionDeytails = action.payload
         }
     }
 })

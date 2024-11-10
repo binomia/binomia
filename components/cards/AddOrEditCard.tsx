@@ -1,28 +1,40 @@
-import React, { useEffect, useState } from 'react'
-import { Dimensions, StyleSheet, TouchableWithoutFeedback, Keyboard } from 'react-native'
-import { HStack, VStack } from 'native-base'
+import React, { useEffect, useRef, useState } from 'react'
+import { Dimensions, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native'
+import { HStack, Pressable, Stack, Image, VStack, Text, Heading } from 'native-base'
 import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-sticky-footer-avoiding-scroll-view';
 import { CreditCardView } from 'react-native-credit-card-input';
-import { cardBackHolder, cardHolder } from '@/assets';
+import { cardBackHolder, cardHolder, noCard } from '@/assets';
 import BottomSheet from '../global/BottomSheet';
 import Button from '../global/Button';
 import Input from '../global/Input';
 import colors from '@/colors';
+import { scale } from 'react-native-size-matters';
+import { MaterialIcons } from '@expo/vector-icons';
+import { TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
+import PagerView from 'react-native-pager-view';
 
 
 type Props = {
     open?: boolean
-    onCloseFinish?: () => void
+    onPress?: (_: any) => Promise<void>
 }
 
 const { height } = Dimensions.get('window')
-const AddOrEditCard: React.FC<Props> = ({ open, onCloseFinish: onClose }: Props = {}) => {
+const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Props = {}) => {
+    const ref = useRef<PagerView>(null);
+
     const [number, setNumber] = useState("")
     const [expiry, setExpiry] = useState("")
     const [cvc, setCvc] = useState("")
     const [name, setName] = useState("")
+    const [alias, setAlias] = useState("")
     const [focusedField, setFocusedField] = useState("")
     const [disabledButton, setDisabledButton] = useState(true)
+    const [asPrimary, setAsPrimary] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>("")
+
+
 
     const cardPlaceholders = {
         number: "0000 0000 0000 0000",
@@ -31,11 +43,34 @@ const AddOrEditCard: React.FC<Props> = ({ open, onCloseFinish: onClose }: Props 
         name: "Nombre Completo",
     }
 
+    const handleOnPress = async () => {
+        try {
+            setIsLoading(true)
+            await onPress({
+                "cardHolderName": name,
+                "cardNumber": number,
+                "isPrimary": asPrimary,
+                "cvv": cvc,
+                "expirationDate": expiry,
+                "alias": alias
+            })
+
+            setIsLoading(false)
+            setName("")
+            setNumber("")
+            setExpiry("")
+            setCvc("")
+            setAlias("")
+        } catch (error: any) {
+            setErrorMessage(error.message)
+            setIsLoading(false)
+            ref.current?.setPage(1)
+        }
+    } // 5425 2334 3010 9903
+
     const identifyCardType = (cardNumber: string): string | undefined => {
-        // Remove spaces or dashes
         cardNumber = cardNumber.replace(/[\s-]/g, "");
 
-        // Define card type patterns with relaxed digit checking
         const cardPatterns: { [key: string]: RegExp } = {
             "visa": /^4/,                                    // Visa: starts with 4
             "mastercard": /^5[1-5]/,                         // MasterCard: starts with 51-55
@@ -71,13 +106,15 @@ const AddOrEditCard: React.FC<Props> = ({ open, onCloseFinish: onClose }: Props 
 
         } else if (type === "expiry") {
             setExpiry(formatExpirationDate(text))
-            console.log(text.length);
 
         } else if (type === "cvc") {
             setCvc(text)
 
         } else if (type === "name") {
             setName(text)
+
+        } else {
+            setAlias(text)
         }
     }
 
@@ -148,70 +185,90 @@ const AddOrEditCard: React.FC<Props> = ({ open, onCloseFinish: onClose }: Props 
         return cvc.length === expectedLength;
     };
 
+
     useEffect(() => {
         const isValidCard = isValidCardLength(number)
         const isValidExpiry = isExpiryValidExpiredDate(expiry)
         const isValidCvc = isValidCVC(cvc, number)
 
 
-        if (isValidCard && isValidExpiry && isValidCvc && name) {
+        if (isValidCard && isValidExpiry && isValidCvc && name && alias) {
             setDisabledButton(false)
 
         } else {
             setDisabledButton(true)
         }
 
-    }, [number, expiry, cvc, name])
+    }, [number, expiry, cvc, name, alias])
 
     return (
-        <KeyboardAvoidingScrollView scrollEnabled={!Keyboard.isVisible()}>
-            <TouchableWithoutFeedback style={{ flex: 1 }} onPress={Keyboard.dismiss}>
-                <BottomSheet openTime={300} height={height * 0.90} onCloseFinish={onClose} open={open}>
-                    <VStack h={"100%"} justifyContent={"space-between"}>
-                        <VStack p={"20px"} variant={"body"} w={"100%"} alignItems={"center"}>
-                            <HStack bg={colors.lightGray} w={"100%"} py={"20px"} px={"40px"} borderRadius={10}>
+        <PagerView style={{ flex: 1 }} initialPage={0} ref={ref}>
+            <KeyboardAvoidingScrollView scrollEnabled={!Keyboard.isVisible()}>
+                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                    <VStack key={"CreditCardView-0"} flex={1} mb={"30px"} justifyContent={"space-between"}>
+                        <VStack p={"20px"} w={"100%"}>
+                            <HStack alignItems={"center"} bg={colors.lightGray} justifyContent={"center"} w={"100%"} py={scale(height * 0.02)} borderRadius={10}>
                                 <CreditCardView
                                     imageFront={cardHolder}
                                     imageBack={cardBackHolder}
                                     name={name}
                                     number={number.match(/.{1,4}/g)?.join(" ") || ""}
                                     expiry={expiry}
-                                    cvc={cvc}                                    
+                                    cvc={cvc}
                                     placeholders={cardPlaceholders}
                                     focusedField={focusedField as any}
                                     type={identifyCardType(number) as any}
                                 />
                             </HStack>
                             <VStack mt={"20px"}>
-                                <Input onFocus={() => setFocusedField("name")} placeholder='Nombre De La Tarjeta' onChangeText={(text) => onChangeText(text, "name")} />
-                                <Input onFocus={() => setFocusedField("number")} keyboardType="number-pad" placeholder='Numero De La Tarjeta' maxLength={19} onChangeText={(text) => onChangeText(text, "number")} />
+                                <Input value={name} onFocus={() => setFocusedField("name")} h={scale(45)} placeholder='Nombre De La Tarjeta' onChangeText={(text) => onChangeText(text, "name")} />
+                                <Input value={number} onFocus={() => setFocusedField("number")} h={scale(45)} keyboardType="number-pad" placeholder='Numero De La Tarjeta' maxLength={19} onChangeText={(text) => onChangeText(text, "number")} />
                                 <HStack w={"100%"} justifyContent={"space-between"}>
                                     <HStack w={"48%"}>
-                                        <Input textAlign={"center"} maxLength={5} value={expiry} onFocus={() => setFocusedField("expiry")} keyboardType='number-pad' w={"100%"} placeholder='Expiracion' onChangeText={(text) => onChangeText(text, "expiry")} />
+                                        <Input textAlign={"center"} h={scale(45)} maxLength={5} value={expiry} onFocus={() => setFocusedField("expiry")} keyboardType='number-pad' w={"100%"} placeholder='Expiracion' onChangeText={(text) => onChangeText(text, "expiry")} />
                                     </HStack>
                                     <HStack w={"48%"}>
-                                        <Input textAlign={"center"} onFocus={() => setFocusedField("cvc")} keyboardType='number-pad' w={"100%"} maxLength={4} placeholder='CVV' onChangeText={(text) => onChangeText(text, "cvc")} />
+                                        <Input value={cvc} textAlign={"center"} h={scale(45)} onFocus={() => setFocusedField("cvc")} keyboardType='number-pad' w={"100%"} maxLength={4} placeholder='CVV' onChangeText={(text) => onChangeText(text, "cvc")} />
                                     </HStack>
                                 </HStack>
+                                <Input value={alias} h={scale(45)} onFocus={() => setFocusedField("")} placeholder='Alias De La Tarjeta' onChangeText={(text) => onChangeText(text, "alias")} />
                             </VStack>
+                            <HStack alignSelf={"flex-end"} alignItems={"center"} w={"100%"} mt={"20px"}>
+                                <Pressable onPress={() => setAsPrimary(!asPrimary)}>
+                                    <MaterialIcons style={{ marginTop: 3 }} name={asPrimary ? "check-box" : "check-box-outline-blank"} size={28} color={colors.mainGreen} />
+                                </Pressable>
+                                <Text mx={"5px"} fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"90%"} color={"white"}>
+                                    Agregue tarjeta como método de pago principal.
+                                </Text>
+                            </HStack>
                         </VStack>
-                        <HStack h={"100px"} justifyContent={"center"} mb={"50px"} >
+                        <Stack mb={"20px"} px={"20px"} justifyContent={"center"}>
                             <Button
+                                spin={isLoading}
                                 opacity={disabledButton ? 0.5 : 1}
                                 disabled={disabledButton}
                                 bg={disabledButton ? "lightGray" : "mainGreen"}
                                 color={disabledButton ? colors.mainGreen : colors.white}
                                 title={"Confirmar"}
-                                onPress={onClose}
+                                onPress={handleOnPress}
                             />
-                        </HStack>
+                        </Stack>
                     </VStack>
-                </BottomSheet>
-            </TouchableWithoutFeedback>
-        </KeyboardAvoidingScrollView>
+                </TouchableWithoutFeedback>
+            </KeyboardAvoidingScrollView>
+            <VStack key={"error-CreditCardView-1"} variant={"body"}>
+                <VStack py={"30px"} px={"10px"} mb={"30px"} justifyContent={"space-between"} flex={1}>
+                    <VStack mt={"10px"}>
+                        <Image alt='logo-image' h={height / 3} resizeMode='contain' w={"100%"} source={noCard} />
+                        <Heading textTransform={"capitalize"} fontSize={scale(20)} color={colors.white} textAlign={"center"}>{errorMessage}</Heading>
+                        <Text textAlign={"center"} fontSize={scale(15)} color={colors.pureGray}>Por favor, añada una tarjeta  que no esté ya vinculada a su cuenta.</Text>
+                    </VStack>
+                        <Button onPress={() => ref.current?.setPage(0)} title="Añadir Tarjeta" bg={colors.mainGreen} />
+                </VStack>
+            </VStack>
+        </PagerView>
+
     )
 }
 
 export default AddOrEditCard
-
-const styles = StyleSheet.create({})

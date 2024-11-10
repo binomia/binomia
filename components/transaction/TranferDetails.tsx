@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, SafeAreaView, TouchableOpacity, Dimensions } from 'react-native'
@@ -7,10 +7,15 @@ import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHO
 import { scale } from 'react-native-size-matters';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Button from '@/components/global/Button';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import BottomSheet from '../global/BottomSheet';
 import { recurenceMonthlyData, recurenceWeeklyData } from '@/mocks';
-import PagerView from 'react-native-pager-view';
+import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
+import { TransactionAuthSchema } from '@/auth/transactionAuth';
+import { useMutation } from '@apollo/client';
+import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
+import { globalActions } from '@/redux/slices/globalSlice';
+import { transactionActions } from '@/redux/slices/transactionSlice';
 
 
 
@@ -19,9 +24,16 @@ type Props = {
     onSubmit?: () => Promise<void>
 }
 
-const {  width } = Dimensions.get("screen")
-const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, onSubmit = async () => { } }) => {
-    const { transaction } = useSelector((state: any) => state.transactionReducer)
+const { width } = Dimensions.get("screen")
+const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { } }) => {
+    const dispatch = useDispatch();
+
+    const { authenticate } = useLocalAuthentication();
+    const { receiver } = useSelector((state: any) => state.transactionReducer)
+    const { location, account, user } = useSelector((state: any) => state.globalReducer)
+    const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
+
+    const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
     const [recurrence, setRecurrence] = useState<string>("oneTime");
     const [recurrenceSelected, setRecurrenceSelected] = useState<string>("");
     const [recurrenceDaySelected, setRecurrenceDaySelected] = useState<string>("");
@@ -34,7 +46,61 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, onSubm
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
 
 
-    const onRecurrenceChange = (value: string) => {        
+    const handleOnSend = async (recurrence?: { title: string, time: string }) => {
+        try {
+
+            const data = await TransactionAuthSchema.createTransaction.parseAsync({
+                receiver: receiver.username,
+                amount: parseFloat(transactionDeytails.amount),
+                location
+            })
+
+            console.log({ data, recurrence });
+            const transaction = await createTransaction({
+                variables: { data }
+            })
+
+            const transactionSent = {
+                ...transaction.data.createTransaction,
+                to: receiver,
+                from: user
+            }
+
+            await dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionDeytails.amount })))
+            await dispatch(transactionActions.setTransaction({
+                id: transactionSent.id,
+                fullName: formatTransaction(transactionSent).fullName,
+                profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
+                username: formatTransaction(transactionSent).username,
+                isFromMe: formatTransaction(transactionSent).isFromMe,
+                amount: transactionSent.amount,
+                createdAt: transactionSent.createdAt
+            }))
+
+            onClose()
+        } catch (error: any) {
+            console.error(error.message);
+        }
+    }
+
+    const formatTransaction = (transaction: any) => {
+        const isFromMe = transaction.from?.id === user.id
+
+        const profileImageUrl = transaction.to?.profileImageUrl
+        const fullName = isFromMe ? transaction.to?.fullName : transaction.from?.fullName
+        const username = isFromMe ? transaction.from?.username : transaction.to?.username
+
+        return {
+            isFromMe,
+            profileImageUrl: profileImageUrl || "",
+            amount: transaction.amount,
+            fullName: fullName || "",
+            username: username || ""
+        }
+    }
+
+
+    const onRecurrenceChange = (value: string) => {
         if (value === "biweekly")
             setRecurrenceBiweeklyOptionSelected("Cada 1 y 16 de cada mes")
 
@@ -43,8 +109,13 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, onSubm
     }
 
     const handleOnPress = async () => {
+        await authenticate()
+
         setLoading(true)
-        await onSubmit()
+        await handleOnSend({
+            title: recurrence,
+            time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
+        })
 
         setLoading(false)
     }
@@ -55,9 +126,11 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, onSubm
 
 
     const RenderWeeklyOption: React.FC = () => {
-        const onSelecteOption = (id: string, title: string) => {
+        const onSelecteOption = async (id: string, title: string) => {
             setRecurrenceSelected(id)
             setRecurrenceOptionSelected(title)
+
+            await delay(300)
             setOpenOptions("")
         }
 
@@ -122,50 +195,50 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, onSubm
                     </Stack>
                     <Stack w={"50px"} />
                 </HStack>
-                <VStack flex={1} pb={"30px"} justifyContent={"space-between"}>
-                    <VStack mt={"20px"} alignItems={"center"} borderRadius={10}>
-                        <HStack>
-                            {transaction.profileImageUrl ?
-                                <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(60)} h={scale(60)} source={{ uri: transaction.profileImageUrl }} />
+                <VStack pb={"30px"} mt={"10px"} flex={1} justifyContent={"space-between"} alignItems={"center"} borderRadius={10}>
+                    <VStack alignItems={"center"} justifyContent={"center"}>
+                        <HStack my={"10px"}>
+                            {transactionDeytails.profileImageUrl ?
+                                <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(60)} h={scale(60)} source={{ uri: transactionDeytails.profileImageUrl }} />
                                 :
                                 <DefaultIcon
-                                    value={transaction?.fullName || "q"}
-                                    contentContainerStyle={[styles.contentContainerStyle, { width: scale(60), height: scale(60), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "") }]}
+                                    value={transactionDeytails?.fullName || "q"}
+                                    contentContainerStyle={[styles.contentContainerStyle, { width: scale(60), height: scale(60), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transactionDeytails?.fullName || "") }]}
                                     textStyle={styles.textStyle}
                                 />
                             }
                         </HStack>
-                        <VStack my={"10px"} alignItems={"center"} justifyContent={"center"}>
-                            <Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
-                            <Text fontSize={scale(16)} color={colors.lightSkyGray}>{transaction.username}</Text>
-                        </VStack>
-                        <Heading textTransform={"capitalize"} fontSize={scale(40)} color={transaction.isFromMe ? "red" : "mainGreen"}>{transaction.isFromMe ? "-" : "+"}{FORMAT_CURRENCY(transaction?.amount)}</Heading>
-                        <VStack p={"20px"} w={"100%"} key={"Recurrente-2"} justifyContent={"space-between"}>
+                        <Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transactionDeytails?.fullName || "")}</Heading>
+                        <Text fontSize={scale(16)} color={colors.lightSkyGray}>{transactionDeytails?.username}</Text>
+                        <Heading textTransform={"capitalize"} fontSize={scale(40)} color={"mainGreen"}>{"+"}{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
+                    </VStack>
+                    <VStack flex={0.8} justifyContent={"space-between"}>
+                        <VStack p={"20px"} w={"100%"} key={"Recurrente-2"} >
                             <Heading fontSize={scale(20)} mt={"20px"} fontWeight={"500"} color={"white"}>Envió Recurrente</Heading>
                             <HStack mt={"15px"} justifyContent={"space-between"}>
-                                <Pressable onPress={() => onRecurrenceChange("oneTime")} opacity={recurrence === "oneTime" ? 1 : 0.8} w={"49%"} h={scale(50)} bg={recurrence === "oneTime" ? colors.mainGreen : colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }}>
+                                <Pressable onPress={() => onRecurrenceChange("oneTime")} w={"49%"} h={scale(50)} bg={recurrence === "oneTime" ? colors.mainGreen : colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }}>
                                     <Heading fontSize={scale(15)} fontWeight={"500"} color={recurrence === "oneTime" ? colors.white : colors.mainGreen}>Una vez</Heading>
                                 </Pressable>
-                                <Pressable onPress={() => onRecurrenceChange("weekly")} opacity={recurrence === "weekly" ? 1 : 0.8} w={"49%"} h={scale(50)} bg={recurrence === "weekly" ? colors.mainGreen : colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }}>
+                                <Pressable onPress={() => onRecurrenceChange("weekly")} w={"49%"} h={scale(50)} bg={recurrence === "weekly" ? colors.mainGreen : colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }}>
                                     <Heading fontSize={scale(15)} fontWeight={"500"} color={recurrence === "weekly" ? colors.white : colors.mainGreen}>Semanal</Heading>
                                     {recurrence === "weekly" && recurrenceOptionSelected ? <Text fontSize={scale(10)} color={colors.white}>{recurrenceOptionSelected}</Text> : null}
                                 </Pressable>
                             </HStack>
                             <HStack mt={"15px"} justifyContent={"space-between"}>
-                                <Pressable onPress={() => onRecurrenceChange("biweekly")} opacity={recurrence === "biweekly" ? 1 : 0.8} w={"49%"} h={scale(50)} bg={recurrence === "biweekly" ? colors.mainGreen : colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }}>
+                                <Pressable onPress={() => onRecurrenceChange("biweekly")} w={"49%"} h={scale(50)} bg={recurrence === "biweekly" ? colors.mainGreen : colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }}>
                                     <Heading fontSize={scale(15)} fontWeight={"500"} color={recurrence === "biweekly" ? colors.white : colors.mainGreen}>Quincenal</Heading>
                                     {recurrence === "biweekly" && recurrenceBiweeklyOptionSelected ? <Text fontSize={scale(10)} color={colors.white}>{recurrenceBiweeklyOptionSelected}</Text> : null}
                                 </Pressable>
-                                <Pressable onPress={() => onRecurrenceChange("monthly")} opacity={recurrence === "monthly" ? 1 : 0.8} w={"49%"} h={scale(50)} bg={recurrence === "monthly" ? colors.mainGreen : colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }}>
+                                <Pressable onPress={() => onRecurrenceChange("monthly")} w={"49%"} h={scale(50)} bg={recurrence === "monthly" ? colors.mainGreen : colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }}>
                                     <Heading fontSize={scale(15)} fontWeight={"500"} color={recurrence === "monthly" ? colors.white : colors.mainGreen}>Mensual</Heading>
                                     {recurrence === "monthly" && recurrenceDayOptionSelected ? <Text fontSize={scale(10)} color={colors.white}>{recurrenceDayOptionSelected}</Text> : null}
                                 </Pressable>
                             </HStack>
                         </VStack>
+                        <HStack justifyContent={"center"}>
+                            <Button spin={loading} onPress={handleOnPress} fontSize={scale(16) + "px"} w={"80%"} bg={"mainGreen"} color='white' title={"Enviar"} />
+                        </HStack>
                     </VStack>
-                    <HStack justifyContent={"center"}>
-                        <Button spin={loading} onPress={handleOnPress} fontSize={scale(16) + "px"} w={"80%"} bg={"mainGreen"} color='white' title={"Enviar"} />
-                    </HStack>
                 </VStack>
             </VStack>
             <BottomSheet onCloseFinish={onCloseFinished} open={openOptions === "weekly"} height={scale(300)}>

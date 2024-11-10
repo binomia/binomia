@@ -6,12 +6,21 @@ export class TransactionAuthSchema {
     static createTransaction = z.object({
         receiver: z.string(),
         amount: z.number().gt(0, "Amount must be greater than 0"),
-        transactionType: z.string().default("send"),
+        transactionType: z.string().default("transfer"),
         currency: z.string().default("DOP"),
         location: z.object({
             latitude: z.number(),
             longitude: z.number(),
         })
+    })
+
+
+    static createTransactionDetails = z.object({
+        username: z.string(),
+        profileImageUrl: z.string(),
+        fullName: z.string(),
+        isFromMe: z.boolean(),
+        amount: z.number(),
     })
 
     static singleTransaction = z.object({
@@ -35,6 +44,7 @@ export class TransactionAuthSchema {
             user: UserAuthSchema.userProfileData
         })
     })
+
     static singleSentTransaction = z.object({
         transactionId: z.string(),
         amount: z.number(),

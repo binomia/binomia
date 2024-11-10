@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, Stack } from 'native-base'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
@@ -7,10 +7,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import BottomSheet from '../global/BottomSheet'
 import CardModification from './CardModification'
 import { globalActions } from '@/redux/slices/globalSlice'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { FlagsList } from 'aws-sdk/clients/guardduty'
 import AntDesign from '@expo/vector-icons/AntDesign';
-
+import { CardType } from '@/types'
+import { mockCardsLogo } from '@/mocks'
+import { mastercardLogo, noCard, visaLogo } from '@/assets'
+import Button from '../global/Button'
 
 type Props = {
     open?: boolean
@@ -18,34 +21,13 @@ type Props = {
     onCloseFinish?: () => void
 }
 
-
 const { height } = Dimensions.get('window')
 
 const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justSelecting = false }) => {
     const ref = React.useRef<FlagsList>(null);
     const dispatch = useDispatch()
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
-
-    const cards = [
-        {
-            logo: "https://logos-world.net/wp-content/uploads/2020/09/Mastercard-Logo.png",
-            brand: 'MasterCard',
-            bankName: "Banco Popular",
-            last4Digits: "2180"
-        },
-        {
-            logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Visa_2021.svg/1200px-Visa_2021.svg.png",
-            brand: 'Visa',
-            bankName: "Banco Popular",
-            last4Digits: "2180"
-        },
-        {
-            logo: "https://logos-world.net/wp-content/uploads/2020/09/Mastercard-Logo.png",
-            brand: 'MasterCard',
-            bankName: "Banco Popular",
-            last4Digits: "2180"
-        }
-    ]
+    const { cards }: { cards: CardType[] } = useSelector((state: any) => state.globalReducer)
 
     const onPressCard = async (card: any) => {
         await dispatch(globalActions.setCard(card))
@@ -57,6 +39,22 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
         }
     }
 
+    const renderCardLogo = (brand: string) => {
+        switch (brand) {
+            case "visa":
+                return <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={visaLogo} />
+
+            case "mastercard":
+                return <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={mastercardLogo} />
+
+            default:
+                return null
+        }
+    }
+
+    useEffect(() => {
+        console.log({ cards });
+    }, [])
 
     return (
         <BottomSheet draggable={false} openTime={300} height={height} onCloseFinish={() => onCloseFinish()} open={open}>
@@ -79,26 +77,35 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                         <HStack justifyContent={"space-between"} alignItems={"center"}>
                             <Heading size={"xl"} color={colors.white}>Tarjetas</Heading>
                         </HStack>
-                        <FlatList
-                            ref={ref}
-                            mt={"10px"}
-                            data={cards}
-                            contentContainerStyle={{ paddingBottom: 100 }}
-                            showsVerticalScrollIndicator={false}
-                            scrollEnabled={true}
-                            renderItem={({ item, index }) => (
-                                <Pressable onPress={() => onPressCard(item)} w={"100%"} key={`card-${index}-${item.last4Digits}`} _pressed={{ opacity: 0.5 }} flexDirection={"row"} p={"15px"} borderRadius={10} bg={colors.lightGray} mt={"15px"} mr={"10px"} alignItems={"center"}>
-                                    <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={{ uri: item.logo }} />
-                                    <VStack ml={"10px"}>
-                                        <Heading fontSize={scale(15)} color={colors.white}>{item.brand} {item.last4Digits}</Heading>
-                                        <Text fontSize={scale(15)} color={colors.pureGray}>{item.bankName}</Text>
-                                    </VStack>
-                                </Pressable>
-                            )}
-                        />
+                        {cards.length > 0 ? (
+                            <FlatList
+                                ref={ref}
+                                mt={"10px"}
+                                data={cards}
+                                contentContainerStyle={{ paddingBottom: 100 }}
+                                showsVerticalScrollIndicator={false}
+                                scrollEnabled={true}
+                                renderItem={({ item, index }) => (
+                                    <Pressable onPress={() => onPressCard(item)} w={"100%"} key={`card-${index}-${item.last4Number}`} _pressed={{ opacity: 0.5 }} flexDirection={"row"} p={"15px"} borderRadius={10} bg={colors.lightGray} mt={"15px"} mr={"10px"} alignItems={"center"}>
+                                        {renderCardLogo(item.brand)}
+                                        <VStack ml={"10px"}>
+                                            <Heading textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.brand} {item.last4Number}</Heading>
+                                            <Text textTransform={"capitalize"} fontSize={scale(15)} color={colors.pureGray}>{item.alias}</Text>
+                                        </VStack>
+                                    </Pressable>
+                                )}
+                            />
+                        ) : (
+                            <VStack px={"10px"} flex={1} bg={"red"}>
+                                <Image alt='logo-image' resizeMode='contain' w={"100%"} h={"100%"} source={noCard} />
+                                <Button onPress={() => { }} title="Añadir Tarjeta" bg={colors.mainGreen} />
+                            </VStack>
+                        )}
+
                     </VStack>
                     <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
                 </VStack>
+
             </SafeAreaView>
         </BottomSheet>
     )

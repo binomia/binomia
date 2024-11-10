@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
-import { StyleSheet, SafeAreaView, Dimensions, TouchableOpacity } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Stack } from 'native-base'
+import { StyleSheet, SafeAreaView, Dimensions } from 'react-native'
+import { Heading, Image, Text, VStack, FlatList, HStack, Stack, Pressable } from 'native-base'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
@@ -13,6 +13,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import * as Sharing from 'expo-sharing';
 import moment from 'moment';
 import { checked } from '@/assets';
+import { AntDesign } from '@expo/vector-icons';
 
 
 type Props = {
@@ -20,8 +21,9 @@ type Props = {
 }
 
 const { height } = Dimensions.get('window')
-const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { } }) => {
+const SingleTransactionBanking: React.FC<Props> = ({ onClose = (_: boolean) => { } }) => {
 	const { transaction } = useSelector((state: any) => state.transactionReducer)
+	const { card } = useSelector((state: any) => state.globalReducer)
 	const [openDetail, setOpenDetail] = useState<boolean>(false)
 
 
@@ -73,47 +75,32 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
 			<VStack px={"10px"} h={"100%"}>
-				<HStack justifyContent={"space-between"}>
-					<TouchableOpacity onPress={() => onClose(false)}>
-						<Stack w={"50px"}>
-							<Ionicons name="chevron-back-outline" size={30} color="white" />
-						</Stack>
-					</TouchableOpacity>
-					<Stack>
-						<Heading mb={"20px"} size={"sm"} color={colors.white} textAlign={"center"}>Transaccion</Heading>
-					</Stack>
-					<TouchableOpacity onPress={handleShare}>
-						<Stack w={"50px"} alignItems={"center"} justifyContent={"center"}>
-							<Entypo name="share" size={24} color="white" />
-						</Stack>
-					</TouchableOpacity>
-				</HStack>
 				<VStack flex={1} pb={"40px"} justifyContent={"space-between"}>
+					<Pressable onPress={() => {}} _pressed={{ opacity: 0.5 }} flexDirection={"row"} alignItems={"center"}>
+						<Image mr={"10px"} borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: card?.logo }} />
+						<VStack justifyContent={"center"}>
+							<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{card?.brand} {card?.last4Digits}</Heading>
+							<Text fontSize={scale(13)} color={colors.pureGray}>{card?.bankName}</Text>
+						</VStack>
+						<Ionicons style={{ marginBottom: 20 }} name="chevron-forward" size={25} color={colors.gray} />
+					</Pressable>
 					<VStack mt={"50px"} alignItems={"center"} borderRadius={10}>
-						<HStack>
-							{transaction.profileImageUrl ?
-								<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(70)} h={scale(70)} source={{ uri: transaction.profileImageUrl }} />
-								:
-								<DefaultIcon
-									value={transaction?.fullName || ""}
-									contentContainerStyle={[styles.contentContainerStyle, { width: scale(70), height: scale(70), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "") }]}
-									textStyle={styles.textStyle}
-								/>
-							}
-						</HStack>
-						<VStack mt={"10px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
-							<Text fontSize={scale(16)} color={colors.lightSkyGray}>{transaction.username}</Text>
+						<VStack mt={"10px"} mb={"50px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
+							<Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{transaction.transactionType}</Heading>
+						</VStack>
+						<VStack alignItems={"center"}>
+							<Heading textTransform={"capitalize"} fontSize={scale(40)} color={transaction.isFromMe ? "red" : "mainGreen"}>{transaction.isFromMe ? "-" : "+"}{FORMAT_CURRENCY(transaction?.amount)}</Heading>
+							<Text mb={"20px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
+							{/* <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(70)} h={scale(70)} source={checked} /> */}
+							<HStack w={scale(60)} h={scale(60)} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
+								<AntDesign name={transaction.icon as any} size={24} color={transaction.isDeposit ? colors.mainGreen : colors.red} />
+							</HStack>
+							{/* <Heading textTransform={"capitalize"} fontSize={scale(18)} color={"white"}>{transaction.transactionType}</Heading> */}
 						</VStack>
 					</VStack>
-					<VStack mb={"50px"} alignItems={"center"}>
-						<Heading textTransform={"capitalize"} fontSize={scale(40)} color={transaction.isFromMe ? "red" : "mainGreen"}>{transaction.isFromMe ? "-" : "+"}{FORMAT_CURRENCY(transaction?.amount)}</Heading>
-						<Text mb={"20px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-						<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(70)} h={scale(70)} source={checked} />
-					</VStack>
-					<HStack justifyContent={"center"}>
+					{/* <HStack justifyContent={"center"}>
 						<Button onPress={() => setOpenDetail(true)} w={"80%"} bg={"mainGreen"} color='white' title={"Ver Detalles"} />
-					</HStack>
+					</HStack> */}
 				</VStack>
 				<BottomSheet openTime={300} height={height * 0.45} onCloseFinish={() => setOpenDetail(false)} open={openDetail}>
 					<VStack my={"30px"} alignItems={"center"}>
@@ -137,7 +124,7 @@ const SingleTransactionScreen: React.FC<Props> = ({ onClose = (_: boolean) => { 
 	)
 }
 
-export default SingleTransactionScreen
+export default SingleTransactionBanking
 
 
 const styles = StyleSheet.create({

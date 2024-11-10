@@ -46,12 +46,22 @@ export class UserAuthSchema {
     })
 
 
+    // id:  Int
+    // last4Number: String
+    // hash: String
+    // brand: String
+    // alias: String
+    // data: String
+    // createdAt: String
+    // updatedAt: String
+
     static cardData = z.object({
         id: z.number(),
-        cardNumber: z.string(),
-        cvv: z.string(),
-        expirationDate: z.string(),
-        cardHolderName: z.string(),
+        last4Number: z.string(),
+        hash: z.string(),
+        brand: z.string(),
+        alias: z.string(),
+        data: z.string(),
         createdAt: z.string(),
         updatedAt: z.string(),
     })
