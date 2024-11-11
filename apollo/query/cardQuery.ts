@@ -35,4 +35,21 @@ export class CardApolloQueries {
             }
         `
     }
+    static deleteCard = () => {
+        return gql`
+            mutation DeleteCard($hash: String!) {
+                deleteCard(hash: $hash) {
+                    id
+                    last4Number
+                    hash
+                    isPrimary
+                    brand
+                    alias
+                    data                    
+                    createdAt
+                    updatedAt
+                }
+                }
+        `
+    }
 }

@@ -12,6 +12,7 @@ import { scale } from 'react-native-size-matters';
 import { MaterialIcons } from '@expo/vector-icons';
 import { TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import PagerView from 'react-native-pager-view';
+import valid from "card-validator";
 
 
 type Props = {
@@ -33,6 +34,7 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
     const [asPrimary, setAsPrimary] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("")
+    const [type, setType] = useState<string>("")
 
 
 
@@ -43,8 +45,10 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
         name: "Nombre Completo",
     }
 
+
     const handleOnPress = async () => {
         try {
+
             setIsLoading(true)
             await onPress({
                 "cardHolderName": name,
@@ -61,6 +65,8 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
             setExpiry("")
             setCvc("")
             setAlias("")
+
+
         } catch (error: any) {
             setErrorMessage(error.message)
             setIsLoading(false)
@@ -102,7 +108,9 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
 
     const onChangeText = (text: string, type: string) => {
         if (type === "number") {
+            const { card } = valid.number(text)
             setNumber(text)
+            setType(card?.type ?? "")
 
         } else if (type === "expiry") {
             setExpiry(formatExpirationDate(text))
@@ -207,7 +215,7 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <VStack key={"CreditCardView-0"} flex={1} mb={"30px"} justifyContent={"space-between"}>
                         <VStack p={"20px"} w={"100%"}>
-                            <HStack alignItems={"center"} bg={colors.lightGray} justifyContent={"center"} w={"100%"} py={scale(height * 0.02)} borderRadius={10}>
+                            <HStack alignItems={"center"} bg={colors.lightGray} justifyContent={"center"} w={"100%"} py={scale(height * 0.015)} borderRadius={10}>
                                 <CreditCardView
                                     imageFront={cardHolder}
                                     imageBack={cardBackHolder}
@@ -217,7 +225,8 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
                                     cvc={cvc}
                                     placeholders={cardPlaceholders}
                                     focusedField={focusedField as any}
-                                    type={identifyCardType(number) as any}
+                                    type={type as any}
+
                                 />
                             </HStack>
                             <VStack mt={"20px"}>
@@ -263,7 +272,7 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
                         <Heading textTransform={"capitalize"} fontSize={scale(20)} color={colors.white} textAlign={"center"}>{errorMessage}</Heading>
                         <Text textAlign={"center"} fontSize={scale(15)} color={colors.pureGray}>Por favor, añada una tarjeta  que no esté ya vinculada a su cuenta.</Text>
                     </VStack>
-                        <Button onPress={() => ref.current?.setPage(0)} title="Añadir Tarjeta" bg={colors.mainGreen} />
+                    <Button onPress={() => ref.current?.setPage(0)} title="Añadir Tarjeta" bg={colors.mainGreen} />
                 </VStack>
             </VStack>
         </PagerView>

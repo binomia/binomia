@@ -19,7 +19,7 @@ import { useLazyQuery } from '@apollo/client'
 import SingleTransactionBanking from '@/components/transaction/SingleBankingTransaction'
 
 
-const { height } = Dimensions.get('window')
+const { height, width } = Dimensions.get('window')
 const BankingScreen: React.FC = () => {
     const dispatch = useDispatch()
     const { user, cards } = useSelector((state: any) => state.globalReducer)
@@ -29,7 +29,6 @@ const BankingScreen: React.FC = () => {
     const [transactions, setTransactions] = useState<any[]>([])
     const [accountBankingTransactions] = useLazyQuery(TransactionApolloQueries.accountBankingTransactions())
     const [refreshing, setRefreshing] = useState(false);
-
 
     const fetchAccountBankingTransactions = async (page: number = 1, pageSize: number = 10) => {
         try {
@@ -43,7 +42,6 @@ const BankingScreen: React.FC = () => {
             console.error({ accountBankingTransactions: error });
         }
     }
-
 
     const handleMakeTransaction = async (title: string) => {
         await dispatch(globalActions.setCard(cards[0]))
@@ -64,7 +62,6 @@ const BankingScreen: React.FC = () => {
 
         return data
     }
-
 
     const onSelectTransaction = async (transaction: any) => {
         try {
@@ -107,51 +104,51 @@ const BankingScreen: React.FC = () => {
         fetchAccountBankingTransactions()
     }, [])
 
-
-
     return (
         <VStack variant={"body"} h={"100%"}>
             <ScrollView showsHorizontalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}  >
                 <HStack borderRadius={10} w={"100%"} mt={"50px"} space={2} justifyContent={"space-between"}>
-                    <Pressable onPress={() => handleMakeTransaction("Deposito")} _pressed={{ opacity: 0.5 }} w={"48%"} h={"150px"} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
+                    <Pressable onPress={() => handleMakeTransaction("Deposito")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
                         <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={depositIcon} />
                         <Heading size={"md"} color={colors.mainGreen}>Depositar</Heading>
                     </Pressable>
-                    <Pressable onPress={() => handleMakeTransaction("Retiro")} _pressed={{ opacity: 0.5 }} w={"48%"} h={"150px"} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
+                    <Pressable onPress={() => handleMakeTransaction("Retiro")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
                         <Image alt='logo-image' resizeMode='contain' tintColor={colors.mainGreen} w={scale(45)} h={scale(45)} source={withdrawIcon} />
                         <Heading size={"md"} color={colors.mainGreen}>Retirar</Heading>
                     </Pressable>
                 </HStack>
-                <VStack mt={"40px"}>
-                    <Heading fontSize={scale(19)} color={colors.white}>Transacciones</Heading>
-                    {transactions.length <= 0 ? (
-                        <VStack key={"transations-screen-no-transactions" + Date.now()} w={"100%"} h={"50%"} mt={"100px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
-                            <Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
-                            <VStack justifyContent={"center"} alignItems={"center"}>
+                <VStack mt={"30px"}>
+                    {transactions.length > 0 ? (
+                        <VStack>
+                            <Heading fontSize={scale(19)} color={colors.white}>Transacciones</Heading>
+                            <FlatList
+                                mt={"20px"}
+                                data={transactions}
+                                scrollEnabled={false}
+                                renderItem={({ item, index }) => (
+                                    <Pressable key={`transaction-banking-${index}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(item)} mb={"25px"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} >
+                                        <HStack >
+                                            <HStack w={"50px"} h={"50px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
+                                                <AntDesign name={formatTransaction(item).icon as any} size={24} color={formatTransaction(item).isDeposit ? colors.mainGreen : colors.red} />
+                                            </HStack>
+                                            <VStack ml={"10px"} justifyContent={"center"}>
+                                                <Heading textTransform={"capitalize"} fontSize={scale(13)} color={colors.white}>{formatTransaction(item).fullName}</Heading>
+                                                <Text fontSize={scale(12)} color={colors.pureGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
+                                            </VStack>
+                                        </HStack>
+                                        <Heading fontSize={scale(12)} color={formatTransaction(item).isDeposit ? colors.mainGreen : colors.red} >{formatTransaction(item).isDeposit ? "+" : "-"}{FORMAT_CURRENCY(item.amount)}</Heading>
+                                    </Pressable>
+                                )}
+                            />
+                        </VStack>
+                    ) : (
+                        <VStack w={"100%"} h={height / 3} mt={"50px"} px={"20px"} alignItems={"center"} justifyContent={"flex-end"}>
+                            <Image resizeMode='contain' alt='logo-image' w={width / 1.5} h={width / 1.5} source={noTransactions} />
+                            <VStack alignItems={"center"}>
                                 <Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
                                 <Text fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
                             </VStack>
                         </VStack>
-                    ) : (
-                        <FlatList
-                            mt={"20px"}
-                            data={transactions}
-                            scrollEnabled={false}
-                            renderItem={({ item, index }) => (
-                                <Pressable key={`transaction-banking-${index}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(item)} mb={"25px"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} >
-                                    <HStack >
-                                        <HStack w={"50px"} h={"50px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
-                                            <AntDesign name={formatTransaction(item).icon as any} size={24} color={formatTransaction(item).isDeposit ? colors.mainGreen : colors.red} />
-                                        </HStack>
-                                        <VStack ml={"10px"} justifyContent={"center"}>
-                                            <Heading textTransform={"capitalize"} fontSize={scale(13)} color={colors.white}>{formatTransaction(item).fullName}</Heading>
-                                            <Text fontSize={scale(12)} color={colors.pureGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
-                                        </VStack>
-                                    </HStack>
-                                    <Heading fontSize={scale(12)} color={formatTransaction(item).isDeposit ? colors.mainGreen : colors.red} >{formatTransaction(item).isDeposit ? "+" : "-"}{FORMAT_CURRENCY(item.amount)}</Heading>
-                                </Pressable>
-                            )}
-                        />
                     )}
                 </VStack>
             </ScrollView>

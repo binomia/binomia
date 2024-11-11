@@ -40,11 +40,11 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
     const onPressCard = async (card: any) => {
         await dispatch(globalActions.setCard(card))
 
-        if (justSelecting) {
-            onCloseFinish()
-        } else {
-            setShowCardModification(true)
-        }
+        // if (justSelecting) {
+        //     onCloseFinish()
+        // } else {
+        // }
+        setShowCardModification(true)
     }
 
     const renderCardLogo = (brand: string) => {
@@ -62,7 +62,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
 
     const onCreateCard = async (cardData: any) => {
         try {
-            const validatedCardData = await CardAuthSchema.createCard.parseAsync(cardData)
+            const validatedCardData = await CardAuthSchema.createCard.parseAsync(cardData)            
             const { data } = await createCard({ variables: { data: validatedCardData } })
 
             await dispatch(globalActions.setCards([...cards, data.createCard]))
@@ -82,8 +82,6 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
 
             const { data } = await fetchCards()
             await dispatch(globalActions.setCards(data.cards))
-
-            console.log(JSON.stringify(data, null, 2));
 
         } catch (error) {
             console.log({

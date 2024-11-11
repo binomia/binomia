@@ -12,16 +12,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import KeyNumberPad from '../global/KeyNumberPad';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
-import { useMutation } from '@apollo/client';
-import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { globalActions } from '@/redux/slices/globalSlice';
-import SingleTransactionScreen from '@/screens/SingleTransactionScreen';
-import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
-import PagerView from 'react-native-pager-view';
-import TransactionDetailsScreen from './TranferDetails';
+
 
 type Props = {
-    open?: boolean
     onSendFinish?: () => any
     onCloseFinish?: () => void
     nextPage?: () => void
@@ -29,82 +22,17 @@ type Props = {
     setInput: (_: string) => void
 }
 
-const { height } = Dimensions.get('window')
-const CreateTransaction: React.FC<Props> = ({ open = false, input, setInput, nextPage = () => { }, onCloseFinish = () => { } }) => {
+const CreateTransaction: React.FC<Props> = ({ input, setInput, nextPage = () => { }, onCloseFinish = () => { } }) => {
     const dispatch = useDispatch();
-    const ref = useRef<PagerView>(null);
     const { receiver } = useSelector((state: any) => state.transactionReducer)
-    const { location, account, user } = useSelector((state: any) => state.globalReducer)
-    const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
-
-    const [visible, setVisible] = useState<boolean>(open);
-    const [showSingleTransaction, setShowSingleTransaction] = useState<boolean>(false);
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
-
-    const handleOnSend = async (recurrence?: { title: string, time: string }) => {
-        try {
-            console.log({ recurrence });
-            const transactionData = await TransactionAuthSchema.createTransaction.parseAsync({
-                receiver: receiver.username,
-                amount: parseFloat(input),
-                location
-            })
-
-            const transaction = await createTransaction({
-                variables: {
-                    data: transactionData
-                }
-            })
-
-            const transactionSent = {
-                ...transaction.data.createTransaction,
-                to: receiver,
-                from: user
-            }
-
-            await dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionData.amount })))
-            await dispatch(transactionActions.setTransaction({
-                id: transactionSent.id,
-                fullName: formatTransaction(transactionSent).fullName,
-                profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
-                username: formatTransaction(transactionSent).username,
-                isFromMe: formatTransaction(transactionSent).isFromMe,
-                amount: transactionSent.amount,
-                createdAt: transactionSent.createdAt
-            }))
-
-            ref.current?.setPage(1)
-
-        } catch (error: any) {
-            console.error(error.message);
-        }
-    }
-
-    const formatTransaction = (transaction: any) => {
-        const isFromMe = transaction.from?.id === user.id
-
-        const profileImageUrl = transaction.to?.profileImageUrl
-        const fullName = isFromMe ? transaction.to?.fullName : transaction.from?.fullName
-        const username = isFromMe ? transaction.from?.username : transaction.to?.username
-
-        return {
-            isFromMe,
-            profileImageUrl: profileImageUrl || "",
-            amount: transaction.amount,
-            fullName: fullName || "",
-            username: username || ""
-        }
-    }
 
     const handleOnClose = async () => {
         await dispatch(transactionActions.setReceiver({}))
 
-        setShowSingleTransaction(false)
         onCloseFinish()
-        setVisible(false)
         setInput("0")
     }
-
 
     const onNextPage = async () => {
         try {
@@ -134,11 +62,6 @@ const CreateTransaction: React.FC<Props> = ({ open = false, input, setInput, nex
 
         setInput(value)
     }
-
-
-    useEffect(() => {
-        setVisible(open)
-    }, [open])
 
     return (
         <VStack flex={1} justifyContent={"space-between"}>

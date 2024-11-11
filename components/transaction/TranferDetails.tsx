@@ -16,16 +16,17 @@ import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
+import { router } from 'expo-router';
 
 
 
 type Props = {
     onClose?: () => void
-    onSubmit?: () => Promise<void>
+    goBack?: () => void
 }
 
 const { width } = Dimensions.get("screen")
-const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { } }) => {
+const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack = () => { } }) => {
     const dispatch = useDispatch();
 
     const { authenticate } = useLocalAuthentication();
@@ -78,6 +79,7 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { } }) => {
             }))
 
             onClose()
+            router.navigate("(home)")
         } catch (error: any) {
             console.error(error.message);
         }
@@ -185,7 +187,7 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { } }) => {
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
             <VStack px={"10px"} h={"100%"}>
                 <HStack px={"10px"} justifyContent={"space-between"}>
-                    <TouchableOpacity onPress={onClose}>
+                    <TouchableOpacity onPress={goBack}>
                         <Stack w={"50px"}>
                             <Ionicons name="chevron-back-outline" size={30} color="white" />
                         </Stack>
