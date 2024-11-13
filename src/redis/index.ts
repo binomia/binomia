@@ -27,7 +27,7 @@ export const initRedisEventSubcription = (io: Server) => {
             case REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE:                
                 const { data: { user, code } } = JSON.parse(payload)
 
-                // await Email.sendVerificationCode(user.email, code);
+                await Email.sendVerificationCode(user.email, code);
                 console.log("redis event: ", code);
                 break;
 

@@ -7,16 +7,15 @@ import { Server } from "socket.io";
 import { initRedisEventSubcription, subscriber } from "@/redis";
 import { setupMaster, setupWorker } from "@socket.io/sticky";
 import { createAdapter, setupPrimary } from "@socket.io/cluster-adapter";
-import sticky from 'sticky-session';
 import { REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
-
-const PORT = process.env.PORT || 8000;
+import { ip } from "address"
+const PORT = process.env.PORT || 8001;
 
 if (cluster.isPrimary) {
     console.log(`Master ${process.pid} started on http://localhost:${PORT}`);
 
     const httpServer = http.createServer();
-    httpServer.listen(8000);
+    httpServer.listen(PORT);
 
     setupMaster(httpServer, {
         loadBalancingMethod: "least-connection"
@@ -42,7 +41,7 @@ if (cluster.isPrimary) {
         const selectedWorker = cluster.workers[randomWorkerId];
 
         if (selectedWorker) {
-            selectedWorker.send({payload, channel}); // Send task to selected worker
+            selectedWorker.send({ payload, channel }); // Send task to selected worker
             console.log(`Master dispatched task to worker ${selectedWorker.process.pid}`);
         }
     })
@@ -53,7 +52,7 @@ if (cluster.isPrimary) {
     });
 
 } else {
-    console.log(`Worker ${process.pid} started on http://localhost:${PORT}`);
+    console.log(`[Notification-Server]: worker ${process.pid} is running on http://${ip()}:${PORT}`);
 
     const httpServer = http.createServer();
     const io = new Server(httpServer);
