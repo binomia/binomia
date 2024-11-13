@@ -14,6 +14,18 @@ export class TransactionJoiSchema {
         }).required()
     })
 
+    static recurrenceTransaction = z.object({
+        title: z.string(),
+        time: z.string()
+    })
+
+    static bankingCreateTransaction = TransactionJoiSchema.createTransaction.fork(
+        ['receiver'],
+        (schema) => schema.forbidden()
+    )
+
+    
+
     static validateTransaction = z.object({
         amount: z.number(),
         currency: z.string(),

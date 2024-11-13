@@ -4,4 +4,6 @@ export type CardModelType = {
     cvv: string
     expirationDate: string
     cardHolderName: string
+    alias: string
+    isPrimary: boolean
 }

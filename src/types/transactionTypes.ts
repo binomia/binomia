@@ -20,6 +20,11 @@ export type TransactionModelType = {
     updatedAt: string
 }
 
+export interface RecurrenceTransactionType {
+    title: string
+    time: string
+}
+
 export interface TransactionAuthorizationType extends TransactionModelType {
     amount: number
 }
@@ -37,3 +42,5 @@ export type TransactionCreateType = {
         longitude: number
     }
 }
+
+export type BankingTransactionCreateType = Omit<TransactionCreateType, 'receiver'>;

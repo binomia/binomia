@@ -1,5 +1,6 @@
-import { GlobalZodSchema } from "@/joi"
+import { GlobalZodSchema } from "@/auth"
 
+export const PORT = process.env.PORT || 8000
 
 const evironmentVariables = GlobalZodSchema.evironmentVariables.parse(process.env)
 export const {
@@ -17,4 +18,10 @@ export const {
 export const REDIS_SUBSCRIPTION_CHANNEL = {
     TRANSACTION_CREATED: "TRANSACTION_CREATED",
     LOGIN_VERIFICATION_CODE: "LOGIN_VERIFICATION_CODE"
+}
+
+
+
+export const QUEUE_JOBS_NAME = {
+    CREATE_TRANSACTION: "CREATE_TRANSACTION",
 }

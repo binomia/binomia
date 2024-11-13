@@ -3,13 +3,13 @@ import { Op } from 'sequelize'
 import { getQueryResponseFields, checkForProtectedRequests, GENERATE_SIX_DIGIT_TOKEN } from '@/helpers'
 import { REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
-import { GlobalZodSchema, UserJoiSchema } from '@/joi';
+import { GlobalZodSchema, UserJoiSchema } from '@/auth';
 import { UserModelType, VerificationDataType } from '@/types';
 import { Cryptography } from '@/helpers/cryptography';
 import { authServer } from '@/rpc';
 import { generate } from 'short-uuid';
 import { z } from 'zod'
-import { publisher } from '@/redis';
+import redis from '@/redis';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import KYCModel from '@/models/kycModel';
@@ -141,8 +141,8 @@ export class UsersController {
 
     static sessionUser = async (_: unknown, ___: any, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            await checkForProtectedRequests(req);
-            return req.session.user
+            const session = await checkForProtectedRequests(req);
+            return session.user
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -228,6 +228,7 @@ export class UsersController {
             throw new GraphQLError(error.message);
         }
     }
+
     static searchUsers = async (_: any, { search, limit }: { search: UserModelType, limit: number }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             await checkForProtectedRequests(req);
@@ -449,7 +450,7 @@ export class UsersController {
                     ZERO_ENCRYPTION_KEY,
                 }))
                 const signature = Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
-                await publisher.publish(REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE, JSON.stringify({
+                await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE, JSON.stringify({
                     data: {
                         user: user.toJSON(),
                         sid: sessionCreated.toJSON().sid,

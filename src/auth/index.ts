@@ -1,4 +1,4 @@
-import { CardJoiSchema } from "./cardJoiSchema";
+import { CardAuthSchema } from "./cardZodSchema";
 import { UserJoiSchema } from "./userJoiSchema";
 import { GlobalZodSchema } from "./globalZodSchema";
 import { AccountZodSchema } from "./accountZodSchema";
@@ -6,7 +6,7 @@ import { AccountZodSchema } from "./accountZodSchema";
 
 export {
     UserJoiSchema,
-    CardJoiSchema,
+    CardAuthSchema,
     GlobalZodSchema,
     AccountZodSchema
 }

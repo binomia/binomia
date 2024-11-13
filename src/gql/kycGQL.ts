@@ -3,21 +3,6 @@ import { CardsController } from '@/controllers'
 
 const type = () => {
     return `        
-        type CardType {
-            id:  Int
-            dniNumber: String
-            dob: String
-            status: String
-            expiration: String
-            occupation: String
-            gender: String
-            maritalStatus: String
-            bloodType: String
-            user: OnlyUserType
-            createdAt: String
-            updatedAt: String
-        }
-
         type KYCTypeResponse {
             id:  Int
             data: String

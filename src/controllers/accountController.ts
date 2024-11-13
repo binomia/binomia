@@ -1,7 +1,7 @@
 import { AccountModel, TransactionsModel, UsersModel } from '@/models'
 import { checkForProtectedRequests, GET_LAST_SUNDAY_DATE, getQueryResponseFields } from '@/helpers'
 import { GraphQLError } from 'graphql';
-import { AccountZodSchema } from '@/joi';
+import { AccountZodSchema } from '@/auth';
 import { Op } from 'sequelize';
 
 export class AccountController {

@@ -1,20 +1,20 @@
-import { AccountModel, kycModel, TransactionsModel, UsersModel } from '@/models'
+import { AccountModel, kycModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel } from '@/models'
 import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
-import { TransactionJoiSchema } from '@/joi/transactionJoiSchema';
-import { TransactionCreateType, TransactionAuthorizationType } from '@/types';
-import { authServer } from '@/rpc';
+import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
+import { TransactionCreateType, BankingTransactionCreateType } from '@/types';
 import { Cryptography } from '@/helpers/cryptography';
-import { REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
+import { QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
-import { publisher } from '@/redis';
+import redis from '@/redis';
 
 
 export class TransactionsController {
-    static createTransaction = async (_: unknown, { data }: { data: any }, context: any) => {
+    static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
         try {
             await checkForProtectedRequests(context.req);
             const validatedData: TransactionCreateType = await TransactionJoiSchema.createTransaction.validateAsync(data)
+            const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
             const { user: sender } = context.req.session
             const senderAccount = await AccountModel.findOne({
@@ -134,10 +134,15 @@ export class TransactionsController {
                 ]
             })
 
-            await publisher.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
+            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
                 transaction: transactionData.toJSON(),
                 recipientSocketRoom: receiverAccount.toJSON().user.username
             }))
+
+            if (recurrenceData.time !== "oneTime")
+                await redis.publish(QUEUE_JOBS_NAME.CREATE_TRANSACTION, JSON.stringify({
+                    headers: Date.now()
+                }))
 
             return transactionData.toJSON()
 
@@ -146,9 +151,63 @@ export class TransactionsController {
         }
     }
 
+    static createBankingTransaction = async (_: unknown, { cardId, data }: { cardId: number, data: any }, context: any) => {
+        try {
+            const session = await checkForProtectedRequests(context.req);
+            const validatedData: BankingTransactionCreateType = await TransactionJoiSchema.bankingCreateTransaction.validateAsync(data)
+
+            const card = await CardsModel.findOne({
+                where: {
+                    [Op.and]: [
+                        { userId: session.user.id },
+                        { id: cardId }
+                    ]
+                }
+            })
+
+            if (!card)
+                throw new GraphQLError('The given card is not linked to the user account');
+
+
+            const decryptedCardData = await Cryptography.decrypt(card?.dataValues?.data)
+            const cardData = Object.assign({}, card.toJSON(), JSON.parse(decryptedCardData))
+
+            // Need Payment Gateway Integration
+            console.error("createBankingTransaction: Need Payment Gateway Integration");
+
+
+            const hash = await Cryptography.hash(JSON.stringify({
+                data: {
+                    ...validatedData,
+                    deliveredAmount: validatedData.amount,
+                    accountId: session.user.account.id,
+                    data: {}
+                },
+                ZERO_ENCRYPTION_KEY,
+                ZERO_SIGN_PRIVATE_KEY,
+            }))
+
+            const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+            const transaction = await BankingTransactionsModel.create({
+                ...validatedData,
+                deliveredAmount: validatedData.amount,
+                accountId: session.user.account.id,
+                cardId: cardData.id,
+                signature,
+                data: {}
+            })
+
+            return transaction.toJSON()
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
     static accountTransactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            await checkForProtectedRequests(context.req);
+            const session = await checkForProtectedRequests(context.req);
+
             const fields = getQueryResponseFields(fieldNodes, 'transactions')
             const { user } = context.req.session
 
@@ -186,6 +245,47 @@ export class TransactionsController {
                         model: AccountModel,
                         as: 'to',
                         attributes: fields['to'],
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                            attributes: fields['user']
+                        }]
+                    }
+                ]
+            })
+
+            if (!transactions)
+                throw new GraphQLError('No transactions found');
+
+            return transactions
+
+        } catch (error: any) {
+            throw new GraphQLError(error);
+        }
+    }
+
+    static accountBankingTransactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            const session = await checkForProtectedRequests(context.req);
+            const fields = getQueryResponseFields(fieldNodes, 'transactions')
+
+            const _pageSize = pageSize > 50 ? 50 : pageSize
+            const limit = _pageSize;
+            const offset = (page - 1) * _pageSize;
+
+            const transactions = await BankingTransactionsModel.findAll({
+                limit,
+                offset,
+                order: [['createdAt', 'DESC']],
+                attributes: [...fields['transactions']],
+                where: {
+                    accountId: session.user.account.id
+                },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'account',
+                        attributes: fields['account'],
                         include: [{
                             model: UsersModel,
                             as: 'user',

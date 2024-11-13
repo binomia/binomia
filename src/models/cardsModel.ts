@@ -1,17 +1,16 @@
-import { INTEGER, TEXT } from "sequelize"
+import { BOOLEAN, TEXT, STRING } from "sequelize"
 import { db } from "@/config"
 
 const CardsModel = db.define('cards', {
     data: TEXT,
-    userId: {
-        type: INTEGER,
-        key: 'userId',
-        unique: true,
-        references: {
-            model: 'users',
-            key: 'id'
-        }
-    }
+    last4Number: STRING,
+    brand: STRING,
+    alias: STRING,
+    isPrimary: {
+        type: BOOLEAN,
+        defaultValue: false
+    },
+    hash: TEXT
 })
 
 

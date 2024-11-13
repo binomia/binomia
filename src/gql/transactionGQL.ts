@@ -1,4 +1,3 @@
-import { CardsController } from '@/controllers'
 import { TransactionsController } from '@/controllers'
 
 
@@ -7,11 +6,21 @@ const type = () => {
         input TransactionLocationInput {
             latitude: Float
             longitude: Float
-        }
-            
+        }  
+
         input TransactionInput {
             receiver: String
-            signature: String
+            amount: Float
+            transactionType: String
+            currency: String
+            location: TransactionLocationInput
+        }
+        input TransactionRecurrenceInput {
+            title: String
+            time: String
+        }
+
+        input BankingTransactionInput {
             amount: Float
             transactionType: String
             currency: String
@@ -33,6 +42,21 @@ const type = () => {
             to: AccountTypeWithUser
         }
 
+        type BankingTransactionType {
+            transactionId: String
+            amount: Float
+            deliveredAmount: Float         
+            voidedAmount: Float
+            transactionType: String
+            currency: String
+            status: String
+            location: TransactionLocationType
+            createdAt: String
+            updatedAt: String
+            account: AccountTypeWithUser
+            data: JSON
+        }
+
         type TransactionLocationType {
             latitude: Float
             longitude: Float
@@ -50,6 +74,20 @@ const type = () => {
             createdAt: String
             updatedAt: String
             receiver: OnlyUserType
+        }   
+
+        type BankingTransactionCreatedType {
+            transactionId: String
+            amount: Float
+            deliveredAmount: Float
+            voidedAmount: Float
+            transactionType: String
+            currency: String
+            status: String
+            location: TransactionLocationType
+            createdAt: String
+            updatedAt: String
+            data: JSON
         }   
 
         type OnlyTransactionType {
@@ -87,13 +125,14 @@ const query = () => {
     return `
         transaction: TransactionType
         accountTransactions(page: Int!, pageSize: Int!): [TransactionType]
-
+        accountBankingTransactions(page: Int!, pageSize: Int!): [BankingTransactionType]
     `
 }
 
 const mutation = () => {
     return `
-        createTransaction(data: TransactionInput!): TransactionCreatedType
+        createTransaction(data: TransactionInput!, recurrence: TransactionRecurrenceInput!): TransactionCreatedType
+        createBankingTransaction(cardId: Int!, data: BankingTransactionInput!): BankingTransactionCreatedType
     `
 }
 
@@ -101,16 +140,18 @@ const subscription = () => {
     return ``
 }
 
-const { createTransaction, accountTransactions } = TransactionsController
+const { createTransaction, accountBankingTransactions, accountTransactions, createBankingTransaction } = TransactionsController
 const resolvers = {
     query: {
-        accountTransactions
+        accountTransactions,
+        accountBankingTransactions
     },
     mutation: {
-        createTransaction
+        createTransaction,
+        createBankingTransaction
     },
     subscription: {
-        // 
+
     }
 }
 

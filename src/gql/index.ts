@@ -1,3 +1,4 @@
+import { GraphQLJSON } from 'graphql-type-json';
 import userGQL from "./userGQL";
 import accountGQL from "./accountGQL";
 import cardGQL from "./cardGQL";
@@ -6,8 +7,9 @@ import globalGQL from "./globalGQL";
 import kycGQL from "./kycGQL";
 
 
-
 export const typeDefs = `
+    scalar JSON
+    scalar JSONObject
     ${userGQL.type()}
     ${accountGQL.type()}
     ${cardGQL.type()}
@@ -45,6 +47,7 @@ export const typeDefs = `
 
 
 export const resolvers = {
+    JSON: GraphQLJSON,
     Query: {
         ...userGQL.resolvers.query,
         ...accountGQL.resolvers.query,

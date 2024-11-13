@@ -106,6 +106,49 @@ export const generateUUID = (): string => {
 }
 
 
+export const IDENTIFY_CARD_TYPE = (cardNumber: string): string | undefined => {
+    cardNumber = cardNumber.replace(/[\s-]/g, "");
+
+    const cardPatterns: { [key: string]: RegExp } = {
+        "visa": /^4/,                                    // Visa: starts with 4
+        "mastercard": /^5[1-5]/,                         // MasterCard: starts with 51-55
+        "american-express": /^3[47]/,                    // Amex: starts with 34 or 37
+        "jcb": /^(?:2131|1800|35)/,                      // JCB: starts with 2131, 1800, or 35
+        "discover": /^6(?:011|5)/,                       // Discover: starts with 6011 or 65
+        "diners-club": /^3(?:0[0-5]|[689])/,             // Diners Club: starts with 300-305, 3095, or 36/38
+    };
+
+    // Identify the card type based on the initial digits
+    for (const cardType in cardPatterns) {
+        if (cardPatterns[cardType].test(cardNumber))
+            return cardType;
+    }
+
+    return undefined;  // Return undefined if no match is found
+};
+
+export const IS_VALID_CARD_LENGTH = (cardNumber: string): boolean => {
+    // Identify the card type
+    const cardType = IDENTIFY_CARD_TYPE(cardNumber);
+    if (!cardType) return false; // Invalid card type
+
+    // Define valid lengths for each card type
+    const cardLengths: { [key: string]: number[] } = {
+        "visa": [13, 16, 19],
+        "mastercard": [16],
+        "american-express": [15],
+        "jcb": [15, 16],
+        "discover": [16],
+        "diners-club": [14],
+    };
+
+    // Get the length of the card number
+    const length = cardNumber.replace(/[\s-]/g, "").length; // Remove spaces and dashes, then get length
+
+    // Check if the length is valid for the identified card type
+    return cardLengths[cardType].includes(length);
+};
+
 export const checkForProtectedRequests = async (req: any) => {
     try {
         const sessionAuthIdentifier = await z.string().length(64).transform((val) => val.trim()).parseAsync(req.headers["session-auth-identifier"]);
@@ -122,7 +165,7 @@ export const checkForProtectedRequests = async (req: any) => {
         });
 
 
-        await jwtVerifyAsync.then(async (data: any) => {
+        return await jwtVerifyAsync.then(async (data: any) => {
             const jwtData = await z.object({
                 sid: z.string().min(1).transform((val) => val.trim())
             }).parseAsync(data);
@@ -157,12 +200,14 @@ export const checkForProtectedRequests = async (req: any) => {
 
             if (!session)
                 throw new GraphQLError("INVALID_SESSION: No session found")
-            
+
             if (jwtToken !== session.dataValues.jwt || sessionAuthIdentifier !== session.dataValues.deviceId)
                 throw new Error("INVALID_SESSION: Invalid token data")
 
             else
                 req.session = session.toJSON()
+
+            return session.toJSON()
 
         }).catch((error: any) => {
             const message = error.message === "jwt expired" ? "INVALID_SESSION: Session expired" : error.message
@@ -197,4 +242,13 @@ export const GET_LAST_SUNDAY_DATE = (): Date => {
 export const GENERATE_SIX_DIGIT_TOKEN = (): string => {
     const token = Math.floor(100000 + Math.random() * 900000);
     return token.toString();
+}
+
+
+export const formatError = (formattedError: any, _: any) => {
+    console.log(JSON.stringify(formattedError, null, 2));
+
+    return {
+        message: formattedError.message
+    }
 }

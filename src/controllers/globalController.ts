@@ -1,17 +1,14 @@
 import { checkForProtectedRequests } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { Cryptography } from '@/helpers/cryptography';
-import { ZERO_SIGN_PRIVATE_KEY, ZERO_ENCRYPTION_KEY, REDIS_SUBSCRIPTION_CHANNEL } from '@/constants';
-import { AccountModel, TransactionsModel, UsersModel } from '@/models';
-import { Op } from 'sequelize';
-import { publisher } from '@/redis';
+import { ZERO_SIGN_PRIVATE_KEY, ZERO_ENCRYPTION_KEY, REDIS_SUBSCRIPTION_CHANNEL, QUEUE_JOBS_NAME } from '@/constants';
+import redis from '@/redis';
 
 
 export class GlobalController {
     static signData = async (_: unknown, { hash }: { hash: string }, context: any) => {
         try {
             await checkForProtectedRequests(context.req);
-
             const hashData = await Cryptography.hash(JSON.stringify({
                 hash,
                 ZERO_ENCRYPTION_KEY,
@@ -30,7 +27,7 @@ export class GlobalController {
 
     static test = async (_: unknown, { hash }: { hash: string }, { req }: { req: any }) => {
         try {
-            publisher.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
+            redis.publish(QUEUE_JOBS_NAME.CREATE_TRANSACTION, JSON.stringify({
                 headers: Date.now(),
             }))
 
