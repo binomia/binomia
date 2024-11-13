@@ -1,11 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
-import { StyleSheet, Dimensions, TouchableOpacity, SafeAreaView } from 'react-native'
+import { StyleSheet, TouchableOpacity } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Stack } from 'native-base'
-import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
-import BottomSheet from '@/components/global/BottomSheet';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Button from '@/components/global/Button';
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,6 +24,7 @@ type Props = {
 const CreateTransaction: React.FC<Props> = ({ input, setInput, nextPage = () => { }, onCloseFinish = () => { } }) => {
     const dispatch = useDispatch();
     const { receiver } = useSelector((state: any) => state.transactionReducer)
+    const { account } = useSelector((state: any) => state.globalReducer)
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
 
     const handleOnClose = async () => {
@@ -53,9 +53,7 @@ const CreateTransaction: React.FC<Props> = ({ input, setInput, nextPage = () => 
     }
 
     const onChange = (value: string) => {
-        console.log(value);
-
-        if (Number(value) >= 10)
+        if (Number(value) >= 10 && Number(value) <= account.balance)
             setShowPayButton(true)
         else
             setShowPayButton(false)
@@ -66,14 +64,14 @@ const CreateTransaction: React.FC<Props> = ({ input, setInput, nextPage = () => 
     return (
         <VStack flex={1} justifyContent={"space-between"}>
             <VStack>
-                <HStack px={"10px"} justifyContent={"space-between"}>
+                <HStack px={"10px"} mb={"20px"} alignItems={"center"} justifyContent={"space-between"}>
                     <TouchableOpacity onPress={() => handleOnClose()}>
                         <Stack w={"50px"}>
                             <Ionicons name="chevron-back-outline" size={30} color="white" />
                         </Stack>
                     </TouchableOpacity>
                     <Stack>
-                        <Heading mb={"20px"} size={"sm"} color={colors.white} textAlign={"center"}>Enviar</Heading>
+                        <Heading size={"md"} color={colors.mainGreen} textAlign={"center"}>{FORMAT_CURRENCY(account.balance)}</Heading>
                     </Stack>
                     <Stack w={"50px"} />
                 </HStack>

@@ -2,7 +2,6 @@ import { createContext, useEffect, useState } from "react";
 import { CreateUserDataType, SessionContextType, SessionPropsType, SessionVerificationDataType, VerificationDataType } from "@/types";
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { SessionApolloQueries, UserApolloQueries } from "@/apollo/query";
-import * as Updates from 'expo-updates';
 import { notificationServer } from "@/rpc/notificationRPC";
 import { GENERATE_SIX_DIGIT_TOKEN } from "@/helpers";
 import useAsyncStorage from "@/hooks/useAsyncStorage";
@@ -13,7 +12,6 @@ import { router } from "expo-router";
 import * as Crypto from 'expo-crypto';
 import * as Network from 'expo-network';
 import { useLocation } from "@/hooks/useLocation";
-import { SessionAuthSchema } from "@/auth/sessionAuth";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -97,10 +95,10 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const onLogout = async () => {
         try {
             await deleteItem("jwt");
-            await Updates.reloadAsync();
+            router.navigate("login")
 
         } catch (error) {
-            console.log({ error });
+            console.log({ onLogout: error });
         }
     }
 

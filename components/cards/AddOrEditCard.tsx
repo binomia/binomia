@@ -1,18 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Dimensions, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native'
+import Button from '../global/Button';
+import Input from '../global/Input';
+import colors from '@/colors';
+import PagerView from 'react-native-pager-view';
+import valid from "card-validator";
+import { Dimensions, TouchableWithoutFeedback, Keyboard } from 'react-native'
 import { HStack, Pressable, Stack, Image, VStack, Text, Heading } from 'native-base'
 import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-sticky-footer-avoiding-scroll-view';
 import { CreditCardView } from 'react-native-credit-card-input';
 import { cardBackHolder, cardHolder, noCard } from '@/assets';
-import BottomSheet from '../global/BottomSheet';
-import Button from '../global/Button';
-import Input from '../global/Input';
-import colors from '@/colors';
 import { scale } from 'react-native-size-matters';
 import { MaterialIcons } from '@expo/vector-icons';
 import { TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
-import PagerView from 'react-native-pager-view';
-import valid from "card-validator";
 
 
 type Props = {

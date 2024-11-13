@@ -3,20 +3,27 @@ import * as LocalAuthentication from 'expo-local-authentication';
 
 export const useLocalAuthentication = () => {
 
+    const doesDeviceSupportLocalAuthentication = useCallback(async () => {
+        const hasHardwareAsync = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolledAsync = await LocalAuthentication.isEnrolledAsync();
+
+        if (!hasHardwareAsync && !isEnrolledAsync)
+            throw new Error('Local authentication is not available');
+
+    }, []);
+
     const authenticate = useCallback(async () => {
         try {
-            const hasHardwareAsync = await LocalAuthentication.hasHardwareAsync();
-            const isEnrolledAsync = await LocalAuthentication.isEnrolledAsync();
+            await doesDeviceSupportLocalAuthentication()
 
-            if (hasHardwareAsync && isEnrolledAsync) {
-                return await LocalAuthentication.authenticateAsync({
-                    promptMessage: 'Authenticate',
-                    fallbackLabel: 'Use passcode',
-                });
-            }
+            return await LocalAuthentication.authenticateAsync({
+                promptMessage: 'Ingresa pin de tu dispositivo para poder enviar la transacción',
+                requireConfirmation: true,
+                biometricsSecurityLevel: "strong"
+            });
 
         } catch (err) {
-            console.error(err, "authenticate error");
+            throw err
         }
 
     }, []);

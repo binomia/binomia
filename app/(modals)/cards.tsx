@@ -149,7 +149,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                 )}
             </VStack>
             <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
-            <BottomSheet open={showAddCard} height={height * 0.9}>
+            <BottomSheet onCloseFinish={() => setShowAddCard(false)} open={showAddCard} height={height * 0.9}>
                 <AddOrEditCard open={showCardModification} onPress={onCreateCard} />
             </BottomSheet>
         </SafeAreaView>

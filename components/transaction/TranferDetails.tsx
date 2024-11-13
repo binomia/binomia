@@ -47,7 +47,7 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
 
 
-    const handleOnSend = async (recurrence?: { title: string, time: string }) => {
+    const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
 
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
@@ -56,9 +56,9 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
                 location
             })
 
-            console.log({ data, recurrence });
+            console.log({ recurrence });  
             const transaction = await createTransaction({
-                variables: { data }
+                variables: { data, recurrence }
             })
 
             const transactionSent = {
@@ -111,15 +111,21 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
     }
 
     const handleOnPress = async () => {
-        await authenticate()
+        try {
+            const authenticated = await authenticate()
 
-        setLoading(true)
-        await handleOnSend({
-            title: recurrence,
-            time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
-        })
+            setLoading(true)
+            if (authenticated.success) {
+                await handleOnSend({
+                    title: recurrence,
+                    time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
+                })
+            } 
 
-        setLoading(false)
+            setLoading(false)
+        } catch (error) {
+            console.log({ handleOnSend: error });
+        }
     }
 
     const onCloseFinished = () => {

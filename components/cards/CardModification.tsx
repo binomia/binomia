@@ -12,12 +12,10 @@ import PagerView from 'react-native-pager-view'
 import { useMutation } from '@apollo/client'
 import { CardApolloQueries } from '@/apollo/query/cardQuery'
 
-
 type Props = {
     open?: boolean
     onCloseFinish?: () => void
 }
-
 
 const { height } = Dimensions.get('window')
 
@@ -38,7 +36,6 @@ const CardModification: React.FC<Props> = ({ open = false, onCloseFinish = () =>
         ref.current?.setPage(0)
     }
 
-
     const onEditCard = async () => {
         setBottomSheetHeight(height * 0.9)
         await delay(200)
@@ -58,7 +55,7 @@ const CardModification: React.FC<Props> = ({ open = false, onCloseFinish = () =>
                 const cardsFiltered = cards.filter((item: any) => item.hash !== card.hash)
                 if (data.deleteCard) {
                     await dispatch(globalActions.setCards(cardsFiltered))
-                    
+
                     onClose()
                     setIsDeleting(false)
                 }
@@ -80,7 +77,6 @@ const CardModification: React.FC<Props> = ({ open = false, onCloseFinish = () =>
                 return null
         }
     }
-
 
     return (
         <BottomSheet openTime={300} height={bottomSheetHeight} onCloseFinish={onClose} open={open}>
