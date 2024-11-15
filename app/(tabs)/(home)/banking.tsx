@@ -15,20 +15,64 @@ import { Dimensions, RefreshControl } from 'react-native'
 import { transactionActions } from '@/redux/slices/transactionSlice'
 import { router } from 'expo-router'
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery'
-import { useLazyQuery } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client'
 import SingleTransactionBanking from '@/components/transaction/SingleBankingTransaction'
+import DepositOrWithdrawTransaction from '@/components/banking/deposit'
+import { TransactionAuthSchema } from '@/auth/transactionAuth'
+import { useLocalAuthentication } from '@/hooks/useLocalAuthentication'
 
 
 const { height, width } = Dimensions.get('window')
 const BankingScreen: React.FC = () => {
     const dispatch = useDispatch()
-    const { user, cards } = useSelector((state: any) => state.globalReducer)
+    const { authenticate } = useLocalAuthentication()
+    const { user, cards, card, account, location } = useSelector((state: any) => state.globalReducer)
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
-    const [showSingleTransaction, setShowSingleTransaction] = useState<boolean>(false);
     const [transactions, setTransactions] = useState<any[]>([])
     const [accountBankingTransactions] = useLazyQuery(TransactionApolloQueries.accountBankingTransactions())
+    const [createBankingTransaction] = useMutation(TransactionApolloQueries.createBankingTransaction())
     const [refreshing, setRefreshing] = useState(false);
+    const [showDeposit, setShowDeposit] = useState(false);
+    const [showWithdraw, setShowWithdraw] = useState(false);
+    const [showSingleTransaction, setShowSingleTransaction] = useState(false);
+
+
+    const onDepositBankingTransaction = async (amount: number) => {
+        try {
+            const variables = await TransactionAuthSchema.createBankingTransaction.parseAsync({
+                cardId: card.id,
+                data: {
+                    amount,
+                    location,
+                    currency: account.currency,
+                    transactionType: "deposit",
+                }
+            })
+
+            await authenticate()
+            const { data } = await createBankingTransaction({
+                variables
+            })
+
+            setTransactions([data.createBankingTransaction, ...transactions])
+            await onSelectTransaction(data.createBankingTransaction)
+
+            console.log(JSON.stringify(data, null, 2));
+
+        } catch (errors: any) {
+            console.log(errors);
+        }
+    }
+
+    const onWithdrawBankingTransaction = async (amount: number) => {
+        try {
+            console.log({ amount });
+
+        } catch (errors: any) {
+            console.log(errors);
+        }
+    }
 
     const fetchAccountBankingTransactions = async (page: number = 1, pageSize: number = 10) => {
         try {
@@ -44,9 +88,18 @@ const BankingScreen: React.FC = () => {
     }
 
     const handleMakeTransaction = async (title: string) => {
-        await dispatch(globalActions.setCard(cards[0]))
+        if (cards.length > 0) {
+            const primaryCard = cards.find((card: any) => card.isPrimary)
+            await dispatch(globalActions.setCard(primaryCard))
 
-        router.navigate("/deposit")
+            if (title === "Deposito")
+                setShowDeposit(true)
+
+            else
+                setShowWithdraw(true)
+
+        } else
+            router.push("/cards")
     }
 
     const formatTransaction = (transaction: any) => {
@@ -57,7 +110,7 @@ const BankingScreen: React.FC = () => {
             transactionType: isDeposit ? "Deposito" : "Retiro",
             amount: transaction.amount,
             fullName: user.fullName,
-            username: user.username
+            username: user.username,
         }
 
         return data
@@ -65,7 +118,9 @@ const BankingScreen: React.FC = () => {
 
     const onSelectTransaction = async (transaction: any) => {
         try {
-            console.log(transaction);
+
+            console.log(JSON.stringify(transaction, null, 2));
+
             const data = {
                 id: transaction.id,
                 fullName: formatTransaction(transaction).fullName,
@@ -74,9 +129,13 @@ const BankingScreen: React.FC = () => {
                 transactionType: formatTransaction(transaction).transactionType,
                 isDeposit: formatTransaction(transaction).isDeposit,
                 amount: transaction.amount,
-                createdAt: transaction.createdAt
+                createdAt: transaction.createdAt,
+                card: {
+                    brand: transaction.card.brand,
+                    last4Number: transaction.card.last4Number,
+                    alias: transaction.card.alias
+                }
             }
-            console.log(data);
 
             await dispatch(transactionActions.setTransaction(data))
             setShowSingleTransaction(true)
@@ -87,8 +146,10 @@ const BankingScreen: React.FC = () => {
         }
     }
 
-    const onCloseFinishSingleTransaction = () => {
+    const onCloseFinishSingleTransaction = async () => {
         setShowSingleTransaction(false)
+
+        await dispatch(transactionActions.setTransaction({}))
     }
 
     const onRefresh = useCallback(async () => {
@@ -132,7 +193,7 @@ const BankingScreen: React.FC = () => {
                                                 <AntDesign name={formatTransaction(item).icon as any} size={24} color={formatTransaction(item).isDeposit ? colors.mainGreen : colors.red} />
                                             </HStack>
                                             <VStack ml={"10px"} justifyContent={"center"}>
-                                                <Heading textTransform={"capitalize"} fontSize={scale(13)} color={colors.white}>{formatTransaction(item).fullName}</Heading>
+                                                <Heading textTransform={"capitalize"} fontSize={scale(13)} color={colors.white}>{formatTransaction(item).transactionType}</Heading>
                                                 <Text fontSize={scale(12)} color={colors.pureGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
                                             </VStack>
                                         </HStack>
@@ -152,11 +213,17 @@ const BankingScreen: React.FC = () => {
                     )}
                 </VStack>
             </ScrollView>
-            <BottomSheet openTime={300} height={height * 0.45} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
+            <BottomSheet openTime={300} height={height * 0.5} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
                 <SingleTransactionBanking onClose={onCloseFinishSingleTransaction} />
             </BottomSheet>
             <Cards onCloseFinish={() => setShowAllCards(false)} open={showAllCards} />
             <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
+            <BottomSheet height={height * 0.9} onCloseFinish={() => setShowDeposit(false)} open={showDeposit}>
+                <DepositOrWithdrawTransaction onSendFinish={onDepositBankingTransaction} />
+            </BottomSheet>
+            <BottomSheet height={height * 0.9} onCloseFinish={() => setShowWithdraw(false)} open={showWithdraw}>
+                <DepositOrWithdrawTransaction title='Retirar' onSendFinish={onWithdrawBankingTransaction} />
+            </BottomSheet>
         </VStack>
     )
 }

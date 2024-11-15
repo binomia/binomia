@@ -1,29 +1,22 @@
-import { UserAuthSchema } from "@/auth/userAuth";
 import { NOTIFICATION_SERVER_URL, SOCKET_EVENTS } from "@/constants";
 import useAsyncStorage from "@/hooks/useAsyncStorage";
 import { SocketContextType } from "@/types";
-import { createContext, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { io, Socket } from "socket.io-client";
+import { createContext, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { io } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 import { AccountAuthSchema } from "@/auth/accountAuth";
 import { globalActions } from "@/redux/slices/globalSlice";
-import SingleTransactionScreen from "@/screens/SingleTransactionScreen";
-import BottomSheet from "@/components/global/BottomSheet";
-import { Dimensions } from "react-native";
 
 
-const { height } = Dimensions.get('window')
 export const SocketContext = createContext<SocketContextType>({
     emit: () => { },
     on: () => { }
 });
 
 export const SocketContextProvider = ({ children }: { children: JSX.Element }) => {
-
     const { getItem } = useAsyncStorage()
     const dispatch = useDispatch()
-
 
     const emit = (event: string, data: any) => {
 

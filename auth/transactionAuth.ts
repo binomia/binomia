@@ -14,6 +14,19 @@ export class TransactionAuthSchema {
         })
     })
 
+    static createBankingTransaction = z.object({
+        cardId: z.number(),
+        data: z.object({
+            amount: z.number().min(10, "la cantidad debe ser mayor o igual a 10"),
+            currency: z.string().default("DOP"),
+            transactionType: z.enum(["deposit", "withdraw"]).default("deposit"),
+            location: z.object({
+                latitude: z.number().default(0),
+                longitude: z.number().default(0),
+            })
+        })
+    })
+
 
     static createTransactionDetails = z.object({
         username: z.string(),

@@ -12,6 +12,7 @@ import { cardBackHolder, cardHolder, noCard } from '@/assets';
 import { scale } from 'react-native-size-matters';
 import { MaterialIcons } from '@expo/vector-icons';
 import { TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
+import { CreditCardIssuer } from 'react-native-credit-card-input/lib/typescript/src/useCreditCardForm';
 
 
 type Props = {
@@ -33,7 +34,7 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
     const [asPrimary, setAsPrimary] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("")
-    const [type, setType] = useState<string>("")
+    const [type, setType] = useState<CreditCardIssuer>()
 
 
 
@@ -109,7 +110,7 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
         if (type === "number") {
             const { card } = valid.number(text)
             setNumber(text)
-            setType(card?.type ?? "")
+            setType(card?.type as CreditCardIssuer)
 
         } else if (type === "expiry") {
             setExpiry(formatExpirationDate(text))
@@ -225,7 +226,6 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
                                     placeholders={cardPlaceholders}
                                     focusedField={focusedField as any}
                                     type={type as any}
-
                                 />
                             </HStack>
                             <VStack mt={"20px"}>

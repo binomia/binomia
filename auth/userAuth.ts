@@ -58,6 +58,7 @@ export class UserAuthSchema {
     static cardData = z.object({
         id: z.number(),
         last4Number: z.string(),
+        isPrimary: z.boolean(),
         hash: z.string(),
         brand: z.string(),
         alias: z.string(),

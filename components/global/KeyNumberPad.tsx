@@ -63,9 +63,9 @@ const KeyNumberPad: React.FC<Props> = ({ onChange = (_: string) => { }, maxAmoun
     }
 
     return (
-        <VStack space={2} alignItems={"center"} justifyContent={"space-between"}>
-            <Heading mb={"10px"} fontSize={scale(45 + valueScale)} color={"mainGreen"} textAlign={"center"}>{FORMAT_CURRENCY(Number(value))}</Heading>
-            <FlatList columnWrapperStyle={styles.ColumnWrapperStyle} contentContainerStyle={{ alignItems: "center", gap: 20 }} data={["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "x"]} numColumns={3} renderItem={({ item }) => (
+        <VStack >
+            <Heading fontSize={scale(45 + valueScale)} color={"mainGreen"} textAlign={"center"}>{FORMAT_CURRENCY(Number(value))}</Heading>
+            <FlatList mt={"20px"} columnWrapperStyle={styles.ColumnWrapperStyle} contentContainerStyle={{ alignItems: "center", justifyContent: "center" }} data={["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "x"]} numColumns={3} renderItem={({ item }) => (
                 item === "x" ?
                     <Pressable key={`number-key-pad-key-${item}`} onPress={() => onInputChange(item)} style={styles.OuterButton} _pressed={styles.OuterButtonPressed}>
                         <FontAwesome6 name="delete-left" size={24} color={colors.white} />
@@ -76,7 +76,7 @@ const KeyNumberPad: React.FC<Props> = ({ onChange = (_: string) => { }, maxAmoun
                     </Pressable>
             )} />
         </VStack>
-        
+
     )
 }
 

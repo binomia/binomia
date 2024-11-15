@@ -139,7 +139,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                             <VStack mt={"10px"}>
                                 <Image alt='logo-image' h={height / 3} resizeMode='contain' w={"100%"} source={noCard} />
                                 <Heading fontSize={scale(20)} color={colors.white} textAlign={"center"}>No Tienes Tarjetas Agregadas</Heading>
-                                <Text textAlign={"center"} fontSize={scale(15)} color={colors.pureGray}>Necesitas mínimo una tarjeta para realizar transacciones</Text>
+                                <Text textAlign={"center"} fontSize={scale(15)} color={colors.pureGray}>Necesitas mínimo una tarjeta para depositar o retirar dinero</Text>
                             </VStack>
                         </ScrollView>
                         <HStack h={"55px"} w={"100%"} justifyContent={"center"}>

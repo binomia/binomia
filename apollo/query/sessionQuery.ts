@@ -149,10 +149,10 @@ export class SessionApolloQueries {
                     }
                     cards {
                         id
-                        cardNumber
-                        cvv
-                        expirationDate
-                        cardHolderName
+                        last4Number
+                        alias
+                        isPrimary
+                        data
                         createdAt
                         updatedAt
                     }

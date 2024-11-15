@@ -1,4 +1,4 @@
-import { Dimensions, RefreshControl, StyleSheet } from 'react-native'
+import { Dimensions, RefreshControl } from 'react-native'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { Heading, HStack, Image, Pressable, VStack, Text, ScrollView } from 'native-base';
 import colors from '@/colors';
@@ -126,12 +126,3 @@ const HomeScreen: React.FC = () => {
 }
 
 export default HomeScreen
-
-const styles = StyleSheet.create({
-	Button: {
-		width: "49%",
-		height: 50,
-		backgroundColor: colors.darkGray,
-		borderRadius: 10
-	}
-})

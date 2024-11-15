@@ -31,6 +31,7 @@ export class TransactionApolloQueries {
             }
         `
     }
+
     static accountBankingTransactions = () => {
         return gql`
             query AccountBankingTransactions($page: Int!, $pageSize: Int!) {
@@ -43,6 +44,17 @@ export class TransactionApolloQueries {
                     currency
                     status
                     data
+                    card {
+                        id
+                        last4Number
+                        isPrimary
+                        hash
+                        brand
+                        alias
+                        data
+                        createdAt
+                        updatedAt
+                    }
                     currency
                     createdAt
                     updatedAt
@@ -56,6 +68,7 @@ export class TransactionApolloQueries {
             }
         `
     }
+
     static accountTransactions = () => {
         return gql`
             query AccountTransactions($page: Int!, $pageSize: Int!) {
@@ -135,6 +148,29 @@ export class TransactionApolloQueries {
                             updatedAt
                         }
                     }
+                }
+            }
+        `
+    }
+
+    static createBankingTransaction = () => {
+        return gql`
+            mutation CreateBankingTransaction($data: BankingTransactionInput!, $cardId: Int!) {
+                createBankingTransaction(data: $data, cardId: $cardId) {
+                    transactionId
+                    amount
+                    deliveredAmount
+                    voidedAmount
+                    transactionType
+                    currency
+                    status
+                    data
+                    location {
+                        latitude
+                        longitude
+                    }
+                    createdAt
+                    updatedAt                    
                 }
             }
         `

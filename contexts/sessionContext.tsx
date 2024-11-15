@@ -56,12 +56,15 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
             const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account)
             const cardsData = await UserAuthSchema.cardsData.parseAsync(user.data.sessionUser.cards)
+            const primaryCard = cardsData.find((card: any) => card.isPrimary === true)
+         
 
             await Promise.all([
                 dispatch(globalActions.setUser(userProfileData)),
                 dispatch(globalActions.setKyc(kycData)),
                 dispatch(globalActions.setAccount(accountsData)),
-                dispatch(globalActions.setCards(cardsData))
+                dispatch(globalActions.setCards(cardsData)),
+                dispatch(globalActions.setCard(primaryCard ?? {}))
             ])
 
         } catch (error) {
@@ -248,18 +251,18 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             if (jwt) {
                 await dispatch(globalActions.setJwt(jwt))
                 await fetchSessionUser()
-                setJwt(jwt)
-
+                
                 const [ip, network] = await Promise.all([Network.getIpAddressAsync(), Network.getNetworkStateAsync()])
                 const location = await getLocation()
-
+                
                 await Promise.all([
                     dispatch(globalActions.setNetwork({ ...network, ip })),
                     dispatch(globalActions.setLocation(location))
                 ])
-
+                
                 await dispatch(globalActions.setApplicationId(applicationId))
                 await setNotifications();
+                setJwt(jwt)
 
             } else {
                 router.navigate("/welcome")

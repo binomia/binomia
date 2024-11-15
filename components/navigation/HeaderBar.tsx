@@ -11,9 +11,7 @@ import { AntDesign, Ionicons } from '@expo/vector-icons';
 
 export const HomeHeaderLeft: React.FC = () => {
     return (
-        <VStack>
-            <Image alt='logo-image' w={"115px"} h={"30px"} source={logo} />
-        </VStack>
+        <Image alt='logo-image'  w={"108px"} h={"35px"} source={logo} />
     )
 }
 
@@ -69,7 +67,7 @@ export const HeaderBankingRight: React.FC = () => {
 export const WelcomeLeft: React.FC = () => {
     return (
         <HStack>
-            <Image alt='logo-image' w={"115px"} h={"30px"} source={logo} />
+            <Image alt='logo-image' resizeMode="contain" w={"108px"} h={"34px"} source={logo} />
         </HStack>
     )
 }

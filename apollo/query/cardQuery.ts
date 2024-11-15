@@ -49,7 +49,7 @@ export class CardApolloQueries {
                     createdAt
                     updatedAt
                 }
-                }
+            }
         `
     }
 }

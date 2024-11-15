@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from 'react'
-import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, Stack } from 'native-base'
 import colors from '@/colors'
-import { scale } from 'react-native-size-matters'
-import { Dimensions, SafeAreaView, TouchableOpacity } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import BottomSheet from '../global/BottomSheet'
 import CardModification from './CardModification'
+import AntDesign from '@expo/vector-icons/AntDesign';
+import Button from '../global/Button'
+import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, Stack } from 'native-base'
+import { scale } from 'react-native-size-matters'
+import { Dimensions, SafeAreaView, TouchableOpacity } from 'react-native'
 import { globalActions } from '@/redux/slices/globalSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { FlagsList } from 'aws-sdk/clients/guardduty'
-import AntDesign from '@expo/vector-icons/AntDesign';
 import { CardType } from '@/types'
-import { mockCardsLogo } from '@/mocks'
 import { mastercardLogo, noCard, visaLogo } from '@/assets'
-import Button from '../global/Button'
 
 type Props = {
     open?: boolean
@@ -96,7 +95,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                                 )}
                             />
                         ) : (
-                            <VStack px={"10px"} flex={1} bg={"red"}>
+                            <VStack px={"10px"} flex={1}>
                                 <Image alt='logo-image' resizeMode='contain' w={"100%"} h={"100%"} source={noCard} />
                                 <Button onPress={() => { }} title="Añadir Tarjeta" bg={colors.mainGreen} />
                             </VStack>
