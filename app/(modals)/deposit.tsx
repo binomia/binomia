@@ -39,8 +39,6 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Deposito", ope
 
 
     const onChange = (value: string) => {
-        console.log(value, card);
-
         if (Number(value) >= 10)
             setShowPayButton(true)
         else

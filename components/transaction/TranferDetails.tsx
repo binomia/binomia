@@ -56,7 +56,6 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
                 location
             })
 
-            console.log({ recurrence });  
             const transaction = await createTransaction({
                 variables: { data, recurrence }
             })

@@ -37,8 +37,9 @@ const BankingScreen: React.FC = () => {
     const [showWithdraw, setShowWithdraw] = useState(false);
     const [showSingleTransaction, setShowSingleTransaction] = useState(false);
 
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-    const onDepositBankingTransaction = async (amount: number) => {
+    const onDepositBankingTransaction = async (amount: number, transactionType: "deposit" | "withdraw") => {
         try {
             const variables = await TransactionAuthSchema.createBankingTransaction.parseAsync({
                 cardId: card.id,
@@ -46,7 +47,7 @@ const BankingScreen: React.FC = () => {
                     amount,
                     location,
                     currency: account.currency,
-                    transactionType: "deposit",
+                    transactionType
                 }
             })
 
@@ -56,18 +57,18 @@ const BankingScreen: React.FC = () => {
             })
 
             setTransactions([data.createBankingTransaction, ...transactions])
-            await onSelectTransaction(data.createBankingTransaction)
 
-            console.log(JSON.stringify(data, null, 2));
+            await Promise.all([
+                dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance + amount }))),
 
-        } catch (errors: any) {
-            console.log(errors);
-        }
-    }
+            ]).then(async () => {
+                setShowDeposit(false)
+                setShowWithdraw(false)
+                await delay(1000)
 
-    const onWithdrawBankingTransaction = async (amount: number) => {
-        try {
-            console.log({ amount });
+            }).then(async () => {
+                await onSelectTransaction(data.createBankingTransaction)
+            })
 
         } catch (errors: any) {
             console.log(errors);
@@ -113,14 +114,14 @@ const BankingScreen: React.FC = () => {
             username: user.username,
         }
 
+        console.log(JSON.stringify(data, null, 2));
+        
+
         return data
     }
 
     const onSelectTransaction = async (transaction: any) => {
         try {
-
-            console.log(JSON.stringify(transaction, null, 2));
-
             const data = {
                 id: transaction.id,
                 fullName: formatTransaction(transaction).fullName,
@@ -219,10 +220,10 @@ const BankingScreen: React.FC = () => {
             <Cards onCloseFinish={() => setShowAllCards(false)} open={showAllCards} />
             <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
             <BottomSheet height={height * 0.9} onCloseFinish={() => setShowDeposit(false)} open={showDeposit}>
-                <DepositOrWithdrawTransaction onSendFinish={onDepositBankingTransaction} />
+                <DepositOrWithdrawTransaction onSendFinish={(amount: number) => onDepositBankingTransaction(amount, "deposit")} />
             </BottomSheet>
             <BottomSheet height={height * 0.9} onCloseFinish={() => setShowWithdraw(false)} open={showWithdraw}>
-                <DepositOrWithdrawTransaction title='Retirar' onSendFinish={onWithdrawBankingTransaction} />
+                <DepositOrWithdrawTransaction title='Retirar' onSendFinish={(amount: number) => onDepositBankingTransaction(amount, "withdraw")} />
             </BottomSheet>
         </VStack>
     )

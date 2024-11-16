@@ -5,7 +5,6 @@ import * as Location from 'expo-location';
 
 export const useLocation = () => {
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
-    const [errorMsg, setErrorMsg] = useState<string>("");
 
     const requestPermissions = async () => {
         const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
@@ -27,13 +26,8 @@ export const useLocation = () => {
     const getLocation = async () => {
         try {
             await requestPermissions();
-            // alert("requestPermissions")
             const location = await Location.getCurrentPositionAsync({});
             setLocation(location);
-
-            // await Location.watchPositionAsync({ accuracy: Location.Accuracy.Highest }, (location) => {
-            //     console.log(JSON.stringify(location, null, 2));
-            // })
 
             return {
                 latitude: location.coords.latitude,
@@ -56,7 +50,6 @@ export const useLocation = () => {
 
     return {
         location,
-        errorMsg,
         getLocation
     }
 }

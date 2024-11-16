@@ -72,7 +72,6 @@ const BankingScreen: React.FC = () => {
 
     const onSelectTransaction = async (transaction: any) => {
         try {
-            console.log(transaction);
             const data = {
                 id: transaction.id,
                 fullName: formatTransaction(transaction).fullName,
@@ -82,14 +81,12 @@ const BankingScreen: React.FC = () => {
                 amount: transaction.amount,
                 createdAt: transaction.createdAt
             }
-            console.log(data);
 
             await dispatch(transactionActions.setTransaction(data))
             setShowSingleTransaction(true)
 
         } catch (error) {
             console.log(error);
-
         }
     }
 

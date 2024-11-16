@@ -165,6 +165,17 @@ export class TransactionApolloQueries {
                     currency
                     status
                     data
+                    card {
+                        id
+                        last4Number
+                        isPrimary
+                        hash
+                        brand
+                        alias
+                        data
+                        createdAt
+                        updatedAt
+                    }
                     location {
                         latitude
                         longitude

@@ -38,13 +38,8 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                 query: { username }
             });
 
-            console.log("red");
-
-
-
             socket.on("connect", () => {
                 socket.on(SOCKET_EVENTS.TRANSACTION_RECEIVED, async (data: any) => {
-                    // console.log(JSON.stringify(data.to, null, 2));
                     dispatch(globalActions.setAccount(data.to))
                 })
 

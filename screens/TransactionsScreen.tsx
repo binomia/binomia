@@ -82,9 +82,6 @@ const TransactionsScreen: React.FC = () => {
 				}
 			})
 
-			console.log(JSON.stringify(data.accountTransactions, null, 2));
-
-
 			setTransactions(data.accountTransactions)
 
 		} catch (error) {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import colors from '@/colors'
 import BottomSheet from '@/components/global/BottomSheet';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import moment from 'moment';
 import { StyleSheet, SafeAreaView, Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Pressable } from 'native-base'
@@ -10,6 +9,7 @@ import { scale } from 'react-native-size-matters';
 import { useSelector } from 'react-redux';
 import { checked, mastercardLogo, visaLogo } from '@/assets';
 import { AntDesign } from '@expo/vector-icons';
+import { TEXT_HEADING_FONT_SIZE } from '@/constants';
 
 
 type Props = {
@@ -76,7 +76,7 @@ const SingleTransactionBanking: React.FC<Props> = ({ }) => {
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
 			<VStack px={"20px"} h={"100%"}>
-				<VStack flex={1} pb={"40px"} mt={"20px"} justifyContent={"space-between"}>
+				<VStack flex={1} pb={"40px"} my={"20px"} justifyContent={"space-between"}>
 					<HStack flexDirection={"row"} alignItems={"center"}>
 						{renderCardLogo(transaction.card.brand)}
 						<VStack justifyContent={"center"}>
@@ -84,12 +84,12 @@ const SingleTransactionBanking: React.FC<Props> = ({ }) => {
 							<Text fontSize={scale(13)} color={colors.pureGray}>{transaction.card?.alias}</Text>
 						</VStack>
 					</HStack>
-					<VStack mt={"20px"} alignItems={"center"} borderRadius={10}>
-						<VStack mt={"10px"} mb={"50px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{transaction.transactionType}</Heading>
+					<VStack  alignItems={"center"} borderRadius={10}>
+						<VStack mt={"10px"} mb={"10px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
+							<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>{transaction.transactionType}</Heading>
 						</VStack>
 						<VStack alignItems={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(40)} color={transaction.isFromMe ? "red" : "mainGreen"}>{transaction.isFromMe ? "-" : "+"}{FORMAT_CURRENCY(transaction?.amount)}</Heading>
+							<Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={!transaction.isDeposit ? "red" : "mainGreen"}>{!transaction.isDeposit ? "-" : "+"}{FORMAT_CURRENCY(transaction?.amount)}</Heading>
 							<Text mb={"20px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
 							<HStack w={scale(60)} h={scale(60)} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
 								<AntDesign name={transaction.icon as any} size={24} color={transaction.isDeposit ? colors.mainGreen : colors.red} />

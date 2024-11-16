@@ -56,7 +56,6 @@ const HomeScreen: React.FC = () => {
 
     useEffect(() => {
         socket.on(`${SOCKET_EVENTS.TRANSACTION_RECEIVED}@${account.username}`, async (data: any) => {
-            console.log(JSON.stringify(data.to, null, 2));
             dispatch(globalActions.setAccount(data.to))
         })
     }, [])

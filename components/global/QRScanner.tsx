@@ -47,7 +47,6 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
     const onBarcodeScanned = async ({ data }: { data: string }) => {
         if (isScanning) return;
         setIsScanning(true);
-        console.log(data);
 
         if (data === user.username) {
             Alert.alert("Advertencia", "No puedes enviarte dinero a ti mismo", [{
@@ -68,10 +67,7 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
 
                 onCloseFinished();
                 setShowSendTransaction(true);
-
-
-                console.log(singleUser.data.searchSingleUser);
-
+                
             } else {
                 Alert.alert("Usuario no encontrado", "El usuario no se encuentra registrado en la plataforma", [{
                     onPress: () => setIsScanning(false)

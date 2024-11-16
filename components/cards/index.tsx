@@ -51,10 +51,6 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
         }
     }
 
-    useEffect(() => {
-        console.log({ cards });
-    }, [])
-
     return (
         <BottomSheet draggable={false} openTime={300} height={height} onCloseFinish={() => onCloseFinish()} open={open}>
             <SafeAreaView style={{ flex: 1 }}>
