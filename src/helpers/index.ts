@@ -4,7 +4,7 @@ import KYCModel from '@/models/kycModel';
 import bcrypt from 'bcryptjs';
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
-import { Op, STRING } from 'sequelize';
+import { Op } from 'sequelize';
 import { z } from 'zod'
 
 
@@ -105,7 +105,6 @@ export const generateUUID = (): string => {
     }
 }
 
-
 export const IDENTIFY_CARD_TYPE = (cardNumber: string): string | undefined => {
     cardNumber = cardNumber.replace(/[\s-]/g, "");
 
@@ -164,12 +163,10 @@ export const checkForProtectedRequests = async (req: any) => {
             });
         });
 
-
         return await jwtVerifyAsync.then(async (data: any) => {
             const jwtData = await z.object({
                 sid: z.string().min(1).transform((val) => val.trim())
             }).parseAsync(data);
-
 
             const session = await SessionModel.findOne({
                 where: {
@@ -226,7 +223,6 @@ export const checkForProtectedRequests = async (req: any) => {
     }
 }
 
-
 export const GET_LAST_SUNDAY_DATE = (): Date => {
     const now: Date = new Date();
     const dayOfWeek = now.getDay();
@@ -243,7 +239,6 @@ export const GENERATE_SIX_DIGIT_TOKEN = (): string => {
     const token = Math.floor(100000 + Math.random() * 900000);
     return token.toString();
 }
-
 
 export const formatError = (formattedError: any, _: any) => {
     console.log(JSON.stringify(formattedError, null, 2));

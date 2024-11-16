@@ -42,21 +42,6 @@ const type = () => {
             to: AccountTypeWithUser
         }
 
-        type BankingTransactionType {
-            transactionId: String
-            amount: Float
-            deliveredAmount: Float         
-            voidedAmount: Float
-            transactionType: String
-            currency: String
-            status: String
-            location: TransactionLocationType
-            createdAt: String
-            updatedAt: String
-            account: AccountTypeWithUser
-            data: JSON
-        }
-
         type TransactionLocationType {
             latitude: Float
             longitude: Float
@@ -74,7 +59,23 @@ const type = () => {
             createdAt: String
             updatedAt: String
             receiver: OnlyUserType
-        }   
+        }  
+            
+        type BankingTransactionType {
+            transactionId: String
+            amount: Float
+            deliveredAmount: Float         
+            voidedAmount: Float
+            transactionType: String
+            currency: String
+            status: String
+            location: TransactionLocationType
+            createdAt: String
+            updatedAt: String
+            account: AccountTypeWithUser
+            card: OnlyCardType
+            data: JSON
+        }
 
         type BankingTransactionCreatedType {
             transactionId: String
@@ -87,6 +88,8 @@ const type = () => {
             location: TransactionLocationType
             createdAt: String
             updatedAt: String
+            account: AccountTypeWithUser
+            card: OnlyCardType
             data: JSON
         }   
 

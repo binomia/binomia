@@ -141,7 +141,9 @@ export class TransactionsController {
 
             if (recurrenceData.time !== "oneTime")
                 await redis.publish(QUEUE_JOBS_NAME.CREATE_TRANSACTION, JSON.stringify({
-                    headers: Date.now()
+                    jobName: recurrenceData.title,
+                    jobTime: recurrenceData.time,
+                    transaction: transactionData.toJSON()
                 }))
 
             return transactionData.toJSON()
@@ -169,7 +171,7 @@ export class TransactionsController {
                 throw new GraphQLError('The given card is not linked to the user account');
 
 
-            const decryptedCardData = await Cryptography.decrypt(card?.dataValues?.data)
+            const decryptedCardData = await Cryptography.decrypt(card.toJSON().data)
             const cardData = Object.assign({}, card.toJSON(), JSON.parse(decryptedCardData))
 
             // Need Payment Gateway Integration
@@ -197,7 +199,15 @@ export class TransactionsController {
                 data: {}
             })
 
-            return transaction.toJSON()
+            await AccountModel.update({
+                balance: session.user.account.balance + validatedData.amount
+            }, {
+                where: {
+                    id: session.user.account.id
+                }
+            })
+
+            return Object.assign({}, transaction.toJSON(), { card: cardData })
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -209,7 +219,7 @@ export class TransactionsController {
             const session = await checkForProtectedRequests(context.req);
 
             const fields = getQueryResponseFields(fieldNodes, 'transactions')
-            const { user } = context.req.session
+            const { user } = session
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
             const limit = _pageSize;
@@ -291,6 +301,11 @@ export class TransactionsController {
                             as: 'user',
                             attributes: fields['user']
                         }]
+                    },
+                    {
+                        model: CardsModel,
+                        as: 'card',
+                        attributes: fields['card']
                     }
                 ]
             })

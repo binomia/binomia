@@ -27,6 +27,7 @@ export class GlobalZodSchema {
         NOTIFICATION_SERVER_URL: z.string(),
         ZERO_SIGN_PRIVATE_KEY: z.string(),
         REDIS_HOST: z.string(),
-        REDIS_PORT: z.string()
+        REDIS_PORT: z.string(),
+        PORT: z.string()
     })
 }

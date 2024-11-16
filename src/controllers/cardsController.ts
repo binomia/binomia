@@ -40,6 +40,9 @@ export class CardsController {
         try {
             const session = await checkForProtectedRequests(req);
 
+            console.log({ session });
+            
+
             const fields = getQueryResponseFields(fieldNodes, 'cards', false, true)
             const cards = await CardsModel.findAll({
                 where: { userId: session.userId },
