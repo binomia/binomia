@@ -6,6 +6,9 @@ export const AUTH_SERVER_URL: string = process.env.AUTH_SERVER_URL || "";
 export const SENDGRID_API_KEY: string = process.env.SENDGRID_API_KEY || "";
 
 
+export const DASHBOARD_LOGO_URL: string = "https://res.cloudinary.com/brayhandeaza/image/upload/v1731676496/ccb2rr0ixpbrjxe9e73j.png";
+export const DASHBOARD_FAVICON_URL: string = 'https://res.cloudinary.com/brayhandeaza/image/upload/v1731649234/yphdze0x2k2unxwoj6vy.png';
+
 export const REDIS_SUBSCRIPTION_CHANNEL = {
     TRANSACTION_CREATED: "TRANSACTION_CREATED",
     LOGIN_VERIFICATION_CODE: "LOGIN_VERIFICATION_CODE"
@@ -14,3 +17,4 @@ export const REDIS_SUBSCRIPTION_CHANNEL = {
 export const QUEUE_JOBS_NAME = {
     CREATE_TRANSACTION: "CREATE_TRANSACTION",
 }
+

@@ -1,0 +1,1 @@
+export type WeeklyQueueTitleType = "everySunday" | "everyMonday" | "everyTuesday" | "everyWednesday" | "everyThursday" | "everyFriday" | "everySaturday"

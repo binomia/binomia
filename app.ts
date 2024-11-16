@@ -2,20 +2,59 @@ import cluster from "cluster";
 import os from "os";
 import redis, { initRedisEventSubcription } from "@/redis";
 import { JSONRPCServer } from "json-rpc-2.0";
-import { QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
-import { initQueues } from "@/queues";
+import { DASHBOARD_FAVICON_URL, DASHBOARD_LOGO_URL, QUEUE_JOBS_NAME } from "@/constants";
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import { unAuthorizedResponse } from "@/helpers";
 import { initMethods } from "@/rpc";
 
+import { createBullBoard, } from '@bull-board/api';
+import { ExpressAdapter, } from '@bull-board/express';
+import { queuesBullAdapter } from "@/queues";
+import { DateFormats } from "@bull-board/api/dist/typings/app";
 
 const app: Express = express();
+// const a: DateFormats
+const serverAdapter = new ExpressAdapter();
+serverAdapter.setBasePath('/')
+
 app.use(express.json());
 app.use(cors({
-    methods: ["POST"],
     origin: "*",
 }));
+
+app.use('/', serverAdapter.getRouter());
+
+
+createBullBoard({
+    queues: queuesBullAdapter,
+    serverAdapter: serverAdapter,
+    options: {
+        uiConfig: {
+            boardTitle: "",
+            favIcon: {
+                default: DASHBOARD_FAVICON_URL,
+                alternative: DASHBOARD_FAVICON_URL,
+            },
+            boardLogo: {
+                width: 80,
+                height: 35,
+                path: DASHBOARD_LOGO_URL,
+            },
+            locale: {
+                lng: "es",
+            },
+            dateFormats: {
+                common: "EEEE, MMM. d yyyy, h:mma",  
+                short: "EEEE, MMM. d yyyy, h:mma",  
+                full: "EEEE, MMM. d yyyy, h:mma",  
+
+            }
+        }
+    }
+});
+
+
 
 const server = new JSONRPCServer();
 initMethods(server);
@@ -40,14 +79,14 @@ if (cluster.isPrimary) {
         }
     })
 
-    initQueues();
     cluster.on("exit", (worker) => {
         console.log(`Worker ${worker.process.pid} died`);
         cluster.fork();
     });
 
+
 } else {
-    app.get("*", unAuthorizedResponse);
+    // app.get("*", unAuthorizedResponse);
     app.patch("*", unAuthorizedResponse);
     app.put("*", unAuthorizedResponse);
     app.delete("*", unAuthorizedResponse);

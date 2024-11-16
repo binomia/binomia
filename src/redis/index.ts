@@ -1,4 +1,5 @@
 import { QUEUE_JOBS_NAME } from "@/constants";
+import { transactionsQueue } from "@/queues";
 import Redis from "ioredis";
 
 
@@ -7,16 +8,18 @@ export const connection = {
     port: 6379
 }
 
-export default new Redis(connection)
+export default new Redis({
+    host: "redis",
+    port: 6379
+})
 
 
-
-export const initRedisEventSubcription = () => {
+export const initRedisEventSubcription = async () => {
     process.on("message", async ({ channel, payload }: any) => {
         switch (channel) {
             case QUEUE_JOBS_NAME.CREATE_TRANSACTION:
-                const { transaction, recipientSocketRoom } = JSON.parse(payload)
-                console.log({ transaction, recipientSocketRoom });
+                const { jobName, jobTime, transaction } = JSON.parse(payload);
+                await transactionsQueue.createJobs(jobName, jobTime, transaction);
                 break;
             default:
                 break;
