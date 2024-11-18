@@ -13,7 +13,7 @@ export class TransactionsController {
     static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
         try {
             await checkForProtectedRequests(context.req);
-            const validatedData: TransactionCreateType = await TransactionJoiSchema.createTransaction.validateAsync(data)
+            const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
             const { user: sender } = context.req.session
@@ -156,7 +156,7 @@ export class TransactionsController {
     static createBankingTransaction = async (_: unknown, { cardId, data }: { cardId: number, data: any }, context: any) => {
         try {
             const session = await checkForProtectedRequests(context.req);
-            const validatedData: BankingTransactionCreateType = await TransactionJoiSchema.bankingCreateTransaction.validateAsync(data)
+            const validatedData = await TransactionJoiSchema.bankingCreateTransaction.parseAsync(data)
 
             const card = await CardsModel.findOne({
                 where: {
@@ -199,13 +199,21 @@ export class TransactionsController {
                 data: {}
             })
 
+
+            const newBalance = {
+                deposit: session.user.account.balance + validatedData.amount,
+                withdraw: session.user.account.balance - validatedData.amount
+            }
+
             await AccountModel.update({
-                balance: session.user.account.balance + validatedData.amount
+                balance: newBalance[validatedData.transactionType]
             }, {
                 where: {
                     id: session.user.account.id
                 }
             })
+
+            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.BANKING_TRANSACTION_CREATED, JSON.stringify(transaction.toJSON()))
 
             return Object.assign({}, transaction.toJSON(), { card: cardData })
 

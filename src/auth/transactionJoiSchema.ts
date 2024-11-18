@@ -3,15 +3,15 @@ import { z } from 'zod'
 
 
 export class TransactionJoiSchema {
-    static createTransaction = Joi.object({
-        amount: Joi.number().greater(0).required(),
-        currency: Joi.string().valid('DOP').required(),
-        receiver: Joi.string().required(),
-        transactionType: Joi.string().required(),
-        location: Joi.object({
-            latitude: Joi.number().required(),
-            longitude: Joi.number().required()
-        }).required()
+    static createTransaction = z.object({
+        amount: z.number().gt(0),
+        currency: z.enum(["DOP"]),
+        receiver: z.string(),
+        transactionType: z.enum(["transfer"]),
+        location: z.object({
+            latitude: z.number(),
+            longitude: z.number()
+        })
     })
 
     static recurrenceTransaction = z.object({
@@ -19,12 +19,13 @@ export class TransactionJoiSchema {
         time: z.string()
     })
 
-    static bankingCreateTransaction = TransactionJoiSchema.createTransaction.fork(
-        ['receiver'],
-        (schema) => schema.forbidden()
-    )
+    // extende the create transaction schema but forbid the receiver
+    static bankingCreateTransaction = TransactionJoiSchema.createTransaction.extend({
+        receiver: z.string().nullish().optional(),
+        transactionType: z.enum(["deposit", "withdraw"])
+    })
 
-    
+
 
     static validateTransaction = z.object({
         amount: z.number(),

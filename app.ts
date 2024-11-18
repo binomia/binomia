@@ -75,7 +75,7 @@ const httpServer = createServer(app);
         app.use(express.json())
         app.use(
             expressMiddleware(server, {
-                context: async ({ req, res }) => {
+                context: async ({ req, res }) => {                    
                     return { req, res }
                 }
             })

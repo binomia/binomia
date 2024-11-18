@@ -1,8 +1,8 @@
-import { ZERO_ENCRYPTION_KEY } from '@/constants';
 import { AccountModel, CardsModel, SessionModel, UsersModel } from '@/models';
 import KYCModel from '@/models/kycModel';
 import bcrypt from 'bcryptjs';
 import { GraphQLError } from 'graphql';
+import { ZERO_ENCRYPTION_KEY } from '@/constants';
 import jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
 import { z } from 'zod'
@@ -154,10 +154,16 @@ export const checkForProtectedRequests = async (req: any) => {
         const token = await z.string().min(1).transform((val) => val.trim()).parseAsync(req.headers["authorization"]);
         const jwtToken = token.split(' ')[1];
 
+        console.log({ jwtToken, ZERO_ENCRYPTION_KEY });
+
+
         const jwtVerifyAsync = new Promise((resolve, reject) => {
             jwt.verify(jwtToken, ZERO_ENCRYPTION_KEY, (err, payload) => {
-                if (err)
+                if (err) {
+                    console.log({ err });
+
                     reject(err);
+                }
                 else
                     resolve(payload);
             });
@@ -195,6 +201,8 @@ export const checkForProtectedRequests = async (req: any) => {
                 }]
             })
 
+
+
             if (!session)
                 throw new GraphQLError("INVALID_SESSION: No session found")
 
@@ -207,6 +215,8 @@ export const checkForProtectedRequests = async (req: any) => {
             return session.toJSON()
 
         }).catch((error: any) => {
+            // console.log({ error });
+
             const message = error.message === "jwt expired" ? "INVALID_SESSION: Session expired" : error.message
             throw new GraphQLError(message, {
                 extensions: {

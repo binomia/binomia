@@ -8,13 +8,18 @@ import { Op } from 'sequelize';
 import cardValidator from 'card-validator';
 
 export class CardsController {
-    static card = async (_: unknown, __: unknown, { req }: { req: any }, { fieldNodes }: { fieldNodes: any }) => {
+    static card = async (_: unknown, { cardId }: { cardId: number }, { req }: { req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(req);
 
             const fields = getQueryResponseFields(fieldNodes, 'card', false, true)
             const card = await CardsModel.findOne({
-                where: { userId: session.userId },
+                where: {
+                    [Op.and]: [
+                        { userId: session.userId },
+                        { id: cardId }
+                    ]
+                },
                 include: [{
                     model: UsersModel,
                     as: 'user',
@@ -27,7 +32,7 @@ export class CardsController {
 
 
             const decryptedCardData = await Cryptography.decrypt(card?.dataValues?.data)
-            const cardData = Object.assign({}, card.dataValues, JSON.parse(decryptedCardData))
+            const cardData = Object.assign({}, card.toJSON(), JSON.parse(decryptedCardData))
 
             return cardData
 
@@ -41,7 +46,7 @@ export class CardsController {
             const session = await checkForProtectedRequests(req);
 
             console.log({ session });
-            
+
 
             const fields = getQueryResponseFields(fieldNodes, 'cards', false, true)
             const cards = await CardsModel.findAll({
@@ -119,23 +124,32 @@ export class CardsController {
         }
     }
 
-    static updateCard = async (_: unknown, { data }: { data: CardModelType }, { req }: { req: any }, { fieldNodes }: { fieldNodes: any }) => {
+    static updateCard = async (_: unknown, { cardId, data }: { cardId: number, data: CardModelType }, { req }: { req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(req);
-            const validatedData: CardModelType = await CardAuthSchema.createCard.parseAsync(data)
+            const validatedData: CardModelType = await CardAuthSchema.updateCard.parseAsync(data)
             const fields = getQueryResponseFields(fieldNodes, 'card')
 
             const card = await CardsModel.findOne({
                 where: {
-                    userId: session.userId
+                    [Op.and]: [
+                        { userId: session.userId },
+                        { id: cardId }
+                    ]
                 }
             })
             if (!card)
                 throw new GraphQLError('The given user does not have a card linked');
 
 
+            const hash = await Cryptography.hash(validatedData.cardNumber)
             const encryptedCardData = await Cryptography.encrypt(JSON.stringify(validatedData))
-            await card.update({
+            const cardUpdated = await card.update({
+                alias: validatedData.alias,
+                isPrimary: validatedData.isPrimary,
+                last4Number: validatedData.cardNumber.slice(-4),
+                brand: cardValidator.number(validatedData.cardNumber).card?.type ?? 'unknown',
+                hash,
                 data: encryptedCardData
             }, {
                 where: {
@@ -143,16 +157,9 @@ export class CardsController {
                 }
             })
 
-            const cardData = await card.reload({
-                attributes: fields['card'],
-                include: [{
-                    model: UsersModel,
-                    as: 'user',
-                    attributes: fields['user']
-                }]
-            })
-
-            return cardData
+            return {
+                ...cardUpdated.toJSON(), user: session.user
+            }
 
         } catch (error: any) {
             throw new GraphQLError(error);

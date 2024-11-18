@@ -12,6 +12,17 @@ const type = () => {
             cardHolderName: String
         }
 
+        type DecryptedCardType {
+            isPrimary: Boolean
+            cardNumber: String
+            cvv: String
+            alias: String
+            expirationDate: String
+            cardHolderName: String
+            createdAt: String
+            updatedAt: String
+        }
+
         
         type CardType {
             id:  Int
@@ -44,7 +55,7 @@ const type = () => {
 
 const query = () => {
     return `
-        card: CardType
+        card(cardId: Int!): DecryptedCardType
         cards: [CardType]
     `
 }
@@ -52,8 +63,8 @@ const query = () => {
 const mutation = () => {
     return `  
         createCard(data: CardInput!): CardType       
-        updateCard(data: CardInput!): CardType       
-        deleteCard(hash: String!): CardType       
+        deleteCard(hash: String!): CardType
+        updateCard(cardId: Int!, data: CardInput!): CardType       
     `
 }
 
@@ -61,7 +72,7 @@ const subscription = () => {
     return ``
 }
 
-const { createCard, deleteCard, updateCard, card, cards } = CardsController
+const { createCard, deleteCard,updateCard, card, cards } = CardsController
 const resolvers = {
     query: {
         card,
@@ -69,8 +80,8 @@ const resolvers = {
     },
     mutation: {
         createCard,
-        updateCard,
-        deleteCard
+        deleteCard,
+        updateCard
     },
     subscription: {
 

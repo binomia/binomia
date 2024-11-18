@@ -16,7 +16,7 @@ const query = () => {
 
 const mutation = () => {
     return `  
-        signData(hash: String): String      
+        signData(hash: String): String  
     `
 }
 
@@ -30,7 +30,7 @@ const resolvers = {
         test
     },
     mutation: {
-        signData,
+        signData
     },
     subscription: {}
 }
