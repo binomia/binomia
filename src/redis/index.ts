@@ -16,24 +16,27 @@ export const subscriber = new Redis({
 
 
 export const initRedisEventSubcription = (io: Server) => {
-    process.on("message", async ({ channel, payload }: any) => {
+    process.on("message", async ({ channel, payload }: any) => {        
         switch (channel) {
-            case REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED:
+            case REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED: {
                 const { transaction, recipientSocketRoom } = JSON.parse(payload)
-
                 io.to(recipientSocketRoom).emit(channel, transaction)
                 break;
-
-            case REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE:                
+            }
+            case REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE: {
                 const { data: { user, code } } = JSON.parse(payload)
 
                 await Email.sendVerificationCode(user.email, code);
                 console.log("redis event: ", code);
                 break;
-
+            }
+            case REDIS_SUBSCRIPTION_CHANNEL.BANKING_TRANSACTION_CREATED: {
+                const transaction = JSON.parse(payload)
+                console.log({ BANKING_TRANSACTION_CREATED: transaction });
+                break;
+            }
             default:
                 break;
         }
     })
 }
-

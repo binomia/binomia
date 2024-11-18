@@ -31,6 +31,7 @@ if (cluster.isPrimary) {
 
 
     subscriber.subscribe(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED)
+    subscriber.subscribe(REDIS_SUBSCRIPTION_CHANNEL.BANKING_TRANSACTION_CREATED)
     subscriber.subscribe(REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE)
 
     subscriber.on("message", async (channel, payload) => {
