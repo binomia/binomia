@@ -3,13 +3,14 @@ import colors from '@/colors'
 import BottomSheet from '@/components/global/BottomSheet';
 import moment from 'moment';
 import { StyleSheet, SafeAreaView, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Pressable } from 'native-base'
+import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, Stack } from 'native-base'
 import { FORMAT_CURRENCY } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useSelector } from 'react-redux';
 import { checked, mastercardLogo, visaLogo } from '@/assets';
-import { AntDesign } from '@expo/vector-icons';
+import { AntDesign, Entypo } from '@expo/vector-icons';
 import { TEXT_HEADING_FONT_SIZE } from '@/constants';
+import * as Sharing from 'expo-sharing';
 
 
 type Props = {
@@ -73,27 +74,35 @@ const SingleTransactionBanking: React.FC<Props> = ({ }) => {
 		}
 	}
 
+	const handleShare = async () => {
+		const isAvailableAsync = await Sharing.isAvailableAsync()
+		if (!isAvailableAsync) return
+
+		await Sharing.shareAsync("http://test.com")
+	}
+
+
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
 			<VStack px={"20px"} h={"100%"}>
 				<VStack flex={1} pb={"40px"} my={"20px"} justifyContent={"space-between"}>
-					<HStack flexDirection={"row"} alignItems={"center"}>
+					<HStack >
 						{renderCardLogo(transaction.card.brand)}
 						<VStack justifyContent={"center"}>
 							<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{transaction.card?.brand} {transaction.card?.last4Number}</Heading>
 							<Text fontSize={scale(13)} color={colors.pureGray}>{transaction.card?.alias}</Text>
 						</VStack>
 					</HStack>
-					<VStack  alignItems={"center"} borderRadius={10}>
+					<VStack alignItems={"center"} borderRadius={10}>
 						<VStack mt={"10px"} mb={"10px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
 							<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>{transaction.transactionType}</Heading>
 						</VStack>
 						<VStack alignItems={"center"}>
 							<Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={!transaction.isDeposit ? "red" : "mainGreen"}>{!transaction.isDeposit ? "-" : "+"}{FORMAT_CURRENCY(transaction?.amount)}</Heading>
 							<Text mb={"20px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-							<HStack w={scale(60)} h={scale(60)} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
-								<AntDesign name={transaction.icon as any} size={24} color={transaction.isDeposit ? colors.mainGreen : colors.red} />
-							</HStack>
+							<Pressable  onPress={handleShare} _pressed={{ opacity: 0.5 }}  w={scale(60)} h={scale(60)} shadow={1} borderWidth={0.4} borderColor={colors.placeholder} alignItems={"center"} justifyContent={"center"}  borderRadius={100} bg={colors.lightGray}>
+								<Entypo name="share" size={24} color="white" />
+							</Pressable>
 						</VStack>
 					</VStack>
 				</VStack>
@@ -123,6 +132,16 @@ export default SingleTransactionBanking
 
 
 const styles = StyleSheet.create({
+	Shadow: {
+		shadowColor: colors.lightGray,
+		shadowOffset: {
+			width: 5,
+			height: 1,
+		},
+		shadowOpacity: 0.25,
+		shadowRadius: 1,
+		elevation: 1,
+	},
 	contentContainerStyle: {
 		width: 55,
 		height: 55,

@@ -12,7 +12,7 @@ import { CardType } from '@/types'
 import { mastercardLogo, noCard, visaLogo } from '@/assets'
 import CardModification from '@/components/cards/CardModification'
 import Button from '@/components/global/Button'
-import { router } from 'expo-router'
+import { router, useLocalSearchParams } from 'expo-router'
 import AddOrEditCard from '@/components/cards/AddOrEditCard'
 import BottomSheet from '@/components/global/BottomSheet'
 import { useLazyQuery, useMutation } from '@apollo/client'
@@ -27,7 +27,7 @@ type Props = {
 
 const { height } = Dimensions.get('window')
 
-const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justSelecting = false }) => {
+const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => {
     const [createCard] = useMutation(CardApolloQueries.createCard())
     const [fetchCards] = useLazyQuery(CardApolloQueries.cards())
     const ref = React.useRef<FlagsList>(null);
@@ -36,15 +36,16 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
     const [refreshing, setRefreshing] = useState(false);
     const [showAddCard, setShowAddCard] = useState<boolean>(false)
     const { cards }: { cards: CardType[] } = useSelector((state: any) => state.globalReducer)
+    const { justSelecting } = useLocalSearchParams()
 
     const onPressCard = async (card: any) => {
         await dispatch(globalActions.setCard(card))
 
-        // if (justSelecting) {
-        //     onCloseFinish()
-        // } else {
-        // }
-        setShowCardModification(true)
+        if (justSelecting) {
+            router.back()
+        } else {
+            setShowCardModification(true)
+        }
     }
 
     const renderCardLogo = (brand: string) => {
@@ -62,7 +63,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
 
     const onCreateCard = async (cardData: any) => {
         try {
-            const validatedCardData = await CardAuthSchema.createCard.parseAsync(cardData)            
+            const validatedCardData = await CardAuthSchema.createCard.parseAsync(cardData)
             const { data } = await createCard({ variables: { data: validatedCardData } })
 
             await dispatch(globalActions.setCards([...cards, data.createCard]))
@@ -127,7 +128,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                                     {renderCardLogo(item.brand)}
                                     <VStack ml={"10px"}>
                                         <Heading textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.brand} {item.last4Number}</Heading>
-                                        <Text textTransform={"capitalize"} fontSize={scale(15)} color={colors.pureGray}>{item.alias}</Text>
+                                        <Text fontSize={scale(15)} color={colors.pureGray}>{item.alias}</Text>
                                     </VStack>
                                 </Pressable>
                             )}

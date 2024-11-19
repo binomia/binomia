@@ -13,6 +13,7 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { mastercardLogo, visaLogo } from '@/assets';
 import { FORMAT_CURRENCY } from '@/helpers';
 import PagerView from 'react-native-pager-view';
+import { router } from 'expo-router';
 
 
 type Props = {
@@ -72,7 +73,7 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", sh
             <VStack px={"20px"} w={"100%"} h={"100%"} justifyContent={"space-between"}>
                 <VStack space={5}>
                     <HStack mt={"20px"} alignItems={"center"} justifyContent={"space-between"}>
-                        <Pressable onPress={() => setShowAllCards(true)} _pressed={{ opacity: 0.5 }} flexDirection={"row"} alignItems={"center"}>
+                        <Pressable onPress={() => router.navigate({ pathname: "cards", params: { justSelecting: "true" } })} _pressed={{ opacity: 0.5 }} flexDirection={"row"} alignItems={"center"}>
                             {renderCardLogo(card.brand)}
                             <VStack justifyContent={"center"}>
                                 <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{card?.brand} {card?.last4Number}</Heading>

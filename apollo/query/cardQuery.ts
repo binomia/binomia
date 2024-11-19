@@ -18,6 +18,7 @@ export class CardApolloQueries {
             }
         `
     }
+
     static cards = () => {
         return gql`
             query Cards {
@@ -35,6 +36,42 @@ export class CardApolloQueries {
             }
         `
     }
+
+    static card = () => {
+        return gql`
+            query Card($cardId: Int!) {
+                card(cardId: $cardId) {
+                    isPrimary
+                    cardNumber
+                    cvv
+                    alias
+                    expirationDate
+                    cardHolderName
+                    createdAt
+                    updatedAt
+                }
+            }
+        `
+    }
+
+    static updateCard = () => {
+        return gql`
+            mutation UpdateCard($data: CardInput!, $cardId: Int!) {
+                updateCard(cardId: $cardId, data: $data) {
+                    id
+                    last4Number
+                    hash
+                    isPrimary
+                    brand
+                    alias
+                    data
+                    createdAt
+                    updatedAt
+                }
+            }
+        `
+    }
+
     static deleteCard = () => {
         return gql`
             mutation DeleteCard($hash: String!) {

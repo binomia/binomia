@@ -68,7 +68,7 @@ const KeyNumberPad: React.FC<Props> = ({ onChange = (_: string) => { }, maxAmoun
             <FlatList mt={"20px"} columnWrapperStyle={styles.ColumnWrapperStyle} contentContainerStyle={{ alignItems: "center", justifyContent: "center" }} data={["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "x"]} numColumns={3} renderItem={({ item }) => (
                 item === "x" ?
                     <Pressable key={`number-key-pad-key-${item}`} onPress={() => onInputChange(item)} style={styles.OuterButton} _pressed={styles.OuterButtonPressed}>
-                        <FontAwesome6 name="delete-left" size={24} color={colors.white} />
+                        <FontAwesome6 name="delete-left" size={22} color={colors.white} />
                     </Pressable>
                     :
                     <Pressable key={`number-key-pad-key-${item}`} onPress={() => onInputChange(item)} style={styles.OuterButton} _pressed={styles.OuterButtonPressed}>

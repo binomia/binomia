@@ -9,4 +9,6 @@ export class CardAuthSchema {
         alias: z.string(),
         isPrimary: z.boolean().default(false)
     })
+
+    static updateCard = CardAuthSchema.createCard.extend({})
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import Button from '../global/Button';
 import Input from '../global/Input';
 import colors from '@/colors';
@@ -13,16 +13,28 @@ import { scale } from 'react-native-size-matters';
 import { MaterialIcons } from '@expo/vector-icons';
 import { TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { CreditCardIssuer } from 'react-native-credit-card-input/lib/typescript/src/useCreditCardForm';
+import { useLazyQuery } from '@apollo/client';
+import { CardApolloQueries } from '@/apollo/query/cardQuery';
+import { useDispatch, useSelector } from 'react-redux';
+import { globalActions } from '@/redux/slices/globalSlice';
+import { CardType } from '@/types';
 
 
 type Props = {
     open?: boolean
+    openToEdit?: boolean
+    setOpenToEdit?: (_: boolean) => void
     onPress?: (_: any) => Promise<void>
 }
 
 const { height } = Dimensions.get('window')
-const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Props = {}) => {
+const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { }, openToEdit = false, setOpenToEdit = (_: boolean) => { } }: Props) => {
     const ref = useRef<PagerView>(null);
+    const [fetchCards] = useLazyQuery(CardApolloQueries.cards())
+    const [fetchCard] = useLazyQuery(CardApolloQueries.card())
+    const dispatch = useDispatch()
+    const { card }: { card: CardType } = useSelector((state: any) => state.globalReducer)
+
 
     const [number, setNumber] = useState("")
     const [expiry, setExpiry] = useState("")
@@ -46,6 +58,19 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
     }
 
 
+    const onRefreshCards = useCallback(async () => {
+        try {
+            const { data } = await fetchCards()
+            await dispatch(globalActions.setCards(data.cards))
+
+        } catch (error) {
+            console.log({
+                onRefreshCards: error
+            });
+        }
+
+    }, []);
+
     const handleOnPress = async () => {
         try {
 
@@ -59,6 +84,8 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
                 "alias": alias
             })
 
+            await onRefreshCards()
+
             setIsLoading(false)
             setName("")
             setNumber("")
@@ -66,13 +93,12 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
             setCvc("")
             setAlias("")
 
-
         } catch (error: any) {
             setErrorMessage(error.message)
             setIsLoading(false)
             ref.current?.setPage(1)
         }
-    } // 5425 2334 3010 9903
+    }
 
     const identifyCardType = (cardNumber: string): string | undefined => {
         cardNumber = cardNumber.replace(/[\s-]/g, "");
@@ -194,6 +220,33 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
     };
 
 
+    const fetchDecryptedCard = async () => {
+        try {
+            const { data } = await fetchCard({
+                variables: {
+                    cardId: card.id
+                }
+            })
+
+            console.log({ fetchDecryptedCard: data });
+
+
+            if (data?.card) {
+                setName(data.card.cardHolderName)
+                setNumber(data.card.cardNumber)
+                setExpiry(data.card.expirationDate)
+                setCvc(data.card.cvv)
+                setAlias(data.card.alias)
+                setAsPrimary(data.card.isPrimary)
+                setFocusedField("number")
+            }
+
+        } catch (error: any) {
+            console.log({ fetchDecryptedCard: error });
+        }
+    }
+
+
     useEffect(() => {
         const isValidCard = isValidCardLength(number)
         const isValidExpiry = isExpiryValidExpiredDate(expiry)
@@ -208,6 +261,13 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
         }
 
     }, [number, expiry, cvc, name, alias])
+
+    useEffect(() => {
+        console.log({ openToEdit });
+
+        if (openToEdit)
+            fetchDecryptedCard()
+    }, [openToEdit])
 
     return (
         <PagerView style={{ flex: 1 }} initialPage={0} ref={ref}>
@@ -229,8 +289,8 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { } }: Pro
                                 />
                             </HStack>
                             <VStack mt={"20px"}>
-                                <Input value={name} onFocus={() => setFocusedField("name")} h={scale(45)} placeholder='Nombre De La Tarjeta' onChangeText={(text) => onChangeText(text, "name")} />
                                 <Input value={number} onFocus={() => setFocusedField("number")} h={scale(45)} keyboardType="number-pad" placeholder='Numero De La Tarjeta' maxLength={19} onChangeText={(text) => onChangeText(text, "number")} />
+                                <Input value={name} onFocus={() => setFocusedField("name")} h={scale(45)} placeholder='Nombre De La Tarjeta' onChangeText={(text) => onChangeText(text, "name")} />
                                 <HStack w={"100%"} justifyContent={"space-between"}>
                                     <HStack w={"48%"}>
                                         <Input textAlign={"center"} h={scale(45)} maxLength={5} value={expiry} onFocus={() => setFocusedField("expiry")} keyboardType='number-pad' w={"100%"} placeholder='Expiracion' onChangeText={(text) => onChangeText(text, "expiry")} />

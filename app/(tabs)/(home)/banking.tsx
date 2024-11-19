@@ -108,14 +108,11 @@ const BankingScreen: React.FC = () => {
         const data = {
             icon: isDeposit ? "arrowup" : "arrowdown",
             isDeposit: isDeposit,
-            transactionType: isDeposit ? "Deposito" : "Retiro",
+            transactionType: isDeposit ? "Depositado" : "Retirado",
             amount: transaction.amount,
             fullName: user.fullName,
             username: user.username,
-        }
-
-        console.log(JSON.stringify(data, null, 2));
-        
+        }        
 
         return data
     }
@@ -168,7 +165,7 @@ const BankingScreen: React.FC = () => {
 
     return (
         <VStack variant={"body"} h={"100%"}>
-            <ScrollView showsHorizontalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}  >
+            <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}  >
                 <HStack borderRadius={10} w={"100%"} mt={"50px"} space={2} justifyContent={"space-between"}>
                     <Pressable onPress={() => handleMakeTransaction("Deposito")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
                         <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={depositIcon} />
