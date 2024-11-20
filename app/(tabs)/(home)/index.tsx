@@ -53,13 +53,6 @@ const HomeScreen: React.FC = () => {
 		}, 1000);
 	}, []);
 
-
-	useEffect(() => {
-		socket.on(`${SOCKET_EVENTS.TRANSACTION_RECEIVED}@${account.username}`, async (data: any) => {
-			dispatch(globalActions.setAccount(data.to))
-		})
-	}, [])
-
 	useEffect(() => {
 		(async () => {
 			await delay(2000)

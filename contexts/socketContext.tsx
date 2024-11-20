@@ -2,11 +2,13 @@ import { NOTIFICATION_SERVER_URL, SOCKET_EVENTS } from "@/constants";
 import useAsyncStorage from "@/hooks/useAsyncStorage";
 import { SocketContextType } from "@/types";
 import { createContext, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { io } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 import { AccountAuthSchema } from "@/auth/accountAuth";
 import { globalActions } from "@/redux/slices/globalSlice";
+import { useLazyQuery } from "@apollo/client";
+import { AccountApolloQueries } from "@/apollo/query";
 
 
 export const SocketContext = createContext<SocketContextType>({
@@ -15,6 +17,8 @@ export const SocketContext = createContext<SocketContextType>({
 });
 
 export const SocketContextProvider = ({ children }: { children: JSX.Element }) => {
+    const { account } = useSelector((state: any) => state.globalReducer)
+
     const { getItem } = useAsyncStorage()
     const dispatch = useDispatch()
 
@@ -39,8 +43,12 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
             });
 
             socket.on("connect", () => {
-                socket.on(SOCKET_EVENTS.TRANSACTION_RECEIVED, async (data: any) => {
+                socket.on(SOCKET_EVENTS.TRANSACTION_CREATED, async (data: any) => {                    
                     dispatch(globalActions.setAccount(data.to))
+                })
+
+                socket.on(SOCKET_EVENTS.TRANSACTION_CREATED_FROM_QUEUE, async (data: any) => {
+                    dispatch(globalActions.setAccount(data.from))
                 })
 
                 console.log("connected");
