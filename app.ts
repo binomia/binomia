@@ -29,10 +29,9 @@ if (cluster.isPrimary) {
     for (let i = 0; i < os.cpus().length; i++)
         cluster.fork();
 
-
-    subscriber.subscribe(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED)
-    subscriber.subscribe(REDIS_SUBSCRIPTION_CHANNEL.BANKING_TRANSACTION_CREATED)
-    subscriber.subscribe(REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE)
+    subscriber.subscribe(...[
+        ...Object.values(REDIS_SUBSCRIPTION_CHANNEL)
+    ])
 
     subscriber.on("message", async (channel, payload) => {
         if (!cluster.workers) return;
