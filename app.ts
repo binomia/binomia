@@ -2,7 +2,7 @@ import cluster from "cluster";
 import os from "os";
 import redis, { initRedisEventSubcription } from "@/redis";
 import { JSONRPCServer } from "json-rpc-2.0";
-import { DASHBOARD_FAVICON_URL, DASHBOARD_LOGO_URL, QUEUE_JOBS_NAME } from "@/constants";
+import { DASHBOARD_FAVICON_URL, DASHBOARD_LOGO_URL, QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import { unAuthorizedResponse } from "@/helpers";
@@ -11,53 +11,13 @@ import { initMethods } from "@/rpc";
 import { createBullBoard, } from '@bull-board/api';
 import { ExpressAdapter, } from '@bull-board/express';
 import { queuesBullAdapter } from "@/queues";
-import { DateFormats } from "@bull-board/api/dist/typings/app";
+import { dbConnection } from "@/config";
 
 const app: Express = express();
-// const a: DateFormats
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/')
-
-app.use(express.json());
-app.use(cors({
-    origin: "*",
-}));
-
-app.use('/', serverAdapter.getRouter());
-
-
-createBullBoard({
-    queues: queuesBullAdapter,
-    serverAdapter: serverAdapter,
-    options: {
-        uiConfig: {
-            boardTitle: "",
-            favIcon: {
-                default: DASHBOARD_FAVICON_URL,
-                alternative: DASHBOARD_FAVICON_URL,
-            },
-            boardLogo: {
-                width: 80,
-                height: 35,
-                path: DASHBOARD_LOGO_URL,
-            },
-            locale: {
-                lng: "es",
-            },
-            dateFormats: {
-                common: "EEEE, MMM. d yyyy, h:mma",  
-                short: "EEEE, MMM. d yyyy, h:mma",  
-                full: "EEEE, MMM. d yyyy, h:mma",  
-
-            }
-        }
-    }
-});
-
-
-
 const server = new JSONRPCServer();
-initMethods(server);
+
 
 if (cluster.isPrimary) {
     console.log(`[Queue-Server]: Master(${process.pid}) started`);
@@ -65,7 +25,13 @@ if (cluster.isPrimary) {
     for (let i = 0; i < os.cpus().length; i++)
         cluster.fork();
 
-    redis.subscribe(QUEUE_JOBS_NAME.CREATE_TRANSACTION)
+
+    redis.subscribe(...[
+        ...Object.values(REDIS_SUBSCRIPTION_CHANNEL),
+        ...Object.values(QUEUE_JOBS_NAME)
+    ])
+
+
     redis.on("message", async (channel, payload) => {
         if (!cluster.workers) return;
 
@@ -86,10 +52,47 @@ if (cluster.isPrimary) {
 
 
 } else {
-    // app.get("*", unAuthorizedResponse);
+    app.use(express.json());
+    app.use('/', serverAdapter.getRouter());
+    app.use(cors({
+        origin: "*",
+    }));
+
+
     app.patch("*", unAuthorizedResponse);
     app.put("*", unAuthorizedResponse);
     app.delete("*", unAuthorizedResponse);
+
+    initMethods(server);
+    dbConnection()
+
+    createBullBoard({
+        queues: queuesBullAdapter,
+        serverAdapter: serverAdapter,
+        options: {
+            uiConfig: {
+                boardTitle: "",
+                favIcon: {
+                    default: DASHBOARD_FAVICON_URL,
+                    alternative: DASHBOARD_FAVICON_URL,
+                },
+                boardLogo: {
+                    width: 80,
+                    height: 35,
+                    path: DASHBOARD_LOGO_URL,
+                },
+                locale: {
+                    lng: "es",
+                },
+                dateFormats: {
+                    common: "EEEE, MMM. d yyyy, h:mma",
+                    short: "EEEE, MMM. d yyyy, h:mma",
+                    full: "EEEE, MMM. d yyyy, h:mma",
+
+                }
+            }
+        }
+    });
 
     app.post("/", async (req: Request, res: Response) => {
         try {

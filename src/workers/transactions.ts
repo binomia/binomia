@@ -15,6 +15,7 @@ export default async () => {
                 break;
 
             default:
+                console.log({ job: job.data });
                 break;
         }
     })
