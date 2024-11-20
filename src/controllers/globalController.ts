@@ -3,6 +3,7 @@ import { GraphQLError } from 'graphql';
 import { Cryptography } from '@/helpers/cryptography';
 import { ZERO_SIGN_PRIVATE_KEY, ZERO_ENCRYPTION_KEY, REDIS_SUBSCRIPTION_CHANNEL, QUEUE_JOBS_NAME } from '@/constants';
 import redis from '@/redis';
+import shortUUID from 'short-uuid';
 
 
 export class GlobalController {
@@ -27,8 +28,11 @@ export class GlobalController {
 
     static test = async (_: unknown, { hash }: { hash: string }, { req }: { req: any }) => {
         try {
-            redis.publish(QUEUE_JOBS_NAME.CREATE_TRANSACTION, JSON.stringify({
-                headers: Date.now(),
+            await redis.publish(QUEUE_JOBS_NAME.CREATE_TRANSACTION, JSON.stringify({
+                jobId: shortUUID.generate(),
+                data: {
+                    test: "test",
+                }
             }))
 
             return null

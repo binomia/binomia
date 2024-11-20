@@ -25,6 +25,12 @@ export class TransactionJoiSchema {
         transactionType: z.enum(["deposit", "withdraw"])
     })
 
+    static recurrenceQueueTransaction = TransactionJoiSchema.createTransaction.extend({
+        id: z.number(),
+        transactionId: z.string(),  
+        sender: z.string()      
+    })
+
 
 
     static validateTransaction = z.object({

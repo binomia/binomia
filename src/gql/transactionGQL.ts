@@ -120,6 +120,19 @@ const type = () => {
             createdAt: String
             updatedAt: String            
         }
+
+        type RecurrentTransactionType {
+            jobId: String
+            repeatJobKey: String
+            jobName: String
+            status: String
+            repeatedCount: Int
+            data: JSON
+            signature: String
+            account: OnlyAccountType
+            createdAt: String
+            updatedAt: String
+        }
     `
 }
 
@@ -128,6 +141,7 @@ const query = () => {
     return `
         transaction: TransactionType
         accountTransactions(page: Int!, pageSize: Int!): [TransactionType]
+        accountRecurrentTransactions(page: Int!, pageSize: Int!): [RecurrentTransactionType]
         accountBankingTransactions(page: Int!, pageSize: Int!): [BankingTransactionType]
     `
 }
@@ -143,11 +157,12 @@ const subscription = () => {
     return ``
 }
 
-const { createTransaction, accountBankingTransactions, accountTransactions, createBankingTransaction } = TransactionsController
+const { createTransaction, accountBankingTransactions,accountRecurrentTransactions, accountTransactions, createBankingTransaction } = TransactionsController
 const resolvers = {
     query: {
         accountTransactions,
-        accountBankingTransactions
+        accountBankingTransactions,
+        accountRecurrentTransactions
     },
     mutation: {
         createTransaction,

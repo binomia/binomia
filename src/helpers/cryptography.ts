@@ -7,7 +7,6 @@ const EC = elliptic.ec;
 const ec = new EC('secp256k1');
 
 const algorithm = 'aes-256-cbc';
-const signAlgorithm = 'SHA256'
 const key = Buffer.from(ZERO_ENCRYPTION_KEY, 'hex'); // Convert hex string to Buffer
 const iv = crypto.randomBytes(16);
 

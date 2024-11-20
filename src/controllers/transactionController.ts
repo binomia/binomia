@@ -7,7 +7,8 @@ import { Cryptography } from '@/helpers/cryptography';
 import { QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
 import redis from '@/redis';
-
+import shortUUID from 'short-uuid';
+import RecurrenceTransactionsModel from '@/models/recurrenceTransactionModel';
 
 export class TransactionsController {
     static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
@@ -135,16 +136,26 @@ export class TransactionsController {
             })
 
             await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
-                transaction: transactionData.toJSON(),
-                recipientSocketRoom: receiverAccount.toJSON().user.username
+                data: transactionData.toJSON(),
+                senderSocketRoom: senderAccount.toJSON().username,
+                recipientSocketRoom: receiverAccount.toJSON().username
             }))
 
-            if (recurrenceData.time !== "oneTime")
+            if (recurrenceData.time !== "oneTime") {
+                const recurrenceQueueData = await TransactionJoiSchema.recurrenceQueueTransaction.parseAsync(Object.assign(transactionData.toJSON(), {
+                    amount: Number(transactionData.toJSON().amount),
+                    receiver: validatedData.receiver,
+                    sender: senderAccount.toJSON().username
+                }))
+
                 await redis.publish(QUEUE_JOBS_NAME.CREATE_TRANSACTION, JSON.stringify({
+                    jobId: `${recurrenceData.title}@${shortUUID.generate()}${shortUUID.generate()}`,
                     jobName: recurrenceData.title,
                     jobTime: recurrenceData.time,
-                    transaction: transactionData.toJSON()
+                    accountId: senderAccount.toJSON().id,
+                    data: recurrenceQueueData
                 }))
+            }
 
             return transactionData.toJSON()
 
@@ -222,6 +233,53 @@ export class TransactionsController {
         }
     }
 
+
+    static accountBankingTransactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            const session = await checkForProtectedRequests(context.req);
+            const fields = getQueryResponseFields(fieldNodes, 'transactions')
+
+            const _pageSize = pageSize > 50 ? 50 : pageSize
+            const limit = _pageSize;
+            const offset = (page - 1) * _pageSize;
+
+            const transactions = await BankingTransactionsModel.findAll({
+                limit,
+                offset,
+                order: [['createdAt', 'DESC']],
+                attributes: [...fields['transactions']],
+                where: {
+                    accountId: session.user.account.id
+                },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'account',
+                        attributes: fields['account'],
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                            attributes: fields['user']
+                        }]
+                    },
+                    {
+                        model: CardsModel,
+                        as: 'card',
+                        attributes: fields['card']
+                    }
+                ]
+            })
+
+            if (!transactions)
+                throw new GraphQLError('No transactions found');
+
+            return transactions
+
+        } catch (error: any) {
+            throw new GraphQLError(error);
+        }
+    }
+
     static accountTransactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(context.req);
@@ -282,38 +340,33 @@ export class TransactionsController {
         }
     }
 
-    static accountBankingTransactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+    static accountRecurrentTransactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(context.req);
+
             const fields = getQueryResponseFields(fieldNodes, 'transactions')
+            const { user } = session
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
             const limit = _pageSize;
             const offset = (page - 1) * _pageSize;
 
-            const transactions = await BankingTransactionsModel.findAll({
+            const transactions = await RecurrenceTransactionsModel.findAll({
                 limit,
                 offset,
                 order: [['createdAt', 'DESC']],
-                attributes: [...fields['transactions']],
+                attributes: fields['transactions'],
                 where: {
-                    accountId: session.user.account.id
+                    [Op.and]: [
+                        { accountId: user.account.id },
+                        { status: "active" }
+                    ]
                 },
                 include: [
                     {
                         model: AccountModel,
                         as: 'account',
-                        attributes: fields['account'],
-                        include: [{
-                            model: UsersModel,
-                            as: 'user',
-                            attributes: fields['user']
-                        }]
-                    },
-                    {
-                        model: CardsModel,
-                        as: 'card',
-                        attributes: fields['card']
+                        attributes: fields['account']
                     }
                 ]
             })

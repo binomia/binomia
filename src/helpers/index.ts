@@ -154,9 +154,6 @@ export const checkForProtectedRequests = async (req: any) => {
         const token = await z.string().min(1).transform((val) => val.trim()).parseAsync(req.headers["authorization"]);
         const jwtToken = token.split(' ')[1];
 
-        console.log({ jwtToken, ZERO_ENCRYPTION_KEY });
-
-
         const jwtVerifyAsync = new Promise((resolve, reject) => {
             jwt.verify(jwtToken, ZERO_ENCRYPTION_KEY, (err, payload) => {
                 if (err) {
@@ -215,8 +212,6 @@ export const checkForProtectedRequests = async (req: any) => {
             return session.toJSON()
 
         }).catch((error: any) => {
-            // console.log({ error });
-
             const message = error.message === "jwt expired" ? "INVALID_SESSION: Session expired" : error.message
             throw new GraphQLError(message, {
                 extensions: {
