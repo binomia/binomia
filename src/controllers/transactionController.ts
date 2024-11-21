@@ -2,13 +2,13 @@ import { AccountModel, kycModel, BankingTransactionsModel, TransactionsModel, Us
 import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
-import { TransactionCreateType, BankingTransactionCreateType } from '@/types';
 import { Cryptography } from '@/helpers/cryptography';
 import { QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
 import redis from '@/redis';
 import shortUUID from 'short-uuid';
 import RecurrenceTransactionsModel from '@/models/recurrenceTransactionModel';
+import { queueServer } from '@/rpc/queueRPC';
 
 export class TransactionsController {
     static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
@@ -137,13 +137,13 @@ export class TransactionsController {
 
             await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
                 data: transactionData.toJSON(),
-                senderSocketRoom: senderAccount.toJSON().username,
-                recipientSocketRoom: receiverAccount.toJSON().username
+                senderSocketRoom: senderAccount.toJSON().user.username,
+                recipientSocketRoom: receiverAccount.toJSON().user.username
             }))
 
             if (recurrenceData.time !== "oneTime") {
                 const recurrenceQueueData = await TransactionJoiSchema.recurrenceQueueTransaction.parseAsync(Object.assign(transactionData.toJSON(), {
-                    amount: Number(transactionData.toJSON().amount),
+                    amount: validatedData.amount,
                     receiver: validatedData.receiver,
                     sender: senderAccount.toJSON().username
                 }))
@@ -152,7 +152,9 @@ export class TransactionsController {
                     jobId: `${recurrenceData.title}@${shortUUID.generate()}${shortUUID.generate()}`,
                     jobName: recurrenceData.title,
                     jobTime: recurrenceData.time,
-                    accountId: senderAccount.toJSON().id,
+                    senderId: senderAccount.toJSON().id,
+                    receiverId: receiverAccount.toJSON().id,
+                    amount: validatedData.amount,
                     data: recurrenceQueueData
                 }))
             }
@@ -232,7 +234,6 @@ export class TransactionsController {
             throw new GraphQLError(error.message);
         }
     }
-
 
     static accountBankingTransactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
@@ -345,7 +346,6 @@ export class TransactionsController {
             const session = await checkForProtectedRequests(context.req);
 
             const fields = getQueryResponseFields(fieldNodes, 'transactions')
-            const { user } = session
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
             const limit = _pageSize;
@@ -358,16 +358,31 @@ export class TransactionsController {
                 attributes: fields['transactions'],
                 where: {
                     [Op.and]: [
-                        { accountId: user.account.id },
+                        { senderId: session.user.account.id },
                         { status: "active" }
                     ]
                 },
                 include: [
                     {
                         model: AccountModel,
-                        as: 'account',
-                        attributes: fields['account']
-                    }
+                        as: 'sender',
+                        attributes: fields['sender'],
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                            attributes: fields['user']
+                        }]
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'receiver',
+                        attributes: fields['receiver'],
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                            attributes: fields['user']
+                        }]
+                    },
                 ]
             })
 
@@ -375,6 +390,17 @@ export class TransactionsController {
                 throw new GraphQLError('No transactions found');
 
             return transactions
+
+        } catch (error: any) {
+            throw new GraphQLError(error);
+        }
+    }
+
+    static deleteRecurrentTransactions = async (_: unknown, { repeatJobKey }: { repeatJobKey: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            await checkForProtectedRequests(context.req);
+            const job = await queueServer("removeJob", { jobKey: repeatJobKey })
+            return job
 
         } catch (error: any) {
             throw new GraphQLError(error);

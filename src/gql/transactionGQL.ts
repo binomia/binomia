@@ -127,9 +127,23 @@ const type = () => {
             jobName: String
             status: String
             repeatedCount: Int
+            amount: Int
             data: JSON
             signature: String
-            account: OnlyAccountType
+            receiver: AccountTypeWithUser
+            sender: AccountTypeWithUser
+            createdAt: String
+            updatedAt: String
+        }
+        type OnlyRecurrentTransactionType {
+            jobId: String
+            repeatJobKey: String
+            jobName: String
+            status: String
+            repeatedCount: Int
+            amount: Int
+            data: JSON
+            signature: String          
             createdAt: String
             updatedAt: String
         }
@@ -148,6 +162,7 @@ const query = () => {
 
 const mutation = () => {
     return `
+        deleteRecurrentTransactions(repeatJobKey: String!): OnlyRecurrentTransactionType
         createTransaction(data: TransactionInput!, recurrence: TransactionRecurrenceInput!): TransactionCreatedType
         createBankingTransaction(cardId: Int!, data: BankingTransactionInput!): BankingTransactionCreatedType
     `
@@ -157,7 +172,7 @@ const subscription = () => {
     return ``
 }
 
-const { createTransaction, accountBankingTransactions,accountRecurrentTransactions, accountTransactions, createBankingTransaction } = TransactionsController
+const { createTransaction, deleteRecurrentTransactions, accountBankingTransactions, accountRecurrentTransactions, accountTransactions, createBankingTransaction } = TransactionsController
 const resolvers = {
     query: {
         accountTransactions,
@@ -166,7 +181,8 @@ const resolvers = {
     },
     mutation: {
         createTransaction,
-        createBankingTransaction
+        createBankingTransaction,
+        deleteRecurrentTransactions
     },
     subscription: {
 

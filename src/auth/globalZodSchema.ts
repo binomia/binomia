@@ -23,6 +23,7 @@ export class GlobalZodSchema {
     static evironmentVariables = z.object({
         SESSION_SECRET_SECRET_KEY: z.string(),
         ZERO_ENCRYPTION_KEY: z.string(),
+        QUEUE_SERVER_URL: z.string(),
         AUTH_SERVER_URL: z.string(),
         NOTIFICATION_SERVER_URL: z.string(),
         ZERO_SIGN_PRIVATE_KEY: z.string(),

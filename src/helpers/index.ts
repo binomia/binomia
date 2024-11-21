@@ -155,7 +155,7 @@ export const checkForProtectedRequests = async (req: any) => {
         const jwtToken = token.split(' ')[1];
 
         const jwtVerifyAsync = new Promise((resolve, reject) => {
-            jwt.verify(jwtToken, ZERO_ENCRYPTION_KEY, (err, payload) => {
+            jwt.verify(jwtToken, ZERO_ENCRYPTION_KEY, (err: any, payload: any) => {
                 if (err) {
                     console.log({ err });
 

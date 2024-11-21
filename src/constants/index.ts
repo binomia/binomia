@@ -10,7 +10,8 @@ export const {
     ZERO_ENCRYPTION_KEY,
     AUTH_SERVER_URL,
     NOTIFICATION_SERVER_URL,
-    ZERO_SIGN_PRIVATE_KEY
+    ZERO_SIGN_PRIVATE_KEY,
+    QUEUE_SERVER_URL
 
 } = evironmentVariables
 
