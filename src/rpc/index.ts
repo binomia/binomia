@@ -10,14 +10,11 @@ export const initMethods = (server: JSONRPCServer) => {
     // queue methods
     server.addMethod("removeJob", async ({ jobKey }: { jobKey: string }) => {
         try {
-            // const validatedRepeatJobKey = z.string().parse(repeatJobKey)            
-            console.log({ jobKey });
-
             const job = await transactionsQueue.removeJob(jobKey)
             return job
 
-        } catch (error: any) {
-            throw error.message
+        } catch (error: any) {            
+            throw new Error(error.toString());
         }
     });
 }

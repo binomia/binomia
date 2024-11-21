@@ -19,10 +19,10 @@ export const initRedisEventSubcription = async () => {
     process.on("message", async ({ channel, payload }: any) => {
         switch (channel) {
             case QUEUE_JOBS_NAME.CREATE_TRANSACTION: {
-                const { jobName, jobTime, jobId, accountId, data } = JSON.parse(payload);
+                const { jobName, jobTime, jobId, amount, senderId, receiverId, data } = JSON.parse(payload);
                 const encryptedData = await Cryptography.encrypt(JSON.stringify(data));
 
-                await transactionsQueue.createJobs({ jobId, jobName, jobTime, accountId, data: encryptedData });
+                await transactionsQueue.createJobs({ jobId, jobName, jobTime, amount, senderId, receiverId, data: encryptedData });
                 break;
             }
             case QUEUE_JOBS_NAME.REMOVE_TRANSACTION_FROM_QUEUE: {
@@ -32,7 +32,7 @@ export const initRedisEventSubcription = async () => {
                 await transactionsQueue.removeJob(jobId);
                 break;
             }
-            default: {               
+            default: {
                 break;
             }
         }
