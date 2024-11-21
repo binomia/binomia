@@ -186,4 +186,53 @@ export class TransactionApolloQueries {
             }
         `
     }
+
+    static accountRecurrentTransactions = () => {
+        return gql`
+            query AccountRecurrentTransactions($page: Int!, $pageSize: Int!) {
+                accountRecurrentTransactions(page: $page, pageSize: $pageSize) {
+                    amount
+                    jobName
+                    repeatJobKey
+                    status
+                    repeatedCount
+                    createdAt
+                    updatedAt
+                    receiver {
+                        id
+                        balance
+                        status
+                        hash
+                        currency
+                        user {
+                            id
+                            fullName
+                            username
+                            profileImageUrl
+                            status
+                        }
+                    }
+                }
+            }
+        `
+    }
+
+    static deleteRecurrentTransactions = () => {
+        return gql`
+            mutation DeleteRecurrentTransactions($repeatJobKey: String!) {
+                deleteRecurrentTransactions(repeatJobKey: $repeatJobKey) {
+                    jobId
+                    repeatJobKey
+                    jobName
+                    status
+                    repeatedCount
+                    amount
+                    data
+                    signature
+                    createdAt
+                    updatedAt
+                }
+            }
+        `
+    }
 }

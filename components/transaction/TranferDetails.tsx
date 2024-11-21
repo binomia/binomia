@@ -79,6 +79,9 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
 
             onClose()
             router.navigate("(home)")
+            await delay(700)
+            router.navigate("recurrences")
+
         } catch (error: any) {
             console.error(error.message);
         }
@@ -119,7 +122,7 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
                     title: recurrence,
                     time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
                 })
-            } 
+            }
 
             setLoading(false)
         } catch (error) {

@@ -75,4 +75,7 @@ export class TransactionAuthSchema {
         from: UserAuthSchema.userProfileData,
         to: UserAuthSchema.userProfileData
     })
+
+    static weeklyQueueTitle = z.enum(["everySunday", "everyMonday", "everyTuesday", "everyWednesday", "everyThursday", "everyFriday", "everySaturday"])
+
 }

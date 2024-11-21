@@ -1,3 +1,4 @@
+import { TransactionAuthSchema } from "@/auth/transactionAuth";
 import { UserAuthSchema } from "@/auth/userAuth"
 import z from "zod";
 
@@ -34,7 +35,7 @@ export type CreateUserDataType = z.infer<typeof UserAuthSchema.createUser>
 
 export type SessionPropsType = {
     onLogin: ({ email, password }: { email: string, password: string }) => Promise<any>
-    onRegister: (data:CreateUserDataType) => Promise<any>,
+    onRegister: (data: CreateUserDataType) => Promise<any>,
     onLogout: () => void
     sendVerificationCode: (to: string) => any
     setVerificationCode: (to: string) => any
@@ -111,7 +112,7 @@ export type GlobalContextType = {
     resetAllStates: () => void
 }
 
-export type FormatTransactionType =  {
+export type FormatTransactionType = {
     isFromMe: boolean
     profileImageUrl?: string
     amount: number
@@ -119,10 +120,12 @@ export type FormatTransactionType =  {
     username?: string
 }
 
-export type SocketContextType =  {
+export type SocketContextType = {
     emit: (event: string, data: any) => void,
     on: (event: string, callback: (data: any) => void) => void
 }
 
 
+
+export type WeeklyQueueTitleType = z.infer<typeof TransactionAuthSchema.weeklyQueueTitle>
 

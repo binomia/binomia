@@ -43,7 +43,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
             });
 
             socket.on("connect", () => {
-                socket.on(SOCKET_EVENTS.TRANSACTION_CREATED, async (data: any) => {                    
+                socket.on(SOCKET_EVENTS.TRANSACTION_CREATED, async (data: any) => {                                        
                     dispatch(globalActions.setAccount(data.to))
                 })
 

@@ -3,6 +3,7 @@ import { globalContextInitialState } from "@/mocks";
 import { GlobalContextType } from "@/types";
 import { createContext, useEffect, useState } from "react";
 import { AppState } from "react-native";
+import * as Contacts from 'expo-contacts';
 import { useContacts } from "@/hooks/useContacts";
 
 

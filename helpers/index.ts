@@ -1,3 +1,7 @@
+import { WeeklyQueueTitleType } from "@/types";
+import { nextFriday, nextMonday, nextSaturday, nextSunday, nextThursday, nextTuesday, nextWednesday } from "date-fns";
+
+
 export const FORMAT_PHONE_NUMBER = (value: string) => {
     value = value.replaceAll(/[^0-9]/g, '');
 
@@ -142,4 +146,33 @@ export const FORMAT_LIMIT = (amount: number, limit: number) => {
 
 export const FORMAT_FULL_NAME = (fullName: string, length: number = 15) => {
     return fullName.length > length ? fullName.slice(0, length - 3) + "..." : fullName
+}
+
+
+export const getNextDay = (targetDay: WeeklyQueueTitleType): number => {
+    switch (targetDay) {
+        case "everySunday":
+            return nextSunday(new Date()).getTime()
+
+        case "everyMonday":
+            return nextMonday(new Date()).getTime()
+
+        case "everyTuesday":
+            return nextTuesday(new Date()).getTime()
+
+        case "everyWednesday":
+            return nextWednesday(new Date()).getTime()
+
+        case "everyThursday":
+            return nextThursday(new Date()).getTime()
+
+        case "everyFriday":
+            return nextFriday(new Date()).getTime()
+
+        case "everySaturday":
+            return nextSaturday(new Date()).getTime()
+
+        default:
+            return 0
+    }
 }
