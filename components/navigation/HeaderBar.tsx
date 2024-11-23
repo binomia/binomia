@@ -1,18 +1,19 @@
 import { creditCard, logo, qrIcon, recurrenceIcon } from "@/assets"
-import { VStack, Image, Pressable, HStack, Text } from "native-base"
+import { VStack, Image, Pressable, HStack, Text, Stack, Heading } from "native-base"
 import { useState } from "react"
 import QRScanner from "../global/QRScanner"
 import Cards from "../cards"
 import { router } from "expo-router"
 import colors from "@/colors"
-import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { scale } from "react-native-size-matters"
+import { Platform } from "react-native"
 
 
 
 export const HomeHeaderLeft: React.FC = () => {
     return (
-        <Image alt='logo-image'  resizeMode="contain" w={scale(120)} h={"40px"} source={logo} />
+        <Image alt='logo-image' resizeMode="contain" w={scale(120)} h={"40px"} source={logo} />
     )
 }
 
@@ -53,11 +54,9 @@ export const RecurrencesHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) =>
 
 export const HeaderBankingRight: React.FC = () => {
     return (
-        <VStack>
-            <Pressable onPress={() => router.navigate("cards")}>
-                <Image alt='HeaderBankingRight-logo-image' w={"25px"} h={"25px"} source={creditCard} />
-            </Pressable>
-        </VStack>
+        <Pressable onPress={() => router.navigate("cards")}>
+            <Image alt='HeaderBankingRight-logo-image' w={"25px"} h={"25px"} source={creditCard} />
+        </Pressable>
     )
 }
 export const WelcomeLeft: React.FC = () => {
@@ -79,5 +78,45 @@ export const LoginRight: React.FC = () => {
         <Pressable onPress={() => router.navigate("/register")}>
             <Text fontSize={"16px"} fontWeight={"extrabold"} color={"mainGreen"}>Registrarse</Text>
         </Pressable>
+    )
+}
+export const CardsRight: React.FC = () => {
+    return (
+        <Pressable _pressed={{ opacity: 0.5 }} onPress={() => { }}>
+            <AntDesign name="pluscircle" size={22} color="white" />
+        </Pressable>
+    )
+}
+export const BackHeaderIcon: React.FC = () => {
+    return (
+        <HStack alignItems={"center"} justifyContent={"space-between"}>
+            {Platform.OS === "android" ?
+                <HStack w={"100%"} justifyContent={"space-between"} alignItems={"center"}>
+                    <HStack px={"10px"}>
+                        <Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.back()}>
+                            <MaterialIcons name="arrow-back" size={25} color="white" />
+                        </Pressable>
+                        <Stack mx={"20px"}>
+                            <Heading color={colors.white} textAlign={"center"}>Tarjetas</Heading>
+                        </Stack>
+                    </HStack>
+                    <Pressable w={"35px"} _pressed={{ opacity: 0.5 }} alignItems={"center"} onPress={() => { }}>
+                        <AntDesign name="pluscircle" size={22} color="white" />
+                    </Pressable>
+                </HStack>
+                :
+                <HStack w={"100%"} alignItems={"center"} justifyContent={"space-between"}>
+                    <Pressable w={"35px"} _pressed={{ opacity: 0.5 }} onPress={() => router.back()}>
+                        <Ionicons name="chevron-back-outline" size={30} color="white" />
+                    </Pressable>
+                    <Stack >
+                        <Heading size={"sm"} color={colors.white} textAlign={"center"}>Tarjetas</Heading>
+                    </Stack>
+                    <Pressable w={"35px"} _pressed={{ opacity: 0.5 }} alignItems={"center"} onPress={() => { }}>
+                        <AntDesign name="pluscircle" size={22} color="white" />
+                    </Pressable>
+                </HStack>
+            }
+        </HStack>
     )
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
-import { StyleSheet, SafeAreaView, TouchableOpacity, Dimensions } from 'react-native'
+import { StyleSheet, Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, Stack, FlatList } from 'native-base'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -17,6 +17,7 @@ import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { router } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 
@@ -79,8 +80,11 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
 
             onClose()
             router.navigate("(home)")
-            await delay(700)
-            router.navigate("recurrences")
+
+            if (recurrence.title !== "oneTime") {
+                await delay(700)
+                router.navigate("recurrences")
+            }
 
         } catch (error: any) {
             console.error(error.message);
@@ -193,18 +197,7 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
-            <VStack px={"10px"} h={"100%"}>
-                <HStack px={"10px"} justifyContent={"space-between"}>
-                    <TouchableOpacity onPress={goBack}>
-                        <Stack w={"50px"}>
-                            <Ionicons name="chevron-back-outline" size={30} color="white" />
-                        </Stack>
-                    </TouchableOpacity>
-                    <Stack>
-                        <Heading size={"sm"} color={colors.white} textAlign={"center"}>Detalles</Heading>
-                    </Stack>
-                    <Stack w={"50px"} />
-                </HStack>
+            <VStack px={"10px"} mt={"10px"} h={"100%"}>
                 <VStack pb={"30px"} mt={"10px"} flex={1} justifyContent={"space-between"} alignItems={"center"} borderRadius={10}>
                     <VStack alignItems={"center"} justifyContent={"center"}>
                         <HStack my={"10px"}>
@@ -222,7 +215,7 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
                         <Text fontSize={scale(16)} color={colors.lightSkyGray}>{transactionDeytails?.username}</Text>
                         <Heading textTransform={"capitalize"} fontSize={scale(40)} color={"mainGreen"}>{"+"}{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
                     </VStack>
-                    <VStack flex={0.8} justifyContent={"space-between"}>
+                    <VStack flex={1} justifyContent={"space-between"}>
                         <VStack p={"20px"} w={"100%"} key={"Recurrente-2"} >
                             <Heading fontSize={scale(20)} mt={"20px"} fontWeight={"500"} color={"white"}>Envió Recurrente</Heading>
                             <HStack mt={"15px"} justifyContent={"space-between"}>
@@ -245,8 +238,9 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
                                 </Pressable>
                             </HStack>
                         </VStack>
-                        <HStack justifyContent={"center"}>
-                            <Button spin={loading} onPress={handleOnPress} fontSize={scale(16) + "px"} w={"80%"} bg={"mainGreen"} color='white' title={"Enviar"} />
+                        <HStack mb="10px" px={"20px"} justifyContent={"space-between"}>
+                            <Button spin={loading} onPress={goBack} w={"49%"} bg={colors.lightGray} color={colors.mainGreen} title={"Atrás"} />
+                            <Button spin={loading} onPress={handleOnPress} w={"49%"} bg={"mainGreen"} color='white' title={"Enviar"} />
                         </HStack>
                     </VStack>
                 </VStack>

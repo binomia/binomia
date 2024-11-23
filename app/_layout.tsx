@@ -64,26 +64,26 @@ export default () => {
 
 	return (
 		// <SQLiteProvider databaseName={DATABASE_NAME}>
-			<Provider store={store}>
-				<ApolloProvider client={apolloClient}>
-					<NativeBaseProvider theme={theme}>
-						<SessionContextProvider>
-							<GlobalContextProvider>
-								<SocketContextProvider>
-									<View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-										<Stack>
-											<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-											<Stack.Screen name="(signup)" options={{ headerShown: false }} />
-											<Stack.Screen name="(modals)" options={{ headerShown: false, presentation: "containedModal" }} />
-											<Stack.Screen name="+not-found" />
-										</Stack>
-									</View>
-								</SocketContextProvider>
-							</GlobalContextProvider>
-						</SessionContextProvider>
-					</NativeBaseProvider>
-				</ApolloProvider>
-			</Provider >
+		<Provider store={store}>
+			<ApolloProvider client={apolloClient}>
+				<NativeBaseProvider theme={theme}>
+					<SessionContextProvider>
+						<GlobalContextProvider>
+							<SocketContextProvider>
+								<View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+									<Stack>
+										<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+										<Stack.Screen name="(signup)" options={{ headerShown: false }} />
+										<Stack.Screen name="(modals)" options={{ headerShown: false, presentation: "containedModal"}} />
+										<Stack.Screen name="+not-found" />
+									</Stack>
+								</View>
+							</SocketContextProvider>
+						</GlobalContextProvider>
+					</SessionContextProvider>
+				</NativeBaseProvider>
+			</ApolloProvider>
+		</Provider >
 		// </SQLiteProvider>
 	);
 }

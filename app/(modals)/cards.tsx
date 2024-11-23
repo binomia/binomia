@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react'
 import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, Stack, ScrollView } from 'native-base'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
-import { Dimensions, RefreshControl, SafeAreaView } from 'react-native'
+import { Dimensions, RefreshControl } from 'react-native'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { globalActions } from '@/redux/slices/globalSlice'
 import { useDispatch, useSelector } from 'react-redux'
@@ -18,6 +18,8 @@ import BottomSheet from '@/components/global/BottomSheet'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { CardApolloQueries } from '@/apollo/query/cardQuery'
 import { CardAuthSchema } from '@/auth/cardAuth'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { BackHeaderIcon } from '@/components/navigation/HeaderBar'
 
 type Props = {
     open?: boolean
@@ -99,17 +101,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => 
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
-            <HStack alignItems={"center"} justifyContent={"space-between"}>
-                <Pressable w={"50px"} alignItems={"flex-start"} px={"5px"} _pressed={{ opacity: 0.5 }} onPress={() => router.back()}>
-                    <Ionicons name="chevron-back-outline" size={30} color="white" />
-                </Pressable>
-                <Stack>
-                    <Heading size={"sm"} color={colors.white} textAlign={"center"}>Tarjetas</Heading>
-                </Stack>
-                <Pressable _pressed={{ opacity: 0.5 }} w={"50px"} alignItems={"center"} onPress={() => setShowAddCard(true)}>
-                    <AntDesign name="pluscircle" size={25} color="white" />
-                </Pressable>
-            </HStack>
+            <BackHeaderIcon />
             <VStack variant={"body"} justifyContent={"space-between"}>
                 {cards.length > 0 ? (
                     <ScrollView mt={"50px"} flex={1} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>

@@ -10,15 +10,13 @@ import { AccountApolloQueries } from '@/apollo/query';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { FORMAT_CURRENCY } from '@/helpers';
 import { scale } from 'react-native-size-matters';
-import { useNavigation } from '@react-navigation/native';
 import QRScannerScreen from '@/components/global/QRScanner';
 import { SocketContext } from '@/contexts/socketContext';
-import { SOCKET_EVENTS } from '@/constants';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import HomeSkeleton from '@/components/home/homeSkeleton';
 
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
 	const { account } = useSelector((state: any) => state.globalReducer)
 	const dispatch = useDispatch()
@@ -72,9 +70,9 @@ const HomeScreen: React.FC = () => {
 		})()
 	}, [])
 
-	return (isLoading ? <HomeSkeleton /> : (
-		<VStack p={"20px"} w={width} bg={colors.darkGray} variant={"body"} flex={1} alignItems={"center"}>
-			<ScrollView contentContainerStyle={{ flex: 1 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+	return (isLoading ? (<HomeSkeleton />) : (
+		<VStack p={"20px"} w={width} bg={colors.darkGray}  flex={1} alignItems={"center"}>
+			<ScrollView  showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
 				<VStack w={"100%"} justifyContent={"center"} alignItems={"center"} borderRadius={"10px"}>
 					<VStack bg={colors.lightGray} p={"20px"} w={"100%"} justifyContent={"space-between"} borderRadius={"10px"} h={scale(160)}>
 						<VStack>
@@ -83,12 +81,12 @@ const HomeScreen: React.FC = () => {
 						</VStack>
 						<HStack w={"100%"} alignItems={"center"} justifyContent={"space-between"} >
 							<Button
-								leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={bagIcon} />}
+								leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"18px"} h={"18px"} source={sendIcon} />}
 								w={"49%"}
 								bg={"darkGray"}
 								mt={"20px"}
 								borderRadius={"10px"}
-								title="Depositar" onPress={() => router.navigate("/user")}
+								title="Enviar" onPress={() => router.navigate("/user")}
 							/>
 							<Button
 								leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={bagIcon} />}

@@ -45,7 +45,7 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
     }, [open])
 
     return (
-        <BottomSheet draggable={false} showDragIcon={false} openTime={300} height={height} onCloseFinish={handleOnClose} open={visible}>
+        <BottomSheet  openTime={300} height={height * 0.9} onCloseFinish={handleOnClose} open={visible}>
             <SafeAreaView style={{ flex: 1 }}>
                 <PagerView style={{ flex: 1 }} ref={ref} initialPage={0}>
                     <CreateTransaction key={"transaction-create-0"} input={input} onCloseFinish={handleOnClose} setInput={setInput} nextPage={nextPage} />

@@ -53,13 +53,6 @@ const HomeScreen: React.FC = () => {
         }, 1000);
     }, []);
 
-
-    useEffect(() => {
-        socket.on(`${SOCKET_EVENTS.TRANSACTION_RECEIVED}@${account.username}`, async (data: any) => {
-            dispatch(globalActions.setAccount(data.to))
-        })
-    }, [])
-
     return (
         <VStack p={"20px"} w={width} bg={colors.darkGray} variant={"body"} flex={1} alignItems={"center"}>
             <ScrollView contentContainerStyle={{ flex: 1 }} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>

@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import KeyNumberPad from '../global/KeyNumberPad';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 type Props = {
@@ -62,42 +63,36 @@ const CreateTransaction: React.FC<Props> = ({ input, setInput, nextPage = () => 
     }
 
     return (
-        <VStack flex={1} justifyContent={"space-between"}>
-            <VStack>
-                <HStack px={"10px"} mb={"20px"} alignItems={"center"} justifyContent={"space-between"}>
-                    <TouchableOpacity onPress={() => handleOnClose()}>
-                        <Stack w={"50px"}>
-                            <Ionicons name="chevron-back-outline" size={30} color="white" />
-                        </Stack>
-                    </TouchableOpacity>
-                    <Stack>
+        <SafeAreaView style={{ width: "100%", height: "90%" }}>
+            <VStack justifyContent={"space-between"} h={"100%"}>
+                <VStack>
+                    <HStack w={"100%"} mt={"10px"} alignItems={"center"} justifyContent={"center"}>
                         <Heading size={"md"} color={colors.mainGreen} textAlign={"center"}>{FORMAT_CURRENCY(account.balance)}</Heading>
-                    </Stack>
-                    <Stack w={"50px"} />
-                </HStack>
-                <HStack px={"20px"} mt={"20px"} alignItems={"center"} justifyContent={"space-between"} mb={"20px"}>
-                    <HStack space={2}>
-                        {receiver.profileImageUrl ?
-                            <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: receiver.profileImageUrl }} />
-                            :
-                            <DefaultIcon
-                                value={receiver?.fullName || ""}
-                                contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(receiver?.fullName || "") }]}
-                                textStyle={styles.textStyle}
-                            />
-                        }
-                        <VStack justifyContent={"center"}>
-                            <Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(receiver?.fullName || "")}</Heading>
-                            <Text color={colors.lightSkyGray}>{receiver?.username}</Text>
-                        </VStack>
                     </HStack>
-                    <Button opacity={showPayButton ? 1 : 0.5} fontSize={scale(13) + "px"} disabled={!showPayButton} onPress={onNextPage} h={"40px"} w={"100px"} title={"Siguiente"} bg={showPayButton ? "mainGreen" : "lightGray"} borderRadius={100} color={showPayButton ? colors.white : colors.mainGreen} />
-                </HStack>
+                    <HStack px={"20px"} mt={"30px"} alignItems={"center"} justifyContent={"space-between"}>
+                        <HStack space={2}>
+                            {receiver.profileImageUrl ?
+                                <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: receiver.profileImageUrl }} />
+                                :
+                                <DefaultIcon
+                                    value={receiver?.fullName || ""}
+                                    contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(receiver?.fullName || "") }]}
+                                    textStyle={styles.textStyle}
+                                />
+                            }
+                            <VStack justifyContent={"center"}>
+                                <Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(receiver?.fullName || "")}</Heading>
+                                <Text color={colors.lightSkyGray}>{receiver?.username}</Text>
+                            </VStack>
+                        </HStack>
+                        <Button opacity={showPayButton ? 1 : 0.5} fontSize={scale(11) + "px"} disabled={!showPayButton} onPress={onNextPage} h={"40px"} w={"100px"} title={"Siguiente"} bg={showPayButton ? "mainGreen" : "lightGray"} borderRadius={100} color={showPayButton ? colors.white : colors.mainGreen} />
+                    </HStack>
+                </VStack>
+                <VStack >
+                    <KeyNumberPad onChange={(value: string) => onChange(value)} />
+                </VStack>
             </VStack>
-            <VStack mb={"40px"}>
-                <KeyNumberPad onChange={(value: string) => onChange(value)} />
-            </VStack>
-        </VStack>
+        </SafeAreaView>
     )
 }
 

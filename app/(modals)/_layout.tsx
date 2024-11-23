@@ -1,6 +1,11 @@
 import 'react-native-reanimated';
 import { Stack } from 'expo-router';
 import colors from '@/colors';
+import { BackHeaderIcon, CardsRight, HomeHeaderRight } from '@/components/navigation/HeaderBar';
+import { Image } from 'native-base';
+import { logo } from '@/assets';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
+
 
 
 export default () => {
