@@ -36,6 +36,17 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
         prevPage()
     }
 
+    const onPressNext = async () => {
+        try {
+            setLoading(true)
+            nextPage()
+            setLoading(false)
+        } catch (error) {
+            console.log({ onPressNext: error });
+        }
+    }
+
+
     useEffect(() => {
         setDisabledButton(true)
         setInvalidCode(false)
@@ -113,11 +124,7 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             bg={disabledButton ? "lightGray" : "mainGreen"}
                             color={disabledButton ? 'placeholderTextColor' : "white"}
                             w={"48%"}
-                            onPress={() => {
-                                setLoading(true)
-                                nextPage()
-                                setLoading(false)
-                            }}
+                            onPress={onPressNext}
                             title={"Siguiente"}
                         />
                     </HStack>

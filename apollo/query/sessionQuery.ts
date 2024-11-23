@@ -149,6 +149,8 @@ export class SessionApolloQueries {
                     }
                     cards {
                         id
+                        hash,
+                        brand
                         last4Number
                         alias
                         isPrimary

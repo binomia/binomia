@@ -57,7 +57,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account)
             const cardsData = await UserAuthSchema.cardsData.parseAsync(user.data.sessionUser.cards)
             const primaryCard = cardsData.find((card: any) => card.isPrimary === true)
-         
+
 
             await Promise.all([
                 dispatch(globalActions.setUser(userProfileData)),
@@ -107,7 +107,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
     const onLogin = async ({ email, password }: { email: string, password: string }): Promise<any> => {
         try {
-            const data = await login({
+            const { data } = await login({
                 variables: { email, password },
                 context: {
                     headers: {
@@ -118,14 +118,16 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 }
             });
 
-            if (!data.data.login.needVerification && data.data.login.token) {
-                await setItem("jwt", data.data.login.token)
-                await fetchSessionUser()
-                router.navigate("(home)")
-                // await Updates.reloadAsync();
+            if (data.login.token) {
+                await setItem("jwt", data.login.token)
+
+                if (!data.login.needVerification) {
+                    await fetchSessionUser()
+                    router.navigate("(home)")
+                }
             }
 
-            return data.data.login
+            return data.login
 
         } catch (error) {
             setInvalidCredentials(true)
@@ -251,15 +253,15 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             if (jwt) {
                 await dispatch(globalActions.setJwt(jwt))
                 await fetchSessionUser()
-                
+
                 const [ip, network] = await Promise.all([Network.getIpAddressAsync(), Network.getNetworkStateAsync()])
                 const location = await getLocation()
-                
+
                 await Promise.all([
                     dispatch(globalActions.setNetwork({ ...network, ip })),
                     dispatch(globalActions.setLocation(location))
                 ])
-                
+
                 await dispatch(globalActions.setApplicationId(applicationId))
                 await setNotifications();
                 setJwt(jwt)

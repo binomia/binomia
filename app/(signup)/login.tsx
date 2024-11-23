@@ -60,9 +60,11 @@ const LoginComponent: React.FC = (): JSX.Element => {
                 dispatch(globalActions.setCard(primaryCard ?? {}))
             ])
 
+            router.navigate("(home)")
+
         } catch (error) {
             onLogout()
-            console.error(error);
+            console.error({error});
         }
     }
 
@@ -103,10 +105,10 @@ const LoginComponent: React.FC = (): JSX.Element => {
             setLoading(true)
 
             const loginData = await onLogin({ email: email.toLowerCase(), password })
-
             const sessionData = await SessionAuthSchema.verifySession.parseAsync(loginData)
+
             setSessionVerificationData(sessionData)
-            setVerificationCode(loginData.code)
+            setVerificationCode(sessionData.code)
 
             pageRef.current?.setPage(1)
             setLoading(false)
@@ -118,19 +120,16 @@ const LoginComponent: React.FC = (): JSX.Element => {
 
     const onVerifyNextPress = async () => {
         try {
-            const verifySessionData = await verifySession({ variables: { ...sessionVerificationData } })
+            const { data } = await verifySession({ variables: { ...sessionVerificationData } })
 
-            if (verifySessionData.data.verifySession) {
+            if (data.verifySession) {
                 if (sessionVerificationData.token)
                     await setItem("jwt", sessionVerificationData.token)
 
-                await fetchSessionUser(verifySessionData.data.verifySession)
+                await fetchSessionUser(data.verifySession)
 
                 setEmail("")
                 setPassword("")
-
-                router.push("(home)")
-                pageRef.current?.setPage(0)
             }
 
         } catch (error) {
