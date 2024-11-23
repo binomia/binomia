@@ -6,7 +6,7 @@ import React, { useCallback, useEffect } from 'react';
 import { NativeBaseProvider } from 'native-base';
 import { theme } from '@/themes';
 import { DATABASE_NAME } from '@/constants';
-import { SQLiteProvider } from "expo-sqlite/next";
+// import { SQLiteProvider } from "expo-sqlite/next";
 import { Provider } from 'react-redux';
 import { store } from '@/redux';
 import { ApolloProvider } from '@apollo/client';
@@ -63,7 +63,7 @@ export default () => {
 	}
 
 	return (
-		<SQLiteProvider databaseName={DATABASE_NAME}>
+		// <SQLiteProvider databaseName={DATABASE_NAME}>
 			<Provider store={store}>
 				<ApolloProvider client={apolloClient}>
 					<NativeBaseProvider theme={theme}>
@@ -84,6 +84,6 @@ export default () => {
 					</NativeBaseProvider>
 				</ApolloProvider>
 			</Provider >
-		</SQLiteProvider>
+		// </SQLiteProvider>
 	);
 }

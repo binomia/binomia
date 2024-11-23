@@ -6,12 +6,13 @@ import Cards from "../cards"
 import { router } from "expo-router"
 import colors from "@/colors"
 import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { scale } from "react-native-size-matters"
 
 
 
 export const HomeHeaderLeft: React.FC = () => {
     return (
-        <Image alt='logo-image'  w={"90px"} h={"30px"} source={logo} />
+        <Image alt='logo-image'  resizeMode="contain" w={scale(120)} h={"40px"} source={logo} />
     )
 }
 
