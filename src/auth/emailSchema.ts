@@ -1,10 +1,10 @@
-import Joi from 'joi'
+import { z } from 'zod'
 
 
 export class EmailJoiSchema {
-    static sendEmail = Joi.object({
-        subject: Joi.string().required(),
-        message: Joi.string().required(),
-        html: Joi.string().optional()
+    static sendEmail = z.object({
+        subject: z.string(),
+        message: z.string(),
+        html: z.string().optional()
     })
 }
