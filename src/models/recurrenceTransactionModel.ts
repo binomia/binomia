@@ -11,6 +11,9 @@ const RecurrenceTransactionsModel = db.define('recurrence_transactions', {
 	jobName: {
 		type: STRING
 	},
+	jobTime: {
+		type: STRING
+	},
 	amount: {
 		type: INTEGER,
 		allowNull: false

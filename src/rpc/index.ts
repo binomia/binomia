@@ -1,4 +1,5 @@
 import { transactionsQueue } from "@/queues";
+import { WeeklyQueueTitleType } from "@/types";
 import { JSONRPCServer } from "json-rpc-2.0";
 
 export const initMethods = (server: JSONRPCServer) => {
@@ -13,7 +14,17 @@ export const initMethods = (server: JSONRPCServer) => {
             const job = await transactionsQueue.removeJob(jobKey)
             return job
 
-        } catch (error: any) {            
+        } catch (error: any) {
+            throw new Error(error.toString());
+        }
+    });
+
+    server.addMethod("updateJob", async ({ jobKey, jobName, jobTime }: { jobKey: string, jobName: string, jobTime: WeeklyQueueTitleType }) => {
+        try {
+            const job = await transactionsQueue.updateJob(jobKey, jobName, jobTime)
+            return job
+
+        } catch (error: any) {
             throw new Error(error.toString());
         }
     });

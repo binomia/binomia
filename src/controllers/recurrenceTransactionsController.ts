@@ -11,30 +11,33 @@ interface RecurrenceTransactionsParams extends JobJson {
     receiverId: number,
     senderId: number,
     amount: number,
+    jobName: string
     jobTime: WeeklyQueueTitleType
 }
 
 export class RecurrenceTransactionsController {
     static createTransaction = async (transactionData: RecurrenceTransactionsParams) => {
-        const { repeatJobKey, receiverId, senderId, jobTime, amount, id, timestamp, data} = transactionData
+        const { repeatJobKey, receiverId, senderId, jobTime, jobName, amount, id, timestamp, data } = transactionData
         const hash = await Cryptography.hash(JSON.stringify({
             jobId: id,
-            receiverId, 
+            receiverId,
             senderId,
             amount,
             repeatJobKey,
             jobTime,
+            jobName,
             ZERO_ENCRYPTION_KEY
         }))
 
         const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
         const transaction = await RecurrenceTransactionsModel.create({
             jobId: id,
-            receiverId, 
+            receiverId,
             senderId,
             amount,
             repeatJobKey,
-            jobName: jobTime,
+            jobName,
+            jobTime,
             timestamp,
             status: "active",
             repeatedCount: 0,
@@ -42,7 +45,7 @@ export class RecurrenceTransactionsController {
             signature
         })
 
-        return transaction
+        return transaction.toJSON()
     }
 
     static prosessTransaction = async (job: Job) => {
@@ -61,19 +64,21 @@ export class RecurrenceTransactionsController {
             if (!transaction)
                 throw "transaction not found";
 
-            const { jobId, jobName, signature, accountId, data } = transaction.toJSON()
+            const { jobId, jobName, jobTime, receiverId, senderId, amount, signature, data } = transaction.toJSON()
+
             const hash = await Cryptography.hash(JSON.stringify({
                 jobId,
-                accountId,
+                receiverId,
+                senderId,
+                amount,
                 repeatJobKey,
+                jobTime,
                 jobName,
                 ZERO_ENCRYPTION_KEY
             }))
 
 
-
             const verify = await Cryptography.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
-
             if (verify) {
                 const decryptedData = await Cryptography.decrypt(data)
                 const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(JSON.parse(decryptedData))
