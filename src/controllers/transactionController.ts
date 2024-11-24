@@ -406,4 +406,15 @@ export class TransactionsController {
             throw new GraphQLError(error);
         }
     }
+
+    static updateRecurrentTransactions = async (_: unknown, { data: { repeatJobKey, jobName, jobTime } }: { data: { repeatJobKey: string, jobName: string, jobTime: string } }, context: any) => {
+        try {
+            await checkForProtectedRequests(context.req);
+            const job = await queueServer("updateJob", { jobKey: repeatJobKey, jobName, jobTime })
+            return job
+
+        } catch (error: any) {
+            throw new GraphQLError(error);
+        }
+    }
 }

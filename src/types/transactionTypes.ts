@@ -1,3 +1,6 @@
+import { TransactionJoiSchema } from "@/auth/transactionJoiSchema"
+import { z } from "zod"
+
 export type TransactionModelType = {
     id: number
     senderId: number
@@ -44,3 +47,6 @@ export type TransactionCreateType = {
 }
 
 export type BankingTransactionCreateType = Omit<TransactionCreateType, 'receiver'>;
+
+
+export type WeeklyQueueTitleType = z.infer<typeof TransactionJoiSchema.weeklyQueueTitle>

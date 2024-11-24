@@ -31,6 +31,7 @@ export class TransactionJoiSchema {
         sender: z.string()      
     })
 
+    static weeklyQueueTitle = z.enum(["everySunday", "everyMonday", "everyTuesday", "everyWednesday", "everyThursday", "everyFriday", "everySaturday"])
 
 
     static validateTransaction = z.object({
