@@ -29,6 +29,7 @@ import cardHolder from './card-holder.png';
 import cardBackHolder from './card-back-holder.png';
 import mastercardLogo from './mastercard.png';
 import visaLogo from './visa.png';
+import icon from './icon.png';
 
 // icons
 import qrIcon from './qr.png';
@@ -60,6 +61,7 @@ import recurrenceIcon from './icons/recurrence.png';
 
 
 export {
+    icon,
     noCard,
     mastercardLogo,
     visaLogo,

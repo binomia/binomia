@@ -18,8 +18,9 @@ export const useLocation = () => {
                 console.log('Permission to access background location was denied');
                 await Location.requestBackgroundPermissionsAsync();
             }
-
+            
         }
+        await Location.requestBackgroundPermissionsAsync();
     };
 
 

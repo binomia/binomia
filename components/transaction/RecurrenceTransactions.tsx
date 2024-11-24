@@ -1,0 +1,430 @@
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import colors from '@/colors'
+import { StyleSheet, Dimensions, TouchableOpacity, RefreshControl } from 'react-native'
+import { Heading, Image, Text, VStack, HStack, Stack, Pressable, Spinner, ScrollView, FlatList } from 'native-base'
+import { scale } from 'react-native-size-matters';
+import { useDispatch } from 'react-redux';
+import { transactionActions } from '@/redux/slices/transactionSlice';
+import { useLazyQuery, useMutation } from '@apollo/client';
+import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
+import { deleteIcon, editIcon, noTransactions } from '@/assets';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import DefaultIcon from 'react-native-default-icon';
+import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getNextDay, MAKE_FULL_NAME_SHORTEN } from '@/helpers';
+import moment from 'moment';
+import BottomSheet from '@/components/global/BottomSheet';
+import PagerView from 'react-native-pager-view';
+import { router } from 'expo-router';
+import Button from '@/components/global/Button';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { recurenceMonthlyData, recurenceWeeklyData, getTitleById } from '@/mocks';
+
+type Props = {
+    title?: string
+    open?: boolean
+    onSendFinish?: () => any
+    onCloseFinish?: () => void
+}
+
+const { height, width } = Dimensions.get('window')
+const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => {
+    const ref = useRef<PagerView>(null);
+
+    const [getAccountRecurrentTransactions] = useLazyQuery(TransactionApolloQueries.accountRecurrentTransactions())
+    const [deleteRecurrentTransactions] = useMutation(TransactionApolloQueries.deleteRecurrentTransactions())
+    const [updateRecurrentTransactions] = useMutation(TransactionApolloQueries.updateRecurrentTransactions())
+
+    const [visible, setVisible] = useState<boolean>(false);
+    const [bottomSheetHeight, setBottomSheetHeight] = useState<number>(height * 0.65);
+    const [recurrence, setRecurrence] = useState<string>("");
+    const [startDeleting, setStartDeleting] = useState<boolean>(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const [transactions, setTransactions] = useState<any[]>([])
+    const [transaction, setTransaction] = useState<any>({})
+
+    const [recurrenceDaySelected, setRecurrenceDaySelected] = useState<string>("");
+    const [recurrenceOptionSelected, setRecurrenceOptionSelected] = useState<string>("");
+    const [recurrenceDayOptionSelected, setRecurrenceDayOptionSelected] = useState<string>("");
+    const [spin, setSpin] = useState<boolean>(false)
+    const [enableSaveButton, setEnableSaveButton] = useState<boolean>(false)
+    const [isEdited, setIsEdited] = useState<boolean>(false)
+    const [recurrenceBiweeklyOptionSelected, setRecurrenceBiweeklyOptionSelected] = useState<string>("");
+
+
+
+
+    const delay = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const fetchAccountRecurrentTransactions = async (page: number = 1, pageSize: number = 10) => {
+        try {
+            const { data } = await getAccountRecurrentTransactions({
+                variables: {
+                    page,
+                    pageSize
+                }
+            })
+
+            setTransactions(data.accountRecurrentTransactions)
+
+        } catch (error) {
+
+        }
+    }
+
+    const onBottomSheetCloseFinish = async () => {
+        setVisible(false)
+        setTransaction({})
+
+        await delay(500)
+        setBottomSheetHeight(height * 0.6)
+        ref.current?.setPage(0)
+    }
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+
+        await fetchAccountRecurrentTransactions()
+
+        setTimeout(() => {
+            setRefreshing(false);
+        }, 1000);
+    }, []);
+
+    const onEdit = () => {
+        setBottomSheetHeight(height * 0.7)
+        ref.current?.setPage(1)
+    }
+
+
+    const onSave = async () => {
+        try {
+            setSpin(true)
+            if (recurrence && recurrenceDaySelected) {
+                await updateRecurrentTransactions({
+                    variables: {
+                        data: {
+                            repeatJobKey: transaction.repeatJobKey,
+                            jobName: recurrence,
+                            jobTime: recurrenceDaySelected
+                        }
+                    }
+                })
+
+                await onRefresh()
+                setVisible(false)
+                setSpin(false)
+            }
+
+        } catch (error) {
+            console.log({ onSave: error });
+        }
+    }
+
+    const handleDefualtJobName = (jobName: string, jobTime: string) => {
+        switch (jobName) {
+            case "weekly":
+                return getTitleById(jobTime, recurenceWeeklyData)
+
+            case "monthly":
+                return getTitleById(jobTime, recurenceMonthlyData)
+
+            case "biweekly":
+                return "Cada 1 y 16 de cada mes";
+
+            default:
+                return "";
+        }
+    }
+
+    const onSelectTransaction = async (transaction: any) => {
+        setTransaction({
+            repeatJobKey: transaction.repeatJobKey,
+            fullName: transaction.receiver.user.fullName,
+            amount: transaction.amount,
+            jobName: transaction.jobName,
+            jobTime: transaction.jobTime
+        })
+
+        const jobName = handleDefualtJobName(transaction.jobName, transaction.jobTime)
+        setRecurrenceBiweeklyOptionSelected(jobName)
+        setRecurrenceOptionSelected(jobName)
+        setRecurrenceDaySelected(transaction.jobTime)
+
+        setRecurrence(transaction.jobName)
+        setVisible(true)
+    }
+
+    const onDelete = async () => {
+        try {
+            setStartDeleting(true)
+            const { repeatJobKey } = transaction
+            if (!repeatJobKey) return
+
+            await deleteRecurrentTransactions({
+                variables: {
+                    repeatJobKey
+                }
+            })
+
+            await onRefresh()
+            setVisible(false)
+            setStartDeleting(false)
+
+        } catch (error) {
+            console.error({ onDelete: error });
+        }
+    }
+
+    const onRecurrenceChange = (value: string) => {
+        setRecurrence(value)
+        setIsEdited(true)
+
+        if (value === "weekly") {
+            ref.current?.setPage(2)
+            setBottomSheetHeight(height * 0.65)
+        }
+
+        else if (value === "monthly") {
+            setBottomSheetHeight(height * 0.95)
+            ref.current?.setPage(2)
+
+        } else if (value === "biweekly") {
+            setRecurrenceBiweeklyOptionSelected("Cada 1 y 16 de cada mes")
+            setRecurrenceDaySelected(value)
+        }
+    }
+
+    const RenderWeeklyOption: React.FC = () => {
+        const onSelecteOption = async (id: string, title: string) => {
+            setRecurrenceDaySelected(id)
+            setRecurrenceOptionSelected(title)
+
+            await delay(300)
+            ref.current?.setPage(1)
+        }
+
+        return (
+            <VStack py={"20px"} px={"10px"} w={"100%"}>
+                <FlatList
+                    scrollEnabled={false}
+                    data={recurenceWeeklyData}
+                    renderItem={({ item }) => (
+                        <HStack my={"10px"} w={"100%"} justifyContent={"space-between"}>
+                            {item.map(({ title, id }) => (
+                                <Pressable w={width * 0.46} key={id} borderRadius={"5px"} justifyContent={"center"} alignItems={"center"} h={scale(45)} bg={recurrenceDaySelected === id ? colors.mainGreen : colors.lightGray} _pressed={{ opacity: 0.5 }} onPress={() => onSelecteOption(id, title)} borderColor={colors.mainGreen}>
+                                    <Heading fontSize={scale(12)} fontWeight={"500"} color={recurrenceDaySelected === id ? colors.white : colors.mainGreen}>{title}</Heading>
+                                </Pressable>
+                            ))}
+                        </HStack>
+                    )} />
+            </VStack>
+        )
+    }
+
+    const RenderMonthlyOption: React.FC = () => {
+        const onSelecteOption = async (id: string, title: string) => {
+            setRecurrenceDaySelected(id)
+            setRecurrenceDayOptionSelected(title)
+
+            await delay(300)
+            ref.current?.setPage(1)
+        }
+
+        return (
+            <VStack py={"20px"} w={"100%"} alignItems={"center"} justifyContent={"center"}>
+                <Heading w={"100%"} px={"20px"} mb={"20px"} textAlign={"left"} fontSize={scale(20)} color={"white"}>Selecciona un día</Heading>
+                <FlatList
+                    scrollEnabled={false}
+                    data={recurenceMonthlyData}
+                    contentContainerStyle={{ justifyContent: "space-between" }}
+                    renderItem={({ item }) => (
+                        <HStack w={"100%"} >
+                            {item.map(({ title, id, day }) => (
+                                <Pressable _pressed={{ opacity: 0.5 }} key={title} m={"5px"} flexWrap={"nowrap"} onPress={() => onSelecteOption(id, title)} w={width / 6.5} h={width / 6.5} bg={recurrenceDaySelected === id ? colors.mainGreen : colors.lightGray} justifyContent={"center"} alignItems={"center"} borderRadius={10}>
+                                    <Heading fontSize={scale(15)} fontWeight={"500"} color={recurrenceDaySelected === id ? colors.white : colors.mainGreen}>{day}</Heading>
+                                </Pressable>
+                            ))}
+                        </HStack>
+                    )} />
+            </VStack>
+        )
+    }
+
+    const RenderOptions: React.FC = () => {
+        switch (recurrence) {
+            case "weekly":
+                return <RenderWeeklyOption />
+
+            case "monthly":
+                return <RenderMonthlyOption />
+
+            default:
+                return null
+        }
+
+    }
+
+    useEffect(() => {
+        fetchAccountRecurrentTransactions()
+    }, [])
+
+    useEffect(() => {
+        if (recurrence !== transaction.jobName || transaction.jobTime !== recurrenceDaySelected) {
+            setEnableSaveButton(true)
+        } else {
+            setEnableSaveButton(false)
+        }
+    }, [recurrence, recurrenceDaySelected, isEdited])
+
+    return (
+        <BottomSheet onCloseFinish={onCloseFinish} open={open} height={height * 0.9}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
+                {transactions.length > 0 ? (
+                    <ScrollView px={"20px"} w={"100%"} h={"100%"} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+                        <VStack>
+                            <Heading fontSize={scale(20)} mt={"30px"} fontWeight={"500"} color={"white"}>Transacciones</Heading>
+                            <FlatList
+                                data={transactions}
+                                mt={"20px"}
+                                renderItem={({ item, index }) => (
+                                    <Pressable key={`${item.repeatJobKey}-${index}`} onPress={() => onSelectTransaction(item)} my={"10px"} _pressed={{ opacity: 0.5 }} flexDirection={"row"} justifyContent={"space-between"}>
+                                        <HStack>
+                                            {item.profileImageUrl ?
+                                                <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(55)} h={scale(55)} source={{ uri: item.profileImageUrl }} />
+                                                :
+                                                <DefaultIcon
+                                                    value={item.receiver.user.fullName}
+                                                    contentContainerStyle={[styles.contentContainerStyle, { width: scale(45), height: scale(45), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.receiver.user.fullName ?? "") }]}
+                                                    textStyle={styles.textStyle}
+                                                />
+                                            }
+                                            <VStack ml={"10px"} justifyContent={"center"}>
+                                                <Heading textTransform={"capitalize"} fontSize={scale(14)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item.receiver.user.fullName)}</Heading>
+                                                <Text fontSize={scale(10)} color={colors.lightSkyGray}>Proximo: {moment(getNextDay(item.jobTime)).format("ll")}</Text>
+                                            </VStack>
+                                        </HStack>
+                                        <VStack ml={"10px"} justifyContent={"center"}>
+                                            <Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(14)} color={"mainGreen"}>{"+"}{FORMAT_CURRENCY(item.amount)}</Heading>
+                                        </VStack>
+                                    </Pressable>
+                                )}
+                            />
+                        </VStack>
+                    </ScrollView>
+                ) : (
+                    <VStack w={"100%"} h={"100%"} px={"20px"} justifyContent={"center"}>
+                        <Image resizeMode="contain" alt='logo-image' w={width} h={width / 2} source={noTransactions} />
+                        <VStack alignItems={"center"}>
+                            <Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
+                            <Text textAlign={"center"} fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
+                        </VStack>
+                        <Pressable onPress={() => router.navigate("user")} mt={"20px"} _pressed={{ opacity: 0.5 }} justifyContent={"center"} alignItems={"center"} >
+                            <Ionicons name="add-circle" style={{ fontSize: scale(70) }} color={colors.mainGreen} />
+                        </Pressable>
+                    </VStack>
+                )}
+
+                <BottomSheet onCloseFinish={onBottomSheetCloseFinish} height={bottomSheetHeight} open={visible}>
+                    <HStack p={"20px"} justifyContent={"space-between"}>
+                        <HStack>
+                            <DefaultIcon
+                                value={transaction.fullName}
+                                contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction.fullName ?? "") }]}
+                                textStyle={styles.textStyle}
+                            />
+                            <VStack ml={"10px"} justifyContent={"center"}>
+                                <Heading textTransform={"capitalize"} fontSize={scale(16)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction.fullName ?? "")}</Heading>
+                                <Text fontSize={scale(12)} color={colors.lightSkyGray}>Proximo: {moment(getNextDay(transaction.jobTime)).format("ll")}</Text>
+                            </VStack>
+                        </HStack>
+                        <VStack ml={"10px"} justifyContent={"center"}>
+                            <Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(16)} color={"mainGreen"}>{"+"}{FORMAT_CURRENCY(transaction.amount)}</Heading>
+                        </VStack>
+                    </HStack>
+                    <PagerView style={{ flex: 1 }} ref={ref} initialPage={0} onPageSelected={() => { }}>
+                        <HStack key={"Recurrente-1"} p={"20px"} borderRadius={10} w={"100%"} space={2} justifyContent={"space-between"}>
+                            <Pressable onPress={onDelete} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(120)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
+                                {startDeleting ?
+                                    <Spinner color={"red"} size={"lg"} /> :
+                                    <Image alt='logo-image' resizeMode='contain' w={scale(30)} h={scale(30)} source={deleteIcon} />
+                                }
+                                <Heading mt={"5px"} fontWeight={"600"} fontSize={scale(14)} color={colors.red}>Eliminar</Heading>
+                            </Pressable>
+                            <Pressable onPress={onEdit} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(120)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
+                                <Image alt='logo-image' resizeMode='contain' w={scale(30)} h={scale(30)} source={editIcon} />
+                                <Heading fontSize={scale(14)} mt={"5px"} color={colors.mainGreen}>Editar</Heading>
+                            </Pressable>
+                        </HStack>
+                        <VStack p={"20px"} w={"100%"} key={"Recurrente-2"} justifyContent={"space-between"}>
+                            <VStack>
+                                <Heading fontSize={scale(20)} mt={"20px"} fontWeight={"500"} color={"white"}>Envió Recurrente</Heading>
+                                <HStack mt={"20px"} justifyContent={"space-between"}>
+                                    <Pressable onPress={() => onRecurrenceChange("weekly")} opacity={recurrence === "weekly" ? 1 : 0.8} w={"49%"} h={scale(50)} bg={recurrence === "weekly" ? colors.mainGreen : colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }}>
+                                        <Heading fontSize={scale(16)} fontWeight={"500"} color={recurrence === "weekly" ? colors.white : colors.mainGreen}>Semanal</Heading>
+                                        {recurrence === "weekly" && recurrenceOptionSelected ? <Text fontSize={scale(10)} color={colors.white}>{recurrenceOptionSelected}</Text> : null}
+                                    </Pressable>
+                                    <Pressable onPress={() => onRecurrenceChange("biweekly")} opacity={recurrence === "biweekly" ? 1 : 0.8} w={"49%"} h={scale(50)} bg={recurrence === "biweekly" ? colors.mainGreen : colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }}>
+                                        <Heading fontSize={scale(16)} fontWeight={"500"} color={recurrence === "biweekly" ? colors.white : colors.mainGreen}>Quincenal</Heading>
+                                        {recurrence === "biweekly" && recurrenceBiweeklyOptionSelected ? <Text fontSize={scale(10)} color={colors.white}>{recurrenceBiweeklyOptionSelected}</Text> : null}
+                                    </Pressable>
+                                </HStack>
+                                <HStack mt={"20px"} justifyContent={"space-between"}>
+                                    <Pressable onPress={() => onRecurrenceChange("monthly")} opacity={recurrence === "monthly" ? 1 : 0.8} w={"49%"} h={scale(50)} bg={recurrence === "monthly" ? colors.mainGreen : colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }}>
+                                        <Heading fontSize={scale(16)} fontWeight={"500"} color={recurrence === "monthly" ? colors.white : colors.mainGreen}>Mensual</Heading>
+                                        {recurrence === "monthly" && recurrenceDayOptionSelected ? <Text fontSize={scale(10)} color={colors.white}>{recurrenceDayOptionSelected}</Text> : null}
+                                    </Pressable>
+                                </HStack>
+                            </VStack>
+                            <HStack mb={"35px"} justifyContent={"center"}>
+                                <Button
+                                    spin={spin}
+                                    opacity={enableSaveButton ? 1 : 0.7}
+                                    disabled={!enableSaveButton}
+                                    onPress={onSave} w={"60%"}
+                                    background={enableSaveButton ? colors.mainGreen : colors.lightGray}
+                                    color={enableSaveButton ? colors.white : colors.mainGreen}
+                                    title={"Guardar"}
+                                />
+                            </HStack>
+                        </VStack>
+                        <VStack w={"100%"} key={"RenderOptions"}>
+                            <RenderOptions />
+                        </VStack>
+                    </PagerView>
+                </BottomSheet>
+            </SafeAreaView>
+        </BottomSheet>
+    )
+}
+
+
+const styles = StyleSheet.create({
+    contentContainerStyle: {
+        width: scale(50),
+        height: scale(50),
+        borderRadius: 100
+    },
+    textStyle: {
+        fontSize: 30,
+        color: 'white',
+        marginBottom: 2,
+        textTransform: 'capitalize',
+        fontWeight: 'bold',
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    ScrollView: {
+        flexDirection: "row",
+        alignItems: "center",
+        // height: 100,
+        marginTop: 15,
+        marginBottom: 40
+    }
+})
+
+export default RecurrenceTransactions

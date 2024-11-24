@@ -192,6 +192,7 @@ export class TransactionApolloQueries {
             query AccountRecurrentTransactions($page: Int!, $pageSize: Int!) {
                 accountRecurrentTransactions(page: $page, pageSize: $pageSize) {
                     amount
+                    jobTime
                     jobName
                     repeatJobKey
                     status
@@ -221,6 +222,24 @@ export class TransactionApolloQueries {
         return gql`
             mutation DeleteRecurrentTransactions($repeatJobKey: String!) {
                 deleteRecurrentTransactions(repeatJobKey: $repeatJobKey) {
+                    jobId
+                    repeatJobKey
+                    jobName
+                    status
+                    repeatedCount
+                    amount
+                    data
+                    signature
+                    createdAt
+                    updatedAt
+                }
+            }
+        `
+    }
+    static updateRecurrentTransactions = () => {
+        return gql`
+            mutation UpdateRecurrentTransactions($data: UpdateQueuedTransactionInput!) {
+                updateRecurrentTransactions(data: $data) {
                     jobId
                     repeatJobKey
                     jobName

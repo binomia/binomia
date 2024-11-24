@@ -52,25 +52,17 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
     }
 
     return (
-        <BottomSheet draggable={false} openTime={300} height={height} onCloseFinish={() => onCloseFinish()} open={open}>
+        <BottomSheet openTime={300} height={height * 0.9} onCloseFinish={() => onCloseFinish()} open={open}>
             <SafeAreaView style={{ flex: 1 }}>
                 <VStack variant={"body"} flex={1}>
-                    <HStack alignItems={"center"} justifyContent={"space-between"}>
-                        <TouchableOpacity onPress={() => onCloseFinish()}>
-                            <Stack >
-                                <Ionicons name="close" size={30} color="white" />
-                            </Stack>
-                        </TouchableOpacity>
-                        <Stack>
-                            <Heading size={"sm"} color={colors.white} textAlign={"center"}>Tarjetas</Heading>
-                        </Stack>
+                    <HStack justifyContent={"flex-end"}>                        
                         <Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} onPress={() => { }}>
-                            <AntDesign name="pluscircle" size={25} color="white" />
+                            <AntDesign name="pluscircle" size={scale(25)} color="white" />
                         </Pressable>
                     </HStack>
-                    <VStack mt={"50px"} flex={0.95}>
+                    <VStack flex={0.95}>
                         <HStack justifyContent={"space-between"} alignItems={"center"}>
-                            <Heading size={"xl"} color={colors.white}>Tarjetas</Heading>
+                            <Heading fontSize={scale(24)} color={colors.white}>Tarjetas</Heading>
                         </HStack>
                         {cards.length > 0 ? (
                             <FlatList

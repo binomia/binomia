@@ -8,6 +8,7 @@ import colors from "@/colors"
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { scale } from "react-native-size-matters"
 import { Platform } from "react-native"
+import RecurrenceTransactions from "../transaction/RecurrenceTransactions"
 
 
 
@@ -30,11 +31,14 @@ export const HomeHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
     )
 }
 export const TransactionsHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
+    const [showBottomSheet, setShowBottomSheet] = useState(false)
+
     return (
         <VStack p={p}>
-            <Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.navigate("recurrences")}>
+            <Pressable _pressed={{ opacity: 0.5 }} onPress={() => setShowBottomSheet(true)}>
                 <Image alt='logo-image' tintColor={"white"} w={"25px"} h={"25px"} source={recurrenceIcon} />
             </Pressable>
+            <RecurrenceTransactions open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} onSendFinish={() => setShowBottomSheet(false)} />
         </VStack>
     )
 }
@@ -53,10 +57,15 @@ export const RecurrencesHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) =>
 
 
 export const HeaderBankingRight: React.FC = () => {
+    const [showBottomSheet, setShowBottomSheet] = useState(false)
+
     return (
-        <Pressable onPress={() => router.navigate("cards")}>
-            <Image alt='HeaderBankingRight-logo-image' w={"25px"} h={"25px"} source={creditCard} />
-        </Pressable>
+        <VStack>
+            <Pressable onPress={() => setShowBottomSheet(true)}>
+                <Image alt='HeaderBankingRight-logo-image' w={"25px"} h={"25px"} source={creditCard} />
+            </Pressable>
+            <Cards open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
+        </VStack>
     )
 }
 export const WelcomeLeft: React.FC = () => {

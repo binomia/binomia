@@ -6,7 +6,7 @@ import PagerView from 'react-native-pager-view';
 import Button from '@/components/global/Button'
 import BottomSheet from '@/components/global/BottomSheet'
 import QRCodeStyled from 'react-native-qrcode-styled';
-import { logo } from '@/assets'
+import { icon, logo } from '@/assets'
 import { useDispatch, useSelector } from 'react-redux'
 import { scale } from 'react-native-size-matters'
 import { MAKE_FULL_NAME_SHORTEN } from '@/helpers'
@@ -79,7 +79,7 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
     return (
         <VStack flex={1}>
             {!showSendTransaction ? (
-                <BottomSheet showDragIcon={false} height={height * 0.90} open={open} onCloseFinish={onCloseFinished}>
+                <BottomSheet  height={height * 0.90} open={open} onCloseFinish={onCloseFinished}>
                     <PagerView scrollEnabled={false} style={{ flex: 1 }} initialPage={currentPage} ref={pageFef}>
                         <VStack key={"QRScannerScreen-1"} flex={1}>
                             <VStack space={2} w={"100%"} h={"90%"} alignItems={"center"} justifyContent={"space-between"}>
@@ -92,10 +92,10 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                             pieceStrokeWidth={0.5}
                                             pieceStroke={colors.darkGray}
                                             logo={{
-                                                href: logo
+                                                href: icon,
+                                                padding: 10,
+                                                opacity: 0.8
                                             }}
-                                            padding={20}
-                                            aria-hidden
                                             style={{
                                                 backgroundColor: "transparent"
                                             }}

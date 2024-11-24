@@ -376,6 +376,21 @@ export const recurenceWeeklyData = [
     ]
 ]
 
+export const getTitleById = (id: string, arr: any[]) => {
+    // Iterate through each sub-array in recurenceWeeklyData
+    for (const group of arr) {
+        // Iterate through each object in the sub-array
+        for (const item of group) {
+            // Check if the current item's id matches the input id
+            if (item.id === id) {
+                return item.title;
+            }
+        }
+    }
+    // Return null or a default value if the id is not found
+    return null;
+}
+
 export const recurenceMonthlyData = [
     [
         { title: "Día 1 de cada mes", id: "everyFirst", day: "1" },

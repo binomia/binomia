@@ -54,7 +54,7 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
-                location
+                location: location ?? {},
             })
 
             const transaction = await createTransaction({
@@ -118,15 +118,19 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
 
     const handleOnPress = async () => {
         try {
-            const authenticated = await authenticate()
+            // const authenticated = await authenticate()
 
             setLoading(true)
-            if (authenticated.success) {
-                await handleOnSend({
-                    title: recurrence,
-                    time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
-                })
-            }
+            // if (authenticated.success) {
+            //     await handleOnSend({
+            //         title: recurrence,
+            //         time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
+            //     })
+            // }
+            await handleOnSend({
+                title: recurrence,
+                time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
+            })
 
             setLoading(false)
         } catch (error) {
@@ -239,7 +243,7 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
                             </HStack>
                         </VStack>
                         <HStack mb="10px" px={"20px"} justifyContent={"space-between"}>
-                            <Button spin={loading} onPress={goBack} w={"49%"} bg={colors.lightGray} color={colors.mainGreen} title={"Atrás"} />
+                            <Button onPress={goBack} w={"49%"} bg={colors.lightGray} color={colors.mainGreen} title={"Atrás"} />
                             <Button spin={loading} onPress={handleOnPress} w={"49%"} bg={"mainGreen"} color='white' title={"Enviar"} />
                         </HStack>
                     </VStack>

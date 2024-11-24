@@ -5,7 +5,7 @@ import colors from '@/colors';
 import PagerView from 'react-native-pager-view';
 import valid from "card-validator";
 import { Dimensions, TouchableWithoutFeedback, Keyboard } from 'react-native'
-import { HStack, Pressable, Stack, Image, VStack, Text, Heading } from 'native-base'
+import { HStack, Pressable, Stack, Image, VStack, Text, Heading, ScrollView } from 'native-base'
 import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-sticky-footer-avoiding-scroll-view';
 import { CreditCardView } from 'react-native-credit-card-input';
 import { cardBackHolder, cardHolder, noCard } from '@/assets';
@@ -18,6 +18,7 @@ import { CardApolloQueries } from '@/apollo/query/cardQuery';
 import { useDispatch, useSelector } from 'react-redux';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { CardType } from '@/types';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 type Props = {
@@ -25,10 +26,11 @@ type Props = {
     openToEdit?: boolean
     setOpenToEdit?: (_: boolean) => void
     onPress?: (_: any) => Promise<void>
+    onClose?: () => void
 }
 
 const { height } = Dimensions.get('window')
-const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { }, openToEdit = false, setOpenToEdit = (_: boolean) => { } }: Props) => {
+const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose = () => { }, openToEdit = false, setOpenToEdit = (_: boolean) => { } }: Props) => {
     const ref = useRef<PagerView>(null);
     const [fetchCards] = useLazyQuery(CardApolloQueries.cards())
     const [fetchCard] = useLazyQuery(CardApolloQueries.card())
@@ -270,24 +272,24 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { }, openT
     }, [openToEdit])
 
     return (
-        <PagerView style={{ flex: 1 }} initialPage={0} ref={ref}>
-            <KeyboardAvoidingScrollView scrollEnabled={!Keyboard.isVisible()}>
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <VStack key={"CreditCardView-0"} flex={1} mb={"30px"} justifyContent={"space-between"}>
-                        <VStack p={"20px"} w={"100%"}>
-                            <HStack alignItems={"center"} bg={colors.lightGray} justifyContent={"center"} w={"100%"} py={scale(height * 0.015)} borderRadius={10}>
-                                <CreditCardView
-                                    imageFront={cardHolder}
-                                    imageBack={cardBackHolder}
-                                    name={name}
-                                    number={number.match(/.{1,4}/g)?.join(" ") || ""}
-                                    expiry={expiry}
-                                    cvc={cvc}
-                                    placeholders={cardPlaceholders}
-                                    focusedField={focusedField as any}
-                                    type={type as any}
-                                />
-                            </HStack>
+        <PagerView style={{ height: "90%" }} initialPage={0} ref={ref}>
+            <ScrollView p={"20px"} h={"100%"} w={"100%"} contentContainerStyle={{ justifyContent: "space-between" }}>
+                <VStack>
+                    <HStack alignItems={"center"} bg={colors.lightGray} justifyContent={"center"} w={"100%"} py={scale(height * 0.015)} borderRadius={10}>
+                        <CreditCardView
+                            imageFront={cardHolder}
+                            imageBack={cardBackHolder}
+                            name={name}
+                            number={number.match(/.{1,4}/g)?.join(" ") || ""}
+                            expiry={expiry}
+                            cvc={cvc}
+                            placeholders={cardPlaceholders}
+                            focusedField={focusedField as any}
+                            type={type as any}
+                        />
+                    </HStack>
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <KeyboardAvoidingScrollView scrollEnabled={!Keyboard.isVisible()}>
                             <VStack mt={"20px"}>
                                 <Input value={number} onFocus={() => setFocusedField("number")} h={scale(45)} keyboardType="number-pad" placeholder='Numero De La Tarjeta' maxLength={19} onChangeText={(text) => onChangeText(text, "number")} />
                                 <Input value={name} onFocus={() => setFocusedField("name")} h={scale(45)} placeholder='Nombre De La Tarjeta' onChangeText={(text) => onChangeText(text, "name")} />
@@ -309,22 +311,31 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { }, openT
                                     Agregue tarjeta como método de pago principal.
                                 </Text>
                             </HStack>
-                        </VStack>
-                        <Stack mb={"20px"} px={"20px"} justifyContent={"center"}>
-                            <Button
-                                spin={isLoading}
-                                opacity={disabledButton ? 0.5 : 1}
-                                disabled={disabledButton}
-                                bg={disabledButton ? "lightGray" : "mainGreen"}
-                                color={disabledButton ? colors.mainGreen : colors.white}
-                                title={"Confirmar"}
-                                onPress={handleOnPress}
-                            />
-                        </Stack>
-                    </VStack>
-                </TouchableWithoutFeedback>
-            </KeyboardAvoidingScrollView>
-            <VStack key={"error-CreditCardView-1"} variant={"body"}>
+                        </KeyboardAvoidingScrollView>
+                    </TouchableWithoutFeedback>
+                </VStack>
+                <HStack w={"100%"} mt={"40px"} h={"100px"} px={"20px"} justifyContent={"space-between"}>
+                    <Button
+                        w={"49%"}
+                        disabled={disabledButton}
+                        bg={colors.lightGray}
+                        color={colors.mainGreen}
+                        title={"Cancelar"}
+                        onPress={onClose}
+                    />
+                    <Button
+                        w={"49%"}
+                        spin={isLoading}
+                        opacity={disabledButton ? 0.5 : 1}
+                        disabled={disabledButton}
+                        bg={disabledButton ? "lightGray" : "mainGreen"}
+                        color={disabledButton ? colors.mainGreen : colors.white}
+                        title={"Confirmar"}
+                        onPress={handleOnPress}
+                    />
+                </HStack>
+            </ScrollView>
+            <VStack key={"error-CreditCardView-1"}>
                 <VStack py={"30px"} px={"10px"} mb={"30px"} justifyContent={"space-between"} flex={1}>
                     <VStack mt={"10px"}>
                         <Image alt='logo-image' h={height / 3} resizeMode='contain' w={"100%"} source={noCard} />
@@ -335,7 +346,6 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { }, openT
                 </VStack>
             </VStack>
         </PagerView>
-
     )
 }
 

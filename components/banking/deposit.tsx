@@ -1,36 +1,27 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import colors from '@/colors'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import KeyNumberPad from '@/components/global/KeyNumberPad';
 import Cards from '@/components/cards';
 import Button from '@/components/global/Button';
-import BottomSheet from '../global/BottomSheet';
-import { Dimensions, SafeAreaView } from 'react-native'
+import { SafeAreaView } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable } from 'native-base'
 import { scale } from 'react-native-size-matters';
-import { useDispatch, useSelector } from 'react-redux';
-import { transactionActions } from '@/redux/slices/transactionSlice';
+import { useSelector } from 'react-redux';
 import { mastercardLogo, visaLogo } from '@/assets';
 import { FORMAT_CURRENCY } from '@/helpers';
-import PagerView from 'react-native-pager-view';
-import { router } from 'expo-router';
 
 
 type Props = {
     title?: string
-    open?: boolean
     showAvailable?: boolean
     onSendFinish?: (amount: number) => any
     onCloseFinish?: () => void
 }
 
-const { height } = Dimensions.get('window')
-const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", showAvailable = false, open = false, onSendFinish = (_: number) => { }, onCloseFinish = () => { } }) => {
-    const dispatch = useDispatch();
+const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", showAvailable = false, onSendFinish = (_: number) => { } }) => {
     const { card, account } = useSelector((state: any) => state.globalReducer)
-
     const [input, setInput] = useState<string>("0");
-    const [visible, setVisible] = useState<boolean>(open);
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
 
@@ -44,12 +35,6 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", sh
         setInput(value.toString())
     }
 
-    const handleOnClose = async () => {
-        await dispatch(transactionActions.setReceiver({}))
-
-        onCloseFinish()
-        setVisible(false)
-    }
 
     const renderCardLogo = (brand: string) => {
         switch (brand) {
@@ -64,16 +49,12 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", sh
         }
     }
 
-    useEffect(() => {
-        setVisible(open)
-    }, [open])
-
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
             <VStack px={"20px"} w={"100%"} h={"100%"} justifyContent={"space-between"}>
                 <VStack space={5}>
                     <HStack mt={"20px"} alignItems={"center"} justifyContent={"space-between"}>
-                        <Pressable onPress={() => router.navigate({ pathname: "cards", params: { justSelecting: "true" } })} _pressed={{ opacity: 0.5 }} flexDirection={"row"} alignItems={"center"}>
+                        <Pressable onPress={() => setShowAllCards(true)} _pressed={{ opacity: 0.5 }} flexDirection={"row"} alignItems={"center"}>
                             {renderCardLogo(card.brand)}
                             <VStack justifyContent={"center"}>
                                 <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{card?.brand} {card?.last4Number}</Heading>

@@ -9,8 +9,8 @@ export class TransactionAuthSchema {
         transactionType: z.string().default("transfer"),
         currency: z.string().default("DOP"),
         location: z.object({
-            latitude: z.number(),
-            longitude: z.number(),
+            latitude: z.number().default(0),
+            longitude: z.number().default(0),
         })
     })
 
