@@ -1,8 +1,9 @@
-import { AccountModel, TransactionsModel, UsersModel } from '@/models'
+import { AccountModel, BankingTransactionsModel, TransactionsModel, UsersModel } from '@/models'
 import { checkForProtectedRequests, GET_LAST_SUNDAY_DATE, getQueryResponseFields } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { AccountZodSchema } from '@/auth';
 import { Op } from 'sequelize';
+import redis from '@/redis';
 
 export class AccountController {
     static accounts = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, _context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -84,43 +85,77 @@ export class AccountController {
 
     static accountLimit = async (_: unknown, { data }: { data: any }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            await checkForProtectedRequests(req);
-            const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
+            const session = await checkForProtectedRequests(req);
 
-            const account = await TransactionsModel.findAll({
+            const accountLimit = await redis.get(`accountLimit@${session.user.account.id}`)
+
+            if (accountLimit)
+                return JSON.parse(accountLimit)
+
+            const now: Date = new Date();
+            const dayOfWeek: number = now.getDay();
+            const daysSinceMonday: number = (dayOfWeek + 6) % 7;
+            const lastMonday: Date = new Date(now);
+
+            lastMonday.setDate(now.getDate() - daysSinceMonday);
+            lastMonday.setHours(0, 0, 0, 0);
+
+            const sentAmount = await TransactionsModel.sum('deliveredAmount', {
                 where: {
-                    [Op.or]: [
-                        {
-                            [Op.and]: [
-                                { fromAccount: req.session.user.account.id },
-                                { createdAt: { [Op.gte]: GET_LAST_SUNDAY_DATE() } }
-                            ]
+                    [Op.and]: {
+                        createdAt: {
+                            [Op.gte]: lastMonday
                         },
-                        {
-                            [Op.and]: [
-                                { toAccount: req.session.user.account.id },
-                                { createdAt: { [Op.gte]: GET_LAST_SUNDAY_DATE() } }
-                            ]
-                        }
-                    ]
-                },
-                include: [
-                    {
-                        model: AccountModel,
-                        as: 'from',
-                        attributes: ["id"]
-                    },
-                    {
-                        model: AccountModel,
-                        as: 'to',
-                        attributes: ["id"]
+                        fromAccount: session.user.account.id
                     }
-                ]
-            })
+                }
+            });
 
-            console.log(account);
+            const receivedAmount = await TransactionsModel.sum('deliveredAmount', {
+                where: {
+                    [Op.and]: {
+                        createdAt: {
+                            [Op.gte]: lastMonday
+                        },
+                        toAccount: session.user.account.id,
+                    }
+                }
+            });
 
-            return account
+            const depositAmount = await BankingTransactionsModel.sum('deliveredAmount', {
+                where: {
+                    [Op.and]: {
+                        createdAt: {
+                            [Op.gte]: lastMonday
+                        },
+                        accountId: session.user.account.id,
+                        transactionType: 'deposit'
+                    }
+                }
+            });
+
+            const withdrawAmount = await BankingTransactionsModel.sum('deliveredAmount', {
+                where: {
+                    [Op.and]: {
+                        createdAt: {
+                            [Op.gte]: lastMonday
+                        },
+                        accountId: session.user.account.id,
+                        transactionType: 'withdraw'
+                    }
+                }
+            });
+
+            const limits = await AccountZodSchema.accountLimits.parseAsync({
+                receivedAmount,
+                sentAmount,
+                depositAmount,
+                withdrawAmount
+            });
+
+            await redis.set(`accountLimit@${session.user.account.id}`, JSON.stringify(limits), 'EX', 10) // expires in 10 seconds
+
+            return limits;
 
         } catch (error: any) {
             throw new GraphQLError(error.message);

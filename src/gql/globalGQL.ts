@@ -3,7 +3,6 @@ import { CardsController, GlobalController } from '@/controllers'
 
 const type = () => {
     return `
-       
     `
 }
 

@@ -4,6 +4,9 @@ import { Cryptography } from '@/helpers/cryptography';
 import { ZERO_SIGN_PRIVATE_KEY, ZERO_ENCRYPTION_KEY, REDIS_SUBSCRIPTION_CHANNEL, QUEUE_JOBS_NAME } from '@/constants';
 import redis from '@/redis';
 import shortUUID from 'short-uuid';
+import { BankingTransactionsModel, TransactionsModel } from '@/models';
+import { fn, literal, Op } from 'sequelize';
+import { AccountZodSchema } from '@/auth';
 
 
 export class GlobalController {
@@ -28,14 +31,15 @@ export class GlobalController {
 
     static test = async (_: unknown, { hash }: { hash: string }, { req }: { req: any }) => {
         try {
-            await redis.publish(QUEUE_JOBS_NAME.CREATE_TRANSACTION, JSON.stringify({
-                jobId: shortUUID.generate(),
-                data: {
-                    test: "test",
-                }
+            const test = await Cryptography.hash(JSON.stringify({
+                hash,
+                ZERO_ENCRYPTION_KEY,
+                ZERO_SIGN_PRIVATE_KEY
             }))
 
-            return null
+            console.log(JSON.stringify(req.headers, null, 2));
+
+            return null;
 
         } catch (error: any) {
             throw new GraphQLError(error.message);

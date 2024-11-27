@@ -1,6 +1,4 @@
-import Joi from 'joi'
 import { z } from 'zod'
-
 
 export class TransactionJoiSchema {
     static createTransaction = z.object({

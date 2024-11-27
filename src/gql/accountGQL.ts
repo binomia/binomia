@@ -102,6 +102,13 @@ const type = () => {
             user: OnlyUserType
             transactions: [TransactionType]
         }
+
+        type AccountLimitsType {
+            receivedAmount: Float
+            withdrawAmount: Float
+            sentAmount: Float
+            depositAmount: Float
+        }
     `
 }
 
@@ -110,7 +117,7 @@ const query = () => {
         accounts(page: Int!, pageSize: Int!): [AccountType]
         account: OnlyAccountType
         searchAccounts(search: AccountInput!, limit: Int): [AccountType]
-        accountLimit: TransactionsWithAccountType
+        accountLimit: AccountLimitsType
     `
 }
 
