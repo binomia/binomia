@@ -166,6 +166,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                 }
             })
 
+            setTransactions(transactions.filter((transaction) => transaction.repeatJobKey !== repeatJobKey))
             await onRefresh()
             setVisible(false)
             setStartDeleting(false)
@@ -277,7 +278,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
     }, [recurrence, recurrenceDaySelected, isEdited])
 
     return (
-        <BottomSheet onCloseFinish={onCloseFinish} open={open} height={height * 0.9}>
+        <BottomSheet onOpenFinish={fetchAccountRecurrentTransactions} onCloseFinish={onCloseFinish} open={open} height={height * 0.9}>
             <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
                 {transactions.length > 0 ? (
                     <ScrollView px={"20px"} w={"100%"} h={"100%"} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>

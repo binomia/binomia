@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState, Suspense } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
 import DefaultIcon from 'react-native-default-icon';
-import { StyleSheet, SafeAreaView, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity, RefreshControl } from 'react-native'
+import { StyleSheet, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity, RefreshControl } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
@@ -22,6 +22,7 @@ import { noTransactions } from '@/assets';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { router } from 'expo-router';
 import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 const { height } = Dimensions.get('window')
@@ -85,7 +86,7 @@ const TransactionsScreen: React.FC = () => {
 			})
 
 			setTransactions(data.accountTransactions)
-			
+
 			await delay(1000)
 			setIsLoading(false)
 
@@ -155,8 +156,8 @@ const TransactionsScreen: React.FC = () => {
 
 	return (
 		isLoading ? <TransactionSkeleton /> : (
-			<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-				<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
+			<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
+				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 					<VStack pt={"20px"}>
 						<VStack px={"20px"} w={"100%"} alignItems={"center"}>
 							<Input h={"50px"} w={"100%"} placeholder='Buscar...' onChangeText={(value) => handleSearch(value.toLowerCase())} />
@@ -245,13 +246,13 @@ const TransactionsScreen: React.FC = () => {
 								)
 							}
 						</ScrollView>
-						<BottomSheet showDragIcon={false} draggable={false} openTime={300} height={height} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
-							<SingleTransactionScreen onClose={onCloseFinishSingleTransaction} />
+						<BottomSheet openTime={300} height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
+							<SingleTransactionScreen />
 						</BottomSheet>
 						<SendTransaction open={showSendTransaction} onCloseFinish={onSendCloseFinish} onSendFinish={onSendCloseFinish} />
 					</VStack>
-				</SafeAreaView>
-			</TouchableWithoutFeedback >
+				</TouchableWithoutFeedback >
+			</SafeAreaView>
 		)
 	)
 }

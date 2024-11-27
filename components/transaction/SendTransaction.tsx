@@ -3,11 +3,11 @@ import { Dimensions, SafeAreaView } from 'react-native'
 import BottomSheet from '@/components/global/BottomSheet';
 import { useDispatch } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
-import SingleTransactionScreen from '@/screens/SingleTransactionScreen';
 import PagerView from 'react-native-pager-view';
-import TransactionDetailsScreen from './TranferDetails';
 import CreateTransaction from './CreateTransaction';
 import { router } from 'expo-router';
+import SingleTransaction from './SingleTransaction';
+import TransactionDetails from './TranferDetails';
 
 type Props = {
     open?: boolean
@@ -21,23 +21,36 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
     const ref = useRef<PagerView>(null);
     const [input, setInput] = useState<string>("0");
     const [visible, setVisible] = useState<boolean>(open);
+    const [currentPage, setCurrentPage] = useState<number>(0);
 
-  
+
     const handleOnClose = async () => {
         await dispatch(transactionActions.setReceiver({}))
 
         onCloseFinish()
         setVisible(false)
         setInput("0")
+
+        if (currentPage === 2)
+            router.navigate("(home)")
     }
 
-    const nextPage = async () => {
-        ref.current?.setPage(1)
+
+    const prevPage = () => {
+        if (currentPage === 0) {
+            ref.current?.setPage(1)
+            setCurrentPage(1)
+
+        } else
+            ref.current?.setPage(currentPage - 1)
+
+        setCurrentPage(currentPage - 1)
     }
 
-    const onCloseSingleTransaction = () => {
-        handleOnClose()
-        router.navigate("(home)")
+
+    const nextPage = () => {
+        ref.current?.setPage(currentPage + 1)
+        setCurrentPage(currentPage + 1)
     }
 
     useEffect(() => {
@@ -45,12 +58,12 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
     }, [open])
 
     return (
-        <BottomSheet  openTime={300} height={height * 0.9} onCloseFinish={handleOnClose} open={visible}>
+        <BottomSheet openTime={300} height={height * 0.9} onCloseFinish={handleOnClose} open={visible}>
             <SafeAreaView style={{ flex: 1 }}>
-                <PagerView style={{ flex: 1 }} ref={ref} initialPage={0}>
+                <PagerView style={{ flex: 1 }} ref={ref} initialPage={currentPage}>
                     <CreateTransaction key={"transaction-create-0"} input={input} onCloseFinish={handleOnClose} setInput={setInput} nextPage={nextPage} />
-                    <TransactionDetailsScreen key={"TransactionDetailsScreen-1"} onClose={handleOnClose} goBack={() => ref.current?.setPage(0)} />
-                    <SingleTransactionScreen key={"SingleTransactionScreen-2"} onClose={onCloseSingleTransaction} />
+                    <TransactionDetails key={"TransactionDetailsScreen-1"} onClose={handleOnClose} goNext={nextPage} goBack={prevPage} />
+                    <SingleTransaction key={"SingleTransactionScreen-2"} />
                 </PagerView>
             </SafeAreaView>
         </BottomSheet>

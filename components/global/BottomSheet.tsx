@@ -11,6 +11,7 @@ interface Props extends BottomSheetProps {
 
 const BottomSheet: React.FC<Props> = ({
     onCloseFinish = () => { },
+    onOpenFinish = () => { },
     children,
     height = 500,
     openTime = 500,
@@ -34,6 +35,7 @@ const BottomSheet: React.FC<Props> = ({
     return (
         <RNBottomSheet
             onCloseFinish={() => onCloseFinish()}
+            onOpenFinish={onOpenFinish}
             openTime={openTime}
             closeTime={500}
             showDragIcon={showDragIcon}

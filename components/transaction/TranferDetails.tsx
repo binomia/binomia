@@ -5,7 +5,6 @@ import { StyleSheet, Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, Stack, FlatList } from 'native-base'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import Button from '@/components/global/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import BottomSheet from '../global/BottomSheet';
@@ -16,7 +15,6 @@ import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
-import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
@@ -24,10 +22,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 type Props = {
     onClose?: () => void
     goBack?: () => void
+    goNext?: () => void
 }
 
-const { width } = Dimensions.get("screen")
-const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack = () => { } }) => {
+const { width, height } = Dimensions.get("screen")
+const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () => { }, goBack = () => { } }) => {
     const dispatch = useDispatch();
 
     const { authenticate } = useLocalAuthentication();
@@ -78,14 +77,8 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
                 createdAt: transactionSent.createdAt
             }))
 
-            onClose()
-            router.navigate("(home)")
-
-            if (recurrence.title !== "oneTime") {
-                await delay(700)
-                router.navigate("recurrences")
-            }
-
+            goNext()
+          
         } catch (error: any) {
             console.error(error.message);
         }
@@ -254,12 +247,12 @@ const TransactionDetailsScreen: React.FC<Props> = ({ onClose = () => { }, goBack
             </BottomSheet>
             <BottomSheet onCloseFinish={onCloseFinished} open={openOptions === "monthly"} height={(width / 6) * 9}>
                 <RenderMonthlyOption key={"RenderMonthlyOption"} />
-            </BottomSheet>
+            </BottomSheet>        
         </SafeAreaView>
     )
 }
 
-export default TransactionDetailsScreen
+export default TransactionDetails
 
 
 const styles = StyleSheet.create({

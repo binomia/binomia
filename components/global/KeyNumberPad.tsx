@@ -64,7 +64,7 @@ const KeyNumberPad: React.FC<Props> = ({ onChange = (_: string) => { }, maxAmoun
 
     return (
         <VStack>
-            <Heading fontSize={scale(45 + valueScale)} color={"mainGreen"} textAlign={"center"}>{FORMAT_CURRENCY(Number(value))}</Heading>
+            <Heading mb={"20px"} fontSize={scale(40 + valueScale)} color={"mainGreen"} textAlign={"center"}>{FORMAT_CURRENCY(Number(value))}</Heading>
             <FlatList columnWrapperStyle={styles.ColumnWrapperStyle} contentContainerStyle={{ alignItems: "center", justifyContent: "center" }} data={["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "x"]} numColumns={3} renderItem={({ item }) => (
                 item === "x" ?
                     <Pressable key={`number-key-pad-key-${item}`} onPress={() => onInputChange(item)} style={styles.OuterButton} _pressed={styles.OuterButtonPressed}>
