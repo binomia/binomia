@@ -1,34 +1,20 @@
 import { NOTIFICATION_SERVER_URL, SOCKET_EVENTS } from "@/constants";
 import useAsyncStorage from "@/hooks/useAsyncStorage";
-import { SocketContextType } from "@/types";
 import { createContext, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { io } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 import { AccountAuthSchema } from "@/auth/accountAuth";
 import { globalActions } from "@/redux/slices/globalSlice";
-import { useLazyQuery } from "@apollo/client";
-import { AccountApolloQueries } from "@/apollo/query";
+import { transactionActions } from "@/redux/slices/transactionSlice";
 
 
-export const SocketContext = createContext<SocketContextType>({
-    emit: () => { },
-    on: () => { }
-});
+export const SocketContext = createContext({});
 
 export const SocketContextProvider = ({ children }: { children: JSX.Element }) => {
-    const { account } = useSelector((state: any) => state.globalReducer)
 
     const { getItem } = useAsyncStorage()
     const dispatch = useDispatch()
-
-    const emit = (event: string, data: any) => {
-
-    }
-
-    const on = (event: string, callback: (data: any) => void) => {
-
-    }
 
     useEffect(() => {
 
@@ -43,8 +29,9 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
             });
 
             socket.on("connect", () => {
-                socket.on(SOCKET_EVENTS.TRANSACTION_CREATED, async (data: any) => {                                        
-                    dispatch(globalActions.setAccount(data.to))
+                socket.on(SOCKET_EVENTS.TRANSACTION_CREATED, async (transaction: any) => {
+                    await dispatch(globalActions.setAccount(transaction.to))
+                    await dispatch(transactionActions.setHasNewTransaction(true))
                 })
 
                 socket.on(SOCKET_EVENTS.TRANSACTION_CREATED_FROM_QUEUE, async (data: any) => {
@@ -63,13 +50,9 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
 
     }, [])
 
-    const data = {
-        emit,
-        on
-    }
 
     return (
-        <SocketContext.Provider value={data}>
+        <SocketContext.Provider value={{}}>
             {children}
         </SocketContext.Provider>
     )

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, Suspense } from 'react'
+import React, { useCallback, useEffect, useState, Suspense, useContext } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
 import DefaultIcon from 'react-native-default-icon';
@@ -20,15 +20,21 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { noTransactions } from '@/assets';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SocketContext } from '@/contexts/socketContext';
+import { SOCKET_EVENTS } from '@/constants';
+import { globalActions } from '@/redux/slices/globalSlice';
+import { generate as uuid } from "short-uuid"
 
 
 const { height } = Dimensions.get('window')
 const TransactionsScreen: React.FC = () => {
 	const dispatch = useDispatch()
-	const { user, account } = useSelector((state: any) => state.globalReducer)
+	const { user } = useSelector((state: any) => state.globalReducer)
+	const { hasNewTransaction } = useSelector((state: any) => state.transactionReducer)
+	const isFocused = useNavigation().isFocused()
 
 	const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
 	const [accountTransactions] = useLazyQuery(TransactionApolloQueries.accountTransactions())
@@ -40,9 +46,6 @@ const TransactionsScreen: React.FC = () => {
 	const [showSingleTransaction, setShowSingleTransaction] = useState<boolean>(false);
 	const [showSendTransaction, setShowSendTransaction] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
-
-	const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
 
 	const handleSearch = async (value: string) => {
 		try {
@@ -86,8 +89,6 @@ const TransactionsScreen: React.FC = () => {
 			})
 
 			setTransactions(data.accountTransactions)
-
-			await delay(1000)
 			setIsLoading(false)
 
 		} catch (error) {
@@ -121,8 +122,8 @@ const TransactionsScreen: React.FC = () => {
 		setShowSendTransaction(false)
 	}
 
-	const formatTransaction = (_transaction: any) => {
-		const transaction = TransactionAuthSchema.singleTransaction.parse(_transaction)
+	const formatTransaction = (transaction: any) => {
+		// const transaction = TransactionAuthSchema.singleTransaction.parse(_transaction)
 		const isFromMe = transaction.from.user?.id === user.id
 
 		const profileImageUrl = isFromMe ? transaction.to.user?.profileImageUrl : transaction.from.user?.profileImageUrl
@@ -140,13 +141,21 @@ const TransactionsScreen: React.FC = () => {
 
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
-
 		await fetchAccountTransactions()
-		setTimeout(() => {
-			setRefreshing(false);
-		}, 1000);
+		setRefreshing(false);
 	}, []);
 
+
+	useEffect(() => {
+		(async () => {
+			if (hasNewTransaction) {
+				await fetchAccountTransactions()
+				await dispatch(transactionActions.setHasNewTransaction(false))
+			}
+
+		})()
+
+	}, [isFocused, hasNewTransaction])
 
 	useEffect(() => {
 		setIsLoading(true)
@@ -173,14 +182,14 @@ const TransactionsScreen: React.FC = () => {
 										contentContainerStyle={{ flexDirection: "row", gap: 20, justifyContent: "center", alignItems: "center" }}
 										renderItem={({ item, index }) => (
 											index === 0 ? (
-												<VStack key={"transations-screen-" + index} justifyContent={"center"} alignItems={"center"}>
+												<VStack key={Date.now()} justifyContent={"center"} alignItems={"center"}>
 													<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} w={scale(55)} h={scale(55)} alignItems={"center"} justifyContent={"center"} onPress={() => router.navigate("/user")}>
 														<AntDesign name="pluscircle" size={30} color="white" />
 													</Pressable>
 													<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>Nueva</Heading>
 												</VStack>
 											) : (
-												<Pressable _pressed={{ opacity: 0.5 }} borderRadius={100} alignItems={"center"} key={`search_user_${index}-${Date.now()}`} onPress={() => onSelectUser(item)}>
+												<Pressable _pressed={{ opacity: 0.5 }} borderRadius={100} alignItems={"center"} key={`search_user_${index}-${Date.now()}}`} onPress={() => onSelectUser(item)}>
 													<VStack alignItems={"center"} borderRadius={10}>
 														{item.profileImageUrl ?
 															<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(55)} h={scale(55)} source={{ uri: item.profileImageUrl }} />
@@ -209,8 +218,8 @@ const TransactionsScreen: React.FC = () => {
 										scrollEnabled={false}
 										mt={"10px"}
 										data={transactions}
-										renderItem={({ item, index }) => (
-											<TouchableOpacity key={`search_user_${index}-${item.transactionId}-${Date.now()}`} onPress={() => onSelectTransaction(item)}>
+										renderItem={({ item, index }: any) => (
+											<TouchableOpacity key={`search_user_${index}-${Date.now()}}`} onPress={() => onSelectTransaction(item)}>
 												<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
 													<HStack>
 														{formatTransaction(item).profileImageUrl ?
@@ -223,12 +232,12 @@ const TransactionsScreen: React.FC = () => {
 															/>
 														}
 														<VStack ml={"10px"} justifyContent={"center"}>
-															<Heading textTransform={"capitalize"} fontSize={scale(16)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
-															<Text fontSize={scale(12)} color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
+															<Heading textTransform={"capitalize"} fontSize={scale(14)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
+															<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
 														</VStack>
 													</HStack>
 													<VStack ml={"10px"} justifyContent={"center"}>
-														<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(16)} color={formatTransaction(item).isFromMe ? "red" : "mainGreen"}>{formatTransaction(item).isFromMe ? "-" : "+"}{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
+														<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(14)} color={formatTransaction(item).isFromMe ? "red" : "mainGreen"}>{formatTransaction(item).isFromMe ? "-" : "+"}{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
 													</VStack>
 												</HStack>
 											</TouchableOpacity>
@@ -236,7 +245,7 @@ const TransactionsScreen: React.FC = () => {
 									/>
 								</VStack>
 								: (
-									<VStack key={"transations-screen-no-transactions" + Date.now()} w={"100%"} h={"50%"} mt={"20px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
+									<VStack key={`transations-screen-no-transactions-${Date.now()}`} w={"100%"} h={"50%"} mt={"20px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
 										<Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
 										<VStack justifyContent={"center"} alignItems={"center"}>
 											<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
@@ -258,7 +267,6 @@ const TransactionsScreen: React.FC = () => {
 }
 
 export default TransactionsScreen
-
 
 const styles = StyleSheet.create({
 	contentContainerStyle: {

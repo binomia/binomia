@@ -6,8 +6,10 @@ const transactionSlice = createSlice({
         sender: {},
         receiver: {},
         transaction: {},
+        transactions: [],
         transactionDeytails: {},
-        createTransactionBody: {}
+        createTransactionBody: {},
+        hasNewTransaction: false
     },
     reducers: {
         setSender: (state, action) => {
@@ -19,11 +21,17 @@ const transactionSlice = createSlice({
         setTransaction: (state, action) => {
             state.transaction = action.payload
         },
+        setTransactions: (state, action) => {
+            state.transactions = action.payload
+        },
         setCreateTransactionBody: (state, action) => {
             state.createTransactionBody = action.payload
         },
         setTransactionDetails: (state, action) => {
             state.transactionDeytails = action.payload
+        },
+        setHasNewTransaction: (state, action) => {
+            state.hasNewTransaction = action.payload
         }
     }
 })

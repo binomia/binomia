@@ -12,20 +12,55 @@ export class TransactionApolloQueries {
                     transactionType
                     currency
                     status
-                    createdAt
-                    updatedAt
                     location {
                         latitude
                         longitude
-                    }                
-                    receiver {
+                    }
+                    createdAt
+                    updatedAt
+                    from {
                         id
-                        fullName
-                        username
-                        email
-                        dniNumber
-                        profileImageUrl
-                        status                        
+                        balance
+                        status
+                        hash
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            profileImageUrl
+                            status      
+                            address
+                            createdAt
+                            updatedAt
+                        }
+                        currency
+                        createdAt
+                        updatedAt
+                    }
+                    to {
+                        id
+                        balance
+                        status
+                        hash
+                        currency
+                        createdAt
+                        updatedAt
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            profileImageUrl       
+                            idFrontUrl
+                            status       
+                            address
+                            createdAt
+                            updatedAt
+                        }
+                    
                     }
                 }
             }

@@ -12,6 +12,8 @@ import { router } from "expo-router";
 import * as Crypto from 'expo-crypto';
 import * as Network from 'expo-network';
 import { useLocation } from "@/hooks/useLocation";
+import { TransactionApolloQueries } from "@/apollo/query/transactionQuery";
+import { transactionActions } from "@/redux/slices/transactionSlice";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -46,6 +48,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const [login] = useMutation(SessionApolloQueries.login());
     const [createUser] = useMutation(UserApolloQueries.createUser());
     const [getSessionUser] = useLazyQuery(UserApolloQueries.sessionUser());
+    const [accountTransactions] = useLazyQuery(TransactionApolloQueries.accountTransactions())
 
 
     const fetchSessionUser = async () => {
@@ -59,11 +62,12 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             const primaryCard = cardsData.find((card: any) => card.isPrimary === true)
 
 
+
             await Promise.all([
-                dispatch(globalActions.setUser(userProfileData)),
-                dispatch(globalActions.setKyc(kycData)),
-                dispatch(globalActions.setAccount(accountsData)),
-                dispatch(globalActions.setCards(cardsData)),
+                dispatch(globalActions.setUser(userProfileData ?? {})),
+                dispatch(globalActions.setKyc(kycData ?? {})),
+                dispatch(globalActions.setAccount(accountsData ?? {})),
+                dispatch(globalActions.setCards(cardsData ?? {})),
                 dispatch(globalActions.setCard(primaryCard ?? {}))
             ])
 
@@ -264,6 +268,15 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
                 await dispatch(globalActions.setApplicationId(applicationId))
                 await setNotifications();
+
+                const { data } = await accountTransactions({
+                    variables: {
+                        "page": 1,
+                        "pageSize": 10
+                    }
+                })
+                await dispatch(transactionActions.setTransactions(data.accountTransactions ?? []))
+
                 setJwt(jwt)
 
             } else {

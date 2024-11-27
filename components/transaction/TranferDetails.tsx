@@ -20,17 +20,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 type Props = {
-    onClose?: () => void
     goBack?: () => void
     goNext?: () => void
 }
 
 const { width, height } = Dimensions.get("screen")
-const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () => { }, goBack = () => { } }) => {
+const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { } }) => {
     const dispatch = useDispatch();
 
     const { authenticate } = useLocalAuthentication();
-    const { receiver } = useSelector((state: any) => state.transactionReducer)
+    const { receiver, transactions } = useSelector((state: any) => state.transactionReducer)
     const { location, account, user } = useSelector((state: any) => state.globalReducer)
     const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
 
@@ -56,29 +55,32 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                 location: location ?? {},
             })
 
-            const transaction = await createTransaction({
+            const { data: transaction } = await createTransaction({
                 variables: { data, recurrence }
             })
 
             const transactionSent = {
-                ...transaction.data.createTransaction,
+                ...transaction.createTransaction,
                 to: receiver,
                 from: user
             }
 
-            await dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionDeytails.amount })))
-            await dispatch(transactionActions.setTransaction({
-                id: transactionSent.id,
-                fullName: formatTransaction(transactionSent).fullName,
-                profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
-                username: formatTransaction(transactionSent).username,
-                isFromMe: formatTransaction(transactionSent).isFromMe,
-                amount: transactionSent.amount,
-                createdAt: transactionSent.createdAt
-            }))
+            await Promise.all([
+                dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionDeytails.amount }))),
+                dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),
+                dispatch(transactionActions.setTransaction({
+                    id: transactionSent.id,
+                    fullName: formatTransaction(transactionSent).fullName,
+                    profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
+                    username: formatTransaction(transactionSent).username,
+                    isFromMe: formatTransaction(transactionSent).isFromMe,
+                    amount: transactionSent.amount,
+                    createdAt: transactionSent.createdAt
+                }))
+            ])
 
             goNext()
-          
+
         } catch (error: any) {
             console.error(error.message);
         }
@@ -247,7 +249,7 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
             </BottomSheet>
             <BottomSheet onCloseFinish={onCloseFinished} open={openOptions === "monthly"} height={(width / 6) * 9}>
                 <RenderMonthlyOption key={"RenderMonthlyOption"} />
-            </BottomSheet>        
+            </BottomSheet>
         </SafeAreaView>
     )
 }
