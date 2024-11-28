@@ -79,6 +79,7 @@ export class UserApolloQueries {
                     username
                     phone
                     email
+                    password
                     dniNumber
                     profileImageUrl
                     addressAgreementSigned
@@ -88,6 +89,69 @@ export class UserApolloQueries {
                     idBackUrl
                     faceVideoUrl
                     address
+                    account {
+                        id
+                        balance
+                        allowReceive
+                        allowWithdraw
+                        allowSend
+                        allowRequestMe
+                        allowDeposit
+                        status
+                        sendLimit
+                        receiveLimit
+                        withdrawLimit
+                        depositLimit
+                        hash
+                        currency
+                        createdAt
+                        updatedAt
+                        transactions {
+                            transactionId
+                            amount
+                            deliveredAmount
+                            voidedAmount
+                            transactionType
+                            currency
+                            status
+                            location {
+                                latitude
+                                longitude
+                            }
+                            createdAt
+                            updatedAt
+                        }
+                    }
+                    cards {
+                        id
+                        last4Number
+                        isPrimary
+                        hash
+                        brand
+                        alias
+                        data
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            dniNumber
+                            password
+                            profileImageUrl
+                            addressAgreementSigned
+                            userAgreementSigned
+                            idFrontUrl
+                            status
+                            idBackUrl
+                            faceVideoUrl
+                            address
+                            createdAt
+                            updatedAt
+                        }
+                        createdAt
+                        updatedAt
+                    }
                     kyc {
                         id
                         dniNumber
@@ -101,36 +165,8 @@ export class UserApolloQueries {
                         createdAt
                         updatedAt
                     }
-                    cards {
-                        id
-                        last4Number
-                        isPrimary
-                        hash
-                        brand
-                        alias
-                        data
-                        createdAt
-                        updatedAt
-                    }
-                    account {
-                        id
-                        balance
-                        status
-                        sendLimit
-                        receiveLimit
-                        withdrawLimit
-                        hash
-                        currency
-                        createdAt
-                        updatedAt
-                        withdrawAmount
-                        receivedAmount
-                        sentAmount
-                        allowWithdraw
-                        allowSend
-                        allowReceive
-                        allowAsk
-                    }
+                    createdAt
+                    updatedAt
                 }
             }
         `

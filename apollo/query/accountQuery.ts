@@ -7,17 +7,16 @@ export class AccountApolloQueries {
                 updateAccountPermissions(data: $data) {
                     id
                     balance
-                    sentAmount
-                    receivedAmount
-                    withdrawAmount
                     allowReceive
                     allowWithdraw
                     allowSend
-                    allowAsk
+                    allowRequestMe    
+                    allowDeposit
                     status
                     sendLimit
                     receiveLimit
                     withdrawLimit
+                    depositLimit
                     hash
                     currency
                     createdAt
@@ -32,18 +31,20 @@ export class AccountApolloQueries {
                 account {
                     id
                     balance
-                    status
-                    sentAmount
-                    receivedAmount
-                    withdrawAmount
-                    sendLimit
-                    receiveLimit
-                    withdrawLimit
                     allowReceive
                     allowWithdraw
                     allowSend
-                    allowAsk
+                    allowRequestMe    
+                    allowDeposit
+                    status
+                    sendLimit
+                    receiveLimit
+                    withdrawLimit
+                    depositLimit
                     hash
+                    currency
+                    createdAt
+                    updatedAt
                 }
             }
         `

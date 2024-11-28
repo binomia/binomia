@@ -48,7 +48,7 @@ const PrivacyScreen: React.FC = () => {
                 const account = await updateAccountPermissions({
                     variables: {
                         data: {
-                            allowAsk: allow
+                            allowRequestMe: allow
                         }
                     }
                 })

@@ -109,22 +109,23 @@ const ProfileScreen: React.FC = () => {
 						<FlatList
 							data={profileScreenData}
 							scrollEnabled={false}
-							pt={"10px"}
-							pb={"5px"}
-							keyExtractor={(item, index) => index.toString()}
+							pt={"5px"}
+							keyExtractor={(_, index) => index.toString()}
 							renderItem={({ item, index }) => (
-								<Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.navigate(item.path)}>
-									<HStack key={`personal${item.name}`} space={2} pl={"10px"} py={"3px"} alignItems={"center"}>
+								<Pressable _pressed={{ opacity: 0.5 }} w={"100%"} h={"55px"} justifyContent={"center"}  onPress={() => router.navigate(item.path)}>
+									<HStack key={`personal${item.name}`} space={2} pl={"10px"} justifyContent={"space-between"} alignItems={"center"}>
 										<HStack bg={"gray"} w={scale(35)} h={scale(35)} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
 											<Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
 										</HStack>
-										<VStack width={"90%"} borderRadius={10}>
-											<HStack pr={"10px"} justifyContent={"space-between"} alignItems={"center"}>
+										<HStack width={"90%"} h={"100%"} borderRadius={10} px={"10px"} justifyContent={"space-between"} >
+											<HStack width={"100%"} justifyContent={"space-between"} alignItems={"center"}>
 												<Text textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
 												<Feather name="chevron-right" size={20} color="white" />
 											</HStack>
-											{index !== 4 ? <Divider mt={"10px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
-										</VStack>
+										</HStack>
+									</HStack>
+									<HStack w={"100%"} justifyContent={"flex-end"}>
+										{index !== 4 ? <Divider mt={"7px"} width={"80%"} h={"0.5px"} bg={colors.gray} /> : null}
 									</HStack>
 								</Pressable>
 							)} />

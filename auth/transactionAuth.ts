@@ -30,7 +30,7 @@ export class TransactionAuthSchema {
 
     static createTransactionDetails = z.object({
         username: z.string(),
-        profileImageUrl: z.string(),
+        profileImageUrl: z.string().nullish().transform((val) => val ?? ""),
         fullName: z.string(),
         isFromMe: z.boolean(),
         amount: z.number(),

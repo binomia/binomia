@@ -114,14 +114,19 @@ export const privacyScreenData = (account: any) => [
         name: "Solicitarme Dinero",
         icon: askingForMoneyIcon,
         allow: account.allowAsk
-    }
+    },
+    {
+        name: "Solicitarme Dinero",
+        icon: askingForMoneyIcon,
+        allow: account.allowAsk
+    },
 ]
 
 export const limitsScreenData = (account: any) => [
     {
-        title: `Enviado ${FORMAT_CURRENCY(account.sentAmount)} de ${FORMAT_CURRENCY(account.withdrawLimit)}`,
-        value: account.sentAmount,
-        percentage: FORMAT_LIMIT(account.sentAmount, account.withdrawLimit)
+        title: `Enviado ${FORMAT_CURRENCY(0)} de ${FORMAT_CURRENCY(account.withdrawLimit)}`,
+        value: 0,
+        percentage: FORMAT_LIMIT(0, account.withdrawLimit)
 
     },
     {
@@ -170,191 +175,6 @@ export const supportScreenData = ({ openEmail, openPhone, openWhatsApp }: any) =
         name: "Whatsapp",
         icon: whatsappIcon,
         onPress: () => openWhatsApp()
-    }
-]
-
-export const transactionsMocks = [
-    {
-        "transactionId": "daEAdo2kdA3f7m3zz74EZvwkU6MVtfdUbn529QA5KP2E",
-        "amount": 10,
-        "deliveredAmount": 10,
-        "voidedAmount": 0,
-        "transactionType": "debit",
-        "currency": "DOP",
-        "status": "pending",
-        "location": {
-            "latitude": -17.5162,
-            "longitude": -136.5157
-        },
-        "createdAt": "1729390764164",
-        "updatedAt": "1729390764164",
-        "from": {
-            "id": 1,
-            "balance": 940,
-            "status": "active",
-            "sentAmount": 0,
-            "receivedAmount": 0,
-            "withdrawAmount": 0,
-            "allowReceive": true,
-            "allowWithdraw": true,
-            "allowSend": true,
-            "allowAsk": true,
-            "sendLimit": 50000,
-            "receiveLimit": 50000,
-            "withdrawLimit": 50000,
-            "hash": "74VouppXYUYjWxwYD5inF4",
-            "user": {
-                "id": 1,
-                "fullName": "test habib",
-                "username": "$test_habib",
-                "phone": "8098027293",
-                "email": "test@fake.com",
-                "dniNumber": "000-0000000-2",
-                "password": "$2b$10$KnFmokId3zn/3FlGaUEra.PAsoADPR5KnaG5BKWVm98TGTGAglKqu",
-                "profileImageUrl": null,
-                "addressAgreementSigned": true,
-                "userAgreementSigned": true,
-                "idFrontUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "status": "active",
-                "idBackUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "faceVideoUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "address": "test",
-                "createdAt": "1729226095853",
-                "updatedAt": "1729226095853"
-            },
-            "currency": "DOP",
-            "createdAt": "1729226095859",
-            "updatedAt": "1729390764167"
-        },
-        "to": {
-            "id": 2,
-            "balance": 60,
-            "status": "active",
-            "sentAmount": 0,
-            "receivedAmount": 0,
-            "withdrawAmount": 0,
-            "allowReceive": true,
-            "allowWithdraw": true,
-            "allowSend": true,
-            "allowAsk": true,
-            "sendLimit": 50000,
-            "receiveLimit": 50000,
-            "withdrawLimit": 50000,
-            "hash": "bqQQNWndyHHxCdeQzVkqSm",
-            "user": {
-                "id": 2,
-                "fullName": "test habib",
-                "username": "$fake_habib",
-                "phone": "8098027293",
-                "email": "fake@fake.com",
-                "dniNumber": "000-0000000-0",
-                "password": "$2b$10$FfmHbHzACmqekkHYu6EoeuQUNJhbCJ78QtQaxQw1A2Qn80VHQ8T3y",
-                "profileImageUrl": null,
-                "addressAgreementSigned": true,
-                "userAgreementSigned": true,
-                "idFrontUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "status": "active",
-                "idBackUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "faceVideoUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "address": "test",
-                "createdAt": "1729390737497",
-                "updatedAt": "1729390737497"
-            },
-            "currency": "DOP",
-            "createdAt": "1729390737503",
-            "updatedAt": "1729390764169"
-        }
-    },
-    {
-        "transactionId": "mA1guMfL6C4wqdRupunQbWi9tHUJpQVFTeXUNanSZZEi",
-        "amount": 10,
-        "deliveredAmount": 10,
-        "voidedAmount": 0,
-        "transactionType": "debit",
-        "currency": "DOP",
-        "status": "pending",
-        "location": {
-            "latitude": -17.5162,
-            "longitude": -136.5157
-        },
-        "createdAt": "1729390763140",
-        "updatedAt": "1729390763140",
-        "from": {
-            "id": 1,
-            "balance": 940,
-            "status": "active",
-            "sentAmount": 0,
-            "receivedAmount": 0,
-            "withdrawAmount": 0,
-            "allowReceive": true,
-            "allowWithdraw": true,
-            "allowSend": true,
-            "allowAsk": true,
-            "sendLimit": 50000,
-            "receiveLimit": 50000,
-            "withdrawLimit": 50000,
-            "hash": "74VouppXYUYjWxwYD5inF4",
-            "user": {
-                "id": 1,
-                "fullName": "test habib",
-                "username": "$test_habib",
-                "phone": "8098027293",
-                "email": "test@fake.com",
-                "dniNumber": "000-0000000-2",
-                "password": "$2b$10$KnFmokId3zn/3FlGaUEra.PAsoADPR5KnaG5BKWVm98TGTGAglKqu",
-                "profileImageUrl": null,
-                "addressAgreementSigned": true,
-                "userAgreementSigned": true,
-                "idFrontUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "status": "active",
-                "idBackUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "faceVideoUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "address": "test",
-                "createdAt": "1729226095853",
-                "updatedAt": "1729226095853"
-            },
-            "currency": "DOP",
-            "createdAt": "1729226095859",
-            "updatedAt": "1729390764167"
-        },
-        "to": {
-            "id": 2,
-            "balance": 60,
-            "status": "active",
-            "sentAmount": 0,
-            "receivedAmount": 0,
-            "withdrawAmount": 0,
-            "allowReceive": true,
-            "allowWithdraw": true,
-            "allowSend": true,
-            "allowAsk": true,
-            "sendLimit": 50000,
-            "receiveLimit": 50000,
-            "withdrawLimit": 50000,
-            "hash": "bqQQNWndyHHxCdeQzVkqSm",
-            "user": {
-                "id": 2,
-                "fullName": "test habib",
-                "username": "$fake_habib",
-                "phone": "8098027293",
-                "email": "fake@fake.com",
-                "dniNumber": "000-0000000-0",
-                "password": "$2b$10$FfmHbHzACmqekkHYu6EoeuQUNJhbCJ78QtQaxQw1A2Qn80VHQ8T3y",
-                "profileImageUrl": null,
-                "addressAgreementSigned": true,
-                "userAgreementSigned": true,
-                "idFrontUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "status": "active",
-                "idBackUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "faceVideoUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
-                "address": "test",
-                "createdAt": "1729390737497",
-                "updatedAt": "1729390737497"
-            },
-            "currency": "DOP",
-            "createdAt": "1729390737503",
-            "updatedAt": "1729390764169"
-        }
     }
 ]
 
