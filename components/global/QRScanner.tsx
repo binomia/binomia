@@ -79,7 +79,7 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
     return (
         <VStack flex={1}>
             {!showSendTransaction ? (
-                <BottomSheet  height={height * 0.90} open={open} onCloseFinish={onCloseFinished}>
+                <BottomSheet showDragIcon={currentPage === 0} height={height * 0.90} open={open} onCloseFinish={onCloseFinished}>
                     <PagerView scrollEnabled={false} style={{ flex: 1 }} initialPage={currentPage} ref={pageFef}>
                         <VStack key={"QRScannerScreen-1"} flex={1}>
                             <VStack space={2} w={"100%"} h={"90%"} alignItems={"center"} justifyContent={"space-between"}>
@@ -145,7 +145,7 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                     barcodeTypes: ["qr"],
                                 }}
                             />
-                            <VStack space={2} w={"100%"} h={"90%"} alignItems={"center"} justifyContent={"space-between"}>
+                            <VStack space={2} w={"100%"} h={"92%"} alignItems={"center"} justifyContent={"space-between"}>
                                 <VStack alignItems={"center"} pt={"30px"}>
                                     <HStack w={width * 0.85} h={width * 0.85} alignItems={"center"} justifyContent={"center"} borderRadius={"25px"} borderWidth={3} borderColor={colors.white} />
                                     <HStack borderRadius={"10px"} mt={"10px"} py={"7px"} px={"15px"} bg={colors.darkGray} >

@@ -13,6 +13,10 @@ export class AccountAuthSchema {
         currency: z.string().nullish().transform((v) => v ?? ""),
         createdAt: z.string().nullish().transform((v) => v ?? ""),
         updatedAt: z.string().nullish().transform((v) => v ?? ""),
+        allowWithdraw: z.boolean().nullable().transform(v => v ?? false),
+        allowSend: z.boolean().nullable().transform(v => v ?? false),
+        allowReceive: z.boolean().nullable().transform(v => v ?? false),
+        allowRequestMe: z.boolean().nullable().transform(v => v ?? false),
     })
 
     static jwtDecoded = z.object({

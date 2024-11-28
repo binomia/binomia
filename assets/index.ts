@@ -50,6 +50,7 @@ import sendMoneyIcon from './icons/return-right.png';
 import askingForMoneyIcon from './icons/asking.png';
 import whatsappIcon from './icons/whatsapp.png';
 import bankIcon from './icons/bank.png';
+import bankOff from './icons/bankOff.png';
 import depositIcon from './icons/deposit.png';
 import withdrawIcon from './icons/withdraw.png';
 import deleteIcon from './icons/delete.png';
@@ -76,6 +77,7 @@ export {
     depositIcon,
     withdrawIcon,
     bankIcon,
+    bankOff,
     whatsappIcon,
     faceIdIcon,
     askingForMoneyIcon,

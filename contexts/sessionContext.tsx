@@ -14,6 +14,7 @@ import * as Network from 'expo-network';
 import { useLocation } from "@/hooks/useLocation";
 import { TransactionApolloQueries } from "@/apollo/query/transactionQuery";
 import { transactionActions } from "@/redux/slices/transactionSlice";
+import { AccountAuthSchema } from "@/auth/accountAuth";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -53,14 +54,11 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
     const fetchSessionUser = async () => {
         try {
-            const user = await getSessionUser()
-
-            console.log(JSON.stringify(user.data, null, 4));
-            
+            const user = await getSessionUser()            
 
             const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user.data.sessionUser)
             const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
-            const accountsData = await UserAuthSchema.accountsData.parseAsync(user.data.sessionUser.account)
+            const accountsData = await AccountAuthSchema.account.parseAsync(user.data.sessionUser.account)
             const cardsData = await UserAuthSchema.cardsData.parseAsync(user.data.sessionUser.cards)
             const primaryCard = cardsData.find((card: any) => card.isPrimary === true)
 

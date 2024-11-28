@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { VStack, Text, HStack, FlatList, ZStack, Pressable } from 'native-base'
+import { VStack, Text, HStack, FlatList, ZStack } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
@@ -10,9 +10,8 @@ import { AccountApolloQueries } from '@/apollo/query'
 import { AccountLimitsType } from '@/types'
 import { AccountAuthSchema } from '@/auth/accountAuth'
 import { useNavigation } from 'expo-router'
-import { transactionActions } from '@/redux/slices/transactionSlice'
 import { globalActions } from '@/redux/slices/globalSlice'
-import { Feather, MaterialIcons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { TEXT_PARAGRAPH_FONT_SIZE } from '@/constants'
 
 
@@ -21,7 +20,6 @@ const LimitsScreen: React.FC = () => {
 
     const isFocused = useNavigation().isFocused()
 
-    const { hasNewTransaction } = useSelector((state: any) => state.transactionReducer)
     const { account, haveAccountChanged } = useSelector((state: any) => state.globalReducer)
     const [accountLimit] = useLazyQuery(AccountApolloQueries.accountLimit())
     const [limits, setLimits] = useState<AccountLimitsType>({} as AccountLimitsType)
@@ -34,7 +32,6 @@ const LimitsScreen: React.FC = () => {
             const limitData = await AccountAuthSchema.accountLimits.parseAsync(data.accountLimit)
             setLimits(limitData)
 
-            console.log({ data });
         } catch (error) {
             console.log(error);
         }

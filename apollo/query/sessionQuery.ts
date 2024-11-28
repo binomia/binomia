@@ -34,22 +34,22 @@ export class SessionApolloQueries {
                     faceVideoUrl
                     address
                     account {
-                    id
-                    balance
-                    allowReceive
-                    allowWithdraw
-                    allowSend
-                    allowRequestMe
-                    allowDeposit
-                    status
-                    sendLimit
-                    receiveLimit
-                    withdrawLimit
-                    depositLimit
-                    hash
-                    currency
-                    createdAt
-                    updatedAt
+                        id
+                        balance
+                        allowReceive
+                        allowWithdraw
+                        allowSend
+                        allowRequestMe
+                        allowDeposit
+                        status
+                        sendLimit
+                        receiveLimit
+                        withdrawLimit
+                        depositLimit
+                        hash
+                        currency
+                        createdAt
+                        updatedAt
                     transactions {
                         transactionId
                         amount

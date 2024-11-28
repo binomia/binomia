@@ -26,5 +26,5 @@ export default {
     text: 'rgb(229, 229, 231)',
     border: 'rgb(39, 39, 41)',
     alert: '#c22525',
-    warning: 'rgba(240, 175, 64,1)',
+    warning: '#ffde21',
 }
