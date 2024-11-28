@@ -25,7 +25,6 @@ const ProfileScreen: React.FC = () => {
 	const dispatch = useDispatch()
 	const { user } = useSelector((state: any) => state.globalReducer)
 	const navigation = useNavigation<any>()
-	const { onLogout } = useContext(SessionContext)
 	const { uploadImage } = useCloudinary()
 	const [profileImage, setProfileImage] = useState<string | null>(null)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -84,11 +83,14 @@ const ProfileScreen: React.FC = () => {
 									<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={{ uri: profileImage }} />
 								</Pressable>
 								:
-								<DefaultIcon
-									value={user?.fullName}
-									contentContainerStyle={[styles.contentContainerStyle, { width: scale(90), height: scale(90), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user?.fullName || "") }]}
-									textStyle={styles.textStyle}
-								/>
+								<Pressable onPress={() => pickImage()} _pressed={{ opacity: 0.5 }}>
+									<DefaultIcon
+										value={user?.fullName}
+										contentContainerStyle={[styles.contentContainerStyle, { width: scale(80), height: scale(80), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user?.fullName || "") }]}
+										textStyle={styles.textStyle}
+									/>
+								</Pressable>
+
 							}
 							{isLoading ?
 								<HStack pl={"10px"} pt={"10px"} justifyContent={"center"} alignItems={"center"} w={scale(90)} h={scale(90)}>
@@ -96,8 +98,8 @@ const ProfileScreen: React.FC = () => {
 								</HStack>
 								: null
 							}
-							<Pressable onPress={() => pickImage()} _pressed={{ opacity: 0.5 }} w={"35px"} h={"35px"} borderRadius={100} bg={"lightGray"} justifyContent={"center"} alignItems={"center"}>
-								<Fontisto name="camera" size={16} color="white" />
+							<Pressable onPress={() => pickImage()} _pressed={{ opacity: 0.5 }} w={"30px"} h={"30px"} borderRadius={100} bg={"lightGray"} justifyContent={"center"} alignItems={"center"}>
+								<Fontisto name="camera" size={14} color="white" />
 							</Pressable>
 						</ZStack>
 						<VStack mt={"10px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
@@ -109,10 +111,10 @@ const ProfileScreen: React.FC = () => {
 						<FlatList
 							data={profileScreenData}
 							scrollEnabled={false}
-							pt={"5px"}
+							py={"5px"}
 							keyExtractor={(_, index) => index.toString()}
 							renderItem={({ item, index }) => (
-								<Pressable _pressed={{ opacity: 0.5 }} w={"100%"} h={"55px"} justifyContent={"center"}  onPress={() => router.navigate(item.path)}>
+								<Pressable _pressed={{ opacity: 0.5 }} w={"100%"} h={scale(45)} justifyContent={"center"} onPress={() => router.navigate(item.path)}>
 									<HStack key={`personal${item.name}`} space={2} pl={"10px"} justifyContent={"space-between"} alignItems={"center"}>
 										<HStack bg={"gray"} w={scale(35)} h={scale(35)} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
 											<Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
@@ -131,9 +133,6 @@ const ProfileScreen: React.FC = () => {
 							)} />
 					</VStack>
 				</VStack>
-				<HStack mt={"20px"} justifyContent={"center"}>
-					<Button fontWeight={"bold"} bg={"lightGray"} color='red' title='Cerrar Sesion' onPress={onLogout} w={'80%'} />
-				</HStack>
 			</VStack>
 			{previewImage ?
 				<ImageView

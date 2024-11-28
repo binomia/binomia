@@ -1,5 +1,5 @@
 import { Linking, StyleSheet, } from 'react-native'
-import React from 'react'
+import React, { useContext } from 'react'
 import { Image, VStack, Text, HStack, Divider, FlatList, Pressable } from 'native-base'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
@@ -8,9 +8,13 @@ import { CAPITALIZE_WORDS } from '@/helpers'
 import { SUPPORT_PHONE_NUMBER } from '@/constants'
 import { useSelector } from 'react-redux'
 import { supportScreenData } from '@/mocks'
+import Button from '@/components/global/Button'
+import { SessionContext } from '@/contexts/sessionContext'
 
 const SupportScreen: React.FC = () => {
-    const {user} = useSelector((state: any) => state.globalReducer)
+    const { user } = useSelector((state: any) => state.globalReducer)
+    const { onLogout } = useContext(SessionContext)
+
 
 
     const openEmail = async () => {
@@ -73,6 +77,9 @@ const SupportScreen: React.FC = () => {
                         </Pressable>
                     )} />
             </VStack>
+            <HStack mb={"30px"} justifyContent={"center"}>
+                <Button fontWeight={"bold"} bg={"lightGray"} color='red' title='Cerrar Sesion' onPress={onLogout} w={'80%'} />
+            </HStack>
         </VStack>
     )
 }

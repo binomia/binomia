@@ -225,19 +225,19 @@ const TransactionsScreen: React.FC = () => {
 														{formatTransaction(item).profileImageUrl ?
 															<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(item).profileImageUrl }} />
 															:
-															<DefaultIcon
+															<DefaultIcon															
 																value={formatTransaction(item).fullName || ""}
 																contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "") }]}
 																textStyle={styles.textStyle}
 															/>
 														}
 														<VStack ml={"10px"} justifyContent={"center"}>
-															<Heading textTransform={"capitalize"} fontSize={scale(14)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
+															<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
 															<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
 														</VStack>
 													</HStack>
 													<VStack ml={"10px"} justifyContent={"center"}>
-														<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(14)} color={formatTransaction(item).isFromMe ? "red" : "mainGreen"}>{formatTransaction(item).isFromMe ? "-" : "+"}{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
+														<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(13)} color={formatTransaction(item).isFromMe ? "red" : "mainGreen"}>{formatTransaction(item).isFromMe ? "-" : "+"}{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
 													</VStack>
 												</HStack>
 											</TouchableOpacity>
@@ -270,12 +270,12 @@ export default TransactionsScreen
 
 const styles = StyleSheet.create({
 	contentContainerStyle: {
-		width: 40,
-		height: 40,
+		width: 50,
+		height: 50,
 		borderRadius: 100
 	},
 	textStyle: {
-		fontSize: 30,
+		fontSize: 20,
 		color: 'white',
 		marginBottom: 2,
 		textTransform: 'capitalize',

@@ -30,8 +30,11 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
 
             socket.on("connect", () => {
                 socket.on(SOCKET_EVENTS.TRANSACTION_CREATED, async (transaction: any) => {
-                    await dispatch(globalActions.setAccount(transaction.to))
-                    await dispatch(transactionActions.setHasNewTransaction(true))
+                    await Promise.all([
+                        dispatch(globalActions.setAccount(transaction.to)),
+                        dispatch(globalActions.setHaveAccountChanged(false)),
+                        dispatch(transactionActions.setHasNewTransaction(true))
+                    ])
                 })
 
                 socket.on(SOCKET_EVENTS.TRANSACTION_CREATED_FROM_QUEUE, async (data: any) => {

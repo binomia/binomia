@@ -1,14 +1,59 @@
-import React from 'react'
-import { VStack, Text, HStack, FlatList, ZStack } from 'native-base'
-import { useSelector } from 'react-redux'
+import React, { useEffect, useState } from 'react'
+import { VStack, Text, HStack, FlatList, ZStack, Pressable } from 'native-base'
+import { useDispatch, useSelector } from 'react-redux'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
 import CircularProgress from 'react-native-circular-progress-indicator';
 import { limitsScreenData } from '@/mocks'
+import { useLazyQuery } from '@apollo/client'
+import { AccountApolloQueries } from '@/apollo/query'
+import { AccountLimitsType } from '@/types'
+import { AccountAuthSchema } from '@/auth/accountAuth'
+import { useNavigation } from 'expo-router'
+import { transactionActions } from '@/redux/slices/transactionSlice'
+import { globalActions } from '@/redux/slices/globalSlice'
+import { Feather, MaterialIcons } from '@expo/vector-icons';
+import { TEXT_PARAGRAPH_FONT_SIZE } from '@/constants'
 
 
 const LimitsScreen: React.FC = () => {
-    const { account } = useSelector((state: any) => state.globalReducer)
+    const dispatch = useDispatch()
+
+    const isFocused = useNavigation().isFocused()
+
+    const { hasNewTransaction } = useSelector((state: any) => state.transactionReducer)
+    const { account, haveAccountChanged } = useSelector((state: any) => state.globalReducer)
+    const [accountLimit] = useLazyQuery(AccountApolloQueries.accountLimit())
+    const [limits, setLimits] = useState<AccountLimitsType>({} as AccountLimitsType)
+
+
+    const fetchAccountLimit = async () => {
+        try {
+            const { data } = await accountLimit()
+
+            const limitData = await AccountAuthSchema.accountLimits.parseAsync(data.accountLimit)
+            setLimits(limitData)
+
+            console.log({ data });
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            if (haveAccountChanged) {
+                await fetchAccountLimit()
+                await dispatch(globalActions.setHaveAccountChanged(false))
+            }
+
+        })()
+
+    }, [isFocused, haveAccountChanged])
+
+    useEffect(() => {
+        fetchAccountLimit()
+    }, [])
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
@@ -17,7 +62,7 @@ const LimitsScreen: React.FC = () => {
                     bg={"lightGray"}
                     borderRadius={10}
                     px={"10px"}
-                    data={limitsScreenData(account)}
+                    data={limitsScreenData(limits, account)}
                     scrollEnabled={false}
                     keyExtractor={(index) => index.toString()}
                     renderItem={({ item }) => (
@@ -47,6 +92,12 @@ const LimitsScreen: React.FC = () => {
                             </VStack>
                         </HStack>
                     )} />
+                <HStack mt={"30px"} >
+                    <Feather style={{ marginTop: 5 }} name="alert-circle" size={24} color={colors.warning} />
+                    <Text ml={"10px"} fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"85%"} color={colors.warning}>
+                        Los recursos de tu cuenta son limitados y se actualizan semanalmente, específicamente cada lunes.
+                    </Text>
+                </HStack>
             </VStack>
         </VStack>
     )

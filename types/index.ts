@@ -1,3 +1,4 @@
+import { AccountAuthSchema } from "@/auth/accountAuth";
 import { TransactionAuthSchema } from "@/auth/transactionAuth";
 import { UserAuthSchema } from "@/auth/userAuth"
 import z from "zod";
@@ -128,4 +129,6 @@ export type SocketContextType = {
 
 
 export type WeeklyQueueTitleType = z.infer<typeof TransactionAuthSchema.weeklyQueueTitle>
+export type AccountLimitsType = z.infer<typeof AccountAuthSchema.accountLimits>
+export type AccountType = z.infer<typeof AccountAuthSchema.account>
 

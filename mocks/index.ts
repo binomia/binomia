@@ -1,7 +1,7 @@
 import { askingForMoneyIcon, bankIcon, idIcon, limitIcon, mailIcon, mastercardLogo, notificacionIcon, phoneIcon, privacyIcon, receiveIcon, sendMoneyIcon, soportIcon, userIcon, visaLogo, whatsappIcon } from "@/assets";
 import { SUPPORT_PHONE_NUMBER } from "@/constants";
 import { FORMAT_CURRENCY, FORMAT_LIMIT, FORMAT_PHONE_NUMBER } from "@/helpers";
-import { GlobalContextType } from "@/types";
+import { AccountLimitsType, AccountType, GlobalContextType } from "@/types";
 
 
 export const globalContextInitialState: GlobalContextType = {
@@ -122,23 +122,26 @@ export const privacyScreenData = (account: any) => [
     },
 ]
 
-export const limitsScreenData = (account: any) => [
+export const limitsScreenData = (limits: AccountLimitsType, account: AccountType) => [
     {
-        title: `Enviado ${FORMAT_CURRENCY(0)} de ${FORMAT_CURRENCY(account.withdrawLimit)}`,
-        value: 0,
-        percentage: FORMAT_LIMIT(0, account.withdrawLimit)
-
+        title: `Enviado ${FORMAT_CURRENCY(limits.sentAmount)} de ${FORMAT_CURRENCY(account.sendLimit)}`,
+        value: limits.sentAmount,
+        percentage: FORMAT_LIMIT(limits.sentAmount, account.sendLimit)
     },
     {
-        title: `Recibido ${FORMAT_CURRENCY(account.receivedAmount)} de ${FORMAT_CURRENCY(account.receiveLimit)}`,
-        value: account.receivedAmount,
-        percentage: FORMAT_LIMIT(account.receivedAmount, account.receiveLimit)
+        title: `Recibido ${FORMAT_CURRENCY(limits.receivedAmount)} de ${FORMAT_CURRENCY(account.receiveLimit)}`,
+        value: limits.receivedAmount,
+        percentage: FORMAT_LIMIT(limits.receivedAmount, account.receiveLimit)
     },
     {
-        title: `Retirado ${FORMAT_CURRENCY(account.withdrawAmount)} de ${FORMAT_CURRENCY(account.withdrawLimit)}`,
-        value: account.withdrawAmount,
-        percentage: FORMAT_LIMIT(account.withdrawAmount, account.withdrawLimit)
-
+        title: `Retirado ${FORMAT_CURRENCY(limits.withdrawAmount)} de ${FORMAT_CURRENCY(account.withdrawLimit)}`,
+        value: limits.withdrawAmount,
+        percentage: FORMAT_LIMIT(limits.withdrawAmount, account.withdrawLimit)
+    },
+    {
+        title: `Depositado ${FORMAT_CURRENCY(limits.depositAmount)} de ${FORMAT_CURRENCY(account.depositLimit)}`,
+        value: limits.depositAmount,
+        percentage: FORMAT_LIMIT(limits.depositAmount, account.depositLimit)
     }
 ]
 

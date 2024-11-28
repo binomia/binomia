@@ -120,7 +120,7 @@ const CardModification: React.FC<Props> = ({ open = false, onCloseFinish = () =>
                         </Pressable>
                     </HStack>
                 </VStack>
-                <AddOrEditCard openToEdit={currentPage === 1} key={"AddOrEditCard-1"} open={true} onClose={onClose} onPress={onEditCard} />
+                <AddOrEditCard openToEdit={currentPage === 1} key={"AddOrEditCard-1"}  onClose={onClose} onPress={onEditCard} />
             </PagerView>
         </BottomSheet>
     )

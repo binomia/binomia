@@ -5,6 +5,7 @@ import * as Device from 'expo-device';
 const globalSlice = createSlice({
     name: 'global',
     initialState: {
+        haveAccountChanged: false,
         appInBackgroundTime: 0,
         account: {},
         card: {},
@@ -79,6 +80,9 @@ const globalSlice = createSlice({
         },
         setApplicationId: (state, action) => {
             state.applicationId = action.payload
+        },
+        setHaveAccountChanged: (state, action) => {
+            state.haveAccountChanged = action.payload
         }
     }
 })

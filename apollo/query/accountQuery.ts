@@ -49,4 +49,16 @@ export class AccountApolloQueries {
             }
         `
     }
+    static accountLimit = () => {
+        return gql`
+            query AccountLimit {
+                accountLimit {
+                    sentAmount
+                    receivedAmount
+                    depositAmount
+                    withdrawAmount
+                }
+            }
+        `
+    }
 }

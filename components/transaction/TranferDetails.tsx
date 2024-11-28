@@ -68,6 +68,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             await Promise.all([
                 dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionDeytails.amount }))),
                 dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),
+                dispatch(globalActions.setHaveAccountChanged(false)),
                 dispatch(transactionActions.setTransaction({
                     id: transactionSent.id,
                     fullName: formatTransaction(transactionSent).fullName,
