@@ -9,15 +9,16 @@ import redis from '@/redis';
 import shortUUID from 'short-uuid';
 import RecurrenceTransactionsModel from '@/models/recurrenceTransactionModel';
 import { queueServer } from '@/rpc/queueRPC';
+import { tr } from '@faker-js/faker';
 
 export class TransactionsController {
     static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
         try {
-            await checkForProtectedRequests(context.req);
+            const session = await checkForProtectedRequests(context.req);
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
-            const { user: sender } = context.req.session
+            const { user: sender } = session
             const senderAccount = await AccountModel.findOne({
                 where: { username: sender.username },
                 include: [
@@ -63,38 +64,25 @@ export class TransactionsController {
             if (!receiverAccount)
                 throw new GraphQLError("receiver account not found");
 
-            const dataToHash = await Cryptography.hash(JSON.stringify({
-                receiverUsername: validatedData.receiver,
-                receiver: validatedData.receiver,
-                amount: validatedData.amount,
-                transactionType: validatedData.transactionType,
-                currency: validatedData.currency,
-                location: validatedData.location
-            }))
-
             const hash = await Cryptography.hash(JSON.stringify({
-                hash: dataToHash,
+                hash: {
+                    sender: senderAccount.toJSON().username,
+                    receiver: validatedData.receiver,
+                    amount: validatedData.amount,
+                    transactionType: validatedData.transactionType,
+                    currency: validatedData.currency,
+                    location: validatedData.location
+                },
                 ZERO_ENCRYPTION_KEY,
                 ZERO_SIGN_PRIVATE_KEY,
             }))
 
+            console.log({ hash });
+
+
             const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
-            // const transactionAuthorizationData = {
-            //     amount: validatedData.amount,
-            //     currency: validatedData.currency,
-            //     transactionType: validatedData.transactionType,
-            //     // location: validatedData.location,
-            //     // userId: sender.id,
-            //     // sender,
-            //     // receiver: receiverAccount.toJSON(),
-            //     signature
-            // }
 
-            // const transactionAuthorization: TransactionAuthorizationType = await authServer("echo", {});
-
-            // if (transactionAuthorization.status !== "approved")
-            //     throw new Error("Transaction authorization failed");
-
+            // [TODO]: Authorization need to be implemented
 
             const transaction = await TransactionsModel.create({
                 fromAccount: senderAccount.toJSON().id,
@@ -106,12 +94,15 @@ export class TransactionsController {
                 location: validatedData.location,
                 signature
             })
+
+            const newSenderBalance = Number(senderAccount.toJSON().balance - validatedData.amount).toFixed(4)
             await senderAccount.update({
-                balance: senderAccount.toJSON().balance - validatedData.amount
+                balance: Number(newSenderBalance)
             })
 
+            const newReceiverBalance = Number(receiverAccount.toJSON().balance + validatedData.amount).toFixed(4)
             await receiverAccount.update({
-                balance: receiverAccount.toJSON().balance + validatedData.amount
+                balance: Number(newReceiverBalance)
             })
 
             const transactionData = await transaction.reload({
@@ -158,6 +149,234 @@ export class TransactionsController {
                     data: recurrenceQueueData
                 }))
             }
+
+            return transactionData.toJSON()
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
+    static createRequestTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
+        try {
+            const session = await checkForProtectedRequests(context.req);
+            const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
+            const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
+
+            const { user: sender } = session
+            const senderAccount = await AccountModel.findOne({
+                where: { username: sender.username },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user',
+                        include: [
+                            {
+                                model: kycModel,
+                                as: 'kyc',
+                                attributes: ['id', 'dniNumber', 'dob', 'status', 'expiration']
+                            }
+                        ]
+                    }
+                ]
+            })
+
+            if (!senderAccount)
+                throw new GraphQLError("sender account not found");
+
+            const receiverAccount = await AccountModel.findOne({
+                where: {
+                    username: validatedData.receiver
+                },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user',
+                        attributes: { exclude: ['createdAt', 'dniNumber', 'updatedAt', 'faceVideoUrl', 'idBackUrl', 'idFrontUrl', 'profileImageUrl', 'password'] },
+                        include: [
+                            {
+                                model: kycModel,
+                                as: 'kyc',
+                                attributes: ['id', 'dniNumber', 'dob', 'status', 'expiration']
+                            }
+                        ]
+                    }
+                ]
+            })
+
+            if (!receiverAccount)
+                throw new GraphQLError("receiver account not found");
+
+
+            const message = `${receiverAccount.toJSON().username}&${senderAccount.toJSON().username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
+            const signature = await Cryptography.sign(message, ZERO_SIGN_PRIVATE_KEY)
+
+            // Authorization NOT IMPLEMENTED
+
+            const transaction = await TransactionsModel.create({
+                fromAccount: senderAccount.toJSON().id,
+                toAccount: receiverAccount.toJSON().id,
+                amount: validatedData.amount,
+                deliveredAmount: validatedData.amount,
+                transactionType: validatedData.transactionType,
+                currency: validatedData.currency,
+                location: validatedData.location,
+                signature
+            })
+
+            const transactionData = await transaction.reload({
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'from',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'to',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    }
+                ]
+            })
+
+            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
+                data: transactionData.toJSON(),
+                senderSocketRoom: senderAccount.toJSON().user.username,
+                recipientSocketRoom: receiverAccount.toJSON().user.username
+            }))
+
+            if (recurrenceData.time !== "oneTime") {
+                const recurrenceQueueData = await TransactionJoiSchema.recurrenceQueueTransaction.parseAsync(Object.assign(transactionData.toJSON(), {
+                    amount: validatedData.amount,
+                    receiver: validatedData.receiver,
+                    sender: senderAccount.toJSON().username
+                }))
+
+                await redis.publish(QUEUE_JOBS_NAME.CREATE_TRANSACTION, JSON.stringify({
+                    jobId: `${recurrenceData.title}@${shortUUID.generate()}${shortUUID.generate()}`,
+                    jobName: recurrenceData.title,
+                    jobTime: recurrenceData.time,
+                    senderId: senderAccount.toJSON().id,
+                    receiverId: receiverAccount.toJSON().id,
+                    amount: validatedData.amount,
+                    data: recurrenceQueueData
+                }))
+            }
+
+            return transactionData.toJSON()
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
+    static payRequestTransaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any) => {
+        try {
+            const session = await checkForProtectedRequests(context.req);
+
+            const transaction = await TransactionsModel.findOne({
+                where: { transactionId },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'from',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'to',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    }
+                ]
+            })
+
+            if (!transaction)
+                throw new GraphQLError("transaction not found");
+
+            const senderAccount = await AccountModel.findOne({
+                where: { id: transaction.toJSON().toAccount },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user',
+                        include: [
+                            {
+                                model: kycModel,
+                                as: 'kyc',
+                                attributes: ['id', 'dniNumber', 'dob', 'status', 'expiration']
+                            }
+                        ]
+                    }
+                ]
+            })
+
+            if (!senderAccount)
+                throw new GraphQLError("sender account not found");
+
+            const receiverAccount = await AccountModel.findOne({
+                where: {
+                    id: transaction.toJSON().fromAccount
+                },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user',
+                        include: [
+                            {
+                                model: kycModel,
+                                as: 'kyc',
+                                attributes: ['id', 'dniNumber', 'dob', 'status', 'expiration']
+                            }
+                        ]
+                    }
+                ]
+            })
+
+            if (!receiverAccount)
+                throw new GraphQLError("receiver account not found");
+
+
+            const message = `${senderAccount.toJSON().username}&${receiverAccount.toJSON().username}@${transaction.toJSON().amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
+
+            // [TODO] Verify signature
+            const verify = await Cryptography.verify(message, transaction.toJSON().signature, ZERO_SIGN_PRIVATE_KEY)
+            if (!verify)
+                throw new GraphQLError("error verificando transacción");
+
+
+            const newSenderBalance = Number(senderAccount.toJSON().balance) - Number(transaction.toJSON().amount)
+            await senderAccount.update({
+                balance: Number(newSenderBalance.toFixed(4))
+            })
+
+            const newReceiverBalance = Number(receiverAccount.toJSON().balance) + Number(transaction.toJSON().amount)
+            await receiverAccount.update({
+                balance: Number(newReceiverBalance.toFixed(4))
+            })
+
+            await transaction.update({
+                status: "paid",
+            })
+            
+            const transactionData = await transaction.reload()
+
+            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_PAIED, JSON.stringify({
+                data: transactionData.toJSON(),
+                senderSocketRoom: senderAccount.toJSON().user.username,
+                recipientSocketRoom: receiverAccount.toJSON().user.username
+            }))
 
             return transactionData.toJSON()
 

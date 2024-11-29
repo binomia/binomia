@@ -12,27 +12,28 @@ const type = () => {
             hash: String
             currency: String
         }
+
         input AccountPermissionsInput {
             allowReceive: Boolean
             allowWithdraw: Boolean
             allowSend: Boolean
-            allowAsk: Boolean
+            allowRequestMe: Boolean
+            allowDeposit: Boolean
         }
 
         type OnlyAccountType {
             id:  Int
             balance: Float
-            sentAmount: Float
-            receivedAmount: Float
-            withdrawAmount: Float
             allowReceive: Boolean
             allowWithdraw: Boolean
             allowSend: Boolean
-            allowAsk: Boolean
+            allowRequestMe: Boolean
+            allowDeposit: Boolean
             status: String
             sendLimit: Float
             receiveLimit: Float
             withdrawLimit: Float
+            depositLimit: Float
             hash: String
             currency: String
             createdAt: String
@@ -42,63 +43,63 @@ const type = () => {
         type AccountTypeWithTransactions {
             id:  Int
             balance: Float
-            status: String
-            sentAmount: Float
-            receivedAmount: Float
-            withdrawAmount: Float
             allowReceive: Boolean
             allowWithdraw: Boolean
             allowSend: Boolean
-            allowAsk: Boolean
+            allowRequestMe: Boolean
+            allowDeposit: Boolean
+            status: String
             sendLimit: Float
             receiveLimit: Float
             withdrawLimit: Float
+            depositLimit: Float
             hash: String
-            transactions: [OnlyTransactionType]
             currency: String
             createdAt: String
             updatedAt: String
+
+            transactions: [OnlyTransactionType]
         }
 
         type AccountTypeWithUser {
             id:  Int
             balance: Float
-            status: String
-            sentAmount: Float
-            receivedAmount: Float
-            withdrawAmount: Float
             allowReceive: Boolean
             allowWithdraw: Boolean
             allowSend: Boolean
-            allowAsk: Boolean
+            allowRequestMe: Boolean
+            allowDeposit: Boolean
+            status: String
             sendLimit: Float
             receiveLimit: Float
             withdrawLimit: Float
+            depositLimit: Float
             hash: String
-            user: OnlyUserType
             currency: String
             createdAt: String
             updatedAt: String
+
+            user: OnlyUserType
         }
 
         type AccountType {
             id:  Int
             balance: Float
-            status: String
-            sentAmount: Float
-            receivedAmount: Float
-            withdrawAmount: Float
-            sendLimit: Float
-            receiveLimit: Float
-            withdrawLimit: Float
             allowReceive: Boolean
             allowWithdraw: Boolean
             allowSend: Boolean
-            allowAsk: Boolean
+            allowRequestMe: Boolean
+            allowDeposit: Boolean
+            status: String
+            sendLimit: Float
+            receiveLimit: Float
+            withdrawLimit: Float
+            depositLimit: Float
             hash: String
             currency: String
             createdAt: String
             updatedAt: String
+
             user: OnlyUserType
             transactions: [TransactionType]
         }

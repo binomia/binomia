@@ -28,12 +28,16 @@ import { startStandaloneServer } from '@apollo/server/standalone';
             console.log('\nUnable to connect to the database:', err);
         })
 
-        const schema = makeExecutableSchema({ typeDefs, resolvers })    
+        const schema = makeExecutableSchema({
+            typeDefs,
+            resolvers,
+        })
         const server: ApolloServer = new ApolloServer({
             schema,
             csrfPrevention: true,
             cache: new KeyvAdapter(keyvRedis),
-            formatError,           
+            formatError,
+
         })
 
         const { url } = await startStandaloneServer(server, {

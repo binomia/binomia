@@ -46,12 +46,12 @@ export class Cryptography {
         return signature.toDER('hex');
     }
 
-    static verify = async (message: string, signature: string, privateKey: string): Promise<boolean> => {
+    static verify = async (data: string, signature: string, privateKey: string): Promise<boolean> => {
         const keyPair = ec.keyFromPrivate(privateKey, 'hex');
         const publicKeyCompressed = keyPair.getPublic(true, "hex");
 
         const key = ec.keyFromPublic(publicKeyCompressed, 'hex');
-        const verified = key.verify(message, signature);
+        const verified = key.verify(data, signature);
 
         return verified
     }

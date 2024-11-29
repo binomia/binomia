@@ -69,7 +69,7 @@ export class CardsController {
     static createCard = async (_: unknown, { data }: { data: CardModelType }, { req }: { req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(req);
-            const validatedData: CardModelType = await CardAuthSchema.createCard.parseAsync(data)
+            const validatedData = await CardAuthSchema.createCard.parseAsync(data)
 
             // if (!IS_VALID_CARD_LENGTH(validatedData.cardNumber))
             //     throw new GraphQLError('Card inserted is not valid');

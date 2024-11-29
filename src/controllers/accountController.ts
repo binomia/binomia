@@ -153,7 +153,7 @@ export class AccountController {
                 withdrawAmount
             });
 
-            await redis.set(`accountLimit@${session.user.account.id}`, JSON.stringify(limits), 'EX', 10) // expires in 10 seconds
+            await redis.set(`accountLimit@${session.user.account.id}`, JSON.stringify(limits), 'EX', 10)
 
             return limits;
 

@@ -5,7 +5,7 @@ export class TransactionJoiSchema {
         amount: z.number().gt(0),
         currency: z.enum(["DOP"]),
         receiver: z.string(),
-        transactionType: z.enum(["transfer"]),
+        transactionType: z.enum(["transfer", "request"]),
         location: z.object({
             latitude: z.number(),
             longitude: z.number()
