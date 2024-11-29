@@ -23,6 +23,11 @@ export const initRedisEventSubcription = (io: Server) => {
                 io.to(recipientSocketRoom).emit(channel, data)
                 break;
             }
+            case REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_PAIED: {
+                const { data, recipientSocketRoom } = JSON.parse(payload)
+                io.to(recipientSocketRoom).emit(channel, data)
+                break;
+            }
             case REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED_FROM_QUEUE: {
                 const { data, senderSocketRoom } = JSON.parse(payload)
                 io.to(senderSocketRoom).emit(channel, data)
