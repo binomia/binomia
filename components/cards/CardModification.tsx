@@ -7,11 +7,11 @@ import BottomSheet from '../global/BottomSheet'
 import { useDispatch, useSelector } from 'react-redux'
 import { deleteIcon, editIcon, mastercardLogo, visaLogo } from '@/assets'
 import { globalActions } from '@/redux/slices/globalSlice'
-import AddOrEditCard from './AddOrEditCard'
 import PagerView from 'react-native-pager-view'
 import { useMutation } from '@apollo/client'
 import { CardApolloQueries } from '@/apollo/query/cardQuery'
 import { CardAuthSchema } from '@/auth/cardAuth'
+import EditCard from './EditCard'
 
 type Props = {
     open?: boolean
@@ -101,7 +101,7 @@ const CardModification: React.FC<Props> = ({ open = false, onCloseFinish = () =>
     return (
         <BottomSheet openTime={300} height={bottomSheetHeight} onCloseFinish={onClose} open={open}>
             <PagerView ref={ref} initialPage={currentPage} style={{ flex: 1 }}>
-                <VStack key={"AddOrEditCard-2"} variant={"body"}>
+                <VStack key={"edit-or-delete-card"} variant={"body"}>
                     <HStack w={"100%"} mt={"20px"} alignItems={"center"}>
                         {renderCardLogo(card?.brand)}
                         <VStack ml={"10px"}>
@@ -120,7 +120,7 @@ const CardModification: React.FC<Props> = ({ open = false, onCloseFinish = () =>
                         </Pressable>
                     </HStack>
                 </VStack>
-                <AddOrEditCard openToEdit={currentPage === 1} key={"AddOrEditCard-1"}  onClose={onClose} onPress={onEditCard} />
+                <EditCard openToEdit={currentPage === 1} key={"edit-card-1"}  onClose={onClose} onPress={onEditCard} />
             </PagerView>
         </BottomSheet>
     )

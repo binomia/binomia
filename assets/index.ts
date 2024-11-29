@@ -59,9 +59,11 @@ import bankTabIconOn from './icons/bankTabIconOn.png';
 import bankTabIconOff from './icons/bankTabIconOff.png';
 import creditCard from './icons/credit-card.png';
 import recurrenceIcon from './icons/recurrence.png';
+import pendingClock from './icons/pendingClock.png';
 
 
 export {
+    pendingClock,
     icon,
     noCard,
     mastercardLogo,

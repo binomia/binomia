@@ -11,30 +11,22 @@ import { globalActions } from '@/redux/slices/globalSlice';
 import { FORMAT_CURRENCY } from '@/helpers';
 import { scale } from 'react-native-size-matters';
 import QRScannerScreen from '@/components/global/QRScanner';
-import { SocketContext } from '@/contexts/socketContext';
 import { router } from 'expo-router';
 import HomeSkeleton from '@/components/home/homeSkeleton';
 
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
 	const { account } = useSelector((state: any) => state.globalReducer)
 	const dispatch = useDispatch()
 
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
-	const socket = useContext(SocketContext);
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
 
 	const [refreshing, setRefreshing] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 
 	const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-	const onPress = async () => {
-		socket.emit("test", {
-			message: "test"
-		})
-	}
 
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
@@ -71,8 +63,8 @@ const HomeScreen: React.FC = () => {
 	}, [])
 
 	return (isLoading ? (<HomeSkeleton />) : (
-		<VStack p={"20px"} w={width} bg={colors.darkGray}  flex={1} alignItems={"center"}>
-			<ScrollView  showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+		<VStack p={"20px"} w={width} bg={colors.darkGray} flex={1} alignItems={"center"}>
+			<ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
 				<VStack w={"100%"} justifyContent={"center"} alignItems={"center"} borderRadius={"10px"}>
 					<VStack bg={colors.lightGray} p={"20px"} w={"100%"} justifyContent={"space-between"} borderRadius={"10px"} h={scale(160)}>
 						<VStack>
@@ -94,7 +86,7 @@ const HomeScreen: React.FC = () => {
 								bg={"darkGray"}
 								mt={"20px"}
 								borderRadius={"10px"}
-								title="Depositar" onPress={() => router.navigate("/banking")}
+								title="Solicitar" onPress={() => router.navigate("/request")}
 							/>
 						</HStack>
 					</VStack>
@@ -102,7 +94,7 @@ const HomeScreen: React.FC = () => {
 				<VStack w={"100%"} pt={"30px"} px={"5px"}>
 					<Heading fontSize={scale(24)} color={"white"}>Servicios</Heading>
 					<HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
-						<Pressable onPress={() => onPress()} _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
+						<Pressable onPress={() => { }} _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
 							<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={phone} />
 							<Text color={"white"}>Recargas</Text>
 						</Pressable>

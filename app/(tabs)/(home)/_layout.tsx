@@ -29,7 +29,7 @@ export default function TabLayout() {
 		<Stack screenOptions={{ headerShadowVisible: false }}>
 			<Stack.Screen name='index' options={{ ...defaultscreenOptions,  title: "", headerLeft: () => <HomeHeaderLeft />, headerRight: () => <HomeHeaderRight /> }} />
 			<Stack.Screen name='user' options={{ title: "Buscar", ...defaultscreenOptions, headerRight: () => <HomeHeaderRight /> }} />
-			<Stack.Screen name='banking' options={{ title: "Deposito & Retiros", ...defaultscreenOptions, headerRight: () => <HeaderBankingRight /> }} />
+			<Stack.Screen name='request' options={{ title: "Solicitar Dinero", ...defaultscreenOptions}} />
 		</Stack>
 	);
 }

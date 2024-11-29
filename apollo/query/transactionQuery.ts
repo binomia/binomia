@@ -66,6 +66,71 @@ export class TransactionApolloQueries {
             }
         `
     }
+    static createRequestTransaction = () => {
+        return gql`
+            mutation CreateRequestTransaction($data: TransactionInput!, $recurrence: TransactionRecurrenceInput!) {
+                createRequestTransaction(data: $data, recurrence: $recurrence) {
+                    transactionId
+                    amount
+                    deliveredAmount
+                    voidedAmount
+                    transactionType
+                    currency
+                    status
+                    location {
+                        latitude
+                        longitude
+                    }
+                    createdAt
+                    updatedAt
+                    from {
+                        id
+                        balance
+                        status
+                        hash
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            profileImageUrl
+                            status      
+                            address
+                            createdAt
+                            updatedAt
+                        }
+                        currency
+                        createdAt
+                        updatedAt
+                    }
+                    to {
+                        id
+                        balance
+                        status
+                        hash
+                        currency
+                        createdAt
+                        updatedAt
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            profileImageUrl       
+                            idFrontUrl
+                            status       
+                            address
+                            createdAt
+                            updatedAt
+                        }
+                    
+                    }
+                }
+            }
+        `
+    }
 
     static accountBankingTransactions = () => {
         return gql`
@@ -285,6 +350,101 @@ export class TransactionApolloQueries {
                     signature
                     createdAt
                     updatedAt
+                }
+            }
+        `
+    }
+    static payRequestTransaction = () => {
+        return gql`
+            mutation PayRequestTransaction($transactionId: String!) {
+                payRequestTransaction(transactionId: $transactionId) {
+                    transactionId
+                    amount
+                    deliveredAmount
+                    voidedAmount
+                    transactionType
+                    currency
+                    status
+                    location {
+                        latitude
+                        longitude
+                    }
+                    createdAt
+                    updatedAt
+                    from {
+                        id
+                        balance
+                        allowReceive
+                        allowWithdraw
+                        allowSend
+                        allowRequestMe
+                        allowDeposit
+                        status
+                        sendLimit
+                        receiveLimit
+                        withdrawLimit
+                        depositLimit
+                        hash
+                        currency
+                        createdAt
+                        updatedAt
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            dniNumber
+                            password
+                            profileImageUrl
+                            addressAgreementSigned
+                            userAgreementSigned
+                            idFrontUrl
+                            status
+                            idBackUrl
+                            faceVideoUrl
+                            address
+                            createdAt
+                            updatedAt
+                        }
+                    }
+                    to {
+                        id
+                        balance
+                        allowReceive
+                        allowWithdraw
+                        allowSend
+                        allowRequestMe
+                        allowDeposit
+                        status
+                        sendLimit
+                        receiveLimit
+                        withdrawLimit
+                        depositLimit
+                        hash
+                        currency
+                        createdAt
+                        updatedAt
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            dniNumber
+                            password
+                            profileImageUrl
+                            addressAgreementSigned
+                            userAgreementSigned
+                            idFrontUrl
+                            status
+                            idBackUrl
+                            faceVideoUrl
+                            address
+                            createdAt
+                            updatedAt
+                        }
+                    }
                 }
             }
         `

@@ -27,8 +27,8 @@ type Props = {
     onClose?: () => void
 }
 
-const { height, width } = Dimensions.get('window')
-const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose = () => { }, openToEdit = false }: Props) => {
+const { height } = Dimensions.get('window')
+const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose = () => { }, openToEdit = false }: Props) => {
     const ref = useRef<PagerView>(null);
     const [fetchCards] = useLazyQuery(CardApolloQueries.cards())
     const [fetchCard] = useLazyQuery(CardApolloQueries.card())
@@ -235,4 +235,4 @@ const AddOrEditCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClo
     )
 }
 
-export default AddOrEditCard
+export default CreateCard

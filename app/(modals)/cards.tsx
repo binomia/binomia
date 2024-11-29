@@ -13,7 +13,7 @@ import { mastercardLogo, noCard, visaLogo } from '@/assets'
 import CardModification from '@/components/cards/CardModification'
 import Button from '@/components/global/Button'
 import { router, useLocalSearchParams } from 'expo-router'
-import AddOrEditCard from '@/components/cards/AddOrEditCard'
+import CreateCard from '@/components/cards/CreateCard'
 import BottomSheet from '@/components/global/BottomSheet'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { CardApolloQueries } from '@/apollo/query/cardQuery'
@@ -143,7 +143,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => 
             </VStack>
             <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
             <BottomSheet onCloseFinish={() => setShowAddCard(false)} open={showAddCard} height={height * 0.9}>
-                <AddOrEditCard  onPress={onCreateCard} />
+                <CreateCard  onPress={onCreateCard} />
             </BottomSheet>
         </SafeAreaView>
     )

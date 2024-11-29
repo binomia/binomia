@@ -1,23 +1,22 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import colors from '@/colors'
-import Ionicons from '@expo/vector-icons/Ionicons';
 import BottomSheet from '../global/BottomSheet'
 import CardModification from './CardModification'
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Button from '../global/Button'
-import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, Stack } from 'native-base'
+import { VStack, Text, HStack, FlatList, Heading, Image, Pressable } from 'native-base'
 import { scale } from 'react-native-size-matters'
-import { Dimensions, SafeAreaView, TouchableOpacity } from 'react-native'
+import { Dimensions, SafeAreaView } from 'react-native'
 import { globalActions } from '@/redux/slices/globalSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { FlagsList } from 'aws-sdk/clients/guardduty'
 import { CardType } from '@/types'
 import { mastercardLogo, noCard, visaLogo } from '@/assets'
-import AddOrEditCard from './AddOrEditCard';
 import PagerView from 'react-native-pager-view';
 import { useMutation } from '@apollo/client';
 import { CardApolloQueries } from '@/apollo/query/cardQuery';
 import { CardAuthSchema } from '@/auth/cardAuth';
+import CreateCard from './CreateCard';
 
 type Props = {
     open?: boolean
@@ -128,7 +127,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                         <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
                     </VStack>
                 </SafeAreaView>
-                <AddOrEditCard onPress={onCreateCard} onClose={() => pagerRef.current?.setPage(0)} />
+                <CreateCard onPress={onCreateCard} onClose={() => pagerRef.current?.setPage(0)} />
             </PagerView>
         </BottomSheet>
     )

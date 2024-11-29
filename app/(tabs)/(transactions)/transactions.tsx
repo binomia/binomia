@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, Suspense, useContext } from 'react'
+import React, { useCallback, useEffect, useState, Suspense, useContext, useRef } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
 import DefaultIcon from 'react-native-default-icon';
@@ -27,10 +27,13 @@ import { SocketContext } from '@/contexts/socketContext';
 import { SOCKET_EVENTS } from '@/constants';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { generate as uuid } from "short-uuid"
+import Button from '@/components/global/Button';
+import PagerView from 'react-native-pager-view';
 
 
 const { height } = Dimensions.get('window')
 const TransactionsScreen: React.FC = () => {
+	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { user } = useSelector((state: any) => state.globalReducer)
 	const { hasNewTransaction } = useSelector((state: any) => state.transactionReducer)
@@ -40,12 +43,15 @@ const TransactionsScreen: React.FC = () => {
 	const [accountTransactions] = useLazyQuery(TransactionApolloQueries.accountTransactions())
 	const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
 
+	const [singleTransactionTitle, setSingleTransactionTitle] = useState<string>("Ver Detalles");
 	const [refreshing, setRefreshing] = useState(false);
 	const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
 	const [transactions, setTransactions] = useState<any[]>([])
 	const [showSingleTransaction, setShowSingleTransaction] = useState<boolean>(false);
 	const [showSendTransaction, setShowSendTransaction] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
+	const [needRefresh, setNeedRefresh] = useState<boolean>(false);
+	const [showPayButton, setShowPayButton] = useState<boolean>(false);
 
 	const handleSearch = async (value: string) => {
 		try {
@@ -104,18 +110,28 @@ const TransactionsScreen: React.FC = () => {
 	const onSelectTransaction = async (transaction: any) => {
 		await dispatch(transactionActions.setTransaction({
 			id: transaction.id,
+			transactionId: transaction.transactionId,
 			fullName: formatTransaction(transaction).fullName,
 			profileImageUrl: formatTransaction(transaction).profileImageUrl,
 			username: formatTransaction(transaction).username,
 			isFromMe: formatTransaction(transaction).isFromMe,
+			showPayButton: formatTransaction(transaction).showPayButton,
 			amount: transaction.amount,
 			createdAt: transaction.createdAt
 		}))
+
+		setShowPayButton(formatTransaction(transaction).showPayButton)
 		setShowSingleTransaction(true)
+		setSingleTransactionTitle(formatTransaction(transaction).showPayButton ? "Pagar" : "Ver Detalles")
 	}
 
-	const onCloseFinishSingleTransaction = () => {
+	const onCloseFinishSingleTransaction = async () => {
 		setShowSingleTransaction(false)
+
+		if (needRefresh)
+			await onRefresh()
+
+		setNeedRefresh(false)
 	}
 
 	const onSendCloseFinish = () => {
@@ -129,11 +145,15 @@ const TransactionsScreen: React.FC = () => {
 		const profileImageUrl = isFromMe ? transaction.to.user?.profileImageUrl : transaction.from.user?.profileImageUrl
 		const fullName = isFromMe ? transaction.to.user?.fullName : transaction.from.user?.fullName
 		const username = isFromMe ? transaction.from.user?.username : transaction.to.user?.username
+		const showPayButton = transaction.transactionType === "request" && !isFromMe && transaction.status === "pending"
+		const amountColor = (transaction.transactionType === "request" && isFromMe) ? colors.mainGreen : colors.red
 
 		return {
 			isFromMe,
+			amountColor,
 			profileImageUrl: profileImageUrl || "",
 			amount: transaction.amount,
+			showPayButton,
 			fullName: fullName || "",
 			username: username || ""
 		}
@@ -144,6 +164,12 @@ const TransactionsScreen: React.FC = () => {
 		await fetchAccountTransactions()
 		setRefreshing(false);
 	}, []);
+
+	const goNext = () => {
+		setShowPayButton(false)
+		setNeedRefresh(true)
+		ref.current?.setPage(1)
+	}
 
 
 	useEffect(() => {
@@ -225,7 +251,7 @@ const TransactionsScreen: React.FC = () => {
 														{formatTransaction(item).profileImageUrl ?
 															<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(item).profileImageUrl }} />
 															:
-															<DefaultIcon															
+															<DefaultIcon
 																value={formatTransaction(item).fullName || ""}
 																contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "") }]}
 																textStyle={styles.textStyle}
@@ -237,7 +263,11 @@ const TransactionsScreen: React.FC = () => {
 														</VStack>
 													</HStack>
 													<VStack ml={"10px"} justifyContent={"center"}>
-														<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(13)} color={formatTransaction(item).isFromMe ? "red" : "mainGreen"}>{formatTransaction(item).isFromMe ? "-" : "+"}{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
+														{formatTransaction(item).showPayButton ?
+															<Button onPress={() => onSelectTransaction(item)} w={"80px"} h={"30px"} fontSize={scale(12) + ""} bg={colors.mainGreen} title='Pagar' color='white' />
+															:
+															<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(13)} color={formatTransaction(item).amountColor}>{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
+														}
 													</VStack>
 												</HStack>
 											</TouchableOpacity>
@@ -256,7 +286,11 @@ const TransactionsScreen: React.FC = () => {
 							}
 						</ScrollView>
 						<BottomSheet openTime={300} height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
-							<SingleTransactionScreen />
+							{/* <SingleTransactionScreen showPayButton={showPayButton} goNext={goNext} title={singleTransactionTitle} /> */}
+							<PagerView scrollEnabled={false} style={{ flex: 1 }} ref={ref}>
+								<SingleTransactionScreen showPayButton={showPayButton} goNext={goNext} title={singleTransactionTitle} />
+								<SingleTransactionScreen />
+							</PagerView>
 						</BottomSheet>
 						<SendTransaction open={showSendTransaction} onCloseFinish={onSendCloseFinish} onSendFinish={onSendCloseFinish} />
 					</VStack>

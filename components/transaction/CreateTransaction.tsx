@@ -19,22 +19,16 @@ type Props = {
     onCloseFinish?: () => void
     nextPage?: () => void
     input: string
+    title?: string
+    showBalance?: boolean
     setInput: (_: string) => void
 }
 
-const CreateTransaction: React.FC<Props> = ({ input, setInput, nextPage = () => { }, onCloseFinish = () => { } }) => {
+const CreateTransaction: React.FC<Props> = ({ input, title = "Siguiente", showBalance = true, setInput, nextPage = () => { }, onCloseFinish = () => { } }) => {
     const dispatch = useDispatch();
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { account } = useSelector((state: any) => state.globalReducer)
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
-
-    const handleOnClose = async () => {
-        await dispatch(transactionActions.setReceiver({}))
-
-        onCloseFinish()
-        setInput("0")
-    }
-
     const onNextPage = async () => {
         try {
             const transactionData = await TransactionAuthSchema.createTransactionDetails.parseAsync({
@@ -54,7 +48,9 @@ const CreateTransaction: React.FC<Props> = ({ input, setInput, nextPage = () => 
     }
 
     const onChange = (value: string) => {
-        if (Number(value) >= 10 && Number(value) <= account.balance)
+        if (Number(value) >= 10 && !showBalance)
+            setShowPayButton(true)
+        else if (Number(value) >= 10 && Number(value) <= account.balance)
             setShowPayButton(true)
         else
             setShowPayButton(false)
@@ -65,9 +61,9 @@ const CreateTransaction: React.FC<Props> = ({ input, setInput, nextPage = () => 
     return (
         <VStack flex={1} pb={"10px"} justifyContent={"space-between"}>
             <VStack>
-                <HStack w={"100%"} mt={"10px"} alignItems={"center"} justifyContent={"center"}>
+                {showBalance ? <HStack w={"100%"} mt={"10px"} alignItems={"center"} justifyContent={"center"}>
                     <Heading size={"md"} color={colors.mainGreen} textAlign={"center"}>{FORMAT_CURRENCY(account.balance)}</Heading>
-                </HStack>
+                </HStack> : null}
                 <HStack px={"20px"} mt={"30px"} alignItems={"center"} justifyContent={"space-between"}>
                     <HStack space={2}>
                         {receiver.profileImageUrl ?
@@ -84,7 +80,7 @@ const CreateTransaction: React.FC<Props> = ({ input, setInput, nextPage = () => 
                             <Text color={colors.lightSkyGray}>{receiver?.username}</Text>
                         </VStack>
                     </HStack>
-                    <Button opacity={showPayButton ? 1 : 0.5} fontSize={scale(11) + "px"} disabled={!showPayButton} onPress={onNextPage} h={"40px"} w={"100px"} title={"Siguiente"} bg={showPayButton ? "mainGreen" : "lightGray"} borderRadius={100} color={showPayButton ? colors.white : colors.mainGreen} />
+                    <Button opacity={showPayButton ? 1 : 0.5} fontSize={scale(11) + "px"} disabled={!showPayButton} onPress={onNextPage} h={"40px"} w={"100px"} title={title} bg={showPayButton ? "mainGreen" : "lightGray"} borderRadius={100} color={showPayButton ? colors.white : colors.mainGreen} />
                 </HStack>
             </VStack>
             <VStack >

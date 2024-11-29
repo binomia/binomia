@@ -27,4 +27,5 @@ export default {
     border: 'rgb(39, 39, 41)',
     alert: '#c22525',
     warning: '#ffde21',
+    goldenYellow: '#ffc107',
 }
