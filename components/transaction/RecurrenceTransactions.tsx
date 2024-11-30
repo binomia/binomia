@@ -265,6 +265,11 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
 
     }
 
+    const onPressNewTransaction = () => {
+        router.navigate("user")
+        onCloseFinish()
+    }
+
     useEffect(() => {
         fetchAccountRecurrentTransactions()
     }, [])
@@ -319,7 +324,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                             <Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
                             <Text textAlign={"center"} fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
                         </VStack>
-                        <Pressable onPress={() => router.navigate("user")} mt={"20px"} _pressed={{ opacity: 0.5 }} justifyContent={"center"} alignItems={"center"} >
+                        <Pressable onPress={onPressNewTransaction} mt={"20px"} _pressed={{ opacity: 0.5 }} justifyContent={"center"} alignItems={"center"} >
                             <Ionicons name="add-circle" style={{ fontSize: scale(70) }} color={colors.mainGreen} />
                         </Pressable>
                     </VStack>

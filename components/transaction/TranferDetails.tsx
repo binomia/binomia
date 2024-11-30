@@ -70,13 +70,11 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
                 dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),
                 dispatch(globalActions.setHaveAccountChanged(false)),
                 dispatch(transactionActions.setTransaction({
-                    id: transactionSent.id,
+                    ...transactionSent,
                     fullName: formatTransaction(transactionSent).fullName,
                     profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
                     username: formatTransaction(transactionSent).username,
                     isFromMe: formatTransaction(transactionSent).isFromMe,
-                    amount: transactionSent.amount,
-                    createdAt: transactionSent.createdAt
                 }))
             ])
 
@@ -213,7 +211,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
                         </HStack>
                         <Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transactionDeytails?.fullName || "")}</Heading>
                         <Text fontSize={scale(16)} color={colors.lightSkyGray}>{transactionDeytails?.username}</Text>
-                        <Heading textTransform={"capitalize"} fontSize={scale(40)} color={"mainGreen"}>{"+"}{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
+                        <Heading textTransform={"capitalize"} fontSize={scale(40)} color={"mainGreen"}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
                     </VStack>
                     <VStack flex={1} justifyContent={"space-between"}>
                         <VStack p={"20px"} w={"100%"} key={"Recurrente-2"} >

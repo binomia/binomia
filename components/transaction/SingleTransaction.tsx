@@ -1,22 +1,18 @@
 import React, { useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
-import { StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Stack, Pressable, ZStack } from 'native-base'
+import { StyleSheet, Dimensions } from 'react-native'
+import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ZStack } from 'native-base'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import Button from '@/components/global/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import Entypo from '@expo/vector-icons/Entypo';
 import * as Sharing from 'expo-sharing';
 import moment from 'moment';
-import { cancelIcon, checked, pendingClock } from '@/assets';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLazyQuery, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { AccountApolloQueries } from '@/apollo/query';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { transactionStatus } from '@/mocks';
@@ -150,7 +146,7 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage,
 	return (
 		<VStack h={"93%"}>
 			<VStack h={"100%"} justifyContent={"space-between"}>
-				<VStack>					
+				<VStack>
 					<VStack pt={"50px"} alignItems={"center"} borderRadius={10}>
 						<HStack>
 							{transaction.profileImageUrl ?
@@ -187,7 +183,7 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage,
 				<VStack my={"30px"} alignItems={"center"}>
 					<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(30)} h={scale(30)} source={iconImage} />
 					<Heading mt={"10px"} textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{transactionStatus(transaction.status)}</Heading>
-					<VStack px={"40px"} mt={"40px"} w={"100%"}>
+					<VStack px={"40px"} mt={"30px"} w={"100%"}>
 						<FlatList
 							data={details}
 							renderItem={({ item, index }) => (
@@ -198,9 +194,11 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage,
 							)}
 						/>
 					</VStack>
-					<Pressable mt={"20px"} _pressed={{ opacity: 0.5 }} bg={colors.mainGreen} onPress={handleShare} w={"70px"} h={"70px"} borderRadius={100} alignItems={"center"} justifyContent={"center"}>
+					<Pressable mt={"20px"} _pressed={{ opacity: 0.5 }} bg={colors.mainGreen} onPress={handleShare} w={"60px"} h={"60px"} borderRadius={100} alignItems={"center"} justifyContent={"center"}>
 						<Entypo name="share" size={28} color={colors.white} />
+
 					</Pressable>
+					<Text mt={"5px"} textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>Compartir</Text>
 				</VStack>
 			</BottomSheet>
 		</VStack>
