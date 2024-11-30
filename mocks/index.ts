@@ -145,6 +145,28 @@ export const limitsScreenData = (limits: AccountLimitsType, account: AccountType
     }
 ]
 
+export const transactionStatus = (title: string) => {
+    console.log(title);
+    
+    switch (title) {
+        case "pending":
+            return "Pendiente"
+        case "approved":
+            return "Aprobado"
+        case "rejected":
+            return "Rechazado"
+        case "completed":
+            return "Completado"
+        case "paid":
+            return "Pagado"
+        case "cancelled":
+            return "Cancelado"
+        
+        default:
+            return title;
+    }
+}
+
 export const notificationsScreenData = ({ pushNotifications, emailNotifications, smsNotifications }: any) => [
     {
         name: "Notificaciónes Mobil",

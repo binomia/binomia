@@ -29,6 +29,7 @@ const CreateTransaction: React.FC<Props> = ({ input, title = "Siguiente", showBa
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { account } = useSelector((state: any) => state.globalReducer)
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
+    
     const onNextPage = async () => {
         try {
             const transactionData = await TransactionAuthSchema.createTransactionDetails.parseAsync({

@@ -69,15 +69,15 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
             }
 
             await Promise.all([
-                dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),
+                dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),                
                 dispatch(transactionActions.setTransaction({
                     id: transactionSent.id,
                     fullName: formatTransaction(transactionSent).fullName,
                     profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
                     username: formatTransaction(transactionSent).username,
                     isFromMe: formatTransaction(transactionSent).isFromMe,
-                    amount: transactionSent.amount,
-                    createdAt: transactionSent.createdAt
+                    amount: formatTransaction(transactionSent).amount,
+                    createdAt: formatTransaction(transactionSent).createdAt
                 }))
             ])
 
@@ -97,6 +97,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
 
         return {
             isFromMe,
+            createdAt: transaction.createdAt,
             profileImageUrl: profileImageUrl || "",
             amount: transaction.amount,
             fullName: fullName || "",

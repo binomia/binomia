@@ -18,7 +18,7 @@ import SingleTransactionScreen from '@/components/transaction/SingleTransaction'
 import SendTransaction from '@/components/transaction/SendTransaction';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { noTransactions } from '@/assets';
+import { cancelIcon, checked, noTransactions, pendingClock } from '@/assets';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { router, useNavigation } from 'expo-router';
 import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
@@ -52,6 +52,7 @@ const TransactionsScreen: React.FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [needRefresh, setNeedRefresh] = useState<boolean>(false);
 	const [showPayButton, setShowPayButton] = useState<boolean>(false);
+	const [initialPage, setInitialPage] = useState<number>(0);
 
 	const handleSearch = async (value: string) => {
 		try {
@@ -110,9 +111,11 @@ const TransactionsScreen: React.FC = () => {
 	const onSelectTransaction = async (transaction: any) => {
 		await dispatch(transactionActions.setTransaction({
 			id: transaction.id,
+			status: transaction.status,
 			transactionId: transaction.transactionId,
 			fullName: formatTransaction(transaction).fullName,
 			profileImageUrl: formatTransaction(transaction).profileImageUrl,
+			amountColor: formatTransaction(transaction).amountColor,
 			username: formatTransaction(transaction).username,
 			isFromMe: formatTransaction(transaction).isFromMe,
 			showPayButton: formatTransaction(transaction).showPayButton,
@@ -120,6 +123,7 @@ const TransactionsScreen: React.FC = () => {
 			createdAt: transaction.createdAt
 		}))
 
+		setInitialPage(formatTransaction(transaction).showPayButton ? 0 : transaction.status === "cancelled" ? 2 : transaction.status === "pending" ? 3 : 1)
 		setShowPayButton(formatTransaction(transaction).showPayButton)
 		setShowSingleTransaction(true)
 		setSingleTransactionTitle(formatTransaction(transaction).showPayButton ? "Pagar" : "Ver Detalles")
@@ -165,10 +169,10 @@ const TransactionsScreen: React.FC = () => {
 		setRefreshing(false);
 	}, []);
 
-	const goNext = () => {
+	const goNext = (next: number = 1) => {
 		setShowPayButton(false)
 		setNeedRefresh(true)
-		ref.current?.setPage(1)
+		ref.current?.setPage(next)
 	}
 
 
@@ -191,111 +195,114 @@ const TransactionsScreen: React.FC = () => {
 
 	return (
 		isLoading ? <TransactionSkeleton /> : (
-			<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
-				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-					<VStack pt={"20px"}>
-						<VStack px={"20px"} w={"100%"} alignItems={"center"}>
-							<Input h={"50px"} w={"100%"} placeholder='Buscar...' onChangeText={(value) => handleSearch(value.toLowerCase())} />
-						</VStack>
-						<ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
-							<VStack>
-								<HStack px={"20px"} style={styles.ScrollView} >
-									<FlatList
-										h={"100%"}
-										showsVerticalScrollIndicator={false}
-										horizontal={true}
-										data={[users[0], ...users]}
-										contentContainerStyle={{ flexDirection: "row", gap: 20, justifyContent: "center", alignItems: "center" }}
-										renderItem={({ item, index }) => (
-											index === 0 ? (
-												<VStack key={Date.now()} justifyContent={"center"} alignItems={"center"}>
-													<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} w={scale(55)} h={scale(55)} alignItems={"center"} justifyContent={"center"} onPress={() => router.navigate("/user")}>
-														<AntDesign name="pluscircle" size={30} color="white" />
-													</Pressable>
-													<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>Nueva</Heading>
-												</VStack>
-											) : (
-												<Pressable _pressed={{ opacity: 0.5 }} borderRadius={100} alignItems={"center"} key={`search_user_${index}-${Date.now()}}`} onPress={() => onSelectUser(item)}>
-													<VStack alignItems={"center"} borderRadius={10}>
-														{item.profileImageUrl ?
-															<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(55)} h={scale(55)} source={{ uri: item.profileImageUrl }} />
-															:
-															<DefaultIcon
-																value={item.fullName}
-																contentContainerStyle={[styles.contentContainerStyle, { width: 70, height: 70, backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.fullName) }]}
-																textStyle={styles.textStyle}
-															/>
-														}
-														<VStack mt={"5px"} justifyContent={"center"}>
-															<Heading textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>{FORMAT_FULL_NAME(item.fullName)}</Heading>
-														</VStack>
-													</VStack>
-												</Pressable>
-											)
-										)}
-									/>
-								</HStack>
-							</VStack>
-							{transactions.length > 0 ?
-								<VStack w={"100%"} >
-									<Heading px={"20px"} fontSize={scale(20)} color={"white"}>Transacciones</Heading>
-									<FlatList
-										px={"20px"}
-										scrollEnabled={false}
-										mt={"10px"}
-										data={transactions}
-										renderItem={({ item, index }: any) => (
-											<TouchableOpacity key={`search_user_${index}-${Date.now()}}`} onPress={() => onSelectTransaction(item)}>
-												<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
-													<HStack>
-														{formatTransaction(item).profileImageUrl ?
-															<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(item).profileImageUrl }} />
-															:
-															<DefaultIcon
-																value={formatTransaction(item).fullName || ""}
-																contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "") }]}
-																textStyle={styles.textStyle}
-															/>
-														}
-														<VStack ml={"10px"} justifyContent={"center"}>
-															<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
-															<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
-														</VStack>
-													</HStack>
-													<VStack ml={"10px"} justifyContent={"center"}>
-														{formatTransaction(item).showPayButton ?
-															<Button onPress={() => onSelectTransaction(item)} w={"80px"} h={"30px"} fontSize={scale(12) + ""} bg={colors.mainGreen} title='Pagar' color='white' />
-															:
-															<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(13)} color={formatTransaction(item).amountColor}>{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
-														}
-													</VStack>
-												</HStack>
-											</TouchableOpacity>
-										)}
-									/>
-								</VStack>
-								: (
-									<VStack key={`transations-screen-no-transactions-${Date.now()}`} w={"100%"} h={"50%"} mt={"20px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
-										<Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
-										<VStack justifyContent={"center"} alignItems={"center"}>
-											<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
-											<Text fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
+			<VStack flex={1} pt={"20px"} bg={colors.darkGray}>
+				<VStack px={"20px"} w={"100%"} alignItems={"center"}>
+					<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+						<Input h={"50px"} w={"100%"} placeholder='Buscar...' onChangeText={(value) => handleSearch(value.toLowerCase())} />
+					</TouchableWithoutFeedback >
+				</VStack>
+				<ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
+					<VStack>
+						<HStack px={"20px"} style={styles.ScrollView} >
+							<FlatList
+								h={"100%"}
+								showsVerticalScrollIndicator={false}
+								horizontal={true}
+								data={[users[0], ...users]}
+								contentContainerStyle={{ flexDirection: "row", gap: 20, justifyContent: "center", alignItems: "center" }}
+								renderItem={({ item, index }) => (
+									index === 0 ? (
+										<VStack key={Date.now()} justifyContent={"center"} alignItems={"center"}>
+											<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} w={scale(55)} h={scale(55)} alignItems={"center"} justifyContent={"center"} onPress={() => router.navigate("/user")}>
+												<AntDesign name="pluscircle" size={30} color="white" />
+											</Pressable>
+											<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>Nueva</Heading>
 										</VStack>
-									</VStack>
-								)
-							}
-						</ScrollView>
-						<BottomSheet openTime={300} height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
-							{/* <SingleTransactionScreen showPayButton={showPayButton} goNext={goNext} title={singleTransactionTitle} /> */}
-							<PagerView scrollEnabled={false} style={{ flex: 1 }} ref={ref}>
-								<SingleTransactionScreen showPayButton={showPayButton} goNext={goNext} title={singleTransactionTitle} />
-								<SingleTransactionScreen />
-							</PagerView>
-						</BottomSheet>
-						<SendTransaction open={showSendTransaction} onCloseFinish={onSendCloseFinish} onSendFinish={onSendCloseFinish} />
+									) : (
+										<Pressable _pressed={{ opacity: 0.5 }} borderRadius={100} alignItems={"center"} key={`search_user_${index}-${Date.now()}}`} onPress={() => onSelectUser(item)}>
+											<VStack alignItems={"center"} borderRadius={10}>
+												{item.profileImageUrl ?
+													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(55)} h={scale(55)} source={{ uri: item.profileImageUrl }} />
+													:
+													<DefaultIcon
+														value={item.fullName}
+														contentContainerStyle={[styles.contentContainerStyle, { width: 70, height: 70, backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.fullName) }]}
+														textStyle={styles.textStyle}
+													/>
+												}
+												<VStack mt={"5px"} justifyContent={"center"}>
+													<Heading textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>{FORMAT_FULL_NAME(item.fullName)}</Heading>
+												</VStack>
+											</VStack>
+										</Pressable>
+									)
+								)}
+							/>
+						</HStack>
 					</VStack>
-				</TouchableWithoutFeedback >
-			</SafeAreaView>
+					{transactions.length > 0 ?
+						<VStack w={"100%"} >
+							<Heading px={"20px"} fontSize={scale(20)} color={"white"}>Transacciones</Heading>
+							<FlatList
+								px={"20px"}
+								scrollEnabled={false}
+								mt={"10px"}
+								data={transactions}
+								renderItem={({ item, index }: any) => (
+									<TouchableOpacity key={`search_user_${index}-${Date.now()}}`} onPress={() => onSelectTransaction(item)}>
+										<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
+											<HStack>
+												{formatTransaction(item).profileImageUrl ?
+													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(item).profileImageUrl }} />
+													:
+													<DefaultIcon
+														value={formatTransaction(item).fullName || ""}
+														contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "") }]}
+														textStyle={styles.textStyle}
+													/>
+												}
+												<VStack ml={"10px"} justifyContent={"center"}>
+													<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
+													<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
+												</VStack>
+											</HStack>
+											<VStack ml={"10px"} justifyContent={"center"}>
+												{formatTransaction(item).showPayButton ?
+													<HStack space={1} w={"120px"} h={"40px"} bg={colors.mainGreen} borderRadius={25} color='white' justifyContent={"center"} alignItems={"center"}>
+														<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>Pagar</Heading>
+														<Text fontWeight={"semibold"} fontSize={scale(10)} color={colors.white}>{FORMAT_CURRENCY(formatTransaction(item).amount)}</Text>
+													</HStack>
+													:
+													<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(13)} color={formatTransaction(item).amountColor}>{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
+												}
+											</VStack>
+										</HStack>
+									</TouchableOpacity>
+								)}
+							/>
+						</VStack>
+						: (
+							<VStack key={`transations-screen-no-transactions-${Date.now()}`} w={"100%"} h={"50%"} mt={"20px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
+								<Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
+								<VStack justifyContent={"center"} alignItems={"center"}>
+									<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
+									<Text fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
+								</VStack>
+							</VStack>
+						)
+					}
+				</ScrollView>
+				<BottomSheet openTime={300} height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
+					{/* <SingleTransactionScreen showPayButton={showPayButton} goNext={goNext} title={singleTransactionTitle} /> */}
+					<PagerView initialPage={initialPage} scrollEnabled={false} style={{ flex: 1 }} ref={ref}>
+						<SingleTransactionScreen iconImage={pendingClock} showPayButton={showPayButton} goNext={goNext} title={singleTransactionTitle} />
+						<SingleTransactionScreen iconImage={checked} />
+						<SingleTransactionScreen iconImage={cancelIcon} />
+						<SingleTransactionScreen iconImage={pendingClock} />
+					</PagerView>
+				</BottomSheet>
+				<SendTransaction open={showSendTransaction} onCloseFinish={onSendCloseFinish} onSendFinish={onSendCloseFinish} />
+			</VStack>
 		)
 	)
 }

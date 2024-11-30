@@ -356,8 +356,8 @@ export class TransactionApolloQueries {
     }
     static payRequestTransaction = () => {
         return gql`
-            mutation PayRequestTransaction($transactionId: String!) {
-                payRequestTransaction(transactionId: $transactionId) {
+            mutation PayRequestTransaction($transactionId: String!, $paymentApproved: Boolean!) {
+                payRequestTransaction(transactionId: $transactionId, paymentApproved: $paymentApproved) {
                     transactionId
                     amount
                     deliveredAmount

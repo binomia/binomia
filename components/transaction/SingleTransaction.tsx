@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Stack, Pressable } from 'native-base'
+import { Heading, Image, Text, VStack, FlatList, HStack, Stack, Pressable, ZStack } from 'native-base'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
@@ -12,29 +12,33 @@ import { useDispatch, useSelector } from 'react-redux';
 import Entypo from '@expo/vector-icons/Entypo';
 import * as Sharing from 'expo-sharing';
 import moment from 'moment';
-import { checked, pendingClock } from '@/assets';
+import { cancelIcon, checked, pendingClock } from '@/assets';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { AccountApolloQueries } from '@/apollo/query';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
+import { transactionStatus } from '@/mocks';
 
 
 type Props = {
 	title?: string
-	goNext?: () => void,
+	goNext?: (_?: number) => void,
 	showPayButton?: boolean
+	iconImage?: any
 
 }
 
 const { height, width } = Dimensions.get('window')
-const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPayButton = false, goNext = () => { } }) => {
+const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage, showPayButton = false, goNext = (_?: number) => { } }) => {
 	const dispatch = useDispatch()
 	const { transaction } = useSelector((state: any) => state.transactionReducer)
 	const { account, user } = useSelector((state: any) => state.globalReducer)
 	const [openDetail, setOpenDetail] = useState<boolean>(false)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
+	const [isCancelLoading, setIsCancelLoading] = useState<boolean>(false)
+	const [isCancelled, setIsCancelled] = useState<boolean>(false)
 	const [payRequestTransaction] = useMutation(TransactionApolloQueries.payRequestTransaction());
 
 	const details = [
@@ -56,8 +60,8 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPayBut
 		if (title === "Monto")
 			return {
 				title,
-				value: transaction.isFromMe ? "-" + FORMAT_CURRENCY(Number(value)) : "+" + FORMAT_CURRENCY(Number(value)),
-				color: transaction.isFromMe ? colors.red : colors.mainGreen
+				value: FORMAT_CURRENCY(Number(value)),
+				color: amountColor(transaction)
 			}
 
 		if (title === "Enviado a")
@@ -101,13 +105,16 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPayBut
 		}
 	}
 
-	const onPress = async () => {
+	const onPress = async (paymentApproved: boolean) => {
 		if (transaction.showPayButton) {
 			try {
-				setIsLoading(true)
+				setIsCancelLoading(!paymentApproved)
+				setIsLoading(paymentApproved)
+
 				const { data } = await payRequestTransaction({
 					variables: {
-						transactionId: transaction.transactionId
+						transactionId: transaction.transactionId,
+						paymentApproved
 					}
 				})
 
@@ -115,7 +122,9 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPayBut
 				await dispatch(globalActions.setAccount(Object.assign({}, account, { balance: Number(account.balance) - Number(transaction.amount) })))
 
 				setIsLoading(false)
-				goNext()
+				setIsCancelLoading(false)
+				setIsCancelled(paymentApproved)
+				goNext(paymentApproved ? 1 : 2)
 
 			} catch (error) {
 				setIsLoading(false)
@@ -127,18 +136,21 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPayBut
 	}
 
 
+	const amountColor = (transaction: any) => {
+		if (transaction.status === "cancelled")
+			return colors.red
+
+		if (transaction.status === "pending")
+			return colors.pureGray
+
+		return colors.mainGreen
+	}
+
+
 	return (
 		<VStack h={"93%"}>
 			<VStack h={"100%"} justifyContent={"space-between"}>
-				<VStack>
-					<HStack justifyContent={"flex-end"}>
-						{!showPayButton ?
-							<Pressable _pressed={{ opacity: 0.5 }} onPress={handleShare} w={"50px"} alignItems={"center"} justifyContent={"center"}>
-								<Entypo name="share" size={24} color="white" />
-							</Pressable> :
-							null
-						}
-					</HStack>
+				<VStack>					
 					<VStack pt={"50px"} alignItems={"center"} borderRadius={10}>
 						<HStack>
 							{transaction.profileImageUrl ?
@@ -156,24 +168,25 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPayBut
 							<Text fontSize={scale(16)} color={colors.lightSkyGray}>{transaction.username}</Text>
 						</VStack>
 						<VStack mt={"40px"} alignItems={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(40)} color={transaction.isFromMe ? "red" : transaction.showPayButton ? colors.goldenYellow : "mainGreen"}>{transaction.isFromMe ? "-" : "+"}{FORMAT_CURRENCY(transaction?.amount)}</Heading>
+							<Heading textTransform={"capitalize"} fontSize={scale(40)} color={amountColor(transaction)}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
 							<Text mb={"40px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-							{showPayButton ?
-								<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(width / 6)} h={scale(width / 6)} source={pendingClock} />
-								:
-								<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(width / 6)} h={scale(width / 6)} source={checked} />
-							}
+							<ZStack w={scale(width / 6)} h={scale(width / 6)} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+								<HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
+								<Image borderRadius={100} p={"20px"} resizeMode='contain' alt='logo-image' w={scale(width / 6)} h={scale(width / 6)} source={iconImage} />
+							</ZStack>
+							<Text mt={"10px"} fontSize={scale(14)} fontWeight={"bold"} color={colors.white}>{transactionStatus(transaction.status)}</Text>
 						</VStack>
 					</VStack>
 				</VStack>
-				<HStack justifyContent={"center"}>
-					<Button onPress={onPress} spin={isLoading} w={"80%"} bg={"mainGreen"} color='white' title={title} />
+				<HStack px={"20px"} justifyContent={showPayButton ? "space-between" : "center"}>
+					{showPayButton ? <Button onPress={() => onPress(false)} spin={isCancelLoading} w={"49%"} bg={colors.lightGray} color={colors.red} title={"Cancelar"} /> : null}
+					<Button onPress={() => onPress(true)} spin={isLoading} w={showPayButton ? "49%" : "80%"} bg={colors.mainGreen} color={colors.white} title={title} />
 				</HStack>
 			</VStack>
 			<BottomSheet openTime={300} height={height * 0.45} onCloseFinish={() => setOpenDetail(false)} open={openDetail}>
 				<VStack my={"30px"} alignItems={"center"}>
-					<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(30)} h={scale(30)} source={checked} />
-					<Heading mt={"10px"} textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{"Completada"}</Heading>
+					<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(30)} h={scale(30)} source={iconImage} />
+					<Heading mt={"10px"} textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{transactionStatus(transaction.status)}</Heading>
 					<VStack px={"40px"} mt={"40px"} w={"100%"}>
 						<FlatList
 							data={details}
@@ -185,6 +198,9 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPayBut
 							)}
 						/>
 					</VStack>
+					<Pressable mt={"20px"} _pressed={{ opacity: 0.5 }} bg={colors.mainGreen} onPress={handleShare} w={"70px"} h={"70px"} borderRadius={100} alignItems={"center"} justifyContent={"center"}>
+						<Entypo name="share" size={28} color={colors.white} />
+					</Pressable>
 				</VStack>
 			</BottomSheet>
 		</VStack>
