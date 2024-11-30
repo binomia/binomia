@@ -276,12 +276,22 @@ export class TransactionsController {
         }
     }
 
-    static payRequestTransaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any) => {
+    static payRequestTransaction = async (_: unknown, { transactionId, paymentApproved }: { transactionId: string, paymentApproved: boolean }, context: any) => {
         try {
             const session = await checkForProtectedRequests(context.req);
 
+            console.log(JSON.stringify(session.user.account, null, 2));
+            
+
             const transaction = await TransactionsModel.findOne({
-                where: { transactionId },
+                where: {
+                    [Op.and]: [
+                        { transactionId },
+                        { status: "pending" },
+                        { transactionType: "request" },
+                        { toAccount: session.user.account.id }
+                    ]
+                },
                 include: [
                     {
                         model: AccountModel,
@@ -304,6 +314,7 @@ export class TransactionsController {
 
             if (!transaction)
                 throw new GraphQLError("transaction not found");
+
 
             const senderAccount = await AccountModel.findOne({
                 where: { id: transaction.toJSON().toAccount },
@@ -348,6 +359,22 @@ export class TransactionsController {
                 throw new GraphQLError("receiver account not found");
 
 
+            if (!paymentApproved) {
+                await transaction.update({
+                    status: "cancelled"
+                })
+
+                await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_CANCELED, JSON.stringify({
+                    data: transaction.toJSON(),
+                    senderSocketRoom: senderAccount.toJSON().user.username,
+                    recipientSocketRoom: receiverAccount.toJSON().user.username
+                }))
+
+                const transactionData = await transaction.reload()
+                return transactionData.toJSON()
+            }
+
+
             const message = `${senderAccount.toJSON().username}&${receiverAccount.toJSON().username}@${transaction.toJSON().amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
 
             // [TODO] Verify signature
@@ -369,7 +396,7 @@ export class TransactionsController {
             await transaction.update({
                 status: "paid",
             })
-            
+
             const transactionData = await transaction.reload()
 
             await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_PAIED, JSON.stringify({
