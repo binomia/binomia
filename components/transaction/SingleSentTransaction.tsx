@@ -192,20 +192,19 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconIm
 					</Pressable>
 				</HStack>
 				<VStack>
-					<VStack mt={"50px"} alignItems={"center"}>
+					<VStack mt={"20px"} alignItems={"center"}>
 						<Heading textTransform={"capitalize"} fontSize={scale(38)} color={amountColor(transaction)}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
 						<Text mb={"10px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-						{transaction.showMap ?
-							<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
-								<ZStack w={"30px"} h={"30px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-									<HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
-									{StatuIcon(transaction?.status)}
-								</ZStack>
-								<VStack w={"80%"}>
-									<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status)}s</Text>
-								</VStack>
-							</VStack> : null
-						}
+						<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
+							<ZStack w={"30px"} h={"30px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+								<HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
+								{StatuIcon(transaction?.status)}
+							</ZStack>
+							<VStack w={"80%"}>
+								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status)}s</Text>
+							</VStack>
+						</VStack>
+
 					</VStack>
 				</VStack>
 			</VStack>
@@ -241,13 +240,12 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconIm
 						/>
 					</VStack> :
 					<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
-						<ZStack w={"60px"} h={"60px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-							<HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
-							{StatuIcon(transaction?.status)}
-						</ZStack>
-						<VStack w={"80%"}>
-							<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status)}</Text>
-						</VStack>
+						<HStack w={"40px"} h={"40px"} bg={colors.lightGray} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
+							<Ionicons name="help" size={22} color={colors.mainGreen} />
+						</HStack>
+						<Text textAlign={"center"} w={"85%"} fontSize={scale(15)} color={colors.pureGray}>
+							Asegúrate de transferir dinero únicamente a personas de confianza, para poder garantizar tu seguridad.
+						</Text>
 					</VStack>
 			}
 		</VStack>
