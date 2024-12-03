@@ -74,7 +74,7 @@ export default () => {
 									<Stack>
 										<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 										<Stack.Screen name="(signup)" options={{ headerShown: false }} />
-										<Stack.Screen name="(modals)" options={{ headerShown: false, presentation: "containedModal"}} />
+										<Stack.Screen name="(modals)" options={{ headerShown: false, headerBackVisible: false, gestureEnabled: true, presentation: "card"}} />
 										<Stack.Screen name="+not-found" />
 									</Stack>
 								</View>

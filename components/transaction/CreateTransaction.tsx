@@ -1,17 +1,15 @@
 import React, { useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
-import { StyleSheet, TouchableOpacity } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Stack } from 'native-base'
+import { StyleSheet } from 'react-native'
+import { Heading, Image, Text, VStack, HStack } from 'native-base'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import Button from '@/components/global/Button';
 import { useDispatch, useSelector } from 'react-redux';
 import KeyNumberPad from '../global/KeyNumberPad';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 type Props = {
@@ -29,7 +27,7 @@ const CreateTransaction: React.FC<Props> = ({ input, title = "Siguiente", showBa
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { account } = useSelector((state: any) => state.globalReducer)
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
-    
+
     const onNextPage = async () => {
         try {
             const transactionData = await TransactionAuthSchema.createTransactionDetails.parseAsync({

@@ -15,6 +15,13 @@ export class TransactionApolloQueries {
                     location {
                         latitude
                         longitude
+                        neighbourhood
+                        road
+                        town
+                        county
+                        state
+                        postcode
+                        country
                     }
                     createdAt
                     updatedAt
@@ -59,13 +66,13 @@ export class TransactionApolloQueries {
                             address
                             createdAt
                             updatedAt
-                        }
-                    
+                        }            
                     }
                 }
             }
         `
     }
+
     static createRequestTransaction = () => {
         return gql`
             mutation CreateRequestTransaction($data: TransactionInput!, $recurrence: TransactionRecurrenceInput!) {
@@ -80,6 +87,13 @@ export class TransactionApolloQueries {
                     location {
                         latitude
                         longitude
+                        neighbourhood
+                        road
+                        town
+                        county
+                        state
+                        postcode
+                        country
                     }
                     createdAt
                     updatedAt
@@ -161,6 +175,13 @@ export class TransactionApolloQueries {
                     location {
                         latitude
                         longitude
+                        neighbourhood
+                        road
+                        town
+                        county
+                        state
+                        postcode
+                        country
                     }
                     createdAt
                     updatedAt                    
@@ -183,6 +204,13 @@ export class TransactionApolloQueries {
                     location {
                         latitude
                         longitude
+                        neighbourhood
+                        road
+                        town
+                        county
+                        state
+                        postcode
+                        country
                     }
                     createdAt
                     updatedAt
@@ -279,6 +307,13 @@ export class TransactionApolloQueries {
                     location {
                         latitude
                         longitude
+                        neighbourhood
+                        road
+                        town
+                        county
+                        state
+                        postcode
+                        country
                     }
                     createdAt
                     updatedAt                    
@@ -336,6 +371,7 @@ export class TransactionApolloQueries {
             }
         `
     }
+    
     static updateRecurrentTransactions = () => {
         return gql`
             mutation UpdateRecurrentTransactions($data: UpdateQueuedTransactionInput!) {
@@ -354,6 +390,7 @@ export class TransactionApolloQueries {
             }
         `
     }
+
     static payRequestTransaction = () => {
         return gql`
             mutation PayRequestTransaction($transactionId: String!, $paymentApproved: Boolean!) {
@@ -368,6 +405,13 @@ export class TransactionApolloQueries {
                     location {
                         latitude
                         longitude
+                        neighbourhood
+                        road
+                        town
+                        county
+                        state
+                        postcode
+                        country
                     }
                     createdAt
                     updatedAt

@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ZStack } from 'native-base'
-import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { Heading, Image, Text, VStack, HStack, Pressable, ScrollView } from 'native-base'
+import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
 import Button from '@/components/global/Button';
@@ -16,6 +16,7 @@ import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { transactionStatus } from '@/mocks';
+import PagerView from 'react-native-pager-view';
 
 
 type Props = {
@@ -28,9 +29,10 @@ type Props = {
 
 const { height, width } = Dimensions.get('window')
 const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage, showPayButton = false, goNext = (_?: number) => { } }) => {
+	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { transaction } = useSelector((state: any) => state.transactionReducer)
-	const { account, user } = useSelector((state: any) => state.globalReducer)
+	const { account, user, location } = useSelector((state: any) => state.globalReducer)
 	const [openDetail, setOpenDetail] = useState<boolean>(false)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [isCancelLoading, setIsCancelLoading] = useState<boolean>(false)
@@ -128,7 +130,7 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage,
 			}
 
 		} else
-			setOpenDetail(true)
+			ref.current?.setPage(1)
 	}
 
 
@@ -142,65 +144,67 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage,
 		return colors.mainGreen
 	}
 
+	useEffect(() => {
+		console.log({ location });
+
+	}, [location])
+
 
 	return (
-		<VStack h={"93%"}>
-			<VStack h={"100%"} justifyContent={"space-between"}>
-				<VStack>
-					<VStack pt={"50px"} alignItems={"center"} borderRadius={10}>
-						<HStack>
-							{transaction.profileImageUrl ?
-								<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(width / 4)} h={scale(width / 4)} source={{ uri: transaction.profileImageUrl }} />
-								:
-								<DefaultIcon
-									value={transaction?.fullName || ""}
-									contentContainerStyle={[styles.contentContainerStyle, { width: scale(width / 4), height: scale(width / 4), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "") }]}
-									textStyle={styles.textStyle}
-								/>
-							}
-						</HStack>
-						<VStack mt={"10px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
-							<Text fontSize={scale(16)} color={colors.lightSkyGray}>{transaction.username}</Text>
+		<VStack h={"100%"}>
+			<ScrollView h={"100%"} flex={1} p={"20px"}>
+				<HStack w={"100%"} mb={"20px"} justifyContent={"space-between"} alignItems={"center"}>
+					<HStack>
+						{transaction.profileImageUrl ?
+							<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(50)} h={scale(50)} source={{ uri: transaction.profileImageUrl }} />
+							:
+							<DefaultIcon
+								value={transaction?.fullName || ""}
+								contentContainerStyle={[styles.contentContainerStyle, { width: scale(width / 4), height: scale(width / 4), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "") }]}
+								textStyle={styles.textStyle}
+							/>
+						}
+						<VStack ml={"10px"} >
+							<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
+							<Text fontSize={scale(15)} color={colors.lightSkyGray}>{transaction.username}</Text>
 						</VStack>
-						<VStack mt={"40px"} alignItems={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(40)} color={amountColor(transaction)}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
-							<Text mb={"40px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-							<ZStack w={scale(width / 6)} h={scale(width / 6)} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-								<HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
-								<Image borderRadius={100} p={"20px"} resizeMode='contain' alt='logo-image' w={scale(width / 6)} h={scale(width / 6)} source={iconImage} />
-							</ZStack>
-							<Text mt={"10px"} fontSize={scale(14)} fontWeight={"bold"} color={colors.white}>{transactionStatus(transaction.status)}</Text>
-						</VStack>
-					</VStack>
-				</VStack>
-				<HStack px={"20px"} justifyContent={showPayButton ? "space-between" : "center"}>
-					{showPayButton ? <Button onPress={() => onPress(false)} spin={isCancelLoading} w={"49%"} bg={colors.lightGray} color={colors.red} title={"Cancelar"} /> : null}
-					<Button onPress={() => onPress(true)} spin={isLoading} w={showPayButton ? "49%" : "80%"} bg={colors.mainGreen} color={colors.white} title={title} />
+					</HStack>
+
+					<Pressable mb={"20px"} _pressed={{ opacity: 0.5 }} bg={colors.lightGray} onPress={handleShare} w={"40px"} h={"40px"} borderRadius={100} alignItems={"center"} justifyContent={"center"}>
+						<Entypo name="share" size={20} color={colors.mainGreen} />
+					</Pressable>
 				</HStack>
-			</VStack>
-			<BottomSheet openTime={300} height={height * 0.45} onCloseFinish={() => setOpenDetail(false)} open={openDetail}>
-				<VStack my={"30px"} alignItems={"center"}>
-					<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(30)} h={scale(30)} source={iconImage} />
-					<Heading mt={"10px"} textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{transactionStatus(transaction.status)}</Heading>
-					<VStack px={"40px"} mt={"30px"} w={"100%"}>
-						<FlatList
-							data={details}
-							renderItem={({ item, index }) => (
-								<HStack key={`detail-tx-${index}`} mb={"10px"} w={"100%"} justifyContent={"space-between"} alignItems={"center"}>
-									<Text fontSize={scale(14)} color={colors.white}>{handleValue(item.title, item.value).title}</Text>
-									<Text fontSize={scale(14)} textTransform={"capitalize"} color={handleValue(item.title, item.value).color}>{handleValue(item.title, item.value).value}</Text>
-								</HStack>
-							)}
+				<VStack >
+					<VStack mt={"30px"} alignItems={"center"}>
+						<Heading textTransform={"capitalize"} fontSize={scale(40)} color={amountColor(transaction)}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
+						<Text mb={"10px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
+						{/* <HStack mb={"40px"} space={1} alignItems={"center"}>
+							<Image borderRadius={100}  resizeMode='contain' alt='logo-image' w={"20px"} h={"20px"} source={iconImage} />
+							<Text fontSize={scale(14)} fontWeight={"bold"} color={colors.white}>{transactionStatus(transaction.status)}</Text>
+						</HStack> */}
+
+					</VStack>
+
+					<VStack w={"100%"} justifyContent={"center"}>
+						<HStack>
+							<Heading fontSize={scale(20)} my={"10px"} textTransform={"capitalize"} color={"white"}>Guaricano, Villa Mella, Santo Domingo Norte</Heading>
+						</HStack>
+						<Image
+							alt='fine-location-image-alt'
+							// resizeMode="stretch"
+							w={"100%"}
+							h={height * 0.3}
+							source={{
+								uri: getMapLocationImage({ latitude: transaction.location?.latitude, longitude: transaction.location?.longitude })
+							}}
+
+							style={{
+								borderRadius: 10
+							}}
 						/>
 					</VStack>
-					<Pressable mt={"20px"} _pressed={{ opacity: 0.5 }} bg={colors.mainGreen} onPress={handleShare} w={"60px"} h={"60px"} borderRadius={100} alignItems={"center"} justifyContent={"center"}>
-						<Entypo name="share" size={28} color={colors.white} />
-
-					</Pressable>
-					<Text mt={"5px"} textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>Compartir</Text>
 				</VStack>
-			</BottomSheet>
+			</ScrollView>
 		</VStack>
 	)
 }

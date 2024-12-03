@@ -1,3 +1,4 @@
+import { GOOGLE_MAPS_API_KEY } from "@/constants";
 import { WeeklyQueueTitleType } from "@/types";
 import { nextFriday, nextMonday, nextSaturday, nextSunday, nextThursday, nextTuesday, nextWednesday } from "date-fns";
 
@@ -146,6 +147,11 @@ export const FORMAT_LIMIT = (amount: number, limit: number) => {
 
 export const FORMAT_FULL_NAME = (fullName: string, length: number = 15) => {
     return fullName.length > length ? fullName.slice(0, length - 3) + "..." : fullName
+}
+
+export const getMapLocationImage = ({ latitude, longitude }: { latitude: number, longitude: number }) => {
+    return `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=500x500&map_id=${"d5db1229935ffa0d"}&key=${GOOGLE_MAPS_API_KEY}`
+
 }
 
 

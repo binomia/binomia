@@ -101,7 +101,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => 
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
-            <BackHeaderIcon />
+            {/* <BackHeaderIcon /> */}
             <VStack variant={"body"} justifyContent={"space-between"}>
                 {cards.length > 0 ? (
                     <ScrollView mt={"50px"} flex={1} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>

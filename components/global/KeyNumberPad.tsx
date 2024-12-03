@@ -56,7 +56,6 @@ const KeyNumberPad: React.FC<Props> = ({ onChange = (_: string) => { }, maxAmoun
                 return
             }
 
-
             setValue(newValue)
             onChange(newValueParseed)
         }

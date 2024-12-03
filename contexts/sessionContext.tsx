@@ -54,7 +54,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
     const fetchSessionUser = async () => {
         try {
-            const user = await getSessionUser()            
+            const user = await getSessionUser()
 
             const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user.data.sessionUser)
             const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
@@ -212,8 +212,6 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 }
 
                 const [ip, network] = await Promise.all([Network.getIpAddressAsync(), Network.getNetworkStateAsync()])
-                const location = await getLocation()
-
 
                 const jwt = await getItem("jwt");
                 if (!jwt) {
@@ -222,10 +220,8 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
                 setJwt(jwt);
 
-                await Promise.all([
-                    dispatch(globalActions.setNetwork({ ...network, ip })),
-                    dispatch(globalActions.setLocation(location))
-                ])
+                await getLocation()
+                await dispatch(globalActions.setNetwork({ ...network, ip }))
 
                 await dispatch(globalActions.setApplicationId(applicationId))
                 await setNotifications();

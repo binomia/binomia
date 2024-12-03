@@ -20,6 +20,8 @@ import PagerView from 'react-native-pager-view';
 import SingleTransaction from '@/components/transaction/SingleTransaction';
 import TranferRequestDetails from '@/components/transaction/TranferRequestDetails';
 import { router } from 'expo-router';
+import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
+import { pendingClock } from '@/assets';
 
 const { height } = Dimensions.get('window')
 
@@ -141,7 +143,7 @@ const Request: React.FC = () => {
                                 <CreateTransaction nextPage={nextPage} title='Solicitar' showBalance={false} setInput={setInput} input={input} />
                             </HStack>
                             <TranferRequestDetails goBack={prevPage} goNext={nextPage} />
-                            <SingleTransaction key={"single-request-transaction-2"} />
+                            <SingleSentTransaction key={"single-request-transaction-2"}  iconImage={pendingClock}/>                            
                         </PagerView>
                     </BottomSheet>
                 </VStack>

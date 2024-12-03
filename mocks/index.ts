@@ -156,7 +156,7 @@ export const transactionStatus = (title: string) => {
         case "rejected":
             return "Rechazado"
         case "completed":
-            return "Completado"
+            return "Completada"
         case "paid":
             return "Pagado"
         case "cancelled":

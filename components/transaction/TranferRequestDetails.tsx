@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, Dimensions } from 'react-native'
@@ -16,6 +16,8 @@ import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import axios from 'axios';
+import { set } from 'date-fns';
 
 
 
@@ -42,9 +44,21 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
     const [recurrenceBiweeklyOptionSelected, setRecurrenceBiweeklyOptionSelected] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false)
     const [openOptions, setOpenOptions] = useState<string>("")
+    const [locationInfo, setLocationInfo] = useState<any>({})
 
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
 
+
+    const getLocationInfo = async ({ latitude, longitude }: { latitude: number, longitude: number }) => {
+        try {
+            const { data } = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+            setLocationInfo(data.address)
+            return data
+        } catch (error) {
+            console.error(error);
+            setLocationInfo({})
+        }
+    }
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
@@ -53,11 +67,11 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
                 transactionType: "request",
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
-                location: location ?? {},
+                location: Object.assign({}, location, locationInfo)
             })
 
             console.log(JSON.stringify(data, null, 2));
-        
+
             const { data: transaction } = await createRequestTransaction({
                 variables: { data, recurrence }
             })
@@ -71,13 +85,11 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
             await Promise.all([
                 dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),                
                 dispatch(transactionActions.setTransaction({
-                    id: transactionSent.id,
+                    ...transactionSent,
                     fullName: formatTransaction(transactionSent).fullName,
                     profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
                     username: formatTransaction(transactionSent).username,
                     isFromMe: formatTransaction(transactionSent).isFromMe,
-                    amount: formatTransaction(transactionSent).amount,
-                    createdAt: formatTransaction(transactionSent).createdAt
                 }))
             ])
 
@@ -90,12 +102,12 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
 
     const formatTransaction = (transaction: any) => {
         const isFromMe = transaction.from?.id === user.id
-
         const profileImageUrl = transaction.to?.profileImageUrl
         const fullName = isFromMe ? transaction.to?.fullName : transaction.from?.fullName
         const username = isFromMe ? transaction.from?.username : transaction.to?.username
 
         return {
+            ...transaction,
             isFromMe,
             createdAt: transaction.createdAt,
             profileImageUrl: profileImageUrl || "",
@@ -105,14 +117,6 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
         }
     }
 
-
-    const onRecurrenceChange = (value: string) => {
-        if (value === "biweekly")
-            setRecurrenceBiweeklyOptionSelected("Cada 1 y 16 de cada mes")
-
-        setOpenOptions(value)
-        setRecurrence(value)
-    }
 
     const handleOnPress = async () => {
         try {
@@ -138,6 +142,8 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
     const onCloseFinished = () => {
         setOpenOptions("")
     }
+
+
 
 
     const RenderWeeklyOption: React.FC = () => {
@@ -195,6 +201,11 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
             </VStack>
         )
     }
+
+
+    useEffect(() => {
+        getLocationInfo(location)
+    }, [])
 
     return (
         <SafeAreaView style={{ flex: 0.95, backgroundColor: colors.darkGray }}>

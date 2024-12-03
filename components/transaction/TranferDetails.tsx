@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Pressable, Stack, FlatList } from 'native-base'
+import { Heading, Image, Text, VStack, HStack, Pressable, FlatList } from 'native-base'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import Button from '@/components/global/Button';
@@ -16,6 +16,7 @@ import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useLocation } from '@/hooks/useLocation';
 
 
 
@@ -28,6 +29,7 @@ const { width, height } = Dimensions.get("screen")
 const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { } }) => {
     const dispatch = useDispatch();
 
+    const { getLocation } = useLocation();
     const { authenticate } = useLocalAuthentication();
     const { receiver, transactions } = useSelector((state: any) => state.transactionReducer)
     const { location, account, user } = useSelector((state: any) => state.globalReducer)
@@ -49,6 +51,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
 
+            await getLocation()
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
@@ -59,6 +62,8 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
                 variables: { data, recurrence }
             })
 
+            console.log(JSON.stringify(transaction.createTransaction, null, 2));
+            
             const transactionSent = {
                 ...transaction.createTransaction,
                 to: receiver,
@@ -93,6 +98,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
         const username = isFromMe ? transaction.from?.username : transaction.to?.username
 
         return {
+            ...transaction,
             isFromMe,
             profileImageUrl: profileImageUrl || "",
             amount: transaction.amount,

@@ -6,9 +6,9 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import PagerView from 'react-native-pager-view';
 import CreateTransaction from './CreateTransaction';
 import { router } from 'expo-router';
-import SingleTransaction from './SingleTransaction';
 import TransactionDetails from './TranferDetails';
 import { checked, pendingClock } from '@/assets';
+import SingleSentTransaction from './SingleSentTransaction';
 
 type Props = {
     open?: boolean
@@ -64,7 +64,7 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
                 <PagerView style={{ flex: 1 }} ref={ref} initialPage={currentPage}>
                     <CreateTransaction key={"transaction-create-0"} input={input} onCloseFinish={handleOnClose} setInput={setInput} nextPage={nextPage} />
                     <TransactionDetails key={"TransactionDetailsScreen-1"} goNext={nextPage} goBack={prevPage} />
-                    <SingleTransaction iconImage={pendingClock} key={"SingleTransactionScreen-2"} />
+                    <SingleSentTransaction key={"SingleTransactionScreen-2"} iconImage={checked} />
                 </PagerView>
             </SafeAreaView>
         </BottomSheet>
