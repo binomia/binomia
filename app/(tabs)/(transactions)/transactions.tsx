@@ -206,10 +206,21 @@ const TransactionsScreen: React.FC = () => {
 
 					const { data } = await refetchAccountTransactions({ page: page + 1, pageSize: 20 })
 
-					setPage(page + 1)
-					setTransactions([...transactions, ...data.accountTransactions])
-					setIsLoadingMore(false)
+					if (data.accountTransactions.length > 0) {
+						setPage(page + 1)
+						setTransactions([...transactions, ...data.accountTransactions])
+					}
+					
 
+
+
+
+
+
+
+					
+					setIsLoadingMore(false)
+					
 				} catch (error) {
 					console.log(error);
 				}
@@ -315,7 +326,7 @@ const TransactionsScreen: React.FC = () => {
 							</VStack>
 						)
 					}
-					{isLoadingMore ? <Spinner mt={"10px"} size={"lg"}/> : null}
+					{isLoadingMore ? <Spinner mt={"10px"} size={"lg"} /> : null}
 				</ScrollView>
 				<BottomSheet height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
 					<SingleSentTransaction iconImage={pendingClock} showPayButton={showPayButton} goNext={goNext} title={singleTransactionTitle} />
