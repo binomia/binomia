@@ -6,6 +6,13 @@ const type = () => {
         input TransactionLocationInput {
             latitude: Float
             longitude: Float
+            neighbourhood: String
+            road: String
+            town: String
+            county: String
+            state: String
+            postcode: String
+            country: String
         }  
 
         input TransactionInput {
@@ -15,6 +22,7 @@ const type = () => {
             currency: String
             location: TransactionLocationInput
         }
+            
         input TransactionRecurrenceInput {
             title: String
             time: String
@@ -51,6 +59,13 @@ const type = () => {
         type TransactionLocationType {
             latitude: Float
             longitude: Float
+            neighbourhood: String
+            road: String
+            town: String
+            county: String
+            state: String
+            postcode: String
+            country: String
         } 
 
         type TransactionCreatedType {

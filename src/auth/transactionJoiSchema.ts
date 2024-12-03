@@ -1,16 +1,27 @@
 import { z } from 'zod'
 
 export class TransactionJoiSchema {
+
+    static transactionLocation = z.object({
+        latitude: z.number().default(0).transform(v => v ?? 0),
+        longitude: z.number().default(0).transform(v => v ?? 0),
+        neighbourhood: z.string().nullish().transform(v => v ?? ""),
+        road: z.string().nullish().transform(v => v ?? ""),
+        town: z.string().nullish().transform(v => v ?? ""),
+        county: z.string().nullish().transform(v => v ?? ""),
+        state: z.string().nullish().transform(v => v ?? ""),
+        postcode: z.string().nullish().transform(v => v ?? ""),
+        country: z.string().nullish().transform(v => v ?? ""),
+    })
+
     static createTransaction = z.object({
         amount: z.number().gt(0),
         currency: z.enum(["DOP"]),
         receiver: z.string(),
         transactionType: z.enum(["transfer", "request"]),
-        location: z.object({
-            latitude: z.number(),
-            longitude: z.number()
-        })
+        location: TransactionJoiSchema.transactionLocation
     })
+
 
     static recurrenceTransaction = z.object({
         title: z.string(),
@@ -25,8 +36,8 @@ export class TransactionJoiSchema {
 
     static recurrenceQueueTransaction = TransactionJoiSchema.createTransaction.extend({
         id: z.number(),
-        transactionId: z.string(),  
-        sender: z.string()      
+        transactionId: z.string(),
+        sender: z.string()
     })
 
     static weeklyQueueTitle = z.enum(["everySunday", "everyMonday", "everyTuesday", "everyWednesday", "everyThursday", "everyFriday", "everySaturday"])
