@@ -1,9 +1,9 @@
-import React, { useCallback, useEffect, useState, Suspense, useContext, useRef } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
 import DefaultIcon from 'react-native-default-icon';
-import { StyleSheet, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity, RefreshControl } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView } from 'native-base'
+import { StyleSheet, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
+import { Heading, Image, Text, VStack, FlatList, HStack, Spinner, Pressable, ScrollView } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
@@ -41,7 +41,7 @@ const TransactionsScreen: React.FC = () => {
 	const isFocused = useNavigation().isFocused()
 
 	const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
-	const [accountTransactions] = useLazyQuery(TransactionApolloQueries.accountTransactions())
+	const [accountTransactions, { refetch: refetchAccountTransactions }] = useLazyQuery(TransactionApolloQueries.accountTransactions())
 	const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
 
 	const [singleTransactionTitle, setSingleTransactionTitle] = useState<string>("Ver Detalles");
@@ -53,7 +53,9 @@ const TransactionsScreen: React.FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [needRefresh, setNeedRefresh] = useState<boolean>(false);
 	const [showPayButton, setShowPayButton] = useState<boolean>(false);
-	const [initialPage, setInitialPage] = useState<number>(0);
+	const [page, setPage] = useState<number>(0);
+	const [isBottom, setIsBottom] = useState(false);
+	const [isLoadingMore, setIsLoadingMore] = useState(false);
 
 	const handleSearch = async (value: string) => {
 		try {
@@ -87,12 +89,12 @@ const TransactionsScreen: React.FC = () => {
 		setUsers(_users)
 	}
 
-	const fetchAccountTransactions = async () => {
+	const fetchAccountTransactions = async (page: number = 1, pageSize: number = 20) => {
 		try {
 			const { data } = await accountTransactions({
 				variables: {
-					"page": 1,
-					"pageSize": 10
+					"page": page,
+					"pageSize": pageSize
 				}
 			})
 
@@ -111,11 +113,10 @@ const TransactionsScreen: React.FC = () => {
 
 	const onSelectTransaction = async (transaction: any) => {
 		console.log(transaction);
-		
+
 
 		await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...formatTransaction(transaction) })))
-		
-		setInitialPage(formatTransaction(transaction).showPayButton ? 0 : transaction.status === "cancelled" ? 2 : transaction.status === "pending" ? 3 : 1)
+
 		setShowPayButton(formatTransaction(transaction).showPayButton)
 		setShowSingleTransaction(true)
 		setSingleTransactionTitle(formatTransaction(transaction).showPayButton ? "Pagar" : "Ver Detalles")
@@ -172,6 +173,13 @@ const TransactionsScreen: React.FC = () => {
 		ref.current?.setPage(next)
 	}
 
+	const onScroll = ({ nativeEvent }: NativeSyntheticEvent<NativeScrollEvent>) => {
+		const { contentOffset, layoutMeasurement, contentSize } = nativeEvent;
+		const isAtBottom = layoutMeasurement.height + contentOffset.y >= contentSize.height - 20; // Adjust the threshold as needed
+
+		setIsBottom(isAtBottom);
+	}
+
 
 	useEffect(() => {
 		(async () => {
@@ -190,6 +198,26 @@ const TransactionsScreen: React.FC = () => {
 		fetchAccountTransactions()
 	}, [])
 
+	useEffect(() => {
+		(async () => {
+			if (isBottom) {
+				try {
+					setIsLoadingMore(true)
+
+					const { data } = await refetchAccountTransactions({ page: page + 1, pageSize: 20 })
+
+					setPage(page + 1)
+					setTransactions([...transactions, ...data.accountTransactions])
+					setIsLoadingMore(false)
+
+				} catch (error) {
+					console.log(error);
+				}
+			}
+		})()
+
+	}, [isBottom])
+
 	return (
 		isLoading ? <TransactionSkeleton /> : (
 			<VStack flex={1} pt={"20px"} bg={colors.darkGray}>
@@ -198,7 +226,7 @@ const TransactionsScreen: React.FC = () => {
 						<Input h={"50px"} w={"100%"} placeholder='Buscar...' onChangeText={(value) => handleSearch(value.toLowerCase())} />
 					</TouchableWithoutFeedback >
 				</VStack>
-				<ScrollView flex={1} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
+				<ScrollView onScroll={onScroll} flex={1} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
 					<HStack px={"20px"} style={styles.ScrollView} >
 						<FlatList
 							h={"100%"}
@@ -275,6 +303,7 @@ const TransactionsScreen: React.FC = () => {
 									</TouchableOpacity>
 								)}
 							/>
+
 						</VStack>
 						: (
 							<VStack mt={"20px"} key={`transations-screen-no-transactions-${Date.now()}`} w={"100%"} h={height / 3} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
@@ -286,8 +315,9 @@ const TransactionsScreen: React.FC = () => {
 							</VStack>
 						)
 					}
+					{isLoadingMore ? <Spinner mt={"10px"} size={"lg"}/> : null}
 				</ScrollView>
-				<BottomSheet  height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
+				<BottomSheet height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
 					<SingleSentTransaction iconImage={pendingClock} showPayButton={showPayButton} goNext={goNext} title={singleTransactionTitle} />
 					{/* <SingleTransactionScreen showPayButton={showPayButton} goNext={goNext} title={singleTransactionTitle} /> */}
 					{/* <PagerView initialPage={initialPage} scrollEnabled={false} style={{ flex: 1 }} ref={ref}>

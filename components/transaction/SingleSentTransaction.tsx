@@ -244,7 +244,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconIm
 							<Ionicons name="help" size={22} color={colors.mainGreen} />
 						</HStack>
 						<Text textAlign={"center"} w={"85%"} fontSize={scale(15)} color={colors.pureGray}>
-							Asegúrate de transferir dinero únicamente a personas de confianza, para poder garantizar tu seguridad.
+							Gestiona tu dinero únicamente con personas de confianza, asi garantizas tu seguridad.
 						</Text>
 					</VStack>
 			}
