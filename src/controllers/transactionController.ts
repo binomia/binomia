@@ -77,7 +77,15 @@ export class TransactionsController {
                 ZERO_SIGN_PRIVATE_KEY,
             }))
 
-            console.log({ hash });
+            if (senderAccount.toJSON().balance < validatedData.amount)
+                throw new GraphQLError("insufficient balance");
+
+            if (!senderAccount.toJSON().allowSend)
+                throw new GraphQLError("sender account is not allowed to send money");
+
+
+            if (!receiverAccount.toJSON().allowReceive)
+                throw new GraphQLError("receiver account is not allowed to receive money");
 
 
             const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
@@ -208,6 +216,9 @@ export class TransactionsController {
                 throw new GraphQLError("receiver account not found");
 
 
+            if (!senderAccount.toJSON().allowRequestMe)
+                throw new GraphQLError(`${receiverAccount.toJSON().username} account does not receive request payment`);
+
             const message = `${receiverAccount.toJSON().username}&${senderAccount.toJSON().username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
             const signature = await Cryptography.sign(message, ZERO_SIGN_PRIVATE_KEY)
 
@@ -280,9 +291,6 @@ export class TransactionsController {
         try {
             const session = await checkForProtectedRequests(context.req);
 
-            console.log(JSON.stringify(session.user.account, null, 2));
-            
-
             const transaction = await TransactionsModel.findOne({
                 where: {
                     [Op.and]: [
@@ -336,6 +344,8 @@ export class TransactionsController {
             if (!senderAccount)
                 throw new GraphQLError("sender account not found");
 
+
+
             const receiverAccount = await AccountModel.findOne({
                 where: {
                     id: transaction.toJSON().fromAccount
@@ -360,6 +370,16 @@ export class TransactionsController {
 
 
             if (!paymentApproved) {
+                if (senderAccount.toJSON().balance < transaction.toJSON().amount)
+                    throw new GraphQLError("insufficient balance");
+
+                if (!senderAccount.toJSON().allowSend)
+                    throw new GraphQLError("sender account is not allowed to send money");
+
+
+                if (!receiverAccount.toJSON().allowReceive)
+                    throw new GraphQLError("receiver account is not allowed to receive money");
+
                 await transaction.update({
                     status: "cancelled"
                 })
@@ -464,12 +484,21 @@ export class TransactionsController {
                 withdraw: session.user.account.balance - validatedData.amount
             }
 
-            await AccountModel.update({
-                balance: newBalance[validatedData.transactionType]
-            }, {
+            const account = await AccountModel.findOne({
                 where: {
                     id: session.user.account.id
                 }
+            })
+
+            if (!account)
+                throw new GraphQLError("account not found");
+
+            if (!account.toJSON().allowDeposit)
+                throw new GraphQLError("account is not allowed to deposit");
+
+
+            await account.update({
+                balance: newBalance[validatedData.transactionType]
             })
 
             await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.BANKING_TRANSACTION_CREATED, JSON.stringify(transaction.toJSON()))

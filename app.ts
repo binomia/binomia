@@ -42,7 +42,7 @@ import { startStandaloneServer } from '@apollo/server/standalone';
 
         const { url } = await startStandaloneServer(server, {
             listen: { port: Number(PORT) },
-            context: async ({ req, res }: { req: any, res: any }) => {
+            context: async ({ req, res }: { req: any, res: any }) => {                
                 return { req, res }
             }
         });
