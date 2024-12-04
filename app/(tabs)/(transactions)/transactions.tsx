@@ -211,14 +211,6 @@ const TransactionsScreen: React.FC = () => {
 						setTransactions([...transactions, ...data.accountTransactions])
 					}
 					
-
-
-
-
-
-
-
-					
 					setIsLoadingMore(false)
 					
 				} catch (error) {

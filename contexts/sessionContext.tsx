@@ -15,6 +15,7 @@ import { useLocation } from "@/hooks/useLocation";
 import { TransactionApolloQueries } from "@/apollo/query/transactionQuery";
 import { transactionActions } from "@/redux/slices/transactionSlice";
 import { AccountAuthSchema } from "@/auth/accountAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -51,6 +52,8 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const [getSessionUser] = useLazyQuery(UserApolloQueries.sessionUser());
     const [accountTransactions] = useLazyQuery(TransactionApolloQueries.accountTransactions())
 
+    const { registerForPushNotificationsAsync } = useNotifications()
+
 
     const fetchSessionUser = async () => {
         try {
@@ -61,8 +64,6 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             const accountsData = await AccountAuthSchema.account.parseAsync(user.data.sessionUser.account)
             const cardsData = await UserAuthSchema.cardsData.parseAsync(user.data.sessionUser.cards)
             const primaryCard = cardsData.find((card: any) => card.isPrimary === true)
-
-
 
             await Promise.all([
                 dispatch(globalActions.setUser(userProfileData ?? {})),
@@ -112,6 +113,11 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
     const onLogin = async ({ email, password }: { email: string, password: string }): Promise<any> => {
         try {
+            const expoNotificationToken = await registerForPushNotificationsAsync()
+
+            console.log({ expoNotificationToken });
+
+
             const { data } = await login({
                 variables: { email, password },
                 context: {
@@ -119,6 +125,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                         device: JSON.stringify({ ...state.device, network: state.network, location: state.location }),
                         "session-auth-identifier": state.applicationId,
                         "authorization": state.applicationId,
+                        expoNotificationToken: expoNotificationToken || "",
                     }
                 }
             });

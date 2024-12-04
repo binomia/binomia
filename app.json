@@ -22,6 +22,8 @@
       }
     },
     "android": {
+      "package": "com.binomia.com",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000"
@@ -36,8 +38,7 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_BACKGROUND_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION"
-      ],
-      "package": "com.dinero.com"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -50,6 +51,17 @@
     "owner": "brayhandeaza",
     "plugins": [
       "react-native-document-scanner-plugin",
+      [
+        "expo-notifications",
+        {
+          "icon": "./local/assets/notification_icon.png",
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "sounds": [
+            "./assets/audio/money.wav"
+          ]      
+        }
+      ],
       [
         "expo-contacts",
         {

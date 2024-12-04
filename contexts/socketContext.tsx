@@ -9,12 +9,15 @@ import { globalActions } from "@/redux/slices/globalSlice";
 import { transactionActions } from "@/redux/slices/transactionSlice";
 import { useLazyQuery } from "@apollo/client";
 import { AccountApolloQueries } from "@/apollo/query";
+import { useNotifications } from "@/hooks/useNotifications";
 
 
 export const SocketContext = createContext({});
 
 export const SocketContextProvider = ({ children }: { children: JSX.Element }) => {
     const [getAccount] = useLazyQuery(AccountApolloQueries.account());
+    const { expoPushToken, notification } = useNotifications();
+
 
 
     const { getItem } = useAsyncStorage()
@@ -31,7 +34,6 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
     }, []);
 
     useEffect(() => {
-
         getItem("jwt").then(async (jwt) => {
             if (!jwt) return
 

@@ -26,7 +26,6 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [showCloseButton, setShowCloseButton] = useState<boolean>(globalContextInitialState.showCloseButton);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
-
     const { getItem, setItem } = useAsyncStorage();
     const { getContacts, getContact } = useContacts();
 
@@ -81,7 +80,11 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
 
     useEffect(() => {
         (async () => {
-            const contact = await getContact("+18297809087")
+            // const contact = await getContact("+18297809087")
+
+            // console.log(JSON.stringify({ expoPushToken, notification }, null, 2));
+            
+
         })();
     }, []);
 

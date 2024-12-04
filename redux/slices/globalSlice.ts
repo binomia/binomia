@@ -13,6 +13,7 @@ const globalSlice = createSlice({
         kyc: {},
         user: {},
         applicationId: "",
+        expoNotificationToken: "",
         jwt: "",
         allowFaceId: true,
         whatsappNotifications: true,
@@ -36,6 +37,9 @@ const globalSlice = createSlice({
         }
     },
     reducers: {
+        setExpoNotificationToken: (state, action) => {
+            state.expoNotificationToken = action.payload
+        },
         setCard: (state, action) => {
             state.card = action.payload
         },

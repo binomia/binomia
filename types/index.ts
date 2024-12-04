@@ -2,6 +2,8 @@ import { AccountAuthSchema } from "@/auth/accountAuth";
 import { TransactionAuthSchema } from "@/auth/transactionAuth";
 import { UserAuthSchema } from "@/auth/userAuth"
 import z from "zod";
+import * as Notifications from 'expo-notifications';
+
 
 export type SessionContextType = {
     children: JSX.Element
@@ -126,6 +128,12 @@ export type SocketContextType = {
     on: (event: string, callback: (data: any) => void) => void
 }
 
+
+export type PushNotificationType = {
+    notification?: Notifications.Notification
+    expoPushToken?: string
+    registerForPushNotificationsAsync: () => Promise<string | undefined>
+}
 
 
 export type WeeklyQueueTitleType = z.infer<typeof TransactionAuthSchema.weeklyQueueTitle>
