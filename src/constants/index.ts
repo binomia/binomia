@@ -1,3 +1,5 @@
+import { GlobalZodSchema } from "@/auth/globalZodSchema";
+
 export const NODEMAILER_EMAIL: string = process.env.NODEMAILER_EMAIL || "";
 export const NODEMAILER_PASSWORD: string = process.env.NODEMAILER_PASSWORD || "";
 export const ZERO_ENCRYPTION_KEY: string = process.env.ZERO_ENCRYPTION_KEY || "";
@@ -13,3 +15,7 @@ export const REDIS_SUBSCRIPTION_CHANNEL = {
     LOGIN_VERIFICATION_CODE: "LOGIN_VERIFICATION_CODE",
     TRANSACTION_CREATED_FROM_QUEUE: "TRANSACTION_CREATED_FROM_QUEUE"
 }
+
+
+export const evironmentVariables = GlobalZodSchema.evironmentVariables.parse(process.env)
+ 

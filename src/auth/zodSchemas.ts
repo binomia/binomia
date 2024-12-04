@@ -21,8 +21,7 @@ const echo = z.object({
 });
 
 
-
-const validateSchema = async (data: any) => {
+export const validateSchema = async (data: any) => {
     try {
         if (data.method === "echo") {
             const response = echo.strict().parse(data);
@@ -48,6 +47,3 @@ const validateSchema = async (data: any) => {
     }
 }
 
-export {
-    validateSchema
-}

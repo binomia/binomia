@@ -1,5 +1,6 @@
 import { REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
 import Email from "@/email";
+import { sendNotification } from "@/expo";
 import Redis from "ioredis";
 import { Server } from "socket.io";
 
@@ -21,6 +22,8 @@ export const initRedisEventSubcription = (io: Server) => {
             case REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED: {
                 const { data, recipientSocketRoom } = JSON.parse(payload)
                 io.to(recipientSocketRoom).emit(channel, data)
+                await sendNotification()
+                
                 break;
             }
             case REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_PAIED: {
