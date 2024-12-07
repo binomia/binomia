@@ -145,12 +145,6 @@ const Transaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage, showP
         return colors.mainGreen
     }
 
-    useEffect(() => {
-        console.log({ location });
-
-    }, [location])
-
-
     return (
         <VStack variant={"body"} bg={colors.darkGray} >
             <VStack pt={"40px"}>

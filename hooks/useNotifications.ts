@@ -55,8 +55,6 @@ export const useNotifications = (): PushNotificationType => {
                     projectId,
                 })).data
 
-                console.log(token);
-
                 setExpoPushToken(token)
             } catch (e) {
                 token = `${e}`;
@@ -78,7 +76,7 @@ export const useNotifications = (): PushNotificationType => {
             });
 
             responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-                console.log(response);
+                // console.log(response);
             });
 
             return () => {

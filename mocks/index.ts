@@ -115,21 +115,21 @@ export const privacyScreenData = (account: any) => [
     {
         name: "Solicitarme Dinero",
         icon: askingForMoneyIcon,
-        allow: account.allowAsk,
-        id: "allowAsk"
+        allow: account.allowRequestMe,
+        id: "allowRequestMe"
     },
     {
         name: "Retirar Dinero",
         icon: withdrawIcon,
-        allow: account.allowAsk,
+        allow: account.allowWithdraw,
         id: "allowWithdraw"
     },
     {
         name: "Depositar Dinero",
         icon: depositIcon,
-        allow: account.allowAsk,
+        allow: account.allowDeposit,
         id: "allowDeposit"
-    },
+    }
 ]
 
 export const limitsScreenData = (limits: AccountLimitsType, account: AccountType) => [
@@ -155,9 +155,7 @@ export const limitsScreenData = (limits: AccountLimitsType, account: AccountType
     }
 ]
 
-export const transactionStatus = (title: string) => {
-    console.log(title);
-    
+export const transactionStatus = (title: string) => {    
     switch (title) {
         case "pending":
             return "Pendiente"

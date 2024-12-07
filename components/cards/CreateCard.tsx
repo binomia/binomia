@@ -118,9 +118,6 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose 
                 }
             })
 
-            console.log({ fetchDecryptedCard: data });
-
-
             if (data?.card) {
                 setName(data.card.cardHolderName)
                 setNumber(data.card.cardNumber)
@@ -167,16 +164,12 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose 
     }
 
     useEffect(() => {
-        console.log({ isValidCard, disabledButton: !Boolean(name && number && isValidCard) });
-
         setDisabledButton(!Boolean(name && alias && isValidCard))
 
     }, [alias, name, isValidCard])
 
 
     useEffect(() => {
-        console.log({ openToEdit });
-
         if (openToEdit)
             fetchDecryptedCard()
     }, [openToEdit])

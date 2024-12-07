@@ -1,5 +1,5 @@
 import { StyleSheet, } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { Image, VStack, Text, HStack, Divider, FlatList, Switch } from 'native-base'
 import { faceIdIcon } from '@/assets'
 import { useDispatch, useSelector } from 'react-redux'
@@ -15,7 +15,7 @@ const PrivacyScreen: React.FC = () => {
     const { allowFaceId, account } = useSelector((state: any) => state.globalReducer)
     const [updateAccountPermissions] = useMutation(AccountApolloQueries.updateAccountPermissions())
 
-    const onSwitchChange = async (id: string, allow: boolean) => {
+    const onSwitchChange = async (id: string, allow: boolean) => {        
         try {
             if (id === "allowFaceId") {
                 await dispatch(globalActions.setAllowFaceId(allow))
@@ -29,9 +29,6 @@ const PrivacyScreen: React.FC = () => {
                     }
                 })
 
-                console.log({ id });
-
-
                 await dispatch(globalActions.setAccount(data.updateAccountPermissions))
             }
 
@@ -39,6 +36,8 @@ const PrivacyScreen: React.FC = () => {
             console.error(error);
         }
     }
+
+    
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
@@ -71,7 +70,7 @@ const PrivacyScreen: React.FC = () => {
                                     <HStack h={"30px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
                                         <Text numberOfLines={3} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
                                     </HStack>
-                                    <Switch isChecked={item.allow} defaultIsChecked onChange={(e) => onSwitchChange(item.id, !item.allow)} mr={"10px"} />
+                                    <Switch isChecked={item.allow} onChange={(e) => onSwitchChange(item.id, !item.allow)} mr={"10px"} />
                                 </HStack>
                                 {index !== 4 ? <Divider mt={"7px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
                             </VStack>

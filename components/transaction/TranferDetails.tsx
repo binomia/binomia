@@ -61,8 +61,6 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             const { data: transaction } = await createTransaction({
                 variables: { data, recurrence }
             })
-
-            console.log(JSON.stringify(transaction.createTransaction, null, 2));
             
             const transactionSent = {
                 ...transaction.createTransaction,

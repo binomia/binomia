@@ -70,8 +70,6 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
                 location: Object.assign({}, location, locationInfo)
             })
 
-            console.log(JSON.stringify(data, null, 2));
-
             const { data: transaction } = await createRequestTransaction({
                 variables: { data, recurrence }
             })

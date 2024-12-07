@@ -54,17 +54,6 @@ const HomeScreen: React.FC = () => {
 
 
 	useEffect(() => {
-		// 	socket.on(SOCKET_EVENTS.TRANSACTION_CREATED, async (data: any) => {
-		// 		dispatch(globalActions.setAccount(data.to))
-		// 	})
-
-		// socket.on(SOCKET_EVENTS.TRANSACTION_CREATED_FROM_QUEUE, async (data: any) => {
-		// 	// dispatch(globalActions.setAccount(data.from))
-		// 	console.log({ account });
-		// })
-	}, [])
-
-	useEffect(() => {
 		(async () => {
 			if (Object.keys(account).length > 0) {
 				await delay(1000)

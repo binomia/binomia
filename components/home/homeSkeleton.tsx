@@ -22,7 +22,7 @@ const HomeSkeleton: React.FC<Props> = ({ }) => {
             <Skeleton.Text lines={1} fadeDuration={0.5} py={"10px"} mt={"30px"} w={"50%"} rounded={"full"} startColor={colors.lightGray} />
             <HStack space={2} w={"100%"}>
                 {new Array(4).fill(0).map((_, index) => (
-                    <ZStack alignItems={"center"} w={"49%"} h={scale(125)}>
+                    <ZStack key={`${index}-skeleton-0`} alignItems={"center"} w={"49%"} h={scale(125)}>
                         <Skeleton mr={"10px"} fadeDuration={0.1} w={"100%"} h={"100%"} rounded={"10px"} startColor={colors.lightGray} />
                         <VStack space={2} alignItems={"center"} justifyContent={"center"} w={"100%"} h={"100%"} rounded={"10px"}>
                             <Skeleton fadeDuration={0.3} w={scale(60)} h={scale(60)} rounded={"full"} startColor={colors.lightGray} />
@@ -33,7 +33,7 @@ const HomeSkeleton: React.FC<Props> = ({ }) => {
             </HStack>
             <HStack space={2} w={"100%"}>
                 {new Array(4).fill(0).map((_, index) => (
-                    <ZStack alignItems={"center"} w={"49%"} h={scale(125)}>
+                    <ZStack key={`${index}-skeleton-1`} alignItems={"center"} w={"49%"} h={scale(125)}>
                         <Skeleton mr={"10px"} fadeDuration={0.1} w={"100%"} h={"100%"} rounded={"10px"} startColor={colors.lightGray} />
                         <VStack space={2} alignItems={"center"} justifyContent={"center"} w={"100%"} h={"100%"} rounded={"10px"}>
                             <Skeleton fadeDuration={0.3} w={scale(60)} h={scale(60)} rounded={"full"} startColor={colors.lightGray} />

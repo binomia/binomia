@@ -63,7 +63,6 @@ const SearchUserScreen: React.FC = () => {
     const onSelectUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>) => {
         await dispatch(transactionActions.setReceiver(user))
         setShowSendTransaction(true)
-        // router.navigate("tranfer")
     }
 
     useEffect(() => {

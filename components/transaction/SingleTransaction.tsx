@@ -144,12 +144,6 @@ const SingleTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage,
 		return colors.mainGreen
 	}
 
-	useEffect(() => {
-		console.log({ location });
-
-	}, [location])
-
-
 	return (
 		<VStack h={"100%"}>
 			<ScrollView h={"100%"} flex={1} p={"20px"}>

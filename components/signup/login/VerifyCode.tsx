@@ -41,6 +41,7 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
             setLoading(true)
             nextPage()
             setLoading(false)
+            
         } catch (error) {
             console.log({ onPressNext: error });
         }

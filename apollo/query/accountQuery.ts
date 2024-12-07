@@ -1,6 +1,20 @@
 import { gql } from "@apollo/client"
 
 export class AccountApolloQueries {
+    static accountPermissions = () => {
+        return gql`
+            query AccountPermissions {
+                accountPermissions {
+                    allowReceive
+                    allowWithdraw
+                    allowSend
+                    allowRequestMe
+                    allowDeposit
+                }
+            }
+        `
+    }
+
     static updateAccountPermissions = () => {
         return gql`
             mutation UpdateAccountPermissions($data: AccountPermissionsInput) {
@@ -25,6 +39,7 @@ export class AccountApolloQueries {
             }
         `
     }
+
     static account = () => {
         return gql`
             query Account {

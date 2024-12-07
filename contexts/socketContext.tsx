@@ -9,14 +9,12 @@ import { globalActions } from "@/redux/slices/globalSlice";
 import { transactionActions } from "@/redux/slices/transactionSlice";
 import { useLazyQuery } from "@apollo/client";
 import { AccountApolloQueries } from "@/apollo/query";
-import { useNotifications } from "@/hooks/useNotifications";
 
 
 export const SocketContext = createContext({});
 
 export const SocketContextProvider = ({ children }: { children: JSX.Element }) => {
     const [getAccount] = useLazyQuery(AccountApolloQueries.account());
-    const { expoPushToken, notification } = useNotifications();
 
 
 
@@ -54,8 +52,6 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                 })
 
                 socket.on(SOCKET_EVENTS.TRANSACTION_REQUEST_PAIED, async (transaction: any) => {
-                    console.log({ transaction });
-
                     await Promise.all([
                         dispatch(globalActions.setAccount(transaction.from)),
                         dispatch(globalActions.setHaveAccountChanged(false)),
@@ -66,8 +62,6 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                 socket.on(SOCKET_EVENTS.TRANSACTION_CREATED_FROM_QUEUE, async (data: any) => {
                     dispatch(globalActions.setAccount(data.from))
                 })
-
-                console.log("connected");
             })
 
             return () => {

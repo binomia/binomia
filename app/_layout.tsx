@@ -17,8 +17,8 @@ import { LogBox, View } from 'react-native';
 import { useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
 import { SocketContextProvider } from '@/contexts/socketContext';
 
-
-LogBox.ignoreAllLogs();
+LogBox.ignoreAllLogs(true);
+LogBox.ignoreLogs(['In React 18']);
 SplashScreen.preventAutoHideAsync();
 
 export default () => {
@@ -63,10 +63,9 @@ export default () => {
 	}
 
 	return (
-		// <SQLiteProvider databaseName={DATABASE_NAME}>
-		<Provider store={store}>
-			<ApolloProvider client={apolloClient}>
-				<NativeBaseProvider theme={theme}>
+		<NativeBaseProvider theme={theme}>
+			<Provider store={store}>
+				<ApolloProvider client={apolloClient}>
 					<SessionContextProvider>
 						<GlobalContextProvider>
 							<SocketContextProvider>
@@ -74,16 +73,15 @@ export default () => {
 									<Stack>
 										<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
 										<Stack.Screen name="(signup)" options={{ headerShown: false }} />
-										<Stack.Screen name="(modals)" options={{ headerShown: false, headerBackVisible: false, gestureEnabled: true, presentation: "card"}} />
+										<Stack.Screen name="(modals)" options={{ headerShown: false, headerBackVisible: false, gestureEnabled: true, presentation: "card" }} />
 										<Stack.Screen name="+not-found" />
 									</Stack>
 								</View>
 							</SocketContextProvider>
 						</GlobalContextProvider>
 					</SessionContextProvider>
-				</NativeBaseProvider>
-			</ApolloProvider>
-		</Provider >
-		// </SQLiteProvider>
+				</ApolloProvider>
+			</Provider >
+		</NativeBaseProvider>
 	);
 }

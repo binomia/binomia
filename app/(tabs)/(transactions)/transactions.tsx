@@ -112,9 +112,6 @@ const TransactionsScreen: React.FC = () => {
 	}
 
 	const onSelectTransaction = async (transaction: any) => {
-		console.log(transaction);
-
-
 		await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...formatTransaction(transaction) })))
 
 		setShowPayButton(formatTransaction(transaction).showPayButton)

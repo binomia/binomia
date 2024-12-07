@@ -32,4 +32,11 @@ export class AccountAuthSchema {
         depositAmount: z.number().nullable().transform((v) => v ?? 0),
         withdrawAmount: z.number().nullable().transform((v) => v ?? 0),
     })
+
+    static accountPermissions = z.object({
+        allowWithdraw: z.boolean().nullable().transform(v => v ?? true),
+        allowSend: z.boolean().nullable().transform(v => v ?? true),
+        allowReceive: z.boolean().nullable().transform(v => v ?? true),
+        allowRequestMe: z.boolean().nullable().transform(v => v ?? true),
+    }).default({ allowWithdraw: true, allowSend: true, allowReceive: true, allowRequestMe: true })
 }
