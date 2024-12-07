@@ -15,7 +15,7 @@ const PrivacyScreen: React.FC = () => {
     const { allowFaceId, account } = useSelector((state: any) => state.globalReducer)
     const [updateAccountPermissions] = useMutation(AccountApolloQueries.updateAccountPermissions())
 
-    const onSwitchChange = async (id: string, allow: boolean) => {        
+    const onSwitchChange = async (id: string, allow: boolean) => {
         try {
             if (id === "allowFaceId") {
                 await dispatch(globalActions.setAllowFaceId(allow))
@@ -37,7 +37,7 @@ const PrivacyScreen: React.FC = () => {
         }
     }
 
-    
+
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
@@ -53,29 +53,22 @@ const PrivacyScreen: React.FC = () => {
                         <Switch isChecked={allowFaceId} onChange={() => onSwitchChange("allowFaceId", !allowFaceId)} mr={"10px"} />
                     </HStack>
                 </HStack>
-                <FlatList
-                    bg={"lightGray"}
-                    borderRadius={10}
-                    pb={"3px"}
-                    data={privacyScreenData(account)}
-                    scrollEnabled={false}
-                    keyExtractor={(index) => index.toString()}
-                    renderItem={({ item, index }) => (
-                        <HStack key={`privacies-${index}-${item.name}`} bg={"lightGray"} w={"100%"} borderRadius={10} h={"50px"} py={"10px"} space={2} pl={"10px"} >
-                            <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
-                                <Image alt='logo-image' resizeMode='contain' tintColor={colors.white} w={"18px"} h={"18px"} source={item.icon} />
-                            </HStack>
-                            <VStack flex={1}>
-                                <HStack justifyContent={"space-between"} alignItems={"center"}>
-                                    <HStack h={"30px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
-                                        <Text numberOfLines={3} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
-                                    </HStack>
-                                    <Switch isChecked={item.allow} onChange={(e) => onSwitchChange(item.id, !item.allow)} mr={"10px"} />
-                                </HStack>
-                                {index !== 4 ? <Divider mt={"7px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
-                            </VStack>
+                {privacyScreenData(account).map((permit, index) => (
+                    <HStack key={`privacies-${index}-${permit.id}${permit.name}`} bg={"lightGray"} w={"100%"} borderRadius={10} h={"50px"} py={"10px"} space={2} pl={"10px"} >
+                        <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
+                            <Image alt='logo-image' resizeMode='contain' tintColor={colors.white} w={"18px"} h={"18px"} source={permit.icon} />
                         </HStack>
-                    )} />
+                        <VStack flex={1}>
+                            <HStack justifyContent={"space-between"} alignItems={"center"}>
+                                <HStack h={"30px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
+                                    <Text numberOfLines={3} fontSize={scale(15)} color={colors.white}>{permit.name}</Text>
+                                </HStack>
+                                <Switch isChecked={permit.allow} onChange={(e) => onSwitchChange(permit.id, !permit.allow)} mr={"10px"} />
+                            </HStack>
+                            {index !== 4 ? <Divider mt={"7px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
+                        </VStack>
+                    </HStack>
+                ))}
             </VStack>
         </VStack>
     )

@@ -312,15 +312,19 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                         </VStack>
                     </ScrollView>
                 ) : (
-                    <VStack w={"100%"} h={"100%"} px={"20px"} justifyContent={"center"}>
-                        <Image resizeMode="contain" alt='logo-image' w={width} h={width / 2} source={noTransactions} />
-                        <VStack alignItems={"center"}>
-                            <Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
-                            <Text textAlign={"center"} fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
+                    <VStack w={"100%"} h={"100%"} px={"20px"}>
+                        <Heading fontSize={scale(20)} mt={"30px"} fontWeight={"500"} color={"white"}>Transacciones</Heading>
+
+                        <VStack h={"70%"} justifyContent={"center"}>
+                            <Image resizeMode="contain" alt='logo-image' w={width} h={width / 2} source={noTransactions} />
+                            <VStack alignItems={"center"}>
+                                <Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
+                                <Text textAlign={"center"} fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
+                            </VStack>
+                            <Pressable onPress={onPressNewTransaction} mt={"20px"} _pressed={{ opacity: 0.5 }} justifyContent={"center"} alignItems={"center"} >
+                                <Ionicons name="add-circle" style={{ fontSize: scale(70) }} color={colors.mainGreen} />
+                            </Pressable>
                         </VStack>
-                        <Pressable onPress={onPressNewTransaction} mt={"20px"} _pressed={{ opacity: 0.5 }} justifyContent={"center"} alignItems={"center"} >
-                            <Ionicons name="add-circle" style={{ fontSize: scale(70) }} color={colors.mainGreen} />
-                        </Pressable>
                     </VStack>
                 )}
 
