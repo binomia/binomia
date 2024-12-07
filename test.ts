@@ -1,8 +1,22 @@
-import { nextTuesday } from "date-fns";
-import moment from "moment";
-
-const date = new Date().setHours(0, 1, 1, 1);
-const nextDate = nextTuesday(date)
+import { z } from "zod"
 
 
-console.log(moment(nextDate).format("llll"));
+
+
+
+(async () => {
+    const deviceSchema = z.object({
+        isDevice: z.boolean().nullish().transform((v) => v ?? false),
+        deviceBrand: z.string().nullish().transform((v) => v ?? ""),
+        deviceName: z.string().nullish().transform((v) => v ?? ""),
+        deviceModelName: z.string().nullish().transform((v) => v ?? ""),
+        deviceOsName: z.string().nullish().transform((v) => v ?? ""),
+        deviceOsVersion: z.string().nullish().transform((v) => v ?? ""),
+    })
+
+    const device = await deviceSchema.parseAsync({})
+
+    console.log(device);
+
+
+})()

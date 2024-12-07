@@ -2,8 +2,9 @@ import { TransactionJoiSchema } from "@/auth/transactionJoiSchema"
 import { QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants"
 import { Cryptography } from "@/helpers/cryptography"
 import { AccountModel, TransactionsModel, UsersModel } from "@/models"
-import redis from "@/redis"
+import { redis } from "@/redis"
 import { CreateTransactionType } from "@/types"
+import { Job } from "bullmq"
 
 export default class TransactionController {
     static createTransaction = async (data: CreateTransactionType) => {
@@ -106,6 +107,30 @@ export default class TransactionController {
             ])
 
             return transactionData.toJSON()
+
+        } catch (error: any) {
+            throw error.message
+        }
+    }
+
+    static updateTransactionStatus = async (job: Job) => {
+        try {
+            const decryptedData = await Cryptography.decrypt(job.data)
+            const { transactionId } = JSON.parse(decryptedData)
+
+            const transaction = await TransactionsModel.findOne({
+                where: { transactionId }
+            })
+
+            if (!transaction)
+                throw "transaction not found";
+
+            if (transaction.toJSON().status !== "completed") {
+                const updatedTransaction = await transaction.update({ status: "completed" })
+                return updatedTransaction.toJSON()
+            }
+
+            return transaction.toJSON()
 
         } catch (error: any) {
             throw error.message

@@ -1,7 +1,7 @@
 import { Job, JobJson, Queue, Worker } from "bullmq";
 import { WeeklyQueueTitleType } from "@/types";
 import { getNextDay } from "@/helpers";
-import { RecurrenceTransactionsController } from "@/controllers/recurrenceTransactionsController";
+import { QueueTransactionsController } from "@/controllers/queueTransactionsController";
 import shortUUID from "short-uuid";
 
 
@@ -13,41 +13,20 @@ export default class TransactionsQueue {
         this.workers()
     }
 
-    createJobs = async ({ jobId, jobName, jobTime, amount, receiverId, senderId, data }: { jobId: string, amount: number, jobName: string, jobTime: WeeklyQueueTitleType, senderId: number, receiverId: number, data: string }) => {
-        switch (jobName) {
-            case "weekly": {
-                const delay = getNextDay(jobTime)
+    private executeJob = async (job: JobJson) => {
+        try {
+            const prosessTransaction = await QueueTransactionsController.prosessTransaction(job)
+            if (prosessTransaction === "transactionStatusCompleted")
+                if (job.repeatJobKey)
+                    this.removeJob(job.repeatJobKey)
 
-                const job = await this.add(jobId, data, delay, delay);
-                const transaction = await RecurrenceTransactionsController.createTransaction(Object.assign(job.asJSON(), {
-                    jobTime,
-                    jobName,
-                    receiverId,
-                    senderId,
-                    amount,
-                    data,
-                }))
-
-                return transaction
-            }
-            default: {
-                const job = await this.add(jobId, data, 50 * 1000, 15 * 1000);
-                const transaction = await RecurrenceTransactionsController.createTransaction(Object.assign(job.asJSON(), {
-                    jobTime,
-                    jobName,
-                    receiverId,
-                    amount,
-                    senderId,
-                    data
-                }))
-
-                return transaction;
-            }
+        } catch (error) {
+            console.log({ executeJob: error });
         }
     }
 
     private workers = async () => {
-        const worker = new Worker('transactions', async (job) => await RecurrenceTransactionsController.prosessTransaction(job), {
+        const worker = new Worker('transactions', async (job) => this.executeJob(job.asJSON()), {
             connection: { host: "redis", port: 6379 },
             settings: {
                 backoffStrategy: (attemptsMade: number) => attemptsMade * 1000
@@ -59,7 +38,45 @@ export default class TransactionsQueue {
         })
     }
 
-    add = async (jobName: string, data: string, delay: number = 0, every: number = 0) => {
+    createJobs = async ({ jobId, jobName, jobTime, amount, receiverId, senderId, data }: { jobId: string, amount: number, jobName: string, jobTime: WeeklyQueueTitleType, senderId: number, receiverId: number, data: string }) => {
+        switch (jobName) {
+            case "weekly": {
+                const delay = getNextDay(jobTime)
+
+                const job = await this.addJob(jobId, data, delay, delay);
+                const transaction = await QueueTransactionsController.createTransaction(Object.assign(job.asJSON(), {
+                    jobTime,
+                    jobName,
+                    receiverId,
+                    senderId,
+                    amount,
+                    data,
+                }))
+
+                return transaction
+            }
+            case "pendingTransaction": {
+                const delay = 1000 * 20 // * 30 // 30 minutes
+                const job = await this.addJob(jobId, data, delay, delay);
+
+                const transaction = await QueueTransactionsController.createTransaction(Object.assign(job.asJSON(), {
+                    jobTime,
+                    jobName,
+                    receiverId,
+                    senderId,
+                    amount,
+                    data,
+                }))
+
+                return transaction
+            }
+            default: {
+                return
+            }
+        }
+    }
+
+    addJob = async (jobName: string, data: string, delay: number = 0, every: number = 0) => {
         const job = await this.queue.add(jobName, data, { delay, repeat: { every, startDate: delay } })
         return job
     }
@@ -68,7 +85,7 @@ export default class TransactionsQueue {
         try {
             const job = await this.queue.removeJobScheduler(repeatJobKey)
             if (job) {
-                const transaction = await RecurrenceTransactionsController.inactiveTransaction(repeatJobKey)
+                const transaction = await QueueTransactionsController.inactiveTransaction(repeatJobKey)
                 return transaction;
             }
 
@@ -83,7 +100,7 @@ export default class TransactionsQueue {
         try {
             const job = await this.queue.removeJobScheduler(repeatJobKey)
             if (job) {
-                const transaction = await RecurrenceTransactionsController.inactiveTransaction(repeatJobKey)
+                const transaction = await QueueTransactionsController.inactiveTransaction(repeatJobKey)
 
                 const newTransaction = await this.createJobs({
                     jobId: shortUUID.generate(),

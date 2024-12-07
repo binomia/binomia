@@ -23,4 +23,18 @@ export class GlobalZodSchema {
         REDIS_PORT: z.string(),
         PORT: z.string()
     })
+
+    static bullDashboard = z.object({
+        setQueues: z.function().args(z.array(z.any())).returns(z.void()),
+        replaceQueues: z.function().args(z.array(z.any())).returns(z.void()),
+        addQueue: z.function().args(z.any()).returns(z.void()),
+        removeQueue: z.function().args(z.any()).returns(z.void())
+    })
+
+    // const bullDashboard: {
+    //     setQueues: (newBullQueues: ReadonlyArray<BaseAdapter>) => void;
+    //     replaceQueues: (newBullQueues: ReadonlyArray<BaseAdapter>) => void;
+    //     addQueue: (queue: BaseAdapter) => void;
+    //     removeQueue: (queueOrName: string | BaseAdapter) => void;
+    // }
 }

@@ -1,6 +1,6 @@
 import cluster from "cluster";
 import os from "os";
-import redis, { initRedisEventSubcription } from "@/redis";
+import { redis, initRedisEventSubcription } from "@/redis";
 import { JSONRPCServer } from "json-rpc-2.0";
 import { DASHBOARD_FAVICON_URL, DASHBOARD_LOGO_URL, QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
 import express, { Express, Request, Response } from 'express';
@@ -8,10 +8,11 @@ import cors from 'cors';
 import { unAuthorizedResponse } from "@/helpers";
 import { initMethods } from "@/rpc";
 
-import { createBullBoard, } from '@bull-board/api';
-import { ExpressAdapter, } from '@bull-board/express';
+import { createBullBoard } from '@bull-board/api';
+import { ExpressAdapter } from '@bull-board/express';
 import { queuesBullAdapter } from "@/queues";
 import { dbConnection } from "@/config";
+import { EventEmitter } from 'node:events';
 
 const app: Express = express();
 const serverAdapter = new ExpressAdapter();
@@ -31,19 +32,32 @@ if (cluster.isPrimary) {
         REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED_FROM_QUEUE,
         QUEUE_JOBS_NAME.CREATE_TRANSACTION,
         QUEUE_JOBS_NAME.REMOVE_TRANSACTION_FROM_QUEUE,
+        QUEUE_JOBS_NAME.PENDING_TRANSACTION,
+
+        QUEUE_JOBS_NAME.CREATE_NEW_QUEUE
     ])
 
 
     redis.on("message", async (channel, payload) => {
-        if (!cluster.workers) return;
+        if (channel === QUEUE_JOBS_NAME.CREATE_NEW_QUEUE) {
+            for (const id in cluster.workers) {
+                if (cluster.workers[id])
+                    cluster.workers[id].send({ payload, channel });
+                // console.log(`Master received message from Worker ${id}:`, payload);
+            }
 
-        const workerIds = Object.keys(cluster.workers);
-        const randomWorkerId = workerIds[Math.floor(Math.random() * workerIds.length)];
-        const selectedWorker = cluster.workers[randomWorkerId];
+        } else {
+            if (!cluster.workers) return;
 
-        if (selectedWorker) {
-            selectedWorker.send({ payload, channel }); // Send task to selected worker
-            console.log(`Master dispatched task to worker ${selectedWorker.process.pid}`);
+            const workerIds = Object.keys(cluster.workers);
+            const randomWorkerId = workerIds[Math.floor(Math.random() * workerIds.length)];
+            const selectedWorker = cluster.workers[randomWorkerId];
+
+
+            if (selectedWorker) {
+                selectedWorker.send({ payload, channel }); // Send task to selected worker
+                console.log(`Master dispatched task to worker ${selectedWorker.process.pid}`);
+            }
         }
     })
 
@@ -65,10 +79,7 @@ if (cluster.isPrimary) {
     app.put("*", unAuthorizedResponse);
     app.delete("*", unAuthorizedResponse);
 
-    initMethods(server);
-    dbConnection()
-
-    createBullBoard({
+    const bullDashboard = createBullBoard({
         queues: queuesBullAdapter,
         serverAdapter: serverAdapter,
         options: {
@@ -89,12 +100,15 @@ if (cluster.isPrimary) {
                 dateFormats: {
                     common: "EEEE, MMM. d yyyy, h:mma",
                     short: "EEEE, MMM. d yyyy, h:mma",
-                    full: "EEEE, MMM. d yyyy, h:mma",
-
+                    full: "EEEE, MMM. d yyyy, h:mma"
                 }
             }
         }
     });
+
+    dbConnection()
+    initMethods(server);
+    initRedisEventSubcription(bullDashboard)
 
     app.post("/", async (req: Request, res: Response) => {
         try {
@@ -113,6 +127,4 @@ if (cluster.isPrimary) {
     app.listen(PORT, () => {
         console.log(`[Queue-Server]: worker ${process.pid} is running at http://localhost:${PORT}`);
     });
-
-    initRedisEventSubcription()
 }
