@@ -33,7 +33,7 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
         setInput("0")
 
         if (currentPage === 2)
-            router.navigate("(home)")
+            router.navigate("(transactions)")
     }
 
 

@@ -70,19 +70,22 @@ export const useNotifications = (): PushNotificationType => {
     }
 
     useEffect(() => {
-        registerForPushNotificationsAsync()
-        notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
-            setNotification(notification);
-        });
 
-        responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-            console.log(response);
-        });
+        if (Device.isDevice && Platform.OS !== 'android') {
+            registerForPushNotificationsAsync()
+            notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+                setNotification(notification);
+            });
 
-        return () => {
-            if (notificationListener.current && responseListener.current) {
-                Notifications.removeNotificationSubscription(notificationListener.current);
-                Notifications.removeNotificationSubscription(responseListener.current);
+            responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
+                console.log(response);
+            });
+
+            return () => {
+                if (notificationListener.current && responseListener.current) {
+                    Notifications.removeNotificationSubscription(notificationListener.current);
+                    Notifications.removeNotificationSubscription(responseListener.current);
+                }
             }
         }
 

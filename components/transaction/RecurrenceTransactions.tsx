@@ -1,21 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import colors from '@/colors'
-import { StyleSheet, Dimensions, TouchableOpacity, RefreshControl } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Stack, Pressable, Spinner, ScrollView, FlatList } from 'native-base'
-import { scale } from 'react-native-size-matters';
-import { useDispatch } from 'react-redux';
-import { transactionActions } from '@/redux/slices/transactionSlice';
-import { useLazyQuery, useMutation } from '@apollo/client';
-import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { deleteIcon, editIcon, noTransactions } from '@/assets';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import DefaultIcon from 'react-native-default-icon';
-import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getNextDay, MAKE_FULL_NAME_SHORTEN } from '@/helpers';
 import moment from 'moment';
 import BottomSheet from '@/components/global/BottomSheet';
 import PagerView from 'react-native-pager-view';
-import { router } from 'expo-router';
 import Button from '@/components/global/Button';
+import { StyleSheet, Dimensions, RefreshControl } from 'react-native'
+import { Heading, Image, Text, VStack, HStack, Pressable, Spinner, ScrollView, FlatList } from 'native-base'
+import { scale } from 'react-native-size-matters';
+import { useLazyQuery, useMutation } from '@apollo/client';
+import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
+import { deleteIcon, editIcon, noTransactions } from '@/assets';
+import { Ionicons } from '@expo/vector-icons';
+import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getNextDay, MAKE_FULL_NAME_SHORTEN } from '@/helpers';
+import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { recurenceMonthlyData, recurenceWeeklyData, getTitleById } from '@/mocks';
 
@@ -49,9 +47,6 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
     const [enableSaveButton, setEnableSaveButton] = useState<boolean>(false)
     const [isEdited, setIsEdited] = useState<boolean>(false)
     const [recurrenceBiweeklyOptionSelected, setRecurrenceBiweeklyOptionSelected] = useState<string>("");
-
-
-
 
     const delay = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -88,13 +83,12 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
         setTimeout(() => {
             setRefreshing(false);
         }, 1000);
-    }, []);
+    }, [])
 
     const onEdit = () => {
         setBottomSheetHeight(height * 0.7)
         ref.current?.setPage(1)
     }
-
 
     const onSave = async () => {
         try {
@@ -402,7 +396,6 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
         </BottomSheet>
     )
 }
-
 
 const styles = StyleSheet.create({
     contentContainerStyle: {

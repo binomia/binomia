@@ -1,4 +1,4 @@
-import { askingForMoneyIcon, bankIcon, idIcon, limitIcon, mailIcon, mastercardLogo, notificacionIcon, phoneIcon, privacyIcon, receiveIcon, sendMoneyIcon, soportIcon, userIcon, visaLogo, whatsappIcon } from "@/assets";
+import { askingForMoneyIcon, withdrawIcon, depositIcon, idIcon, limitIcon, mailIcon, mastercardLogo, notificacionIcon, phoneIcon, privacyIcon, receiveIcon, sendMoneyIcon, soportIcon, userIcon, visaLogo, whatsappIcon } from "@/assets";
 import { SUPPORT_PHONE_NUMBER } from "@/constants";
 import { FORMAT_CURRENCY, FORMAT_LIMIT, FORMAT_PHONE_NUMBER } from "@/helpers";
 import { AccountLimitsType, AccountType, GlobalContextType } from "@/types";
@@ -103,22 +103,32 @@ export const privacyScreenData = (account: any) => [
     {
         name: "Recibir Dinero",
         icon: receiveIcon,
-        allow: account.allowReceive
+        allow: account.allowReceive,
+        id: "allowReceive"
     },
     {
         name: "Enviar Dinero",
         icon: sendMoneyIcon,
-        allow: account.allowSend
+        allow: account.allowSend,
+        id: "allowSend"
     },
     {
         name: "Solicitarme Dinero",
         icon: askingForMoneyIcon,
-        allow: account.allowAsk
+        allow: account.allowAsk,
+        id: "allowAsk"
     },
     {
-        name: "Solicitarme Dinero",
-        icon: askingForMoneyIcon,
-        allow: account.allowAsk
+        name: "Retirar Dinero",
+        icon: withdrawIcon,
+        allow: account.allowAsk,
+        id: "allowWithdraw"
+    },
+    {
+        name: "Depositar Dinero",
+        icon: depositIcon,
+        allow: account.allowAsk,
+        id: "allowDeposit"
     },
 ]
 

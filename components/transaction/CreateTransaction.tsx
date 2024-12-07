@@ -82,7 +82,7 @@ const CreateTransaction: React.FC<Props> = ({ input, title = "Siguiente", showBa
                     <Button opacity={showPayButton ? 1 : 0.5} fontSize={scale(11) + "px"} disabled={!showPayButton} onPress={onNextPage} h={"40px"} w={"100px"} title={title} bg={showPayButton ? "mainGreen" : "lightGray"} borderRadius={100} color={showPayButton ? colors.white : colors.mainGreen} />
                 </HStack>
             </VStack>
-            <VStack >
+            <VStack mb={"10px"}>
                 <KeyNumberPad onChange={(value: string) => onChange(value)} />
             </VStack>
         </VStack>

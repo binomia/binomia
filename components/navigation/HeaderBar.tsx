@@ -29,7 +29,7 @@ export const HomeHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
 
     return (
         <VStack p={p}>
-            <Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.navigate("cards")}>
+            <Pressable _pressed={{ opacity: 0.5 }} onPress={() => setShowBottomSheet(true)}>
                 <Image alt='logo-image' w={"25px"} h={"25px"} source={qrIcon} />
             </Pressable>
             <QRScanner open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />

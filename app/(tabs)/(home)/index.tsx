@@ -28,19 +28,28 @@ const HomeScreen: React.FC = () => {
 
 	const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-	const onRefresh = useCallback(async () => {
-		setRefreshing(true);
-
+	const fetchAccount = async () => {
 		try {
-			const data = await getAccount()
-			await dispatch(globalActions.setAccount(data.data.account))
+			const { data } = await getAccount()
+			await dispatch(globalActions.setAccount(data.account))
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	const onRefresh = useCallback(async () => {
+		try {
+			setRefreshing(true);
+
+			await fetchAccount();
+
+			setTimeout(() => {
+				setRefreshing(false);
+			}, 1000);
 		} catch (error) {
 			console.log(error);
 		}
 
-		setTimeout(() => {
-			setRefreshing(false);
-		}, 1000);
 	}, []);
 
 
@@ -57,8 +66,14 @@ const HomeScreen: React.FC = () => {
 
 	useEffect(() => {
 		(async () => {
-			await delay(2000)
-			setIsLoading(false)
+			if (Object.keys(account).length > 0) {
+				await delay(1000)
+				setIsLoading(false)
+
+			} else {
+				await fetchAccount();
+				setIsLoading(false)
+			}
 		})()
 	}, [])
 

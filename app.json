@@ -58,7 +58,7 @@
           "color": "#ffffff",
           "defaultChannel": "default",
           "sounds": [
-            "./assets/audio/money.wav"
+            "./assets/money.wav"
           ]      
         }
       ],

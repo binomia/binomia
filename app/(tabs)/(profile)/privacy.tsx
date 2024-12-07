@@ -15,45 +15,24 @@ const PrivacyScreen: React.FC = () => {
     const { allowFaceId, account } = useSelector((state: any) => state.globalReducer)
     const [updateAccountPermissions] = useMutation(AccountApolloQueries.updateAccountPermissions())
 
-
-    const onSwitchChange = async (name: string, allow: boolean) => {
+    const onSwitchChange = async (id: string, allow: boolean) => {
         try {
-            if (name === "allowFaceId") {
+            if (id === "allowFaceId") {
                 await dispatch(globalActions.setAllowFaceId(allow))
 
-            } else if (name === "Recibir Dinero") {
-
-                const account = await updateAccountPermissions({
+            } else {
+                const { data } = await updateAccountPermissions({
                     variables: {
                         data: {
-                            allowReceive: allow
+                            [id]: allow
                         }
                     }
                 })
 
-                await dispatch(globalActions.setAccount(account.data.updateAccountPermissions))
+                console.log({ id });
 
-            } else if (name === "Enviar Dinero") {
-                const account = await updateAccountPermissions({
-                    variables: {
-                        data: {
-                            allowSend: allow
-                        }
-                    }
-                })
 
-                await dispatch(globalActions.setAccount(account.data.updateAccountPermissions))
-
-            } else if (name === "Solicitarme Dinero") {
-                const account = await updateAccountPermissions({
-                    variables: {
-                        data: {
-                            allowRequestMe: allow
-                        }
-                    }
-                })
-
-                await dispatch(globalActions.setAccount(account.data.updateAccountPermissions))
+                await dispatch(globalActions.setAccount(data.updateAccountPermissions))
             }
 
         } catch (error) {
@@ -85,16 +64,16 @@ const PrivacyScreen: React.FC = () => {
                     renderItem={({ item, index }) => (
                         <HStack key={`privacies-${index}-${item.name}`} bg={"lightGray"} w={"100%"} borderRadius={10} h={"50px"} py={"10px"} space={2} pl={"10px"} >
                             <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
-                                <Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
+                                <Image alt='logo-image' resizeMode='contain' tintColor={colors.white} w={"18px"} h={"18px"} source={item.icon} />
                             </HStack>
                             <VStack flex={1}>
                                 <HStack justifyContent={"space-between"} alignItems={"center"}>
                                     <HStack h={"30px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
                                         <Text numberOfLines={3} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
                                     </HStack>
-                                    <Switch isChecked={item.allow} defaultIsChecked onChange={(e) => onSwitchChange(item.name, !item.allow)} mr={"10px"} />
+                                    <Switch isChecked={item.allow} defaultIsChecked onChange={(e) => onSwitchChange(item.id, !item.allow)} mr={"10px"} />
                                 </HStack>
-                                {index !== 2 ? <Divider mt={"7px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
+                                {index !== 4 ? <Divider mt={"7px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
                             </VStack>
                         </HStack>
                     )} />

@@ -115,9 +115,6 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
         try {
             const expoNotificationToken = await registerForPushNotificationsAsync()
 
-            console.log({ expoNotificationToken });
-
-
             const { data } = await login({
                 variables: { email, password },
                 context: {
