@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { VStack, Text, HStack, FlatList, ZStack } from 'native-base'
+import React, { useCallback, useEffect, useState } from 'react'
+import { VStack, Text, HStack, FlatList, ZStack, ScrollView } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
@@ -13,6 +13,7 @@ import { useNavigation } from 'expo-router'
 import { globalActions } from '@/redux/slices/globalSlice'
 import { Feather } from '@expo/vector-icons';
 import { TEXT_PARAGRAPH_FONT_SIZE } from '@/constants'
+import { RefreshControl } from 'react-native'
 
 
 const LimitsScreen: React.FC = () => {
@@ -23,6 +24,8 @@ const LimitsScreen: React.FC = () => {
     const { account, haveAccountChanged } = useSelector((state: any) => state.globalReducer)
     const [accountLimit] = useLazyQuery(AccountApolloQueries.accountLimit())
     const [limits, setLimits] = useState<AccountLimitsType>({} as AccountLimitsType)
+    const [refreshing, setRefreshing] = useState(false);
+
 
 
     const fetchAccountLimit = async () => {
@@ -36,6 +39,21 @@ const LimitsScreen: React.FC = () => {
             console.log(error);
         }
     }
+
+    const onRefresh = useCallback(async () => {
+        try {
+            setRefreshing(true);
+
+            await fetchAccountLimit();
+
+            setTimeout(() => {
+                setRefreshing(false);
+            }, 1000);
+        } catch (error) {
+            console.log(error);
+        }
+
+    }, []);
 
     useEffect(() => {
         (async () => {
@@ -54,16 +72,10 @@ const LimitsScreen: React.FC = () => {
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
-            <VStack borderRadius={10} w={"100%"} h={"auto"} mt={"50px"}>
-                <FlatList
-                    bg={"lightGray"}
-                    borderRadius={10}
-                    px={"10px"}
-                    data={limitsScreenData(limits, account)}
-                    scrollEnabled={false}
-                    keyExtractor={(index) => index.toString()}
-                    renderItem={({ item }) => (
-                        <HStack bg={"lightGray"} w={"100%"} space={2} pl={"10px"} py={"18px"} >
+            <ScrollView borderRadius={10} w={"100%"} h={"auto"} mt={"50px"} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+                <VStack bg={"lightGray"} borderRadius={10} px={"10px"}>
+                    {limitsScreenData(limits, account).map((item, index) => (
+                        <HStack key={`limits-creen-data-${index}`} bg={"lightGray"} w={"100%"} space={2} pl={"10px"} py={"18px"} >
                             <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
                                 <CircularProgress
                                     radius={25}
@@ -88,14 +100,15 @@ const LimitsScreen: React.FC = () => {
                                 </ZStack>
                             </VStack>
                         </HStack>
-                    )} />
+                    ))}
+                </VStack>
                 <HStack mt={"30px"} >
                     <Feather style={{ marginTop: 5 }} name="alert-circle" size={24} color={colors.warning} />
                     <Text ml={"10px"} fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"85%"} color={colors.warning}>
                         Los recursos de tu cuenta son limitados y se actualizan semanalmente, específicamente cada lunes.
                     </Text>
                 </HStack>
-            </VStack>
+            </ScrollView>
         </VStack>
     )
 }
