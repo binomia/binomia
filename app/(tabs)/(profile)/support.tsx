@@ -52,30 +52,23 @@ const SupportScreen: React.FC = () => {
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
-            <VStack borderRadius={10} w={"100%"} h={"auto"} mt={"50px"}>
-                <FlatList
-                    bg={"lightGray"}
-                    data={supportScreenData({ openEmail, openPhone, openWhatsApp })}
-                    borderRadius={10}
-                    pb={"4px"}
-                    scrollEnabled={false}
-                    keyExtractor={(index) => index.toString()}
-                    renderItem={({ item, index }) => (
-                        <Pressable _pressed={{ opacity: 0.5 }} onPress={item.onPress}>
-                            <HStack key={`personal${item.name}`} space={2} pl={"10px"} py={index === 2 ? "2px" : "7px"} alignItems={"center"}>
-                                <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
-                                    <Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
-                                </HStack>
-                                <VStack width={"90%"} h={"30px"} borderRadius={10}>
-                                    <HStack pr={"10px"} justifyContent={"space-between"} alignItems={"center"}>
-                                        <Text textTransform={index === 2 ? "capitalize" : "lowercase"} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
-                                        <Feather name="chevron-right" size={24} color="white" />
-                                    </HStack>
-                                    {index !== 2 ? <Divider mt={"10px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
-                                </VStack>
+            <VStack borderRadius={10} bg={"lightGray"} p={"5px"} w={"100%"} h={"auto"} mt={"50px"}>
+                {supportScreenData({ openEmail, openPhone, openWhatsApp }).map((item, index) => (
+                    <Pressable key={`support-screen-data-${index}-${item.name}`} _pressed={{ opacity: 0.5 }} onPress={item.onPress}>
+                        <HStack space={2} pl={"10px"} py={index === 2 ? "2px" : "7px"} alignItems={"center"}>
+                            <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
+                                <Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
                             </HStack>
-                        </Pressable>
-                    )} />
+                            <VStack width={"90%"} h={"30px"} borderRadius={10}>
+                                <HStack pr={"10px"} justifyContent={"space-between"} alignItems={"center"}>
+                                    <Text textTransform={index === 2 ? "capitalize" : "lowercase"} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
+                                    <Feather name="chevron-right" size={24} color="white" />
+                                </HStack>
+                                {index !== 2 ? <Divider mt={"10px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
+                            </VStack>
+                        </HStack>
+                    </Pressable>
+                ))}
             </VStack>
             <HStack mb={"30px"} justifyContent={"center"}>
                 <Button fontWeight={"bold"} bg={"lightGray"} color='red' title='Cerrar Sesion' onPress={onLogout} w={'80%'} />

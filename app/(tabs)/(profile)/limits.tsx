@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { VStack, Text, HStack, FlatList, ZStack, ScrollView } from 'native-base'
+import { VStack, Text, HStack, ZStack, ScrollView } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'

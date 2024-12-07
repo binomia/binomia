@@ -1,18 +1,17 @@
 import React from 'react'
-import { Image, VStack, Text, HStack, Divider, FlatList, Switch } from 'native-base'
+import useAsyncStorage from '@/hooks/useAsyncStorage'
+import colors from '@/colors'
+import { Image, VStack, Text, HStack, Divider, Switch } from 'native-base'
 import { whatsappIcon } from '@/assets'
 import { useDispatch, useSelector } from 'react-redux'
-import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
 import { globalActions } from '@/redux/slices/globalSlice'
-import useAsyncStorage from '@/hooks/useAsyncStorage'
 import { notificationsScreenData } from '@/mocks'
 
 const NotificationsScreen: React.FC = () => {
     const dispatch = useDispatch()
     const { setItem } = useAsyncStorage()
     const { smsNotifications, whatsappNotifications, emailNotifications, pushNotifications } = useSelector((state: any) => state.globalReducer)
-
 
     const onSwitchChange = async (name: string, allow: boolean) => {
         try {
@@ -52,14 +51,8 @@ const NotificationsScreen: React.FC = () => {
                         <Switch isChecked={whatsappNotifications} onChange={() => onSwitchChange("whatsapp", !whatsappNotifications)} mr={"10px"} />
                     </HStack>
                 </HStack>
-                <FlatList
-                    bg={"lightGray"}
-                    borderRadius={10}
-                    pb={"3px"}
-                    data={notificationsScreenData({ pushNotifications, emailNotifications, smsNotifications })}
-                    scrollEnabled={false}
-                    keyExtractor={(index) => index.toString()}
-                    renderItem={({ item, index }) => (
+                <VStack bg={"lightGray"} borderRadius={10} pb={"3px"}>
+                    {notificationsScreenData({ pushNotifications, emailNotifications, smsNotifications }).map((item, index) => (
                         <HStack key={`privacies-${index}-${item.name}`} bg={"lightGray"} w={"100%"} borderRadius={10} h={"50px"} py={"10px"} space={2} pl={"10px"} >
                             <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
                                 <Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
@@ -74,7 +67,8 @@ const NotificationsScreen: React.FC = () => {
                                 {index !== 2 ? <Divider mt={"7px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
                             </VStack>
                         </HStack>
-                    )} />
+                    ))}
+                </VStack>                
             </VStack>
         </VStack>
     )
