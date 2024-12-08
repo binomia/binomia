@@ -134,21 +134,21 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconIm
 				return (
 					<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 						<HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
-						<Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={checked} />
+						<Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={iconImage} />
 					</ZStack>
 				)
 			case "cancelled":
 				return (
 					<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 						<HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
-						<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={cancelIcon} />
+						<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={iconImage} />
 					</ZStack>
 				)
 			default:
 				return (
 					<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 						<HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
-						<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
+						<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={iconImage} />
 					</ZStack>
 				)
 		}

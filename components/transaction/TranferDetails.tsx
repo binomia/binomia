@@ -75,6 +75,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
                 dispatch(globalActions.setHaveAccountChanged(false)),
                 dispatch(transactionActions.setTransaction({
                     ...transactionSent,
+                    amountColor: colors.red,
                     fullName: formatTransaction(transactionSent).fullName,
                     profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
                     username: formatTransaction(transactionSent).username,
@@ -83,8 +84,6 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             ])
 
             goNext()
-            handleOnClose()
-
         } catch (error: any) {
             console.error(error.message);
         }
