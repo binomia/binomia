@@ -134,9 +134,9 @@ const TransactionsScreen: React.FC = () => {
 		const profileImageUrl = isFromMe ? transaction.to.user?.profileImageUrl : transaction.from.user?.profileImageUrl
 		const fullName = isFromMe ? transaction.to.user?.fullName : transaction.from.user?.fullName
 		const username = isFromMe ? transaction.from.user?.username : transaction.to.user?.username
-		const showPayButton = transaction.transactionType === "request" && !isFromMe && transaction.status === "pending"
-		const amountColor = (transaction.transactionType === "request" && isFromMe || transaction.transactionType === "transfer" && !isFromMe) ? colors.mainGreen : colors.red
-		const showMap = (transaction.transactionType === "request" && isFromMe || transaction.transactionType === "transfer" && !isFromMe) ? false : true
+		const showPayButton = transaction.transactionType === "request" && !isFromMe && transaction.status === "requested"
+		const amountColor = (transaction.transactionType === "request" && isFromMe || transaction.transactionType === "transfer" && !isFromMe) && transaction.status !== "cancelled" ? colors.mainGreen : colors.red
+		const showMap = (transaction.transactionType === "request" && isFromMe && transaction.status === "cancelled" || transaction.transactionType === "transfer" && !isFromMe) ? false : true
 
 		return {
 			isFromMe,
@@ -189,7 +189,7 @@ const TransactionsScreen: React.FC = () => {
 
 	useEffect(() => {
 		(async () => {
-			if (isBottom) {
+			if (isBottom && transactions.length >= 10) {
 				try {
 					setIsLoadingMore(true)
 
@@ -280,7 +280,7 @@ const TransactionsScreen: React.FC = () => {
 														<Text fontWeight={"semibold"} fontSize={scale(10)} color={colors.white}>{FORMAT_CURRENCY(formatTransaction(item).amount)}</Text>
 													</HStack>
 													:
-													<Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(13)} color={formatTransaction(item).amountColor}>{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
+													<Heading opacity={item.status === "cancelled" ? 0.5 : 1} textDecorationLine={item.status === "cancelled" ? "line-through" : "none"} fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(13)} color={formatTransaction(item).amountColor}>{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
 												}
 											</VStack>
 										</HStack>

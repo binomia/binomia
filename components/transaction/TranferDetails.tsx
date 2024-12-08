@@ -23,10 +23,11 @@ import { useLocation } from '@/hooks/useLocation';
 type Props = {
     goBack?: () => void
     goNext?: () => void
+    handleOnClose?: () => void
 }
 
 const { width, height } = Dimensions.get("screen")
-const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { } }) => {
+const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }, handleOnClose = () => { } }) => {
     const dispatch = useDispatch();
 
     const { getLocation } = useLocation();
@@ -61,16 +62,16 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             const { data: transaction } = await createTransaction({
                 variables: { data, recurrence }
             })
-            
+
             const transactionSent = {
                 ...transaction.createTransaction,
                 to: receiver,
                 from: user
             }
 
+            await dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions]))
             await Promise.all([
                 dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionDeytails.amount }))),
-                dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),
                 dispatch(globalActions.setHaveAccountChanged(false)),
                 dispatch(transactionActions.setTransaction({
                     ...transactionSent,
@@ -82,6 +83,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             ])
 
             goNext()
+            handleOnClose()
 
         } catch (error: any) {
             console.error(error.message);
@@ -116,19 +118,15 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
 
     const handleOnPress = async () => {
         try {
-            // const authenticated = await authenticate()
+            const authenticated = await authenticate()
 
             setLoading(true)
-            // if (authenticated.success) {
-            //     await handleOnSend({
-            //         title: recurrence,
-            //         time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
-            //     })
-            // }
-            await handleOnSend({
-                title: recurrence,
-                time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
-            })
+            if (authenticated.success) {
+                await handleOnSend({
+                    title: recurrence,
+                    time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
+                })
+            }
 
             setLoading(false)
         } catch (error) {
