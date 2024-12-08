@@ -1,24 +1,21 @@
 import React, { useEffect, useState } from 'react'
+import axios from 'axios';
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
+import Button from '@/components/global/Button';
+import BottomSheet from '../global/BottomSheet';
 import { StyleSheet, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Pressable, Stack, FlatList } from 'native-base'
+import { Heading, Image, Text, VStack, HStack, Pressable, FlatList } from 'native-base'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
-import Button from '@/components/global/Button';
 import { useDispatch, useSelector } from 'react-redux';
-import BottomSheet from '../global/BottomSheet';
 import { recurenceMonthlyData, recurenceWeeklyData } from '@/mocks';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import axios from 'axios';
-import { set } from 'date-fns';
-
 
 
 type Props = {
@@ -26,28 +23,24 @@ type Props = {
     goNext?: () => void
 }
 
-const { width, height } = Dimensions.get("screen")
+const { width } = Dimensions.get("screen")
 const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { } }) => {
     const dispatch = useDispatch();
 
     const { authenticate } = useLocalAuthentication();
     const { receiver, transactions } = useSelector((state: any) => state.transactionReducer)
-    const { location, account, user } = useSelector((state: any) => state.globalReducer)
+    const { location, user } = useSelector((state: any) => state.globalReducer)
     const [createRequestTransaction] = useMutation(TransactionApolloQueries.createRequestTransaction())
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
     const [recurrence, setRecurrence] = useState<string>("oneTime");
     const [recurrenceSelected, setRecurrenceSelected] = useState<string>("");
     const [recurrenceDaySelected, setRecurrenceDaySelected] = useState<string>("");
-    const [recurrenceOptionSelected, setRecurrenceOptionSelected] = useState<string>("");
-    const [recurrenceDayOptionSelected, setRecurrenceDayOptionSelected] = useState<string>("");
-    const [recurrenceBiweeklyOptionSelected, setRecurrenceBiweeklyOptionSelected] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false)
     const [openOptions, setOpenOptions] = useState<string>("")
     const [locationInfo, setLocationInfo] = useState<any>({})
 
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
-
 
     const getLocationInfo = async ({ latitude, longitude }: { latitude: number, longitude: number }) => {
         try {
@@ -62,7 +55,6 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
-
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 transactionType: "request",
                 receiver: receiver.username,
@@ -74,21 +66,22 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
                 variables: { data, recurrence }
             })
 
-            const transactionSent = {
+            const transactionSent = Object.assign({}, transaction.createRequestTransaction, {
                 ...transaction.createTransaction,
                 to: receiver,
                 from: user
-            }
+            })
+
+
 
             await Promise.all([
-                dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),                
-                dispatch(transactionActions.setTransaction({
-                    ...transactionSent,
-                    fullName: formatTransaction(transactionSent).fullName,
-                    profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
-                    username: formatTransaction(transactionSent).username,
-                    isFromMe: formatTransaction(transactionSent).isFromMe,
-                }))
+                dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),
+                dispatch(transactionActions.setTransaction(Object.assign({}, transaction.createRequestTransaction, {
+                    ...transaction.createTransaction,
+                    ...formatTransaction(transactionSent),
+                    to: receiver,
+                    from: user
+                })))
             ])
 
             goNext()
@@ -115,22 +108,18 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
         }
     }
 
-
     const handleOnPress = async () => {
         try {
-            // const authenticated = await authenticate()
-
+            const authenticated = await authenticate()
             setLoading(true)
-            // if (authenticated.success) {
-            //     await handleOnSend({
-            //         title: recurrence,
-            //         time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
-            //     })
-            // }
-            await handleOnSend({
-                title: recurrence,
-                time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
-            })
+
+            if (authenticated.success) {
+                await handleOnSend({
+                    title: recurrence,
+                    time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
+                })
+            }
+
             setLoading(false)
         } catch (error) {
             console.log({ handleOnSend: error });
@@ -141,13 +130,9 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
         setOpenOptions("")
     }
 
-
-
-
     const RenderWeeklyOption: React.FC = () => {
         const onSelecteOption = async (id: string, title: string) => {
             setRecurrenceSelected(id)
-            setRecurrenceOptionSelected(title)
 
             await delay(300)
             setOpenOptions("")
@@ -174,7 +159,6 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
     const RenderMonthlyOption: React.FC = () => {
         const onSelecteOption = async (id: string, title: string) => {
             setRecurrenceDaySelected(id)
-            setRecurrenceDayOptionSelected(title)
 
             await delay(300)
             setOpenOptions("")
@@ -209,7 +193,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
         <SafeAreaView style={{ flex: 0.95, backgroundColor: colors.darkGray }}>
             <VStack px={"10px"} mt={"10px"} h={"100%"}>
                 <VStack pb={"30px"} flex={1} justifyContent={"space-between"} alignItems={"center"} borderRadius={10}>
-                    <VStack w={"100%"} h={"60%"} alignItems={"center"} justifyContent={"center"}>
+                    <VStack w={"100%"} h={"50%"} alignItems={"center"} justifyContent={"center"}>
                         <HStack my={"10px"}>
                             {transactionDeytails.profileImageUrl ?
                                 <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(60)} h={scale(60)} source={{ uri: transactionDeytails.profileImageUrl }} />
@@ -223,7 +207,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
                         </HStack>
                         <Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transactionDeytails?.fullName || "")}</Heading>
                         <Text fontSize={scale(16)} color={colors.lightSkyGray}>{transactionDeytails?.username}</Text>
-                        <Heading textTransform={"capitalize"} fontSize={scale(40)} color={"mainGreen"}>{"+"}{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
+                        <Heading textTransform={"capitalize"} mt={"30px"} fontSize={scale(40)} color={"mainGreen"}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
                     </VStack>
 
                     <HStack w={"100%"} px={"10px"} justifyContent={"space-between"}>

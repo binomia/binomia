@@ -150,13 +150,15 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconIm
 	}
 
 	const StatuIcon = (status: string) => {
+		// console.log(JSON.stringify(transaction, null, 2));
+		
 		switch (status) {
-			case "pending":
-				return <Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
+			case "completed":
+				return <Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={checked} />
 			case "cancelled":
 				return <Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={cancelIcon} />
 			default:
-				return <Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={checked} />
+				return <Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
 		}
 	}
 
@@ -198,10 +200,10 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconIm
 						<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
 							<ZStack w={"30px"} h={"30px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 								<HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
-								{StatuIcon(transaction?.status)}
+								{StatuIcon(transaction.status || "pending")}
 							</ZStack>
 							<VStack w={"80%"}>
-								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status)}s</Text>
+								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status || "pending")}</Text>
 							</VStack>
 						</VStack>
 
