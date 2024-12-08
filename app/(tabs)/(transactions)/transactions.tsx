@@ -176,7 +176,6 @@ const TransactionsScreen: React.FC = () => {
 				await fetchAccountTransactions()
 				await dispatch(transactionActions.setHasNewTransaction(false))
 			}
-
 		})()
 
 	}, [isFocused, hasNewTransaction])

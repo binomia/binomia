@@ -26,14 +26,13 @@ type Props = {
     handleOnClose?: () => void
 }
 
-const { width, height } = Dimensions.get("screen")
+const { width } = Dimensions.get("screen")
 const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }, handleOnClose = () => { } }) => {
-    const dispatch = useDispatch();
-
-    const { getLocation } = useLocation();
-    const { authenticate } = useLocalAuthentication();
     const { receiver, transactions } = useSelector((state: any) => state.transactionReducer)
     const { location, account, user } = useSelector((state: any) => state.globalReducer)
+    
+    const dispatch = useDispatch();
+    const { authenticate } = useLocalAuthentication();
     const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
@@ -51,8 +50,6 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
-
-            await getLocation()
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),

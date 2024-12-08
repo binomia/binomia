@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Dimensions, SafeAreaView } from 'react-native'
 import BottomSheet from '@/components/global/BottomSheet';
-import { useDispatch } from 'react-redux';
-import { transactionActions } from '@/redux/slices/transactionSlice';
 import PagerView from 'react-native-pager-view';
 import CreateTransaction from './CreateTransaction';
-import { router } from 'expo-router';
 import TransactionDetails from './TranferDetails';
-import { checked, pendingClock } from '@/assets';
 import SingleSentTransaction from './SingleSentTransaction';
+import { Dimensions, SafeAreaView } from 'react-native'
+import { useDispatch } from 'react-redux';
+import { transactionActions } from '@/redux/slices/transactionSlice';
+import { router } from 'expo-router';
+import { pendingClock } from '@/assets';
 
 type Props = {
     open?: boolean
@@ -37,6 +37,7 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
 
             ref.current?.setPage(0)
             setCurrentPage(0)
+            await dispatch(transactionActions.setHasNewTransaction(true))
         }
     }
 
