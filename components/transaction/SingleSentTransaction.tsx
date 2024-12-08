@@ -134,21 +134,21 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconIm
 				return (
 					<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 						<HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
-						<Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={iconImage} />
+						<Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={checked} />
 					</ZStack>
 				)
 			case "cancelled":
 				return (
 					<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 						<HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
-						<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={iconImage} />
+						<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={cancelIcon} />
 					</ZStack>
 				)
 			default:
 				return (
 					<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 						<HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
-						<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={iconImage} />
+						<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
 					</ZStack>
 				)
 		}
@@ -187,12 +187,9 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconIm
 				</HStack>
 				<VStack>
 					<VStack mt={"20px"} alignItems={"center"}>
-						<Heading textTransform={"capitalize"} fontSize={scale(38)} color={transaction.amountColor}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
+						<Heading textTransform={"capitalize"} fontSize={scale(38)} color={colors.white}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
 						<Text mb={"10px"} color={colors.lightSkyGray}>{transaction.isFromMe ? "Enviado " :  "Recibido "}{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-						<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
-							{/* <ZStack w={"30px"} h={"30px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-								<HStack w={"80%"} h={"80%"} bg={colors.red} borderRadius={100} />
-							</ZStack> */}
+						<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>							
 							{StatuIcon(transaction.status || "pending")}
 							<VStack w={"80%"}>
 								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status || "pending")}</Text>

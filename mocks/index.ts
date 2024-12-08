@@ -156,9 +156,7 @@ export const limitsScreenData = (limits: AccountLimitsType, account: AccountType
 ]
 
 export const transactionStatus = (title: string) => {    
-    switch (title) {
-        case "pending":
-            return "Pendiente"
+    switch (title) {       
         case "approved":
             return "Aprobado"
         case "rejected":
@@ -171,7 +169,7 @@ export const transactionStatus = (title: string) => {
             return "Cancelado"
         
         default:
-            return title;
+            return "Procesando";
     }
 }
 
