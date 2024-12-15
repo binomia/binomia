@@ -1,8 +1,10 @@
-import { Dimensions, RefreshControl } from 'react-native'
-import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { Heading, HStack, Image, Pressable, VStack, Text, ScrollView } from 'native-base';
+import React, { useCallback, useEffect, useState } from 'react'
 import colors from '@/colors';
 import Button from '@/components/global/Button';
+import QRScannerScreen from '@/components/global/QRScanner';
+import HomeSkeleton from '@/components/home/homeSkeleton';
+import { Dimensions, RefreshControl } from 'react-native'
+import { Heading, HStack, Image, Pressable, VStack, Text, ScrollView } from 'native-base';
 import { bagIcon, bills, cars, house, phone, sendIcon } from '@/assets';
 import { useLazyQuery } from '@apollo/client';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,9 +12,8 @@ import { AccountApolloQueries } from '@/apollo/query';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { FORMAT_CURRENCY } from '@/helpers';
 import { scale } from 'react-native-size-matters';
-import QRScannerScreen from '@/components/global/QRScanner';
 import { router } from 'expo-router';
-import HomeSkeleton from '@/components/home/homeSkeleton';
+import Transactions from '@/components/transaction/transactions';
 
 
 const { width } = Dimensions.get('window');
@@ -95,7 +96,10 @@ const HomeScreen: React.FC = () => {
 						</HStack>
 					</VStack>
 				</VStack>
-				<VStack w={"100%"} pt={"30px"} px={"5px"}>
+				<VStack w={"100%"} pt={"30px"}>
+					<Transactions showNewTransaction={false} />
+				</VStack>
+				{/* <VStack w={"100%"} pt={"30px"} px={"5px"}>
 					<Heading fontSize={scale(24)} color={"white"}>Servicios</Heading>
 					<HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
 						<Pressable onPress={() => { }} _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
@@ -117,7 +121,7 @@ const HomeScreen: React.FC = () => {
 							<Text color={"white"}>Facturas</Text>
 						</Pressable>
 					</HStack>
-				</VStack>
+				</VStack> */}
 				<QRScannerScreen defaultPage={1} open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
 			</ScrollView>
 		</VStack>

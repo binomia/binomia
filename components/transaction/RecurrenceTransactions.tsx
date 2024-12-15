@@ -33,7 +33,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
     const [updateRecurrentTransactions] = useMutation(TransactionApolloQueries.updateRecurrentTransactions())
 
     const [visible, setVisible] = useState<boolean>(false);
-    const [bottomSheetHeight, setBottomSheetHeight] = useState<number>(height * 0.65);
+    const [bottomSheetHeight, setBottomSheetHeight] = useState<number>(height * 0.4);
     const [recurrence, setRecurrence] = useState<string>("");
     const [startDeleting, setStartDeleting] = useState<boolean>(false);
     const [refreshing, setRefreshing] = useState(false);
@@ -71,7 +71,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
         setTransaction({})
 
         await delay(500)
-        setBottomSheetHeight(height * 0.6)
+        setBottomSheetHeight(height * 0.5)
         ref.current?.setPage(0)
     }
 
@@ -132,6 +132,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
 
     const onSelectTransaction = async (transaction: any) => {
         setTransaction({
+            ...transaction,
             repeatJobKey: transaction.repeatJobKey,
             fullName: transaction.receiver.user.fullName,
             amount: transaction.amount,
@@ -264,6 +265,19 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
         onCloseFinish()
     }
 
+    const formatTransactionRecurrenceTime = (jobName: string, jobTime: string) => {
+        switch (jobName) {
+            case "weekly":
+                return getTitleById(jobTime, recurenceWeeklyData)
+
+            case "monthly":
+                return getTitleById(jobTime, recurenceMonthlyData)
+
+            default:
+                return "Cada 1 y 16 de cada mes";
+        }
+    }
+
     useEffect(() => {
         fetchAccountRecurrentTransactions()
     }, [])
@@ -288,9 +302,9 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                                 mt={"20px"}
                                 renderItem={({ item, index }) => (
                                     <Pressable key={`${item.repeatJobKey}-${index}`} onPress={() => onSelectTransaction(item)} my={"10px"} _pressed={{ opacity: 0.5 }} flexDirection={"row"} justifyContent={"space-between"}>
-                                        <HStack>
-                                            {item.profileImageUrl ?
-                                                <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(55)} h={scale(55)} source={{ uri: item.profileImageUrl }} />
+                                        <HStack alignItems={"center"}>
+                                            {item.receiver.user.profileImageUrl ?
+                                                <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: item.receiver.user.profileImageUrl }} />
                                                 :
                                                 <DefaultIcon
                                                     value={item.receiver.user.fullName}
@@ -299,8 +313,9 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                                                 />
                                             }
                                             <VStack ml={"10px"} justifyContent={"center"}>
-                                                <Heading textTransform={"capitalize"} fontSize={scale(14)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item.receiver.user.fullName)}</Heading>
+                                                <Heading textTransform={"capitalize"} fontSize={scale(14)} color={"white"}>{item.profileImageUrl}{MAKE_FULL_NAME_SHORTEN(item.receiver.user.fullName)}</Heading>
                                                 <Text fontSize={scale(10)} color={colors.lightSkyGray}>Proximo: {moment(getNextDay(item.jobTime)).format("ll")}</Text>
+                                                <Text fontSize={scale(10)} color={colors.lightSkyGray}>{formatTransactionRecurrenceTime(item.jobName, item.jobTime)}</Text>
                                             </VStack>
                                         </HStack>
                                         <VStack ml={"10px"} justifyContent={"center"}>
@@ -327,18 +342,22 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                         </VStack>
                     </VStack>
                 )}
-
                 <BottomSheet onCloseFinish={onBottomSheetCloseFinish} height={bottomSheetHeight} open={visible}>
                     <HStack p={"20px"} justifyContent={"space-between"}>
-                        <HStack>
-                            <DefaultIcon
-                                value={transaction.fullName}
-                                contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction.fullName ?? "") }]}
-                                textStyle={styles.textStyle}
-                            />
+                        <HStack alignItems={"center"}>
+                            {transaction.receiver?.user?.profileImageUrl ?
+                                <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: transaction.receiver.user.profileImageUrl }} />
+                                :
+                                <DefaultIcon
+                                    value={transaction.fullName}
+                                    contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction.fullName ?? "") }]}
+                                    textStyle={styles.textStyle}
+                                />
+                            }
                             <VStack ml={"10px"} justifyContent={"center"}>
                                 <Heading textTransform={"capitalize"} fontSize={scale(16)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction.fullName ?? "")}</Heading>
                                 <Text fontSize={scale(12)} color={colors.lightSkyGray}>Proximo: {moment(getNextDay(transaction.jobTime)).format("ll")}</Text>
+                                <Text fontSize={scale(10)} color={colors.lightSkyGray}>{formatTransactionRecurrenceTime(transaction.jobName, transaction.jobTime)}</Text>
                             </VStack>
                         </HStack>
                         <VStack ml={"10px"} justifyContent={"center"}>
@@ -346,7 +365,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                         </VStack>
                     </HStack>
                     <PagerView style={{ flex: 1 }} ref={ref} initialPage={0} onPageSelected={() => { }}>
-                        <HStack key={"Recurrente-1"} p={"20px"} borderRadius={10} w={"100%"} space={2} justifyContent={"space-between"}>
+                        <HStack key={"Recurrente-1"} p={"20px"} mt={"20px"} borderRadius={10} w={"100%"} space={2} >
                             <Pressable onPress={onDelete} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(120)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
                                 {startDeleting ?
                                     <Spinner color={"red"} size={"lg"} /> :

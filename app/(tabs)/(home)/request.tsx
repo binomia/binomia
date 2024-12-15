@@ -79,11 +79,19 @@ const Request: React.FC = () => {
         setOpenRequest(true)
     }
 
-    const onCloseFinish = () => {
+    const onCloseFinish = async () => {
         setOpenRequest(false)
 
-        if (currentPage === 2)
-            router.navigate("(home)")
+        await dispatch(transactionActions.setReceiver({}))
+        setInput("0")
+
+        if (currentPage === 2) {
+            router.navigate("(transactions)")
+
+            ref.current?.setPage(0)
+            setCurrentPage(0)
+            await dispatch(transactionActions.setHasNewTransaction(true))
+        }
     }
 
     const nextPage = () => {
@@ -143,7 +151,7 @@ const Request: React.FC = () => {
                                 <CreateTransaction nextPage={nextPage} title='Solicitar' showBalance={false} setInput={setInput} input={input} />
                             </HStack>
                             <TranferRequestDetails goBack={prevPage} goNext={nextPage} />
-                            <SingleSentTransaction key={"single-request-transaction-2"}  iconImage={pendingClock}/>                            
+                            <SingleSentTransaction key={"single-request-transaction-2"} iconImage={pendingClock} />
                         </PagerView>
                     </BottomSheet>
                 </VStack>

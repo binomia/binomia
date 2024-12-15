@@ -7,7 +7,7 @@ import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import * as Sharing from 'expo-sharing';
 import { StyleSheet, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Pressable, ZStack, FlatList } from 'native-base'
+import { Heading, Image, Text, VStack, HStack, Pressable, ZStack } from 'native-base'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
@@ -28,42 +28,18 @@ type Props = {
 	goNext?: (_?: number) => void,
 	showPayButton?: boolean
 	iconImage?: any
-
 }
 
 const { height, width } = Dimensions.get('window')
-const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage, showPayButton = false, goNext = (_?: number) => { } }) => {
+const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPayButton = false, goNext = (_?: number) => { } }) => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { authenticate } = useLocalAuthentication()
 	const { transaction } = useSelector((state: any) => state.transactionReducer)
-	const { account, user, location }: { account: any, user: any, location: z.infer<typeof TransactionAuthSchema.transactionLocation> } = useSelector((state: any) => state.globalReducer)
-	const [openDetail, setOpenDetail] = useState<boolean>(false)
+	const { account, user }: { account: any, user: any, location: z.infer<typeof TransactionAuthSchema.transactionLocation> } = useSelector((state: any) => state.globalReducer)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [isCancelLoading, setIsCancelLoading] = useState<boolean>(false)
-	const [isCancelled, setIsCancelled] = useState<boolean>(false)
 	const [payRequestTransaction] = useMutation(TransactionApolloQueries.payRequestTransaction());
-	const [refreshing, setRefreshing] = useState(false);
-
-
-	const details = [
-		{
-			title: "Fecha",
-			value: moment(Number(transaction?.createdAt)).format("lll")
-		},
-		{
-			title: "Enviado a",
-			value: transaction?.fullName
-		},
-		{
-			title: "Monto",
-			value: transaction?.amount
-		}
-	]
-
-	const handleValue = () => {
-		return transaction.isFromMe ? "Enviado el" :  "Recibido el"
-	}
 
 	const handleShare = async () => {
 		const isAvailableAsync = await Sharing.isAvailableAsync()
@@ -114,7 +90,6 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconIm
 
 					setIsLoading(false)
 					setIsCancelLoading(false)
-					setIsCancelled(paymentApproved)
 					goNext(paymentApproved ? 1 : 2)
 				}
 
@@ -127,17 +102,16 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconIm
 			ref.current?.setPage(1)
 	}
 
-
 	const StatuIcon = (status: string) => {
-		switch (status) {
-			case "completed":
+		switch (true) {
+			case status === "completed":
 				return (
 					<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 						<HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
 						<Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={checked} />
 					</ZStack>
 				)
-			case "cancelled":
+			case status === "cancelled":
 				return (
 					<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 						<HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
@@ -188,8 +162,8 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", iconIm
 				<VStack>
 					<VStack mt={"20px"} alignItems={"center"}>
 						<Heading textTransform={"capitalize"} fontSize={scale(38)} color={colors.white}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
-						<Text mb={"10px"} color={colors.lightSkyGray}>{transaction.isFromMe ? "Enviado " :  "Recibido "}{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-						<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>							
+						<Text mb={"10px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
+						<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
 							{StatuIcon(transaction.status || "pending")}
 							<VStack w={"80%"}>
 								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status || "pending")}</Text>

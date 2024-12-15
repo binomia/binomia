@@ -16,7 +16,7 @@ import DefaultIcon from "react-native-default-icon"
 import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
 
 
-const { height, width } = Dimensions.get('window')
+const { width } = Dimensions.get('window')
 
 export const HomeHeaderLeft: React.FC = () => {
     return (
@@ -36,6 +36,7 @@ export const HomeHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
         </VStack>
     )
 }
+
 export const TransactionsHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
     const [showBottomSheet, setShowBottomSheet] = useState(false)
 
