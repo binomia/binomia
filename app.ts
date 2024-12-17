@@ -30,6 +30,7 @@ if (cluster.isPrimary) {
     redis.subscribe(...[
         REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE,
         REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED_FROM_QUEUE,
+        REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_PAIED,
         QUEUE_JOBS_NAME.CREATE_TRANSACTION,
         QUEUE_JOBS_NAME.REMOVE_TRANSACTION_FROM_QUEUE,
         QUEUE_JOBS_NAME.PENDING_TRANSACTION,
@@ -84,13 +85,14 @@ if (cluster.isPrimary) {
         serverAdapter: serverAdapter,
         options: {
             uiConfig: {
+                
                 boardTitle: "",
                 favIcon: {
                     default: DASHBOARD_FAVICON_URL,
                     alternative: DASHBOARD_FAVICON_URL,
                 },
                 boardLogo: {
-                    width: 80,
+                    width: 200,
                     height: 35,
                     path: DASHBOARD_LOGO_URL,
                 },
@@ -113,12 +115,18 @@ if (cluster.isPrimary) {
     app.post("/", async (req: Request, res: Response) => {
         try {
             const jsonRPCResponse = await server.receive(req.body);
-            res.status(200).json(jsonRPCResponse);
+
+            if (jsonRPCResponse?.error)
+                res.status(400).json(jsonRPCResponse);
+
+            else
+                res.status(200).json(jsonRPCResponse);
 
         } catch (error) {
             res.status(400).json({
                 jsonrpc: "2.0",
-                error
+                error,
+                test: false
             });
         }
     });

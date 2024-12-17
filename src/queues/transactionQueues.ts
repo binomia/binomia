@@ -56,7 +56,7 @@ export default class TransactionsQueue {
                 return transaction
             }
             case "pendingTransaction": {
-                const delay = 1000 * 20 // * 30 // 30 minutes
+                const delay = 1000 * 60 * 30
                 const job = await this.addJob(jobId, data, delay, delay);
 
                 const transaction = await QueueTransactionsController.createTransaction(Object.assign(job.asJSON(), {
