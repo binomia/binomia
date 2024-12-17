@@ -20,9 +20,10 @@ export const initRedisEventSubcription = (io: Server) => {
     process.on("message", async ({ channel, payload }: any) => {
         switch (channel) {
             case REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED: {
-                const { data, recipientSocketRoom } = JSON.parse(payload)
+                const { data, recipientSocketRoom, expoNotificationTokens } = JSON.parse(payload)
+                
                 io.to(recipientSocketRoom).emit(channel, data)
-                await sendNotification()
+                await sendNotification(expoNotificationTokens)
                 
                 break;
             }
