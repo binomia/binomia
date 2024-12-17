@@ -39,6 +39,14 @@ const type = () => {
             createdAt: String
             updatedAt: String
         }
+
+        type AccountPermissionsType {            
+            allowReceive: Boolean
+            allowWithdraw: Boolean
+            allowSend: Boolean
+            allowRequestMe: Boolean
+            allowDeposit: Boolean  
+        }
        
         type AccountTypeWithTransactions {
             id:  Int
@@ -117,6 +125,7 @@ const query = () => {
     return `
         accounts(page: Int!, pageSize: Int!): [AccountType]
         account: OnlyAccountType
+        accountPermissions: AccountPermissionsType
         searchAccounts(search: AccountInput!, limit: Int): [AccountType]
         accountLimit: AccountLimitsType
     `
@@ -129,11 +138,12 @@ const mutation = () => {
 }
 const subscription = () => { }
 
-const { accounts, account, updateAccountPermissions, accountLimit } = AccountController
+const { accounts, account, accountPermissions, updateAccountPermissions, accountLimit } = AccountController
 const resolvers = {
     query: {
         accounts,
         account,
+        accountPermissions,
         accountLimit
     },
 

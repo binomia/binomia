@@ -1,4 +1,4 @@
-import { AccountModel, kycModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel } from '@/models'
+import { AccountModel, kycModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, SessionModel } from '@/models'
 import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
@@ -7,9 +7,8 @@ import { QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_
 import { Op } from 'sequelize';
 import redis from '@/redis';
 import shortUUID from 'short-uuid';
-import RecurrenceTransactionsModel from '@/models/recurrenceTransactionModel';
 import { queueServer } from '@/rpc/queueRPC';
-import { tr } from '@faker-js/faker';
+import QueueTransactionsModel from '@/models/queueTransactionModel';
 
 export class TransactionsController {
     static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
@@ -134,11 +133,47 @@ export class TransactionsController {
                 ]
             })
 
-            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
-                data: transactionData.toJSON(),
-                senderSocketRoom: senderAccount.toJSON().user.username,
-                recipientSocketRoom: receiverAccount.toJSON().user.username
-            }))
+            const receiverSession = await SessionModel.findAll({
+                attributes: ["expoNotificationToken"],
+                where: {
+                    [Op.and]: [
+                        { userId: receiverAccount.toJSON().user.id },
+                        { verified: true },
+                        {
+                            expires: {
+                                [Op.gt]: Date.now()
+                            }
+                        },
+                        {
+                            [Op.not]: {
+                                expoNotificationToken: null
+                            }
+                        }
+                    ]
+                }
+            })
+
+            const expoNotificationTokens: string[] = receiverSession.map(obj => obj.dataValues.expoNotificationToken);
+
+            await Promise.all([
+                redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
+                    data: transactionData.toJSON(),
+                    senderSocketRoom: senderAccount.toJSON().user.username,
+                    recipientSocketRoom: receiverAccount.toJSON().user.username,
+                    expoNotificationTokens
+                })),
+
+                redis.publish(QUEUE_JOBS_NAME.PENDING_TRANSACTION, JSON.stringify({
+                    jobId: `pendingTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
+                    jobName: "pendingTransaction",
+                    jobTime: "everyThirtyMinutes",
+                    senderId: senderAccount.toJSON().id,
+                    receiverId: receiverAccount.toJSON().id,
+                    amount: validatedData.amount,
+                    data: { transactionId: transactionData.toJSON().transactionId },
+                }))
+            ])
+
 
             if (recurrenceData.time !== "oneTime") {
                 const recurrenceQueueData = await TransactionJoiSchema.recurrenceQueueTransaction.parseAsync(Object.assign(transactionData.toJSON(), {
@@ -232,6 +267,7 @@ export class TransactionsController {
                 transactionType: validatedData.transactionType,
                 currency: validatedData.currency,
                 location: validatedData.location,
+                status: "requested",
                 signature
             })
 
@@ -295,7 +331,7 @@ export class TransactionsController {
                 where: {
                     [Op.and]: [
                         { transactionId },
-                        { status: "pending" },
+                        { status: "requested" },
                         { transactionType: "request" },
                         { toAccount: session.user.account.id }
                     ]
@@ -414,16 +450,28 @@ export class TransactionsController {
             })
 
             await transaction.update({
-                status: "paid",
+                status: "pending",
             })
 
             const transactionData = await transaction.reload()
 
-            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_PAIED, JSON.stringify({
-                data: transactionData.toJSON(),
-                senderSocketRoom: senderAccount.toJSON().user.username,
-                recipientSocketRoom: receiverAccount.toJSON().user.username
-            }))
+            await Promise.all([
+                redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_PAIED, JSON.stringify({
+                    data: transactionData.toJSON(),
+                    senderSocketRoom: senderAccount.toJSON().user.username,
+                    recipientSocketRoom: receiverAccount.toJSON().user.username
+                })),
+
+                redis.publish(QUEUE_JOBS_NAME.PENDING_TRANSACTION, JSON.stringify({
+                    jobId: `pendingTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
+                    jobName: "pendingTransaction",
+                    jobTime: "everyThirtyMinutes",
+                    senderId: senderAccount.toJSON().id,
+                    receiverId: receiverAccount.toJSON().id,
+                    amount: transactionData.toJSON().amount,
+                    data: { transactionId: transactionData.toJSON().transactionId },
+                }))
+            ])
 
             return transactionData.toJSON()
 
@@ -626,7 +674,7 @@ export class TransactionsController {
             const limit = _pageSize;
             const offset = (page - 1) * _pageSize;
 
-            const transactions = await RecurrenceTransactionsModel.findAll({
+            const transactions = await QueueTransactionsModel.findAll({
                 limit,
                 offset,
                 order: [['createdAt', 'DESC']],
@@ -634,7 +682,8 @@ export class TransactionsController {
                 where: {
                     [Op.and]: [
                         { senderId: session.user.account.id },
-                        { status: "active" }
+                        { status: "active" },
+                        { jobName: { [Op.ne]: "pendingTransaction" } }
                     ]
                 },
                 include: [

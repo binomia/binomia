@@ -1,7 +1,7 @@
 import { STRING, JSONB, TEXT, INTEGER } from "sequelize"
 import { db } from "@/config"
 
-const RecurrenceTransactionsModel = db.define('recurrence_transactions', {
+const QueueTransactionsModel = db.define('queue_transactions', {
 	jobId: {
 		type: STRING
 	},
@@ -39,4 +39,4 @@ const RecurrenceTransactionsModel = db.define('recurrence_transactions', {
 
 
 
-export default RecurrenceTransactionsModel
+export default QueueTransactionsModel

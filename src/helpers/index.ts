@@ -198,12 +198,10 @@ export const checkForProtectedRequests = async (req: any) => {
                 }]
             })
 
-
-
             if (!session)
                 throw new GraphQLError("INVALID_SESSION: No session found")
 
-            if (jwtToken !== session.dataValues.jwt || sessionAuthIdentifier !== session.dataValues.deviceId)
+            if (jwtToken !== session.toJSON().jwt || sessionAuthIdentifier !== session.dataValues.deviceId)
                 throw new Error("INVALID_SESSION: Invalid token data")
 
             else

@@ -3,11 +3,11 @@ import { z } from 'zod'
 
 export class AccountZodSchema {
     static updateAccountPermissions = z.object({
-        allowReceive: z.boolean().nullish().transform((v) => v ?? false),
-        allowWithdraw: z.boolean().nullish().transform((v) => v ?? false),
-        allowDeposit: z.boolean().nullish().transform((v) => v ?? false),
-        allowSend: z.boolean().nullish().transform((v) => v ?? false),
-        allowRequestMe: z.boolean().nullish().transform((v) => v ?? false)
+        allowReceive: z.boolean().nullish().optional(),
+        allowWithdraw: z.boolean().nullish().optional(),
+        allowDeposit: z.boolean().nullish().optional(),
+        allowSend: z.boolean().nullish().optional(),
+        allowRequestMe: z.boolean().nullish().optional()
     })
 
     static accountLimits = z.object({

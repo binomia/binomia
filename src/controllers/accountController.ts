@@ -50,6 +50,24 @@ export class AccountController {
             throw new GraphQLError(error.message);
         }
     }
+    static accountPermissions = async (_: unknown, ___: unknown, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            const session = await checkForProtectedRequests(req);
+
+            const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
+            const user = await AccountModel.findOne({            
+                where: {
+                    hash: session.user.account.hash
+                },
+                attributes: fields['account']
+            })
+
+            return user
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
 
     static updateAccountPermissions = async (_: unknown, { data }: { data: any }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
@@ -57,6 +75,12 @@ export class AccountController {
 
             const accountPermissions = await AccountZodSchema.updateAccountPermissions.parseAsync(data)
             const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
+
+            console.log({
+                accountPermissions,
+                data
+            });
+            
 
 
             const account = await AccountModel.findOne({
