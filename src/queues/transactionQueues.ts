@@ -77,7 +77,14 @@ export default class TransactionsQueue {
     }
 
     addJob = async (jobName: string, data: string, delay: number = 0, every: number = 0) => {
-        const job = await this.queue.add(jobName, data, { delay, repeat: { every, startDate: delay } })
+        const job = await this.queue.upsertJobScheduler(jobName,
+            {
+                every,
+                startDate: new Date(Date.now() + delay)
+            },
+            { data }
+        );
+
         return job
     }
 

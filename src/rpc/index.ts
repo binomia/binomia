@@ -20,7 +20,7 @@ export const initMethods = (server: JSONRPCServer) => {
 
         return job?.asJSON()
     });
-    
+
     server.addMethod("moveToCompleted", async ({ queueName, jobId }: { queueName: string, jobId: string }) => {
         const queue = new Queue(queueName, { connection: { host: "redis", port: 6379 } });
         const job = await queue.getJob(jobId);
@@ -59,7 +59,7 @@ export const initMethods = (server: JSONRPCServer) => {
     server.addMethod("getQueues", async () => {
         const keys = await redis.keys('bull:*:meta')
         const queues = keys.map(key => key.split(':')[1]);
-        
+
 
         return queues
     });
@@ -76,7 +76,7 @@ export const initMethods = (server: JSONRPCServer) => {
 
     server.addMethod("removeJob", async ({ jobKey }: { jobKey: string }) => {
         try {
-            const job = await transactionsQueue.removeJob(jobKey)
+            const job = await transactionsQueue.removeJob(jobKey)            
             return job
 
         } catch (error: any) {
