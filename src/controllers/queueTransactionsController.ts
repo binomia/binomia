@@ -12,7 +12,7 @@ interface RecurrenceTransactionsParams extends JobJson {
     senderId: number,
     amount: number,
     jobName: string
-    jobTime: WeeklyQueueTitleType
+    jobTime: string
 }
 
 export class QueueTransactionsController {

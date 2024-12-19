@@ -1,8 +1,8 @@
 import { Job, JobJson, Queue, Worker } from "bullmq";
-import { WeeklyQueueTitleType } from "@/types";
-import { getNextDay } from "@/helpers";
+import { MonthlyQueueTitleType, WeeklyQueueTitleType } from "@/types";
 import { QueueTransactionsController } from "@/controllers/queueTransactionsController";
 import shortUUID from "short-uuid";
+import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_EVERY_HALF_HOUR_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN } from "@/constants";
 
 
 export default class TransactionsQueue {
@@ -38,12 +38,14 @@ export default class TransactionsQueue {
         })
     }
 
-    createJobs = async ({ jobId, jobName, jobTime, amount, receiverId, senderId, data }: { jobId: string, amount: number, jobName: string, jobTime: WeeklyQueueTitleType, senderId: number, receiverId: number, data: string }) => {
+    createJobs = async ({ jobId, jobName, jobTime, amount, receiverId, senderId, data }: { jobId: string, amount: number, jobName: string, jobTime: string, senderId: number, receiverId: number, data: string }) => {
+        console.log({
+            jobName,
+            jobTime
+        });
         switch (jobName) {
             case "weekly": {
-                const delay = getNextDay(jobTime)
-
-                const job = await this.addJob(jobId, data, delay, delay);
+                const job = await this.addJob(jobId, data, CRON_JOB_WEEKLY_PATTERN[jobTime as WeeklyQueueTitleType]);
                 const transaction = await QueueTransactionsController.createTransaction(Object.assign(job.asJSON(), {
                     jobTime,
                     jobName,
@@ -55,10 +57,34 @@ export default class TransactionsQueue {
 
                 return transaction
             }
-            case "pendingTransaction": {
-                const delay = 1000 * 60 * 30
-                const job = await this.addJob(jobId, data, delay, delay);
+            case "biweekly": {
+                const job = await this.addJob(jobId, data, CRON_JOB_BIWEEKLY_PATTERN);
+                const transaction = await QueueTransactionsController.createTransaction(Object.assign(job.asJSON(), {
+                    jobTime,
+                    jobName,
+                    receiverId,
+                    senderId,
+                    amount,
+                    data
+                }))
 
+                return transaction
+            }
+            case "monthly": {
+                const job = await this.addJob(jobId, data, CRON_JOB_MONTHLY_PATTERN[jobTime as MonthlyQueueTitleType]);
+                const transaction = await QueueTransactionsController.createTransaction(Object.assign(job.asJSON(), {
+                    jobTime,
+                    jobName,
+                    receiverId,
+                    senderId,
+                    amount,
+                    data
+                }))
+
+                return transaction
+            }
+            case "pendingTransaction": {
+                const job = await this.addJob(jobId, data, CRON_JOB_EVERY_HALF_HOUR_PATTERN);
                 const transaction = await QueueTransactionsController.createTransaction(Object.assign(job.asJSON(), {
                     jobTime,
                     jobName,
@@ -76,15 +102,8 @@ export default class TransactionsQueue {
         }
     }
 
-    addJob = async (jobName: string, data: string, delay: number = 0, every: number = 0) => {
-        const job = await this.queue.upsertJobScheduler(jobName,
-            {
-                every,
-                startDate: new Date(Date.now() + delay)
-            },
-            { data }
-        );
-
+    addJob = async (jobName: string, data: string, pattern: string) => {
+        const job = await this.queue.upsertJobScheduler(jobName, { tz: "EST", pattern }, { data });
         return job
     }
 
