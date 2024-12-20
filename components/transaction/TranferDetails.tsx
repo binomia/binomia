@@ -30,7 +30,7 @@ const { width } = Dimensions.get("screen")
 const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }, handleOnClose = () => { } }) => {
     const { receiver, transactions } = useSelector((state: any) => state.transactionReducer)
     const { location, account, user } = useSelector((state: any) => state.globalReducer)
-    
+
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
     const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
@@ -173,14 +173,13 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
         }
 
         return (
-            <VStack py={"20px"} px={"10px"} w={"100%"}>
+            <VStack py={"20px"} alignItems={"center"} w={"100%"}>
                 <Heading mb={"20px"} fontSize={scale(20)} color={"white"}>Selecciona un día</Heading>
                 <FlatList
                     scrollEnabled={false}
                     data={recurenceMonthlyData}
-                    contentContainerStyle={{ justifyContent: "space-between" }}
-                    renderItem={({ item }) => (
-                        <HStack w={"100%"} >
+                    renderItem={({ item, index }) => (
+                        <HStack w={"100%"}>
                             {item.map(({ title, id, day }) => (
                                 <Pressable _pressed={{ opacity: 0.5 }} key={title} m={"5px"} flexWrap={"nowrap"} onPress={() => onSelecteOption(id, title)} w={width / 6} h={width / 6} bg={recurrenceDaySelected === id ? colors.mainGreen : colors.lightGray} justifyContent={"center"} alignItems={"center"} borderRadius={10}>
                                     <Heading fontSize={scale(15)} fontWeight={"500"} color={recurrenceDaySelected === id ? colors.white : colors.mainGreen}>{day}</Heading>
@@ -245,7 +244,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             <BottomSheet onCloseFinish={onCloseFinished} open={openOptions === "weekly"} height={scale(300)}>
                 <RenderWeeklyOption key={"RenderWeeklyOption"} />
             </BottomSheet>
-            <BottomSheet onCloseFinish={onCloseFinished} open={openOptions === "monthly"} height={(width / 6) * 9}>
+            <BottomSheet onCloseFinish={onCloseFinished} open={openOptions === "monthly"} height={(width / 6) * 10}>
                 <RenderMonthlyOption key={"RenderMonthlyOption"} />
             </BottomSheet>
         </SafeAreaView>

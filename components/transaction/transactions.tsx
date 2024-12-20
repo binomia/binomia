@@ -251,9 +251,9 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 						<VStack w={"100%"} >
 							<HStack w={"100%"} justifyContent={"space-between"}>
 								<Heading px={showNewTransaction ? "20px" : "0px"} fontSize={scale(20)} color={"white"}>{"Transacciones"}</Heading>
-								<Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.navigate("/transactions")}>
+								{!showNewTransaction ? <Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.navigate("/transactions")}>
 									<Heading px={showNewTransaction ? "20px" : "0px"} underline fontSize={scale(17)} color={colors.pureGray}>{"Ver más"}</Heading>
-								</Pressable>
+								</Pressable> : null}
 							</HStack>
 							<FlatList
 								px={showNewTransaction ? "20px" : "0px"}

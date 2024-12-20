@@ -96,10 +96,10 @@ const HomeScreen: React.FC = () => {
 						</HStack>
 					</VStack>
 				</VStack>
-				<VStack w={"100%"} pt={"30px"}>
+				{/* <VStack w={"100%"} pt={"30px"}>
 					<Transactions showNewTransaction={false} />
-				</VStack>
-				{/* <VStack w={"100%"} pt={"30px"} px={"5px"}>
+				</VStack> */}
+				<VStack w={"100%"} pt={"30px"} px={"5px"}>
 					<Heading fontSize={scale(24)} color={"white"}>Servicios</Heading>
 					<HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
 						<Pressable onPress={() => { }} _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
@@ -121,7 +121,7 @@ const HomeScreen: React.FC = () => {
 							<Text color={"white"}>Facturas</Text>
 						</Pressable>
 					</HStack>
-				</VStack> */}
+				</VStack>
 				<QRScannerScreen defaultPage={1} open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
 			</ScrollView>
 		</VStack>

@@ -282,6 +282,11 @@ export const recurenceMonthlyData = [
         { title: "Día 26 de cada mes", id: "everyTwentySixth", day: "26" },
         { title: "Día 27 de cada mes", id: "everyTwentySeventh", day: "27" },
         { title: "Día 28 de cada mes", id: "everyTwentyEighth", day: "28" },
+        { title: "Día 29 de cada mes", id: "everyTwentyNinth", day: "29" },
+        { title: "Día 30 de cada mes", id: "everyThirtieth", day: "30" },
+    ],
+    [
+        { title: "Día 31 de cada mes", id: "everyThirtyFirst", day: "31" }
     ]
 ]
 

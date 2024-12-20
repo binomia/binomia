@@ -209,7 +209,7 @@ const TransactionsScreen: React.FC = () => {
 	}, [isBottom])
 
 	return (
-		isLoading ? <TransactionSkeleton /> : < Transactions/>
+		isLoading ? <TransactionSkeleton /> : < Transactions />
 	)
 }
 
