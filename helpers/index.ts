@@ -156,37 +156,40 @@ export const getMapLocationImage = ({ latitude, longitude }: { latitude: number,
 
 
 export const getNextDay = (targetDay: WeeklyQueueTitleType): number => {
-    switch (targetDay) {
-        case "everySunday":
-            return nextSunday(new Date()).getTime()
+    try {
+        switch (targetDay) {
+            case "everySunday":
+                return nextSunday(new Date()).getTime()
 
-        case "everyMonday":
-            return nextMonday(new Date()).getTime()
+            case "everyMonday":
+                return nextMonday(new Date()).getTime()
 
-        case "everyTuesday":
-            return nextTuesday(new Date()).getTime()
+            case "everyTuesday":
+                return nextTuesday(new Date()).getTime()
 
-        case "everyWednesday":
-            return nextWednesday(new Date()).getTime()
+            case "everyWednesday":
+                return nextWednesday(new Date()).getTime()
 
-        case "everyThursday":
-            return nextThursday(new Date()).getTime()
+            case "everyThursday":
+                return nextThursday(new Date()).getTime()
 
-        case "everyFriday":
-            return nextFriday(new Date()).getTime()
+            case "everyFriday":
+                return nextFriday(new Date()).getTime()
 
-        case "everySaturday":
-            return nextSaturday(new Date()).getTime()
+            case "everySaturday":
+                return nextSaturday(new Date()).getTime()
 
-        default:
-            return 0
+            default:
+                return 0
+        }
+    } catch (error) {
+        console.error({ getNextDay: error });
+        return 0
     }
 }
 
 
 export const getSpecificDayOfMonth = (dayString: string) => {
-    console.log({ dayString });
-    
     // Get the current date
     const today = new Date();
 
@@ -245,5 +248,19 @@ export const getSpecificDayOfMonth = (dayString: string) => {
         return nextMonth;
     } else {
         return ""
+    }
+}
+
+
+export const getNextBiWeeklyDate = (): Date => {
+    const today = new Date(); // Get today's date
+    const currentDay = today.getDate();
+
+    if (currentDay < 16) {
+        // Return the 16th of the current month
+        return new Date(today.getFullYear(), today.getMonth(), 16);
+    } else {
+        // Return the 1st of the next month
+        return new Date(today.getFullYear(), today.getMonth() + 1, 1);
     }
 }

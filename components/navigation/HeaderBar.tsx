@@ -10,7 +10,7 @@ import colors from "@/colors"
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { scale } from "react-native-size-matters"
 import { Dimensions, Platform } from "react-native"
-import RecurrenceTransactions from "../transaction/RecurrenceTransactions"
+import RecurrenceTransactions from "../transaction/recurrence/RecurrenceTransactions"
 import { useSelector } from "react-redux"
 import DefaultIcon from "react-native-default-icon"
 import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from "@/helpers"

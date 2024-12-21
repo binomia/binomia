@@ -218,7 +218,7 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 						<Input h={"50px"} w={"100%"} placeholder='Buscar...' onChangeText={(value) => handleSearch(value.toLowerCase())} />
 					</TouchableWithoutFeedback >
 				</VStack> : null}
-				<ScrollView onScroll={onScroll} flex={1} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }}>
+				<ScrollView onScroll={onScroll} flex={1} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} contentContainerStyle={{ paddingBottom: 80 }}>
 					{showNewTransaction ? <HStack px={"20px"} style={styles.ScrollView} >
 						<ScrollView horizontal>
 							<VStack justifyContent={"center"} alignItems={"center"}>
