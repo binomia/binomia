@@ -13,11 +13,12 @@ interface RecurrenceTransactionsParams extends JobJson {
     amount: number,
     jobName: string
     jobTime: string
+    status?: string
 }
 
 export class QueueTransactionsController {
     static createTransaction = async (transactionData: RecurrenceTransactionsParams) => {
-        const { repeatJobKey, receiverId, senderId, jobTime, jobName, amount, id, timestamp, data } = transactionData
+        const { repeatJobKey, receiverId, senderId, jobTime, status = "active", jobName,  amount, id, timestamp, data } = transactionData
         const hash = await Cryptography.hash(JSON.stringify({
             jobId: id,
             receiverId,
@@ -39,7 +40,7 @@ export class QueueTransactionsController {
             jobName,
             jobTime,
             timestamp,
-            status: "active",
+            status,
             repeatedCount: 0,
             data,
             signature
@@ -125,7 +126,7 @@ export class QueueTransactionsController {
         }
     }
 
-    static inactiveTransaction = async (repeatJobKey: string) => {
+    static inactiveTransaction = async (repeatJobKey: string, status: string = "completed") => {
         const transaction = await QueueTransactionsModel.findOne({
             where: {
                 [Op.and]: [
@@ -139,7 +140,7 @@ export class QueueTransactionsController {
             throw "transaction not found";
 
         await transaction.update({
-            status: "inactive",
+            status,
             repeatedCount: transaction.toJSON().repeatedCount + 1
         })
 

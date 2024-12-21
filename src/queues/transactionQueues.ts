@@ -38,6 +38,7 @@ export default class TransactionsQueue {
         })
     }
 
+
     createJobs = async ({ jobId, jobName, jobTime, amount, receiverId, senderId, data }: { jobId: string, amount: number, jobName: string, jobTime: string, senderId: number, receiverId: number, data: string }) => {
         console.log({
             jobName,
@@ -111,7 +112,7 @@ export default class TransactionsQueue {
         try {
             const job = await this.queue.removeJobScheduler(repeatJobKey)
             if (job) {
-                const transaction = await QueueTransactionsController.inactiveTransaction(repeatJobKey)
+                const transaction = await QueueTransactionsController.inactiveTransaction(repeatJobKey, "cancelled")
                 return transaction;
             }
 
@@ -124,12 +125,13 @@ export default class TransactionsQueue {
 
     updateJob = async (repeatJobKey: string, jobName: string, jobTime: WeeklyQueueTitleType): Promise<any> => {
         try {
+            // const job = await this.queue.getJobScheduler(repeatJobKey)
             const job = await this.queue.removeJobScheduler(repeatJobKey)
             if (job) {
-                const transaction = await QueueTransactionsController.inactiveTransaction(repeatJobKey)
+                const transaction = await QueueTransactionsController.inactiveTransaction(repeatJobKey, "cancelled")
 
                 const newTransaction = await this.createJobs({
-                    jobId: shortUUID.generate(),
+                    jobId: `${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`,
                     amount: transaction.amount,
                     jobName,
                     jobTime,

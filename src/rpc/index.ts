@@ -9,30 +9,39 @@ import { Job, Queue } from "bullmq";
 
 export const initMethods = (server: JSONRPCServer) => {
     // gloabal methods
-    server.addMethod("test", async ({ queueName, jobId }: { queueName: string, jobId: string }) => {
-        const queue = new Queue(queueName, { connection: { host: "redis", port: 6379 } });
-        const job = await Job.fromId(queue, jobId);
-
-        if (!job)
-            throw new Error("Job not found");
-
-        job.moveToCompleted
-
-        return job?.asJSON()
-    });
-
-    server.addMethod("moveToCompleted", async ({ queueName, jobId }: { queueName: string, jobId: string }) => {
-        const queue = new Queue(queueName, { connection: { host: "redis", port: 6379 } });
-        const job = await queue.getJob(jobId);
-
-        const result = await queue.drain(true)
-
-        console.log({ result });
-
-        return result
+    server.addMethod("test", async ({ queueName, jobId, jobKey }: { queueName: string, jobId: string, jobKey: string }) => {
+        const job = await transactionsQueue.queue.getJobScheduler(jobKey)
+        return job
     });
 
     // queue methods
+    server.addMethod("dropJobs", async () => {
+        try {
+            const keys = await redis.keys('bull:*:meta')
+            const queueNames = keys.map(key => key.split(':')[1]);
+            const queues = queueNames.map(name => new Queue(name, { connection: { host: "redis", port: 6379 } }));
+
+            const jobs = await Promise.all(queues.map(async (queue) => {
+                const getJobs = await queue.getJobs()
+                await Promise.all(
+                    getJobs.map(async ({ repeatJobKey }) => {
+                        if (repeatJobKey)
+                            await transactionsQueue.removeJob(repeatJobKey)
+                    })
+                )
+
+                return "All jobs deleted";
+            }));
+
+            return jobs
+
+        } catch (error: any) {
+            console.log({ error });
+            throw new Error(error);
+        }
+
+    });
+
     server.addMethod("getQueuesWithJobs", async () => {
         const keys = await redis.keys('bull:*:meta')
         const queueNames = keys.map(key => key.split(':')[1]);
@@ -76,7 +85,7 @@ export const initMethods = (server: JSONRPCServer) => {
 
     server.addMethod("removeJob", async ({ jobKey }: { jobKey: string }) => {
         try {
-            const job = await transactionsQueue.removeJob(jobKey)            
+            const job = await transactionsQueue.removeJob(jobKey)
             return job
 
         } catch (error: any) {
