@@ -37,8 +37,6 @@ const PrivacyScreen: React.FC = () => {
         }
     }
 
-
-
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
             <VStack w={"100%"} h={"auto"} mt={"50px"}>

@@ -17,6 +17,7 @@ export class AccountAuthSchema {
         allowSend: z.boolean().nullable().transform(v => v ?? false),
         allowReceive: z.boolean().nullable().transform(v => v ?? false),
         allowRequestMe: z.boolean().nullable().transform(v => v ?? false),
+        allowDeposit: z.boolean().nullable().transform(v => v ?? false),
     })
 
     static jwtDecoded = z.object({
@@ -38,5 +39,6 @@ export class AccountAuthSchema {
         allowSend: z.boolean().nullable().transform(v => v ?? true),
         allowReceive: z.boolean().nullable().transform(v => v ?? true),
         allowRequestMe: z.boolean().nullable().transform(v => v ?? true),
-    }).default({ allowWithdraw: true, allowSend: true, allowReceive: true, allowRequestMe: true })
+        allowDeposit: z.boolean().nullable().transform(v => v ?? true),
+    }).default({ allowWithdraw: true, allowSend: true, allowReceive: true, allowDeposit: true, allowRequestMe: true })
 }

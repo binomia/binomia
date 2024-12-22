@@ -34,7 +34,6 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
     const [updateRecurrentTransactions] = useMutation(TransactionApolloQueries.updateRecurrentTransactions())
 
     const [visible, setVisible] = useState<boolean>(false);
-    const [bottomSheetHeight, setBottomSheetHeight] = useState<number>(height * 0.4);
     const [recurrence, setRecurrence] = useState<string>("");
     const [startDeleting, setStartDeleting] = useState<boolean>(false);
     const [refreshing, setRefreshing] = useState(false);
@@ -84,7 +83,6 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
     }, [])
 
     const onEdit = () => {
-        setBottomSheetHeight(height * 0.7)
         ref.current?.setPage(1)
         setVisible(false)
     }
@@ -182,12 +180,9 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
 
         if (value === "weekly") {
             ref.current?.setPage(2)
-            setBottomSheetHeight(height * 0.65)
         }
 
         else if (value === "monthly") {
-            // setBottomSheetHeight(height -  (width * 0.6) * 5)
-            setBottomSheetHeight(height * 0.90)
             ref.current?.setPage(2)
 
         } else if (value === "biweekly") {

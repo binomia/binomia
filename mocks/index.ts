@@ -1,5 +1,5 @@
 import { askingForMoneyIcon, withdrawIcon, depositIcon, idIcon, limitIcon, mailIcon, mastercardLogo, notificacionIcon, phoneIcon, privacyIcon, receiveIcon, sendMoneyIcon, soportIcon, userIcon, visaLogo, whatsappIcon } from "@/assets";
-import { SUPPORT_PHONE_NUMBER } from "@/constants";
+import { SUPPORT_EMAIL, SUPPORT_PHONE_NUMBER } from "@/constants";
 import { FORMAT_CURRENCY, FORMAT_LIMIT, FORMAT_PHONE_NUMBER } from "@/helpers";
 import { AccountLimitsType, AccountType, GlobalContextType } from "@/types";
 
@@ -198,7 +198,7 @@ export const supportScreenData = ({ openEmail, openPhone, openWhatsApp }: any) =
         onPress: () => openPhone(),
     },
     {
-        name: "soporte@dinero.com.do",
+        name: SUPPORT_EMAIL,
         icon: mailIcon,
         onPress: () => openEmail(),
     },

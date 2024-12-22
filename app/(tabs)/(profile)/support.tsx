@@ -5,7 +5,7 @@ import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
 import Feather from '@expo/vector-icons/Feather';
 import { CAPITALIZE_WORDS } from '@/helpers'
-import { SUPPORT_PHONE_NUMBER } from '@/constants'
+import { SUPPORT_EMAIL, SUPPORT_PHONE_NUMBER } from '@/constants'
 import { useSelector } from 'react-redux'
 import { supportScreenData } from '@/mocks'
 import Button from '@/components/global/Button'
@@ -19,9 +19,8 @@ const SupportScreen: React.FC = () => {
 
     const openEmail = async () => {
         try {
-            const recipient = 'example@email.com'; // Replace with the recipient's email address
             const subject = `Soporte - ${CAPITALIZE_WORDS(user?.fullName)} `; // Subject of the email
-            const url = `mailto:${recipient}?subject=${encodeURIComponent(subject)}`;
+            const url = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}`;
             await Linking.openURL(url)
 
         } catch (error) {
