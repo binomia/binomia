@@ -207,7 +207,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
                         </HStack>
                         <Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transactionDeytails?.fullName || "")}</Heading>
                         <Text fontSize={scale(16)} color={colors.lightSkyGray}>{transactionDeytails?.username}</Text>
-                        <Heading textTransform={"capitalize"} mt={"30px"} fontSize={scale(40)} color={"mainGreen"}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
+                        <Heading textTransform={"capitalize"} mt={"30px"} fontSize={scale(45)} color={"mainGreen"}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
                     </VStack>
 
                     <HStack w={"100%"} px={"10px"} justifyContent={"space-between"}>

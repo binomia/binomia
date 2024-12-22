@@ -2,7 +2,6 @@ import React from 'react'
 import colors from '@/colors'
 import { StyleSheet, } from 'react-native'
 import { Image, VStack, Text, HStack, Divider, Switch } from 'native-base'
-import { faceIdIcon } from '@/assets'
 import { useDispatch, useSelector } from 'react-redux'
 import { scale } from 'react-native-size-matters'
 import { globalActions } from '@/redux/slices/globalSlice'
@@ -12,7 +11,7 @@ import { privacyScreenData } from '@/mocks'
 
 const PrivacyScreen: React.FC = () => {
     const dispatch = useDispatch()
-    const { allowFaceId, account } = useSelector((state: any) => state.globalReducer)
+    const { account } = useSelector((state: any) => state.globalReducer)
     const [updateAccountPermissions] = useMutation(AccountApolloQueries.updateAccountPermissions())
 
     const onSwitchChange = async (id: string, allow: boolean) => {
@@ -39,20 +38,9 @@ const PrivacyScreen: React.FC = () => {
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
-            <VStack w={"100%"} h={"auto"} mt={"50px"}>
-                <HStack bg={"lightGray"} w={"100%"} borderRadius={10} space={2} pl={"10px"} py={"8px"} mb={"30px"}>
-                    <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
-                        <Image alt='logo-image' resizeMode='contain' w={"17px"} h={"17px"} source={faceIdIcon} />
-                    </HStack>
-                    <HStack flex={1} justifyContent={"space-between"} alignItems={"center"}>
-                        <HStack h={"30px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
-                            <Text numberOfLines={3} fontSize={scale(15)} color={colors.white}>{"Face ID"}</Text>
-                        </HStack>
-                        <Switch isChecked={allowFaceId} onChange={() => onSwitchChange("allowFaceId", !allowFaceId)} mr={"10px"} />
-                    </HStack>
-                </HStack>
+            <VStack bg={"lightGray"} borderRadius={10} w={"100%"} pb={"5px"} h={"auto"} mt={"50px"}>
                 {privacyScreenData(account).map((permit, index) => (
-                    <HStack key={`privacies-${index}-${permit.id}${permit.name}`} bg={"lightGray"} w={"100%"} borderRadius={10} h={"50px"} py={"10px"} space={2} pl={"10px"} >
+                    <HStack key={`privacies-${index}-${permit.id}${permit.name}`} w={"100%"} borderRadius={10} h={"50px"} py={"10px"} space={2} pl={"10px"} >
                         <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
                             <Image alt='logo-image' resizeMode='contain' tintColor={colors.white} w={"18px"} h={"18px"} source={permit.icon} />
                         </HStack>

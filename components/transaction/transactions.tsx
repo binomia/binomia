@@ -22,6 +22,7 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { noTransactions, pendingClock } from '@/assets';
 import { router, useNavigation } from 'expo-router';
+import { set } from 'date-fns';
 
 type Props = {
 	showNewTransaction?: boolean;
@@ -51,30 +52,42 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 	const [page, setPage] = useState<number>(0);
 	const [isBottom, setIsBottom] = useState(false);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const [searchValue, setSearchValue] = useState<string>("");
 
 	const handleSearch = async (value: string) => {
 		try {
-			if (value === "") {
-				await fetchSearchedUser()
+			setSearchValue(value)
+			const filteredTransactions = transactions.filter((transaction: any) => {
+				const { fullName } = formatTransaction(transaction)
+				return fullName.toLowerCase().includes(value.toLowerCase())
+			})
 
-			} else {
-				const { data } = await searchUser({
-					variables: {
-						"limit": 5,
-						"search": {
-							"username": value,
-							"fullName": value,
-							"email": value,
-							"dniNumber": value
-						}
-					}
-				})
-
-				setUsers(data.searchUsers.length > 0 ? data.searchUsers : [])
-			}
+			setTransactions(filteredTransactions)
 
 		} catch (error) {
 			console.log(error)
+		}
+	}
+
+	const formatTransaction = (transaction: any) => {
+		const isFromMe = transaction.from.user?.id === user.id
+
+		const profileImageUrl = isFromMe ? transaction.to.user?.profileImageUrl : transaction.from.user?.profileImageUrl
+		const fullName = isFromMe ? transaction.to.user?.fullName : transaction.from.user?.fullName
+		const username = isFromMe ? transaction.from.user?.username : transaction.to.user?.username
+		const showPayButton = transaction.transactionType === "request" && !isFromMe && transaction.status === "requested"
+		const amountColor = (transaction.transactionType === "request" && isFromMe || transaction.transactionType === "transfer" && !isFromMe) && transaction.status !== "cancelled" ? colors.mainGreen : colors.red
+		const showMap = (transaction.transactionType === "request" && isFromMe) || (transaction.transactionType === "transfer" && !isFromMe) ? false : true
+
+		return {
+			isFromMe,
+			showMap,
+			amountColor,
+			profileImageUrl: profileImageUrl || "",
+			amount: transaction.amount,
+			showPayButton,
+			fullName: fullName || "",
+			username: username || ""
 		}
 	}
 
@@ -129,27 +142,6 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 		setShowSendTransaction(false)
 	}
 
-	const formatTransaction = (transaction: any) => {
-		const isFromMe = transaction.from.user?.id === user.id
-
-		const profileImageUrl = isFromMe ? transaction.to.user?.profileImageUrl : transaction.from.user?.profileImageUrl
-		const fullName = isFromMe ? transaction.to.user?.fullName : transaction.from.user?.fullName
-		const username = isFromMe ? transaction.from.user?.username : transaction.to.user?.username
-		const showPayButton = transaction.transactionType === "request" && !isFromMe && transaction.status === "requested"
-		const amountColor = (transaction.transactionType === "request" && isFromMe || transaction.transactionType === "transfer" && !isFromMe) && transaction.status !== "cancelled" ? colors.mainGreen : colors.red
-		const showMap = (transaction.transactionType === "request" && isFromMe) || (transaction.transactionType === "transfer" && !isFromMe) ? false : true
-
-		return {
-			isFromMe,
-			showMap,
-			amountColor,
-			profileImageUrl: profileImageUrl || "",
-			amount: transaction.amount,
-			showPayButton,
-			fullName: fullName || "",
-			username: username || ""
-		}
-	}
 
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
@@ -293,7 +285,7 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 								)}
 							/>
 						</VStack>
-						: (
+						: !searchValue ? (
 							<VStack mt={"20px"} w={"100%"} h={height / 3} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
 								<Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
 								<VStack justifyContent={"center"} alignItems={"center"}>
@@ -301,7 +293,7 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 									<Text fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
 								</VStack>
 							</VStack>
-						)
+						) : null
 					}
 					{isLoadingMore ? <Spinner mt={"10px"} size={"lg"} /> : null}
 				</ScrollView>
