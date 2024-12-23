@@ -85,7 +85,7 @@ export default class TransactionsQueue {
                 return transaction
             }
             case "pendingTransaction": {
-                const job = await this.addJob(jobId, data, CRON_JOB_EVERY_HALF_HOUR_PATTERN);
+                const job = await this.queue.add(jobId, data, { repeat: { every: 1000 * 60 * 30 }, jobId }); // 30 minutes
                 const transaction = await QueueTransactionsController.createTransaction(Object.assign(job.asJSON(), {
                     jobTime,
                     jobName,
