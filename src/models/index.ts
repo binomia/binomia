@@ -6,6 +6,7 @@ import TransactionsModel from "./transactionModel"
 import kycModel from "./kycModel"
 import BankingTransactionsModel from "./bankingTransactionModel"
 import QueueTransactionsModel from "./queueTransactionModel"
+import SugestedUsers from "./SugestedUsers"
 
 
 UsersModel.hasOne(kycModel)
@@ -30,6 +31,9 @@ QueueTransactionsModel.belongsTo(AccountModel, { foreignKey: 'receiverId', targe
 AccountModel.hasMany(TransactionsModel, { foreignKey: 'fromAccount', sourceKey: 'id', as: 'incomingTransactions' })
 AccountModel.hasMany(TransactionsModel, { foreignKey: 'toAccount', sourceKey: 'id', as: 'outgoingTransactions' })
 
+SugestedUsers.belongsTo(UsersModel, { foreignKey: 'ownerId', targetKey: 'id', as: 'owner' });
+UsersModel.hasMany(SugestedUsers, { foreignKey: 'userId', sourceKey: 'id', as: 'user' });
+
 BankingTransactionsModel.belongsTo(CardsModel)
 CardsModel.hasMany(BankingTransactionsModel)
 
@@ -37,6 +41,7 @@ BankingTransactionsModel.belongsTo(AccountModel)
 AccountModel.hasMany(BankingTransactionsModel)
 
 export {
+	SugestedUsers,
 	UsersModel,
 	BankingTransactionsModel,
 	SessionModel,

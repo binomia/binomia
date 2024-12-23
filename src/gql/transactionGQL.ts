@@ -177,6 +177,7 @@ const query = () => {
     return `
         transaction: TransactionType
         accountTransactions(page: Int!, pageSize: Int!): [TransactionType]
+        searchAccountTransactions(page: Int!, pageSize: Int!, fullName: String!): [TransactionType]
         accountRecurrentTransactions(page: Int!, pageSize: Int!): [RecurrentTransactionType]
         accountBankingTransactions(page: Int!, pageSize: Int!): [BankingTransactionType]
     `
@@ -197,10 +198,11 @@ const subscription = () => {
     return ``
 }
 
-const { createTransaction, updateRecurrentTransactions, payRequestTransaction, createRequestTransaction, deleteRecurrentTransactions, accountBankingTransactions, accountRecurrentTransactions, accountTransactions, createBankingTransaction } = TransactionsController
+const { createTransaction, searchAccountTransactions, updateRecurrentTransactions, payRequestTransaction, createRequestTransaction, deleteRecurrentTransactions, accountBankingTransactions, accountRecurrentTransactions, accountTransactions, createBankingTransaction } = TransactionsController
 const resolvers = {
     query: {
         accountTransactions,
+        searchAccountTransactions,
         accountBankingTransactions,
         accountRecurrentTransactions
     },

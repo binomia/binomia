@@ -34,12 +34,12 @@ export class AccountController {
 
     static account = async (_: unknown, { hash }: { hash: string }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            await checkForProtectedRequests(req);
+            const session = await checkForProtectedRequests(req);
 
             const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
             const user = await AccountModel.findOne({
                 where: {
-                    hash: req.session.user.account.hash
+                    hash: session.user.account.hash
                 },
                 attributes: fields['account']
             })
@@ -55,7 +55,7 @@ export class AccountController {
             const session = await checkForProtectedRequests(req);
 
             const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
-            const user = await AccountModel.findOne({            
+            const user = await AccountModel.findOne({
                 where: {
                     hash: session.user.account.hash
                 },
@@ -71,21 +71,14 @@ export class AccountController {
 
     static updateAccountPermissions = async (_: unknown, { data }: { data: any }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            await checkForProtectedRequests(req);
+            const session = await checkForProtectedRequests(req);
 
             const accountPermissions = await AccountZodSchema.updateAccountPermissions.parseAsync(data)
             const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
 
-            console.log({
-                accountPermissions,
-                data
-            });
-            
-
-
             const account = await AccountModel.findOne({
                 where: {
-                    id: req.session.user.account.id
+                    id: session.user.account.id
                 },
                 attributes: fields['updateAccount'],
                 include: [{

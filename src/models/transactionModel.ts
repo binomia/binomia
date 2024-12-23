@@ -42,6 +42,14 @@ const TransactionsModel = db.define('transactions', {
 	signature: {
 		type: STRING,
 		allowNull: false
+	},
+	senderFullName: {
+		type: STRING,
+		allowNull: false
+	},
+	receiverFullName: {
+		type: STRING,
+		allowNull: false
 	}
 })
 

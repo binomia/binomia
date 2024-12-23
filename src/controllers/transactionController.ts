@@ -1,4 +1,4 @@
-import { AccountModel, kycModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, SessionModel } from '@/models'
+import { AccountModel, kycModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, SessionModel, SugestedUsers } from '@/models'
 import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
@@ -94,6 +94,8 @@ export class TransactionsController {
             const transaction = await TransactionsModel.create({
                 fromAccount: senderAccount.toJSON().id,
                 toAccount: receiverAccount.toJSON().id,
+                senderFullName: senderAccount.toJSON().user.fullName,
+                receiverFullName: receiverAccount.toJSON().user.fullName,
                 amount: validatedData.amount,
                 deliveredAmount: validatedData.amount,
                 transactionType: validatedData.transactionType,
@@ -171,9 +173,9 @@ export class TransactionsController {
                     receiverId: receiverAccount.toJSON().id,
                     amount: validatedData.amount,
                     data: { transactionId: transactionData.toJSON().transactionId },
-                }))
-            ])
+                })),
 
+            ])
 
             if (recurrenceData.time !== "oneTime") {
                 const recurrenceQueueData = await TransactionJoiSchema.recurrenceQueueTransaction.parseAsync(Object.assign(transactionData.toJSON(), {
@@ -183,7 +185,7 @@ export class TransactionsController {
                 }))
 
                 await redis.publish(QUEUE_JOBS_NAME.CREATE_TRANSACTION, JSON.stringify({
-                    jobId: `${recurrenceData.title}@${shortUUID.generate()}${shortUUID.generate()}`,
+                    jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
                     jobName: recurrenceData.title,
                     jobTime: recurrenceData.time,
                     senderId: senderAccount.toJSON().id,
@@ -192,6 +194,8 @@ export class TransactionsController {
                     data: recurrenceQueueData
                 }))
             }
+
+            await redis.del(`sugestedUsers:${session.userId}`)
 
             return transactionData.toJSON()
 
@@ -664,6 +668,81 @@ export class TransactionsController {
         }
     }
 
+    static searchAccountTransactions = async (_: unknown, { page, pageSize, fullName }: { page: number, pageSize: number, fullName: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            const session = await checkForProtectedRequests(context.req);
+            const { user } = session
+
+            const fields = getQueryResponseFields(fieldNodes, 'transactions')
+
+            const _pageSize = pageSize > 50 ? 50 : pageSize
+            const limit = _pageSize;
+            const offset = (page - 1) * _pageSize;
+
+            const transactions = await TransactionsModel.findAll({
+                limit,
+                offset,
+                order: [['createdAt', 'DESC']],
+                attributes: [...fields['transactions'], "fromAccount", "toAccount"],
+                where: {
+                    [Op.and]: [
+                        {
+                            [Op.or]: [
+                                {
+                                    senderFullName: { [Op.iLike]: `%${fullName}%` },
+                                },
+                                {
+                                    receiverFullName: { [Op.iLike]: `%${fullName}%` }
+                                }
+                            ]
+                        },
+                        {
+                            [Op.or]: [
+                                {
+                                    fromAccount: user.account.id
+                                },
+                                {
+                                    toAccount: user.account.id,
+                                }
+                            ]
+                        }
+                    ]
+                },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'from',
+                        attributes: fields['from'],
+
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                            attributes: fields['user']
+                        }]
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'to',
+                        attributes: fields['to'],
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                            attributes: fields['user']
+                        }]
+                    }
+                ]
+            })
+
+            if (!transactions)
+                throw new GraphQLError('No transactions found');
+
+            return transactions
+
+        } catch (error: any) {
+            throw new GraphQLError(error);
+        }
+    }
+
     static accountRecurrentTransactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(context.req);
@@ -734,7 +813,11 @@ export class TransactionsController {
     static updateRecurrentTransactions = async (_: unknown, { data: { repeatJobKey, jobName, jobTime } }: { data: { repeatJobKey: string, jobName: string, jobTime: string } }, context: any) => {
         try {
             await checkForProtectedRequests(context.req);
-            const job = await queueServer("updateJob", { jobKey: repeatJobKey, jobName, jobTime })
+            const job = await queueServer("updateJob", {
+                jobKey: repeatJobKey,
+                jobName,
+                jobTime
+            })
             return job
 
         } catch (error: any) {

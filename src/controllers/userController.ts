@@ -1,5 +1,5 @@
-import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel, SessionModel } from '@/models'
-import { Op } from 'sequelize'
+import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel, SessionModel, SugestedUsers } from '@/models'
+import { Op, Sequelize } from 'sequelize'
 import { getQueryResponseFields, checkForProtectedRequests, GENERATE_SIX_DIGIT_TOKEN } from '@/helpers'
 import { REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
@@ -419,7 +419,7 @@ export class UsersController {
                     ]
                 }
             })
-            
+
             if (session)
                 return {
                     user: user.toJSON(),
@@ -531,10 +531,18 @@ export class UsersController {
         }
     }
 
-    static sugestedUsers = async (_: unknown, { username }: { username: string }, { req }: { req: any }) => {
+    static sugestedUsers = async (_: unknown, ___: any, { req }: { req: any }) => {
         try {
-            await checkForProtectedRequests(req);
+            const session = await checkForProtectedRequests(req);
+
+            const cacheUsers = await redis.get(`sugestedUsers:${session.userId}`)
+
+            if (cacheUsers)
+                return JSON.parse(cacheUsers)  
+            
+        
             const transactions = await TransactionsModel.findAll({
+                limit: 20,
                 where: {
                     [Op.or]: [
                         { fromAccount: req.session.user.account.id },
@@ -584,6 +592,8 @@ export class UsersController {
 
                 return acc;
             }, []);
+
+            await redis.set(`sugestedUsers:${session.userId}`, JSON.stringify(users), 'EX', 1000 * 60 * 30)
 
             return users
 
