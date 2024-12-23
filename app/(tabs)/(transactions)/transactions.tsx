@@ -35,6 +35,7 @@ const TransactionsScreen: React.FC = () => {
 
 	const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
 	const [accountTransactions, { refetch: refetchAccountTransactions }] = useLazyQuery(TransactionApolloQueries.accountTransactions())
+	const [searchAccountTransactions] = useLazyQuery(TransactionApolloQueries.searchAccountTransactions())
 	const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
 
 	const [singleTransactionTitle, setSingleTransactionTitle] = useState<string>("Ver Detalles");

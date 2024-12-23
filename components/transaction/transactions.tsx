@@ -38,12 +38,15 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 
 	const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
 	const [accountTransactions, { refetch: refetchAccountTransactions }] = useLazyQuery(TransactionApolloQueries.accountTransactions())
+	const [searchAccountTransactions] = useLazyQuery(TransactionApolloQueries.searchAccountTransactions())
+
 	const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
 
 	const [singleTransactionTitle, setSingleTransactionTitle] = useState<string>("Ver Detalles");
 	const [refreshing, setRefreshing] = useState(false);
 	const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
 	const [transactions, setTransactions] = useState<any[]>([])
+	const [filteredTransactions, setFilteredTransactions] = useState<any[]>([])
 	const [showSingleTransaction, setShowSingleTransaction] = useState<boolean>(false);
 	const [showSendTransaction, setShowSendTransaction] = useState<boolean>(false);
 	const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -52,17 +55,23 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 	const [page, setPage] = useState<number>(0);
 	const [isBottom, setIsBottom] = useState(false);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
-	const [searchValue, setSearchValue] = useState<string>("");
 
 	const handleSearch = async (value: string) => {
 		try {
-			setSearchValue(value)
-			const filteredTransactions = transactions.filter((transaction: any) => {
-				const { fullName } = formatTransaction(transaction)
-				return fullName.toLowerCase().includes(value.toLowerCase())
-			})
+			if (value === "") {
+				setFilteredTransactions(transactions)
 
-			setTransactions(filteredTransactions)
+			} else {
+				const { data } = await searchAccountTransactions({
+					variables: {
+						"page": 1,
+						"pageSize": 10,
+						"fullName": value.toLowerCase()
+					}
+				})
+
+				setFilteredTransactions(data.searchAccountTransactions.length > 0 ? data.searchAccountTransactions : [])
+			}
 
 		} catch (error) {
 			console.log(error)
@@ -107,6 +116,7 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 			})
 
 			setTransactions(data.accountTransactions)
+			setFilteredTransactions(data.accountTransactions)
 			setIsLoading(false)
 
 		} catch (error) {
@@ -239,7 +249,7 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 							))}
 						</ScrollView>
 					</HStack> : null}
-					{transactions.length > 0 ?
+					{filteredTransactions.length > 0 ?
 						<VStack w={"100%"} >
 							<HStack w={"100%"} justifyContent={"space-between"}>
 								<Heading px={showNewTransaction ? "20px" : "0px"} fontSize={scale(20)} color={"white"}>{"Transacciones"}</Heading>
@@ -285,7 +295,7 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 								)}
 							/>
 						</VStack>
-						: !searchValue ? (
+						: (
 							<VStack mt={"20px"} w={"100%"} h={height / 3} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
 								<Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
 								<VStack justifyContent={"center"} alignItems={"center"}>
@@ -293,7 +303,7 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 									<Text fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
 								</VStack>
 							</VStack>
-						) : null
+						)
 					}
 					{isLoadingMore ? <Spinner mt={"10px"} size={"lg"} /> : null}
 				</ScrollView>

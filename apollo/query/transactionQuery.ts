@@ -190,6 +190,109 @@ export class TransactionApolloQueries {
         `
     }
 
+    static searchAccountTransactions = () => {
+        return gql`
+            query SearchAccountTransactions($page: Int!, $pageSize: Int!, $fullName: String!) {
+                searchAccountTransactions(page: $page, pageSize: $pageSize, fullName: $fullName) {
+                    transactionId
+                    amount
+                    deliveredAmount
+                    voidedAmount
+                    transactionType
+                    currency
+                    status
+                    createdAt
+                    updatedAt
+                    location {
+                        latitude
+                        longitude
+                        neighbourhood
+                        road
+                        town
+                        county
+                        state
+                        postcode
+                        country
+                    }                    
+                    from {
+                        id
+                        balance
+                        allowReceive
+                        allowWithdraw
+                        allowSend
+                        allowRequestMe
+                        allowDeposit
+                        status
+                        sendLimit
+                        receiveLimit
+                        withdrawLimit
+                        depositLimit
+                        hash
+                        currency
+                        createdAt
+                        updatedAt
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            dniNumber
+                            password
+                            profileImageUrl
+                            addressAgreementSigned
+                            userAgreementSigned
+                            idFrontUrl
+                            status
+                            idBackUrl
+                            faceVideoUrl
+                            address
+                            createdAt
+                            updatedAt
+                        }
+                    }
+                    to {
+                        id
+                        balance
+                        allowReceive
+                        allowWithdraw
+                        allowSend
+                        allowRequestMe
+                        allowDeposit
+                        status
+                        sendLimit
+                        receiveLimit
+                        withdrawLimit
+                        depositLimit
+                        hash
+                        currency
+                        createdAt
+                        updatedAt
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            dniNumber
+                            password
+                            profileImageUrl
+                            addressAgreementSigned
+                            userAgreementSigned
+                            idFrontUrl
+                            status
+                            idBackUrl
+                            faceVideoUrl
+                            address
+                            createdAt
+                            updatedAt
+                        }
+                    }
+                }
+            }
+        `
+    }
+
     static accountTransactions = () => {
         return gql`
             query AccountTransactions($page: Int!, $pageSize: Int!) {
