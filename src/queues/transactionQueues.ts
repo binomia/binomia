@@ -18,7 +18,7 @@ export default class TransactionsQueue {
             const prosessTransaction = await QueueTransactionsController.prosessTransaction(job)
             if (prosessTransaction === "transactionStatusCompleted")
                 if (job.repeatJobKey)
-                    this.removeJob(job.repeatJobKey)
+                    this.removeJob(job.repeatJobKey, "completed")
 
         } catch (error) {
             console.log({ executeJob: error });
@@ -85,7 +85,7 @@ export default class TransactionsQueue {
                 return transaction
             }
             case "pendingTransaction": {
-                const job = await this.queue.add(jobId, data, { repeat: { every: 1000 * 60 * 30 }, jobId }); // 30 minutes
+                const job = await this.queue.add(jobId, data, { delay: 1000 * 60 * 30, repeat: { every: 1000 * 60 * 30 }, jobId }); // 30 minutes
                 const transaction = await QueueTransactionsController.createTransaction(Object.assign(job.asJSON(), {
                     jobTime,
                     jobName,
@@ -108,11 +108,11 @@ export default class TransactionsQueue {
         return job
     }
 
-    removeJob = async (repeatJobKey: string) => {
+    removeJob = async (repeatJobKey: string, newStatus: string = "cancelled") => {
         try {
             const job = await this.queue.removeJobScheduler(repeatJobKey)
             if (job) {
-                const transaction = await QueueTransactionsController.inactiveTransaction(repeatJobKey, "cancelled")
+                const transaction = await QueueTransactionsController.inactiveTransaction(repeatJobKey, newStatus)
                 return transaction;
             }
 
