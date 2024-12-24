@@ -689,10 +689,24 @@ export class TransactionsController {
                         {
                             [Op.or]: [
                                 {
-                                    senderFullName: { [Op.iLike]: `%${fullName}%` },
+                                    [Op.and]: [
+                                        {
+                                            senderFullName: { [Op.iLike]: `%${fullName}%` },
+                                        },
+                                        {
+                                            fromAccount: { [Op.ne]: user.account.id }
+                                        }
+                                    ]
                                 },
                                 {
-                                    receiverFullName: { [Op.iLike]: `%${fullName}%` }
+                                    [Op.and]: [
+                                        {
+                                            receiverFullName: { [Op.iLike]: `%${fullName}%` },
+                                        },
+                                        {
+                                            fromAccount: user.account.id
+                                        }
+                                    ]
                                 }
                             ]
                         },
