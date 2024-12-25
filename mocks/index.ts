@@ -167,6 +167,8 @@ export const transactionStatus = (title: string) => {
             return "Pagado"
         case "cancelled":
             return "Cancelado"
+        case "requested":
+            return "Solicitado"
         
         default:
             return "Procesando";

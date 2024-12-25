@@ -26,12 +26,13 @@ import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 type Props = {
 	title?: string
 	goNext?: (_?: number) => void,
+	onClose?: () => Promise<void>,
 	showPayButton?: boolean
 	iconImage?: any
 }
 
 const { height, width } = Dimensions.get('window')
-const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPayButton = false, goNext = (_?: number) => { } }) => {
+const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPayButton = false, goNext = (_?: number) => { }, onClose = async () => { } }) => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { authenticate } = useLocalAuthentication()
@@ -71,7 +72,6 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPa
 	const onPress = async (paymentApproved: boolean) => {
 		if (transaction?.showPayButton) {
 			try {
-
 				const authenticated = await authenticate()
 
 				if (authenticated.success) {
@@ -80,7 +80,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPa
 
 					const { data } = await payRequestTransaction({
 						variables: {
-							transactionId: transaction?.transactionId,
+							transactionId: transaction.transactionId,
 							paymentApproved
 						}
 					})

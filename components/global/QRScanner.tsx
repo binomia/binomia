@@ -48,12 +48,14 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
         if (isScanning) return;
         setIsScanning(true);
 
+        console.log({ data });
         if (data === user.username) {
             Alert.alert("Advertencia", "No puedes enviarte dinero a ti mismo", [{
                 onPress: () => setIsScanning(false)
             }]);
 
         } else {
+            
             const singleUser = await searchSingleUser({
                 variables: {
                     search: {
@@ -87,9 +89,9 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                     <HStack w={width * 0.9} h={width * 0.9} alignItems={"center"} borderWidth={0} borderColor={colors.gray} justifyContent={"center"} borderRadius={"20px"} bg={colors.lightGray} >
                                         <QRCodeStyled
                                             color={"#535353"}
-                                            data={user?.username}
+                                            data={user?.username || ""}
                                             pieceLiquidRadius={0}
-                                            pieceStrokeWidth={0.5}
+                                            pieceStrokeWidth={1}
                                             pieceStroke={colors.darkGray}
                                             logo={{
                                                 href: icon,

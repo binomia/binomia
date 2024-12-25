@@ -308,7 +308,7 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 					{isLoadingMore ? <Spinner mt={"10px"} size={"lg"} /> : null}
 				</ScrollView>
 				<BottomSheet height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
-					<SingleSentTransaction iconImage={pendingClock} showPayButton={showPayButton} goNext={goNext} title={singleTransactionTitle} />
+					<SingleSentTransaction iconImage={pendingClock} showPayButton={showPayButton} goNext={goNext} onClose={onCloseFinishSingleTransaction} title={singleTransactionTitle} />
 				</BottomSheet>
 				<SendTransaction open={showSendTransaction} onCloseFinish={onSendCloseFinish} onSendFinish={onSendCloseFinish} />
 			</VStack>
