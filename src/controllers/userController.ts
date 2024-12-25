@@ -415,7 +415,12 @@ export class UsersController {
                     [Op.and]: [
                         { userId: user.toJSON().id },
                         { deviceId },
-                        { verified: true }
+                        { verified: true },
+                        {
+                            expires: {
+                                [Op.gt]: Date.now()
+                            }
+                        }
                     ]
                 }
             })
@@ -431,7 +436,6 @@ export class UsersController {
             const sid = `${generate()}${generate()}${generate()}`
             const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days
             const token = jwt.sign({ sid, username: user.toJSON().username }, ZERO_ENCRYPTION_KEY);
-
 
             const sessionCreated = await SessionModel.create({
                 sid,
@@ -450,9 +454,6 @@ export class UsersController {
                 code,
                 ZERO_ENCRYPTION_KEY,
             }))
-
-            console.log({ code, token: req.headers.exponotificationtoken });
-
 
             const signature = Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
             await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE, JSON.stringify({
@@ -538,9 +539,9 @@ export class UsersController {
             const cacheUsers = await redis.get(`sugestedUsers:${session.userId}`)
 
             if (cacheUsers)
-                return JSON.parse(cacheUsers)  
-            
-        
+                return JSON.parse(cacheUsers)
+
+
             const transactions = await TransactionsModel.findAll({
                 limit: 20,
                 where: {

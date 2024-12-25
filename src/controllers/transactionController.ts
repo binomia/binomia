@@ -147,8 +147,8 @@ export class TransactionsController {
                             }
                         },
                         {
-                            [Op.not]: {
-                                expoNotificationToken: null
+                            expoNotificationToken: {
+                                [Op.not]: null
                             }
                         }
                     ]
@@ -156,7 +156,6 @@ export class TransactionsController {
             })
 
             const expoNotificationTokens: string[] = receiverSession.map(obj => obj.dataValues.expoNotificationToken);
-
             await Promise.all([
                 redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
                     data: transactionData.toJSON(),
@@ -264,6 +263,8 @@ export class TransactionsController {
             // Authorization NOT IMPLEMENTED
 
             const transaction = await TransactionsModel.create({
+                senderFullName: senderAccount.toJSON().user.fullName,
+                receiverFullName: receiverAccount.toJSON().user.fullName,
                 fromAccount: senderAccount.toJSON().id,
                 toAccount: receiverAccount.toJSON().id,
                 amount: validatedData.amount,
@@ -330,7 +331,6 @@ export class TransactionsController {
     static payRequestTransaction = async (_: unknown, { transactionId, paymentApproved }: { transactionId: string, paymentApproved: boolean }, context: any) => {
         try {
             const session = await checkForProtectedRequests(context.req);
-
             const transaction = await TransactionsModel.findOne({
                 where: {
                     [Op.and]: [
