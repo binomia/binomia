@@ -86,6 +86,7 @@ const Request: React.FC = () => {
         setInput("0")
 
         if (currentPage === 2) {
+            router.dismissAll()
             router.navigate("(transactions)")
 
             ref.current?.setPage(0)

@@ -33,6 +33,7 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
         setInput("0")
 
         if (currentPage === 2) {
+            router.dismissAll()
             router.navigate("(transactions)")
 
             ref.current?.setPage(0)

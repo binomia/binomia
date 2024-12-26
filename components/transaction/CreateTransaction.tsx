@@ -79,7 +79,18 @@ const CreateTransaction: React.FC<Props> = ({ input, title = "Siguiente", showBa
                             <Text color={colors.lightSkyGray}>{receiver?.username}</Text>
                         </VStack>
                     </HStack>
-                    <Button opacity={showPayButton ? 1 : 0.5} fontSize={scale(11) + "px"} disabled={!showPayButton} onPress={onNextPage} h={"40px"} w={"100px"} title={title} bg={showPayButton ? "mainGreen" : "lightGray"} borderRadius={100} color={showPayButton ? colors.white : colors.mainGreen} />
+                    <Button
+                        opacity={showPayButton ? 1 : 0.5}
+                        fontSize={scale(12) + "px"}
+                        disabled={!showPayButton}
+                        onPress={onNextPage}
+                        h={"45px"}
+                        w={"120px"}
+                        title={title}
+                        bg={showPayButton ? "mainGreen" : "lightGray"}
+                        borderRadius={100}
+                        color={showPayButton ? colors.white : colors.mainGreen}
+                    />
                 </HStack>
             </VStack>
             <VStack mb={"10px"}>

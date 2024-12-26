@@ -61,10 +61,14 @@ import creditCard from './icons/credit-card.png';
 import recurrenceIcon from './icons/recurrence.png';
 import pendingClock from './icons/pendingClock.png';
 import cancelIcon from './icons/cancel.png';
+import claroLogo from './claroLogo.png';
+import articeLogo from './articeLogo.png';
 
 
 export {
     pendingClock,
+    articeLogo,
+    claroLogo,
     cancelIcon,
     icon,
     noCard,

@@ -35,16 +35,3 @@ class ReduxAuth {
         })
     })
 }
-
-
-
-//     location: {},
-//     device: {
-//         isDevice: Device.isDevice,
-//         deviceBrand: Device.brand,
-//         deviceName: Device.deviceName,
-//         deviceModelName: Device.modelName,
-//         deviceOsName: Device.osName,
-//         deviceOsVersion: Device.osVersion,
-//     }
-// }

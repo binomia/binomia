@@ -51,7 +51,7 @@ const SearchUserScreen: React.FC = () => {
                     }
                 })
 
-                setUsers(data.searchUsers.length > 0 ? data.searchUsers : [])
+                setUsers(data.searchUsers)
             }
 
         } catch (error) {

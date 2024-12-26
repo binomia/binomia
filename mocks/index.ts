@@ -1,7 +1,8 @@
-import { askingForMoneyIcon, withdrawIcon, depositIcon, idIcon, limitIcon, mailIcon, mastercardLogo, notificacionIcon, phoneIcon, privacyIcon, receiveIcon, sendMoneyIcon, soportIcon, userIcon, visaLogo, whatsappIcon } from "@/assets";
+import { askingForMoneyIcon, withdrawIcon, depositIcon, idIcon, limitIcon, mailIcon, mastercardLogo, notificacionIcon, phoneIcon, privacyIcon, receiveIcon, sendMoneyIcon, soportIcon, userIcon, visaLogo, whatsappIcon, claroLogo, articeLogo } from "@/assets";
 import { SUPPORT_EMAIL, SUPPORT_PHONE_NUMBER } from "@/constants";
 import { FORMAT_CURRENCY, FORMAT_LIMIT, FORMAT_PHONE_NUMBER } from "@/helpers";
 import { AccountLimitsType, AccountType, GlobalContextType } from "@/types";
+import { cancelIcon, checked, pendingClock } from '@/assets';
 
 
 export const globalContextInitialState: GlobalContextType = {
@@ -155,8 +156,8 @@ export const limitsScreenData = (limits: AccountLimitsType, account: AccountType
     }
 ]
 
-export const transactionStatus = (title: string) => {    
-    switch (title) {       
+export const transactionStatus = (title: string) => {
+    switch (title) {
         case "approved":
             return "Aprobado"
         case "rejected":
@@ -169,7 +170,7 @@ export const transactionStatus = (title: string) => {
             return "Cancelado"
         case "requested":
             return "Solicitado"
-        
+
         default:
             return "Procesando";
     }
@@ -296,3 +297,34 @@ export const mockCardsLogo = {
     "mastercard": mastercardLogo,
     "visa": visaLogo
 }
+
+export const statuTransactionIcons = {
+    "completed": checked,
+    "approved": checked,
+    "cancelled": cancelIcon,
+    "pending": pendingClock,
+    "rejected": cancelIcon,
+    "requested": pendingClock,
+    "paid": checked
+}
+
+export const topupPhones = [
+    {
+        fullName: "Juan Perez",
+        phone: "8298763290",
+        provider: "Claro",
+        providerLogo: claroLogo
+    },
+    {
+        fullName: "Luis Lopez",
+        phone: "8298763290",
+        provider: "Artice",
+        providerLogo: articeLogo
+    },
+    {
+        fullName: "Pedro Gomez",
+        phone: "8298763290",
+        provider: "Claro",
+        providerLogo: claroLogo
+    }
+]

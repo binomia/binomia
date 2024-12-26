@@ -126,6 +126,13 @@ export const CardsRight: React.FC = () => {
         </Pressable>
     )
 }
+export const TopupsRight: React.FC = () => {
+    return (
+        <Pressable _pressed={{ opacity: 0.5 }} onPress={() => { }}>
+            <AntDesign name="pluscircle" size={22} color="white" />
+        </Pressable>
+    )
+}
 export const BackHeaderIcon: React.FC = () => {
     return (
         <HStack alignItems={"center"} justifyContent={"space-between"}>

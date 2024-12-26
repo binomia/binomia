@@ -17,6 +17,7 @@ import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocation } from '@/hooks/useLocation';
+import { router } from 'expo-router';
 
 
 
@@ -78,7 +79,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
                     profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
                     username: formatTransaction(transactionSent).username,
                     isFromMe: formatTransaction(transactionSent).isFromMe,
-                }))
+                }))            
             ])
 
             goNext()

@@ -79,14 +79,26 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 	}
 
 	const formatTransaction = (transaction: any) => {
+		const { transactionType, status, amount } = transaction
 		const isFromMe = transaction.from.user?.id === user.id
 
 		const profileImageUrl = isFromMe ? transaction.to.user?.profileImageUrl : transaction.from.user?.profileImageUrl
 		const fullName = isFromMe ? transaction.to.user?.fullName : transaction.from.user?.fullName
 		const username = isFromMe ? transaction.from.user?.username : transaction.to.user?.username
 		const showPayButton = transaction.transactionType === "request" && !isFromMe && transaction.status === "requested"
-		const amountColor = (transaction.transactionType === "request" && isFromMe || transaction.transactionType === "transfer" && !isFromMe) && transaction.status !== "cancelled" ? colors.mainGreen : colors.red
 		const showMap = (transaction.transactionType === "request" && isFromMe) || (transaction.transactionType === "transfer" && !isFromMe) ? false : true
+
+		let amountColor;
+
+		if ((transactionType === "request" && isFromMe && status === "requested")) {
+			amountColor = colors.pureGray
+
+		} else if ((transaction.transactionType === "request" && isFromMe || transaction.transactionType === "transfer" && !isFromMe) && transaction.status !== "cancelled") {
+			amountColor = colors.mainGreen
+			
+		} else {
+			amountColor = colors.red
+		}
 
 		return {
 			isFromMe,

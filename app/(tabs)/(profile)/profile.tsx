@@ -107,30 +107,27 @@ const ProfileScreen: React.FC = () => {
 							<Text fontSize={scale(18)} color={colors.lightSkyGray}>{user?.username}</Text>
 						</VStack>
 					</VStack>
-					<VStack px={"10px"} borderRadius={10} w={"100%"} h={"auto"} mt={"20px"} bg={"lightGray"}>
-						<FlatList
-							data={profileScreenData}
-							scrollEnabled={false}
-							py={"5px"}
-							keyExtractor={(_, index) => index.toString()}
-							renderItem={({ item, index }) => (
-								<Pressable _pressed={{ opacity: 0.5 }} w={"100%"} h={scale(45)} justifyContent={"center"} onPress={() => router.navigate(item.path)}>
-									<HStack key={`personal${item.name}`} space={2} pl={"10px"} justifyContent={"space-between"} alignItems={"center"}>
-										<HStack bg={"gray"} w={scale(35)} h={scale(35)} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
-											<Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
-										</HStack>
-										<HStack width={"90%"} h={"100%"} borderRadius={10} px={"10px"} justifyContent={"space-between"} >
-											<HStack width={"100%"} justifyContent={"space-between"} alignItems={"center"}>
-												<Text textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
-												<Feather name="chevron-right" size={20} color="white" />
-											</HStack>
+					<VStack borderRadius={10} bg={"lightGray"} p={"5px"} w={"100%"} h={"auto"} mt={"50px"}>
+						{profileScreenData.map((item, index) => (
+							<Pressable  _pressed={{ opacity: 0.5 }} w={"100%"} h={scale(45)} justifyContent={"center"} onPress={() => router.navigate(item.path)}>
+								<HStack key={`personal${item.name}`} space={2} pl={"10px"} justifyContent={"space-between"} alignItems={"center"}>
+									<HStack bg={"gray"} w={scale(35)} h={scale(35)} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
+										<Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
+									</HStack>
+									<HStack width={"90%"} h={"100%"} borderRadius={10} px={"10px"} justifyContent={"space-between"} >
+										<HStack width={"100%"} justifyContent={"space-between"} alignItems={"center"}>
+											<Text textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
+											<Feather name="chevron-right" size={20} color="white" />
 										</HStack>
 									</HStack>
+								</HStack>
+								{index !== 4 ?
 									<HStack w={"100%"} justifyContent={"flex-end"}>
-										{index !== 4 ? <Divider mt={"7px"} width={"80%"} h={"0.5px"} bg={colors.gray} /> : null}
+										<Divider mt={"7px"} width={"80%"} h={"0.5px"} bg={colors.gray} />
 									</HStack>
-								</Pressable>
-							)} />
+									: null}
+							</Pressable>
+						))}
 					</VStack>
 				</VStack>
 			</VStack>

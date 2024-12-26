@@ -1,7 +1,7 @@
 import React from 'react';
 import colors from '@/colors';
 import { Stack } from 'expo-router';
-import { HomeHeaderLeft, HomeHeaderRight } from '@/components/navigation/HeaderBar';
+import { HomeHeaderLeft, HomeHeaderRight, TopupsRight } from '@/components/navigation/HeaderBar';
 
 export default function TabLayout() {
 	const defaultHeaderStyles = {
@@ -27,6 +27,8 @@ export default function TabLayout() {
 			<Stack.Screen name='index' options={{ ...defaultscreenOptions, title: "", headerLeft: () => <HomeHeaderLeft />, headerRight: () => <HomeHeaderRight /> }} />
 			<Stack.Screen name='user' options={{ title: "Buscar", ...defaultscreenOptions, headerRight: () => <HomeHeaderRight /> }} />
 			<Stack.Screen name='request' options={{ title: "Solicitar Dinero", ...defaultscreenOptions }} />
+			<Stack.Screen name='topups' options={{ title: "Recargas", ...defaultscreenOptions, headerRight: () => <TopupsRight /> }} />
+			<Stack.Screen name='topUpTransactions' options={{ title: "", ...defaultscreenOptions, headerRight: () => <TopupsRight /> }} />
 		</Stack>
 	);
 }

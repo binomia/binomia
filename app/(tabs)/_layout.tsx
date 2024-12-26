@@ -36,6 +36,7 @@ export default () => {
 			<Tabs.Screen
 				name="(home)"
 				options={{
+					freezeOnBlur: true,
 					title: '',
 					tabBarIcon: ({ color, focused }) => (
 						<Image resizeMode='contain' tintColor={focused ? colors.mainGreen : colors.pureGray} w={'25px'} h={'25px'} source={focused ? homeOn : homeOff} alt='home-on' />

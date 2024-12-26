@@ -14,6 +14,7 @@ import { FORMAT_CURRENCY } from '@/helpers';
 import { scale } from 'react-native-size-matters';
 import { router } from 'expo-router';
 import Transactions from '@/components/transaction/transactions';
+import { Ionicons, Entypo } from '@expo/vector-icons';
 
 
 const { width } = Dimensions.get('window');
@@ -69,7 +70,7 @@ const HomeScreen: React.FC = () => {
 
 	return (isLoading ? (<HomeSkeleton />) : (
 		<VStack p={"20px"} w={width} bg={colors.darkGray} flex={1} alignItems={"center"}>
-			<ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+			<ScrollView w={"100%"} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
 				<VStack w={"100%"} justifyContent={"center"} alignItems={"center"} borderRadius={"10px"}>
 					<VStack bg={colors.lightGray} p={"20px"} w={"100%"} justifyContent={"space-between"} borderRadius={"10px"} h={scale(160)}>
 						<VStack>
@@ -95,14 +96,11 @@ const HomeScreen: React.FC = () => {
 							/>
 						</HStack>
 					</VStack>
-				</VStack>
-				{/* <VStack w={"100%"} pt={"30px"}>
-					<Transactions showNewTransaction={false} />
-				</VStack> */}
+				</VStack>				
 				<VStack w={"100%"} pt={"30px"} px={"5px"}>
 					<Heading fontSize={scale(24)} color={"white"}>Servicios</Heading>
 					<HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
-						<Pressable onPress={() => { }} _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
+						<Pressable onPress={() => router.navigate("/topups")} _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
 							<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={phone} />
 							<Text color={"white"}>Recargas</Text>
 						</Pressable>
