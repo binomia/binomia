@@ -15,6 +15,8 @@ const getGqlBody = (fieldNodes: any[], schema: string) => {
 
     const gqlSchemas = [
         "user",
+        "company",
+        "companies",
         "kyc",
         "users",
         "account",

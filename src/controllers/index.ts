@@ -3,6 +3,7 @@ import { UsersController } from "./userController";
 import { CardsController } from "./cardsController";
 import { TransactionsController } from "./transactionController";
 import { GlobalController } from "./globalController";
+import { TopUpController } from "./topUpController";
 
 
 export {
@@ -10,5 +11,6 @@ export {
     CardsController,
     GlobalController,
     TransactionsController,
-    AccountController
+    AccountController,
+    TopUpController
 }

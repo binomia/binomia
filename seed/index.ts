@@ -1,4 +1,4 @@
-import { TransactionsModel, UsersModel } from '@/models';
+import { TopUpCompanyModel, TransactionsModel, UsersModel } from '@/models';
 import { faker } from '@faker-js/faker';
 import short from 'short-uuid';
 
@@ -43,6 +43,28 @@ const createTransactions = async () => {
             receiverId: 2
         })
     }
+}
+
+const createTopUpCompany = async () => {
+    const companies: any[] = [
+        {
+            name: "Claro",
+            logo: "https://res.cloudinary.com/brayhandeaza/image/upload/e_make_transparent:10/v1735248474/bitnomia/cotxkgldk09jjsrnw4ap.jpg"
+        },
+        {
+            name: "Viva",
+            logo: "https://play-lh.googleusercontent.com/41hDt3wZUWEQAgFBAsNYj90R5DlGwaJB9L2CkkB3WeVBevsitCz-pV8o76ANcH792Q"
+        },
+        {
+            name: "Artice",
+            logo: "https://res.cloudinary.com/brayhandeaza/image/upload/e_make_transparent:10/v1735248474/bitnomia/cotxkgldk09jjsrnw4ap.jpg"
+        },
+    ]
+
+    companies.forEach(async (company) => {
+        await TopUpCompanyModel.create(company)
+    })
+
 }
 
 

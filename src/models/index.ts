@@ -7,10 +7,18 @@ import kycModel from "./kycModel"
 import BankingTransactionsModel from "./bankingTransactionModel"
 import QueueTransactionsModel from "./queueTransactionModel"
 import SugestedUsers from "./SugestedUsers"
+import TopUpsModel from "./topUpModel"
+import TopUpCompanyModel from "./topUpCompanyModel"
 
 
 UsersModel.hasOne(kycModel)
 kycModel.belongsTo(UsersModel)
+
+TopUpsModel.belongsTo(UsersModel)
+UsersModel.hasMany(TopUpsModel)
+
+TopUpsModel.belongsTo(TopUpCompanyModel, { foreignKey: 'companyId', targetKey: 'id', as: 'company' })
+TopUpCompanyModel.hasMany(TopUpsModel, { as: 'topups', foreignKey: 'companyId' })
 
 AccountModel.belongsTo(UsersModel, { foreignKey: 'username', targetKey: 'username', as: 'user' });
 UsersModel.hasOne(AccountModel, { foreignKey: 'username', sourceKey: 'username', as: 'account' });
@@ -48,5 +56,7 @@ export {
 	TransactionsModel,
 	AccountModel,
 	CardsModel,
-	kycModel
+	kycModel,
+	TopUpsModel,
+	TopUpCompanyModel
 }
