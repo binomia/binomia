@@ -3,7 +3,7 @@ import colors from '@/colors';
 import Button from '@/components/global/Button';
 import QRScannerScreen from '@/components/global/QRScanner';
 import HomeSkeleton from '@/components/home/homeSkeleton';
-import { Dimensions, RefreshControl } from 'react-native'
+import { Alert, Dimensions, RefreshControl, Button as RNBButton } from 'react-native'
 import { Heading, HStack, Image, Pressable, VStack, Text, ScrollView } from 'native-base';
 import { bagIcon, bills, cars, house, phone, sendIcon } from '@/assets';
 import { useLazyQuery } from '@apollo/client';
@@ -12,13 +12,15 @@ import { AccountApolloQueries } from '@/apollo/query';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { FORMAT_CURRENCY } from '@/helpers';
 import { scale } from 'react-native-size-matters';
-import { router } from 'expo-router';
+import { router, Stack, useNavigation } from 'expo-router';
 import Transactions from '@/components/transaction/transactions';
-import { Ionicons, Entypo } from '@expo/vector-icons';
-
+import { Ionicons, Entypo, AntDesign } from '@expo/vector-icons';
+import Popover, { PopoverMode } from 'react-native-popover-view';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
+	const isFocused = useNavigation().isFocused()
+
 	const { account } = useSelector((state: any) => state.globalReducer)
 	const dispatch = useDispatch()
 
@@ -68,6 +70,20 @@ const HomeScreen: React.FC = () => {
 		})()
 	}, [])
 
+	const handleAlert = () => {
+		Alert.alert('Envio De Dinero', 'La opción de enviar dinero está desactivada.', [
+			{
+				text: 'Cancelar',
+				onPress: () => { },
+				style: 'destructive',
+			},
+			{
+				text: 'Activar',
+				onPress: () => router.navigate("/privacy"),
+			}
+		])
+	}
+
 	return (isLoading ? (<HomeSkeleton />) : (
 		<VStack p={"20px"} w={width} bg={colors.darkGray} flex={1} alignItems={"center"}>
 			<ScrollView w={"100%"} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
@@ -79,12 +95,14 @@ const HomeScreen: React.FC = () => {
 						</VStack>
 						<HStack w={"100%"} alignItems={"center"} justifyContent={"space-between"} >
 							<Button
-								leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"18px"} h={"18px"} source={sendIcon} />}
+								opacity={account?.allowSend ? 1 : 0.6}
 								w={"49%"}
 								bg={"darkGray"}
 								mt={"20px"}
 								borderRadius={"10px"}
-								title="Enviar" onPress={() => router.navigate("/user")}
+								title="Enviar"
+								onPress={() => account?.allowSend ? router.navigate("/user") : handleAlert()}
+								leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"18px"} h={"18px"} source={sendIcon} />}
 							/>
 							<Button
 								leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={bagIcon} />}
@@ -96,7 +114,7 @@ const HomeScreen: React.FC = () => {
 							/>
 						</HStack>
 					</VStack>
-				</VStack>				
+				</VStack>
 				<VStack w={"100%"} pt={"30px"} px={"5px"}>
 					<Heading fontSize={scale(24)} color={"white"}>Servicios</Heading>
 					<HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>

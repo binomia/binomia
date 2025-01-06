@@ -1,19 +1,20 @@
+import QRScanner from "../global/QRScanner"
+import Cards from "../cards"
+import RecurrenceTransactions from "../transaction/recurrence/RecurrenceTransactions"
+import DefaultIcon from "react-native-default-icon"
+import NewTopUp from "../topups/NewTopUp"
+import colors from "@/colors"
 import { creditCard, logo, qrIcon, recurrenceIcon } from "@/assets"
 import { VStack, Image, Pressable, HStack, Text, Stack, Heading } from "native-base"
 import { StyleSheet } from "react-native"
-
 import { useState } from "react"
-import QRScanner from "../global/QRScanner"
-import Cards from "../cards"
-import { router } from "expo-router"
-import colors from "@/colors"
+import { router, useNavigation } from "expo-router"
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { scale } from "react-native-size-matters"
 import { Dimensions, Platform } from "react-native"
-import RecurrenceTransactions from "../transaction/recurrence/RecurrenceTransactions"
-import { useSelector } from "react-redux"
-import DefaultIcon from "react-native-default-icon"
+import { useDispatch, useSelector } from "react-redux"
 import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
+import { topupActions } from "@/redux/slices/topupSlice"
 
 
 const { width } = Dimensions.get('window')
@@ -51,8 +52,6 @@ export const TransactionsHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) =
 }
 
 export const RecurrencesHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
-    const [showBottomSheet, setShowBottomSheet] = useState(false)
-
     return (
         <VStack p={p}>
             <Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.navigate("recurrences")}>
@@ -63,8 +62,6 @@ export const RecurrencesHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) =>
 }
 export const TransactionCenter: React.FC<{ p?: string }> = ({ p = "0" }) => {
     const { transaction } = useSelector((state: any) => state.transactionReducer)
-
-    const [showBottomSheet, setShowBottomSheet] = useState(false)
 
     return (
         <HStack alignItems={"center"}>
@@ -127,9 +124,28 @@ export const CardsRight: React.FC = () => {
     )
 }
 export const TopupsRight: React.FC = () => {
+    const navigation = useNavigation()
+
+    const dispatch = useDispatch()
+    const { topup } = useSelector((state: any) => state.topupReducer)
+
+    const [openBottomSheet, setOpenBottomSheet] = useState(false)
+
+    const onPress = async () => {
+        setOpenBottomSheet(true)
+
+        await dispatch(topupActions.setNewTopUp({}))
+        if (navigation.getState().index === 2)
+            await dispatch(topupActions.setNewTopUp({
+                company: topup.company,
+                phone: topup.phone,
+            }))
+    }
+
     return (
-        <Pressable _pressed={{ opacity: 0.5 }} onPress={() => { }}>
+        <Pressable _pressed={{ opacity: 0.5 }} onPress={onPress}>
             <AntDesign name="pluscircle" size={22} color="white" />
+            <NewTopUp onClose={() => setOpenBottomSheet(false)} open={openBottomSheet} />
         </Pressable>
     )
 }

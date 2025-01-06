@@ -151,7 +151,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                                 value={phoneNumber.length === 10 ? FORMAT_PHONE_NUMBER(phoneNumber) : phoneNumber}
                                 isInvalid={(!isAValidPhoneNumber(phoneNumber) && Boolean(phoneNumber.length === 10))}
                                 errorMessage='Este no es un numero no es de República Dominicana'
-                                keyboardType="numeric"
+                                keyboardType="phone-pad"
                                 onChangeText={(value) => onChangeText(value.replaceAll(/[^0-9]/g, ''), "phone")}
                                 placeholder="Numero De Telefono*"
                             />

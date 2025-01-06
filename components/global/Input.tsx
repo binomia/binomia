@@ -16,7 +16,7 @@ interface Props extends IInputProps {
 
 
 const InputComponent: React.FC<Props> = (props) => {
-    const { errorMessage, bColor, isInvalid = false, fontSize = "14px" } = props
+    const { errorMessage, bColor, isInvalid = false, placeholderTextColor = "rgba(255,255,255,0.2)", fontSize = "14px" } = props
 
     return (
         <HStack mb={isInvalid ? "10px" : "0px"}>
@@ -29,7 +29,7 @@ const InputComponent: React.FC<Props> = (props) => {
                     _focus={{ selectionColor: "white" }}
                     fontWeight={"medium"}
                     color={"white"}
-                    placeholderTextColor={"rgba(255,255,255,0.2)"}
+                    placeholderTextColor={placeholderTextColor}
 
                 />
                 <FormControl.ErrorMessage

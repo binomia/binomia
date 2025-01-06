@@ -118,7 +118,7 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 		setUsers(_users)
 	}
 
-	const fetchAccountTransactions = async (page: number = 1, pageSize: number = showNewTransaction ? 20 : 10) => {
+	const fetchAccountTransactions = async (page: number = 1, pageSize: number = showNewTransaction ? 1 : 10) => {
 		try {
 			const { data } = await accountTransactions({
 				variables: {
@@ -266,7 +266,7 @@ const Transactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => 
 							<HStack w={"100%"} justifyContent={"space-between"}>
 								<Heading px={showNewTransaction ? "20px" : "0px"} fontSize={scale(20)} color={"white"}>{"Transacciones"}</Heading>
 								{!showNewTransaction ? <Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.navigate("/transactions")}>
-									<Heading px={showNewTransaction ? "20px" : "0px"} underline fontSize={scale(17)} color={colors.pureGray}>{"Ver más"}</Heading>
+									<Heading px={showNewTransaction ? "20px" : "0px"} underline fontSize={scale(14)} color={colors.pureGray}>{"Ver más"}</Heading>
 								</Pressable> : null}
 							</HStack>
 							<FlatList

@@ -28,7 +28,7 @@ const PrivacyScreen: React.FC = () => {
                     }
                 })
 
-                await dispatch(globalActions.setAccount(data.updateAccountPermissions))
+                await dispatch(globalActions.setAccount(data.updateAccountPermissions))                
             }
 
         } catch (error) {

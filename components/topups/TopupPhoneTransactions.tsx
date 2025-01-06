@@ -32,7 +32,7 @@ const { height } = Dimensions.get('window')
 const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => {
     const dispatch = useDispatch()
     const { user } = useSelector((state: any) => state.globalReducer)
-    const { hasNewTransaction } = useSelector((state: any) => state.transactionReducer)
+    const { hasNewTransaction } = useSelector((state: any) => state.topupReducer)
     const isFocused = useNavigation().isFocused()
 
     const [accountTransactions, { refetch: refetchAccountTransactions }] = useLazyQuery(TransactionApolloQueries.accountTransactions())

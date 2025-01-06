@@ -23,7 +23,7 @@ const Button: React.FC<Props> = (props): JSX.Element => {
                 :
                 <HStack space={2} w={"100%"} justifyContent={"center"} alignItems={"center"}>
                     {leftRender}
-                    <Text  fontWeight={"bold"} fontSize={fontSize} textAlign={"center"} color={color}>{title}</Text>
+                    <Text fontWeight={"bold"} fontSize={fontSize} textAlign={"center"} color={color}>{title}</Text>
                 </HStack>
             }
         </Pressable>

@@ -328,3 +328,22 @@ export const topupPhones = [
         providerLogo: claroLogo
     }
 ]
+
+
+export const topUpCompanies = [
+    {
+        uuid: "1",
+        name: "Claro",
+        logo: "https://res.cloudinary.com/brayhandeaza/image/upload/e_make_transparent:10/v1735248474/bitnomia/cotxkgldk09jjsrnw4ap.jpg"
+    },
+    {
+        uuid: "2",
+        name: "Viva",
+        logo: "https://play-lh.googleusercontent.com/41hDt3wZUWEQAgFBAsNYj90R5DlGwaJB9L2CkkB3WeVBevsitCz-pV8o76ANcH792Q"
+    },
+    {
+        uuid: "3",
+        name: "Artice",
+        logo: "https://res.cloudinary.com/brayhandeaza/image/upload/e_make_transparent:10/v1735248474/bitnomia/cotxkgldk09jjsrnw4ap.jpg"
+    },
+]

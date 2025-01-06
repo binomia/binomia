@@ -29,6 +29,7 @@ export default function TabLayout() {
 			<Stack.Screen name='request' options={{ title: "Solicitar Dinero", ...defaultscreenOptions }} />
 			<Stack.Screen name='topups' options={{ title: "Recargas", ...defaultscreenOptions, headerRight: () => <TopupsRight /> }} />
 			<Stack.Screen name='topUpTransactions' options={{ title: "", ...defaultscreenOptions, headerRight: () => <TopupsRight /> }} />
+			<Stack.Screen name='createTopUp' options={{ title: "Nueva Recarga", ...defaultscreenOptions }} />
 		</Stack>
 	);
 }
