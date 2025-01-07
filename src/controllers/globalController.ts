@@ -2,6 +2,7 @@ import { checkForProtectedRequests } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { Cryptography } from '@/helpers/cryptography';
 import { ZERO_SIGN_PRIVATE_KEY, ZERO_ENCRYPTION_KEY } from '@/constants';
+import { seedDatabase } from '@/../seed';
 
 
 
@@ -27,6 +28,7 @@ export class GlobalController {
 
     static test = async (_: unknown, { hash }: { hash: string }, { req }: { req: any }) => {
         try {
+            await seedDatabase()
             // const session = await checkForProtectedRequests(req);
 
 

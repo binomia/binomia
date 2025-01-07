@@ -48,16 +48,19 @@ const createTransactions = async () => {
 const createTopUpCompany = async () => {
     const companies: any[] = [
         {
+            status: "active",
             name: "Claro",
             logo: "https://res.cloudinary.com/brayhandeaza/image/upload/e_make_transparent:10/v1735248474/bitnomia/cotxkgldk09jjsrnw4ap.jpg"
         },
         {
+            status: "active",
             name: "Viva",
-            logo: "https://play-lh.googleusercontent.com/41hDt3wZUWEQAgFBAsNYj90R5DlGwaJB9L2CkkB3WeVBevsitCz-pV8o76ANcH792Q"
+            logo: "https://res.cloudinary.com/brayhandeaza/image/upload/v1736125748/bitnomia/wjycvtfmmg2jroll8jqf.png"
         },
         {
+            status: "active",
             name: "Artice",
-            logo: "https://res.cloudinary.com/brayhandeaza/image/upload/e_make_transparent:10/v1735248474/bitnomia/cotxkgldk09jjsrnw4ap.jpg"
+            logo: "https://res.cloudinary.com/brayhandeaza/image/upload/v1736112365/bitnomia/q17tq3gqiooyku5qduow.png"
         },
     ]
 
@@ -73,5 +76,6 @@ const createTopUpCompany = async () => {
 
 export const seedDatabase = async () => {
     // await createUsers()
-    await createTransactions()
+    await createTopUpCompany()
+    // await createTransactions()
 }
