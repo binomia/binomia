@@ -1,4 +1,4 @@
-import { transactionsQueue } from "@/queues";
+import { topUpQueue, transactionsQueue } from "@/queues";
 import { WeeklyQueueTitleType } from "@/types";
 import { JSONRPCServer } from "json-rpc-2.0";
 import { redis } from "@/redis";
@@ -24,9 +24,14 @@ export const initMethods = (server: JSONRPCServer) => {
             const jobs = await Promise.all(queues.map(async (queue) => {
                 const getJobs = await queue.getJobs()
                 await Promise.all(
-                    getJobs.map(async ({ repeatJobKey }) => {
-                        if (repeatJobKey)
-                            await transactionsQueue.removeJob(repeatJobKey)
+                    getJobs.map(async ({ repeatJobKey, queueQualifiedName }) => {
+                        if (repeatJobKey) {
+                            if (queueQualifiedName === "bull:topups")
+                                await topUpQueue.removeJob(repeatJobKey)
+
+                            else if (queueQualifiedName === "bull:transactions")
+                                await transactionsQueue.removeJob(repeatJobKey)
+                        }
                     })
                 )
 

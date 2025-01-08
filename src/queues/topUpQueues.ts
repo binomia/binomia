@@ -4,20 +4,21 @@ import shortUUID from "short-uuid";
 import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN } from "@/constants";
 import TransactionController from "@/controllers/transactionController";
 import MainController from "@/controllers/mainController";
+import { TopUpController } from "@/controllers/topUpController";
 
 
-export default class TransactionsQueue {
+export default class TopUpQueue {
     queue: Queue;
 
     constructor() {
-        this.queue = new Queue("transactions", { connection: { host: "redis", port: 6379 } });
+        this.queue = new Queue("topups", { connection: { host: "redis", port: 6379 } });
         this.workers()
     }
 
     private executeJob = async (job: JobJson) => {
         try {
-            const prosessTransaction = await TransactionController.prosessTransaction(job)
-            if (prosessTransaction === "transactionStatusCompleted")
+            const prosessTransaction = await TopUpController.prosessTopUp(job)
+            if (prosessTransaction === "toptupStatusCompleted")
                 if (job.repeatJobKey)
                     this.removeJob(job.repeatJobKey, "completed")
 
@@ -27,7 +28,7 @@ export default class TransactionsQueue {
     }
 
     private workers = async () => {
-        const worker = new Worker('transactions', async (job) => this.executeJob(job.asJSON()), {
+        const worker = new Worker('topups', async (job) => this.executeJob(job.asJSON()), {
             connection: { host: "redis", port: 6379 },
             settings: {
                 backoffStrategy: (attemptsMade: number) => attemptsMade * 1000
@@ -40,13 +41,13 @@ export default class TransactionsQueue {
     }
 
 
-    createJobs = async ({ jobId, jobName, jobTime, amount, userId, data }: { jobId: string, userId: number, amount: number, jobName: string, jobTime: string, data: string }) => {        
+    createJobs = async ({ jobId, jobName, jobTime, amount, userId, data }: { jobId: string, userId: number, amount: number, jobName: string, jobTime: string, data: string }) => {
         switch (jobName) {
             case "weekly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_WEEKLY_PATTERN[jobTime as WeeklyQueueTitleType]);
                 const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
                     jobTime,
-                    jobName,                    
+                    jobName,
                     userId,
                     amount,
                     data,
@@ -78,8 +79,9 @@ export default class TransactionsQueue {
 
                 return transaction
             }
-            case "pendingTransaction": {
-                const job = await this.queue.add(jobId, data, { delay: 1000 * 60 * 30, repeat: { every: 1000 * 60 * 30 }, jobId }); // 30 minutes
+            case "pendingTopUp": {
+                const time = 1000 * 60 * 30 // 30 minutes
+                const job = await this.queue.add(jobId, data, { delay: time, repeat: { every: time }, jobId });
                 const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
                     jobTime,
                     jobName,
@@ -118,7 +120,6 @@ export default class TransactionsQueue {
 
     updateJob = async (repeatJobKey: string, jobName: string, jobTime: WeeklyQueueTitleType): Promise<any> => {
         try {
-            // const job = await this.queue.getJobScheduler(repeatJobKey)
             const job = await this.queue.removeJobScheduler(repeatJobKey)
             if (job) {
                 const transaction = await MainController.inactiveTransaction(repeatJobKey, "cancelled")
