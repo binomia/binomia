@@ -8,7 +8,7 @@ import redis from '@/redis';
 export class AccountController {
     static accounts = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, _context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            const fields = getQueryResponseFields(fieldNodes, 'accounts', false, true)
+            const fields = getQueryResponseFields(fieldNodes, 'accounts')
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
             const offset = (page - 1) * _pageSize;
@@ -36,7 +36,7 @@ export class AccountController {
         try {
             const session = await checkForProtectedRequests(req);
 
-            const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
+            const fields = getQueryResponseFields(fieldNodes, 'account')
             const user = await AccountModel.findOne({
                 where: {
                     hash: session.user.account.hash
@@ -54,7 +54,7 @@ export class AccountController {
         try {
             const session = await checkForProtectedRequests(req);
 
-            const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
+            const fields = getQueryResponseFields(fieldNodes, 'account')
             const user = await AccountModel.findOne({
                 where: {
                     hash: session.user.account.hash
@@ -74,7 +74,7 @@ export class AccountController {
             const session = await checkForProtectedRequests(req);
 
             const accountPermissions = await AccountZodSchema.updateAccountPermissions.parseAsync(data)
-            const fields = getQueryResponseFields(fieldNodes, 'account', false, true)
+            const fields = getQueryResponseFields(fieldNodes, 'account')
 
             const account = await AccountModel.findOne({
                 where: {

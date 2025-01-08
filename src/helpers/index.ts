@@ -8,12 +8,16 @@ import { Op } from 'sequelize';
 import { z } from 'zod'
 
 
+
 const getGqlBody = (fieldNodes: any[], schema: string) => {
     let body: any = {
         [schema]: []
     }
 
     const gqlSchemas = [
+        "topUpPhones",
+        "phone",
+        "phones",
         "user",
         "company",
         "companies",
@@ -31,14 +35,14 @@ const getGqlBody = (fieldNodes: any[], schema: string) => {
         "transaction"
     ];
 
-    fieldNodes.forEach((item: any) => {
+    fieldNodes?.forEach((item: any) => {
         if (item.kind === 'Field') {
             if (!gqlSchemas.includes(item.name.value)) {
                 if (item.name.value !== "__typename") {
                     body[schema].push(item.name.value)
                 }
             } else {
-                const items = getGqlBody(item.selectionSet.selections, item.name.value)
+                const items = getGqlBody(item.selectionSet?.selections, item.name.value)
                 body = Object.assign(body, items)
             }
         }
@@ -47,7 +51,7 @@ const getGqlBody = (fieldNodes: any[], schema: string) => {
     return body
 }
 
-export const getQueryResponseFields = (fieldNodes: any[], name: string, isGlobal: boolean = false, isAll: boolean = false) => {
+export const getQueryResponseFields = (fieldNodes: any[], name: string) => {
     const selections = fieldNodes[0].selectionSet?.selections;
     const fields = getGqlBody(selections, name)
 

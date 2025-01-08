@@ -19,7 +19,7 @@ export class UsersController {
     static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             await checkForProtectedRequests(context.req);
-            const fields = getQueryResponseFields(fieldNodes, 'users', false, true)
+            const fields = getQueryResponseFields(fieldNodes, 'users')
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
             const offset = (page - 1) * _pageSize;

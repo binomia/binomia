@@ -172,8 +172,7 @@ export class TransactionsController {
                     receiverId: receiverAccount.toJSON().id,
                     amount: validatedData.amount,
                     data: { transactionId: transactionData.toJSON().transactionId },
-                })),
-
+                }))
             ])
 
             if (recurrenceData.time !== "oneTime") {

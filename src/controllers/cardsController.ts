@@ -12,7 +12,7 @@ export class CardsController {
         try {
             const session = await checkForProtectedRequests(req);
 
-            const fields = getQueryResponseFields(fieldNodes, 'card', false, true)
+            const fields = getQueryResponseFields(fieldNodes, 'card')
             const card = await CardsModel.findOne({
                 where: {
                     [Op.and]: [
@@ -48,7 +48,7 @@ export class CardsController {
             console.log({ session });
 
 
-            const fields = getQueryResponseFields(fieldNodes, 'cards', false, true)
+            const fields = getQueryResponseFields(fieldNodes, 'cards')
             const cards = await CardsModel.findAll({
                 where: { userId: session.userId },
                 attributes: fields['cards'],

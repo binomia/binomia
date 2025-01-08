@@ -4,13 +4,15 @@ import { TopUpsModel, UsersModel, TopUpCompanyModel, TopUpPhonesModel } from '@/
 import { Op } from 'sequelize';
 import { TopUpSchema } from '@/auth';
 import shortUUID from 'short-uuid';
+import redis from '@/redis';
+import { QUEUE_JOBS_NAME } from '@/constants';
 
 
 export class TopUpController {
-    static userTopUps = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+    static topUps = async (_: unknown, { phoneId, page, pageSize }: { phoneId: string, page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(context.req);
-            const fields = getQueryResponseFields(fieldNodes, 'topups', false, true)
+            const fields = getQueryResponseFields(fieldNodes, 'topups')
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
             const offset = (page - 1) * _pageSize;
@@ -19,49 +21,27 @@ export class TopUpController {
             const tupups = await TopUpsModel.findAll({
                 limit,
                 offset,
+                order: [['createdAt', 'DESC']],
                 attributes: fields['topups'],
-                where: { userId: session.userId },
-                include: [
-                    {
-                        model: TopUpCompanyModel,
-                        as: 'company',
-                        attributes: fields['company']
-                    },
-                    {
-                        model: UsersModel,
-                        as: 'user',
-                        attributes: fields['user']
-                    },
-                ]
+                where: {
+                    [Op.and]: [
+                        { userId: session.userId },
+                        { phoneId: phoneId }
+                    ]
+                }
             })
 
-            console.log(JSON.stringify(tupups, null, 2));
-
-
-            const filterByUniquePhone = (data: any[]): any[] => {
-                const uniquePhones = new Set();
-                const filteredData = [];
-                for (const item of data) {
-                    if (!uniquePhones.has(item.phone)) {
-                        uniquePhones.add(item.phone);
-                        filteredData.push(item);
-                    }
-                }
-                return filteredData;
-            }
-
-            const filteredData = filterByUniquePhone(tupups)
-            return filteredData
+            return tupups
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
         }
     }
 
-    static phoneTopUps = async (_: unknown, { phone, page, pageSize }: { phone: string, page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+    static topUpPhones = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(context.req);
-            const fields = getQueryResponseFields(fieldNodes, 'phones', false, true)
+            const fields = getQueryResponseFields(fieldNodes, 'topUpPhones')
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
             const offset = (page - 1) * _pageSize;
@@ -70,12 +50,9 @@ export class TopUpController {
             const phones = await TopUpPhonesModel.findAll({
                 limit,
                 offset,
-                attributes: fields['phones'],
+                attributes: [...fields['topUpPhones'], "phone"],
                 where: {
-                    [Op.and]: [
-                        { userId: session.userId },
-                        { phone }
-                    ]
+                    userId: session.userId
                 },
                 include: [
                     {
@@ -85,8 +62,6 @@ export class TopUpController {
                     }
                 ]
             })
-
-            console.log(JSON.stringify(phones, null, 2));
 
             return phones
 
@@ -142,6 +117,18 @@ export class TopUpController {
                     }
                 ]
             })
+
+            redis.publish(QUEUE_JOBS_NAME.PENDING_TOPUP, JSON.stringify({
+                jobId: `pendingTopUp@${shortUUID.generate()}${shortUUID.generate()}`,
+                jobName: "pendingTopUp",
+                jobTime: "everyThirtyMinutes",
+                userId: session.userId,
+                amount: topUp.toJSON().amount,
+                data: {
+                    id: topUp.toJSON().id,
+                    referenceId: topUp.toJSON().referenceId
+                },
+            }))
 
             return Object.assign({}, topUp.toJSON(), { user: session.user })
 

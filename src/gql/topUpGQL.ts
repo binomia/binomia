@@ -37,7 +37,7 @@ const type = () => {
             company: TopUpCompany
         }
 
-        type TopUpsGQL {
+        type TopUpsType {
             id: ID
             status: String
             amount: Float
@@ -49,21 +49,29 @@ const type = () => {
             company: TopUpCompany
         }
 
+        type OnlyTopUpsType {
+            id: ID
+            status: String
+            amount: Float
+            referenceId: String
+            createdAt: String
+            updatedAt: String            
+        }
     `
 }
 
 
 const query = () => {
     return `
-        userTopUps(page: Int!, pageSize: Int!): [TopUpsGQL]
-        phoneTopUps(phone: String!, page: Int!, pageSize: Int!): [PhoneWithCompanyTopUpType]
+        topUps(phoneId: Int!, page: Int!, pageSize: Int!): [OnlyTopUpsType]
+        topUpPhones(page: Int!, pageSize: Int!): [PhoneWithCompanyTopUpType]
         topUpCompanies: [TopUpCompany]
     `
 }
 
 const mutation = () => {
     return `
-        createTopUp(data: TopUpInput!): TopUpsGQL
+        createTopUp(data: TopUpInput!): TopUpsType
     `
 }
 
@@ -71,11 +79,11 @@ const subscription = () => {
     return ``
 }
 
-const { userTopUps, phoneTopUps, createTopUp, topUpCompanies } = TopUpController
+const { topUps, topUpPhones, createTopUp, topUpCompanies } = TopUpController
 const resolvers = {
     query: {
-        userTopUps,
-        phoneTopUps,
+        topUps,
+        topUpPhones,
         topUpCompanies
     },
     mutation: {
