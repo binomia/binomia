@@ -4,6 +4,25 @@ import { FORMAT_CURRENCY, FORMAT_LIMIT, FORMAT_PHONE_NUMBER } from "@/helpers";
 import { AccountLimitsType, AccountType, GlobalContextType } from "@/types";
 import { cancelIcon, checked, pendingClock } from '@/assets';
 
+export const topUpInitialState = {
+    amount: 0,
+    phoneNumber: "",
+    fullName: "",
+    company: {
+        id: 0,
+        uuid: "",
+        status: "",
+        name: "",
+        logo: "",
+        createdAt: "",
+        updatedAt: ""
+    },
+
+    setAmount: (_: number) => { },
+    setPhoneNumber: (_: string) => { },
+    setFullName: (_: string) => { },
+    setCompany: (_: any) => { }
+}
 
 export const globalContextInitialState: GlobalContextType = {
     setEmail: (_: string) => { },

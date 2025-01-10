@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import colors from '@/colors'
+import NewTopUp from '@/components/topups/NewTopUp'
 import { Text, Image, Pressable, Heading, VStack } from 'native-base'
 import { scale } from 'react-native-size-matters'
 import { FORMAT_PHONE_NUMBER } from '@/helpers'
@@ -13,35 +14,38 @@ import { TopUpAuthSchema } from '@/auth/topUpAuth'
 import { z } from 'zod'
 import { noTransactions } from '@/assets'
 import { AntDesign } from '@expo/vector-icons';
-import NewTopUp from '@/components/topups/NewTopUp'
 import { FlatGrid } from 'react-native-super-grid';
+import { TopUpContext } from '@/contexts/topUpContext'
 
 
 
 const { height, width } = Dimensions.get('window')
 const Topups: React.FC = () => {
+    const { setCompany, setFullName, setPhoneNumber, setAmount } = useContext(TopUpContext)
+
     const { hasNewTransaction } = useSelector((state: any) => state.topupReducer)
-    const [userTopUps] = useLazyQuery(TopUpApolloQueries.userTopUps());
+    // const [userTopUps] = useLazyQuery(TopUpApolloQueries.userTopUps());
+    const [topUpPhones] = useLazyQuery(TopUpApolloQueries.topUpPhones());
     const dispatch = useDispatch();
     const navigation = useNavigation();
     const isFocused = navigation.isFocused()
 
     const [refreshing, setRefreshing] = useState(false);
     const [openBottomSheet, setOpenBottomSheet] = useState(false);
-    const [topups, setTopUps] = useState<z.infer<typeof TopUpAuthSchema.topUp>[]>([]);
+    const [phones, setPhones] = useState<z.infer<typeof TopUpAuthSchema.phone>[]>([]);
 
     const fetchTopUpPhones = async (page: number = 1, pageSize: number = 10) => {
         try {
-            const { data } = await userTopUps({
+            const { data } = await topUpPhones({
                 variables: {
                     page,
                     pageSize
                 }
-            });
+            });            
 
-            setTopUps(data.userTopUps)
+            setPhones(data.topUpPhones)
 
-            if (data.userTopUps.length < 1)
+            if (data.userTopUps?.length < 1)
                 navigation.setOptions({
                     headerRight: undefined
                 });
@@ -70,26 +74,38 @@ const Topups: React.FC = () => {
 
     const onSelectedPhone = async (phone: any) => {
         await dispatch(topupActions.setTopUp(phone))
+
+        setCompany(phone.company)
+        setFullName(phone.fullName)
+        setPhoneNumber(phone.phone)
+        setAmount(phone.amount)
+
         router.navigate("/topUpTransactions")
     }
 
-    const onClose = (newTopUp?: z.infer<typeof TopUpAuthSchema.topUp> | undefined) => {
+    const onClose = (newTopUp?: z.infer<typeof TopUpAuthSchema.phone> | undefined) => {
         setOpenBottomSheet(false)
 
         if (newTopUp)
-            setTopUps([...topups, newTopUp])
+            setPhones([...phones, newTopUp])
     }
 
 
     useEffect(() => {
         fetchTopUpPhones()
+        navigation.addListener("focus", async () => {
+            setCompany({})
+            setFullName("")
+            setPhoneNumber("")
+            setAmount(0)
+        })
+
     }, [])
 
     useEffect(() => {
         (async () => {
-            if (hasNewTransaction) {
+            if (hasNewTransaction)
                 fetchTopUpPhones()
-            }
         })()
 
     }, [isFocused, hasNewTransaction])
@@ -97,19 +113,19 @@ const Topups: React.FC = () => {
 
     return (
         <VStack flex={1} bg={colors.darkGray} pt={"20px"}>
-            {topups.length > 0 ? (
+            {phones?.length > 0 ? (
                 <FlatGrid
                     refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
                     refreshing={refreshing}
                     itemDimension={width / 3}
-                    data={topups}
+                    data={phones}
                     style={styles.gridView}
                     spacing={15}
                     renderItem={({ item: topUp }) => (
                         <Pressable key={topUp.phone} style={[styles.itemContainer]} _pressed={{ opacity: 0.5 }} onPress={() => onSelectedPhone(topUp)}>
-                            <Image borderRadius={"100px"} w={"50px"} h={"50px"} alt={`${topUp.phone}`} resizeMode='contain' source={{ uri: topUp.company.logo }} />
+                            <Image borderRadius={"100px"} w={"50px"} h={"50px"} alt={`${topUp.phone}`} resizeMode='contain' source={{ uri: topUp.company?.logo }} />
                             <Heading mt={"10px"} textTransform={"capitalize"} fontSize={scale(14)} color={colors.white}>{topUp.fullName}</Heading>
-                            <Text fontSize={scale(12)} color={colors.white}>{FORMAT_PHONE_NUMBER(topUp.phone)}</Text>
+                            <Text fontSize={scale(11)} color={colors.white}>{FORMAT_PHONE_NUMBER(topUp.phone)}</Text>
                         </Pressable>
                     )}
                 />

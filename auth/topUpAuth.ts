@@ -10,13 +10,12 @@ export class TopUpAuthSchema {
         logo: z.string().url(),
         createdAt: z.string(),
         updatedAt: z.string()
-    })
-    static topUp = z.object({
+    }).partial().nullable().default(null)
+    
+    static phone = z.object({
         id: z.number(),
         fullName: z.string(),
-        amount: z.number(),
         phone: z.string().length(10),       
-        referenceId: z.string(),
         createdAt: z.string(),
         updatedAt: z.string(),
         company: TopUpAuthSchema.company

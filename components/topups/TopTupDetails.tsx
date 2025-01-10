@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, Dimensions } from 'react-native'
@@ -34,7 +34,9 @@ type Props = {
 const { width } = Dimensions.get("screen")
 const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }, onClose = (_?: any) => { } }) => {
     const [createTopUp] = useMutation(TopUpApolloQueries.createTopUp())
-    const { newTopUp } = useSelector((state: any) => state.topupReducer)
+    const { newTopUp, topup } = useSelector((state: any) => state.topupReducer)
+    const { account } = useSelector((state: any) => state.globalReducer)
+
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
 
@@ -64,7 +66,9 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
                 }
             })
 
+            await dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance - Number(newTopUp.amount) })))
             await dispatch(topupActions.setHasNewTransaction(true))
+            
             onClose()
 
         } catch (error: any) {
@@ -92,6 +96,8 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
                     time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
                 })
             }
+
+            await dispatch(transactionActions.setHasNewTransaction(true))
 
             setLoading(false)
         } catch (error) {
@@ -159,13 +165,18 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
         )
     }
 
+    useEffect(() => {
+        // console.log(JSON.stringify({topup,newTopUp}, null, 2));
+
+    }, [newTopUp, topup])
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
             <VStack px={"10px"} mt={"10px"} h={"100%"}>
                 <VStack pb={"30px"} mt={"10px"} flex={1} justifyContent={"space-between"} alignItems={"center"} borderRadius={10}>
                     <VStack alignItems={"center"} justifyContent={"center"}>
                         <HStack my={"10px"}>
-                            <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(60)} h={scale(60)} source={{ uri: newTopUp.company?.logo || "" }} />
+                            <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(60)} h={scale(60)} source={{ uri: newTopUp.logo }} />
                         </HStack>
                         <Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(newTopUp?.fullName || "")}</Heading>
                         <Text fontSize={scale(16)} color={colors.lightSkyGray}>{FORMAT_PHONE_NUMBER(newTopUp?.phone || "")}</Text>

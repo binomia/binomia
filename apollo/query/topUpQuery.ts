@@ -1,51 +1,33 @@
 import { gql } from "@apollo/client"
 
 export class TopUpApolloQueries {
-    static userTopUps = () => {
+    static topUps = () => {
         return gql`
-            query UserTopUps($page: Int!, $pageSize: Int!) {
-                userTopUps(page: $page, pageSize: $pageSize) {
+            query UserTopUps($page: Int!, $pageSize: Int!, $phoneId: Int!) {
+                topUps(page: $page, pageSize: $pageSize, phoneId: $phoneId) {
                     id
-                    fullName
-                    phone
                     status
                     amount
                     referenceId
                     createdAt
                     updatedAt
-                    company {
-                        id
-                        uuid
-                        status
-                        name
-                        logo
-                        createdAt
-                        updatedAt
-                    }
                 }
             }
         `
     }
-    
-    static phoneTopUps = () => {
+
+    static topUpPhones = () => {
         return gql`
-            query PhoneTopUps($phone: String!, $page: Int!, $pageSize: Int!) {
-                phoneTopUps(phone: $phone, page: $page, pageSize: $pageSize) {
+            query TopUpPhones($page: Int!, $pageSize: Int!) {
+                topUpPhones(page: $page, pageSize: $pageSize) {
                     id
                     fullName
-                    phone
-                    status
-                    amount
-                    createdAt
-                    updatedAt
+                    phone                   
                     company {
                         id
                         uuid
-                        status
                         name
-                        logo
-                        createdAt
-                        updatedAt
+                        logo                        
                     }
                 }
             }
@@ -57,12 +39,11 @@ export class TopUpApolloQueries {
             mutation CreateTopUp($data: TopUpInput!) {
                 createTopUp(data: $data) {
                     id
-                    fullName
+                    status
                     amount
                     referenceId
-                    phone
                     createdAt
-                    updatedAt,
+                    updatedAt
                     company {
                         id
                         uuid
@@ -85,9 +66,7 @@ export class TopUpApolloQueries {
                     uuid
                     status
                     name
-                    logo
-                    createdAt
-                    updatedAt
+                    logo                    
                 }
             }
         `

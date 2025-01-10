@@ -8,13 +8,12 @@ import { creditCard, logo, qrIcon, recurrenceIcon } from "@/assets"
 import { VStack, Image, Pressable, HStack, Text, Stack, Heading } from "native-base"
 import { StyleSheet } from "react-native"
 import { useState } from "react"
-import { router, useNavigation } from "expo-router"
+import { router } from "expo-router"
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { scale } from "react-native-size-matters"
 import { Dimensions, Platform } from "react-native"
-import { useDispatch, useSelector } from "react-redux"
+import { useSelector } from "react-redux"
 import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
-import { topupActions } from "@/redux/slices/topupSlice"
 
 
 const { width } = Dimensions.get('window')
@@ -82,7 +81,6 @@ export const TransactionCenter: React.FC<{ p?: string }> = ({ p = "0" }) => {
     )
 }
 
-
 export const HeaderBankingRight: React.FC = () => {
     const [showBottomSheet, setShowBottomSheet] = useState(false)
 
@@ -124,22 +122,10 @@ export const CardsRight: React.FC = () => {
     )
 }
 export const TopupsRight: React.FC = () => {
-    const navigation = useNavigation()
-
-    const dispatch = useDispatch()
-    const { topup } = useSelector((state: any) => state.topupReducer)
-
     const [openBottomSheet, setOpenBottomSheet] = useState(false)
 
     const onPress = async () => {
         setOpenBottomSheet(true)
-
-        await dispatch(topupActions.setNewTopUp({}))
-        if (navigation.getState().index === 2)
-            await dispatch(topupActions.setNewTopUp({
-                company: topup.company,
-                phone: topup.phone,
-            }))
     }
 
     return (

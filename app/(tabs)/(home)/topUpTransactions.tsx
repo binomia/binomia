@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import colors from '@/colors'
 import moment from 'moment';
 import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
 import Entypo from '@expo/vector-icons/Entypo';
 import BottomSheet from '@/components/global/BottomSheet';
 import * as Sharing from 'expo-sharing';
-import { StyleSheet, Dimensions, TouchableOpacity, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
+import { Dimensions, TouchableOpacity, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Spinner, Pressable, ScrollView, ZStack } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { TopUpApolloQueries } from '@/apollo/query'
@@ -17,6 +17,7 @@ import { cancelIcon, checked, pendingClock } from '@/assets';
 import { router, useNavigation } from 'expo-router';
 import { transactionStatus } from '@/mocks';
 import { TEXT_HEADING_FONT_SIZE } from '@/constants';
+import { TopUpContext } from '@/contexts/topUpContext';
 
 
 type Props = {
@@ -28,8 +29,9 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
     const dispatch = useDispatch()
     const { topup } = useSelector((state: any) => state.topupReducer)
     const { hasNewTransaction } = useSelector((state: any) => state.transactionReducer)
-    const isFocused = useNavigation().isFocused()
-    const [phoneTopUps, { refetch: reFetchPhoneTopUps }] = useLazyQuery(TopUpApolloQueries.phoneTopUps())
+    const navigation = useNavigation();
+    const isFocused = navigation.isFocused()
+    const [topUps, { refetch: reFetchTopUps }] = useLazyQuery(TopUpApolloQueries.topUps())
 
     const [openBottomSheet, setOpenBottomSheet] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
@@ -40,17 +42,17 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
     const [isBottom, setIsBottom] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
 
- 
+
     const fetchPhoneTopUps = async (page: number = 1, pageSize: number = showNewTransaction ? 20 : 10) => {
         try {
-            const { data } = await phoneTopUps({
+            const { data } = await topUps({
                 variables: {
-                    phone: topup.phone,
+                    phoneId: Number(topup.id),
                     page,
                     pageSize
                 }
             })
-            setTopups(data.phoneTopUps)
+            setTopups(data.topUps)
             setIsLoading(false)
 
         } catch (error) {
@@ -61,7 +63,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        await reFetchPhoneTopUps()
+        await fetchPhoneTopUps()
         setRefreshing(false);
     }, []);
 
@@ -127,8 +129,9 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
 
     useEffect(() => {
         (async () => {
+
             if (hasNewTransaction) {
-                await reFetchPhoneTopUps()
+                await fetchPhoneTopUps()
                 await dispatch(transactionActions.setHasNewTransaction(false))
             }
         })()
@@ -146,7 +149,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                 try {
                     setIsLoadingMore(true)
 
-                    const { data } = await reFetchPhoneTopUps({ page: page + 1, pageSize: 20 })
+                    const { data } = await reFetchTopUps({ page: page + 1, pageSize: 20 })
 
                     if (data.accountTransactions.length > 0) {
                         setPage(page + 1)
@@ -187,18 +190,15 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                             renderItem={({ item, index }: any) => (
                                 <TouchableOpacity key={`transactions(tgrtgnrhbfhrbgr)-${item.transactionId}-${index}-${item.transactionId}`} onPress={() => onOpenBottomSheet(item)}>
                                     <HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
-                                        <HStack>
+                                        <HStack alignItems={"center"}>
                                             <HStack w={scale(40)} h={scale(40)} bg={colors.lightGray} alignItems={"center"} justifyContent={"center"} borderRadius={100}>
                                                 <Entypo name="phone" size={24} color={colors.mainGreen} />
                                             </HStack>
                                             <VStack ml={"10px"} justifyContent={"center"}>
-                                                <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item.fullName || "")}</Heading>
+                                                <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{FORMAT_CURRENCY(item.amount)}</Heading>
                                                 <Text fontSize={scale(12)} color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
                                             </VStack>
                                         </HStack>
-                                        <VStack ml={"10px"} justifyContent={"center"}>
-                                            <Heading opacity={item.status === "cancelled" ? 0.5 : 1} textDecorationLine={item.status === "cancelled" ? "line-through" : "none"} fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(13)} color={colors.white}>{FORMAT_CURRENCY(item.amount)}</Heading>
-                                        </VStack>
                                     </HStack>
                                 </TouchableOpacity>
                             )}
@@ -209,10 +209,10 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                 <BottomSheet height={height * 0.50} open={openBottomSheet} onCloseFinish={onCloseFinish}>
                     <VStack px={"20px"} pt={"30px"} w={"100%"} h={"80%"} justifyContent={"space-between"}>
                         <HStack alignItems={"center"}>
-                            <Image borderRadius={"100px"} w={"55px"} h={"55px"} alt={transaction.fullName} resizeMode='contain' source={{ uri: transaction.company?.logo }} />
+                            <Image borderRadius={"100px"} w={"55px"} h={"55px"} alt={transaction.fullName} resizeMode='contain' source={{ uri: topup.company?.logo }} />
                             <VStack ml={"10px"} justifyContent={"center"}>
-                                <Heading fontSize={scale(16)} color={colors.pureGray} textTransform={"capitalize"}>{transaction.fullName}</Heading>
-                                <Text fontWeight={"semibold"} fontSize={scale(12)} color={colors.pureGray}>{FORMAT_PHONE_NUMBER(transaction.phone || "")}</Text>
+                                <Heading fontSize={scale(16)} color={colors.pureGray} textTransform={"capitalize"}>{topup.fullName}</Heading>
+                                <Text fontWeight={"semibold"} fontSize={scale(12)} color={colors.pureGray}>{FORMAT_PHONE_NUMBER(topup.phone || "")}</Text>
                             </VStack>
                         </HStack>
                         <VStack alignItems={"center"} borderRadius={10}>

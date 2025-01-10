@@ -1,12 +1,12 @@
-import { Dimensions, StyleSheet } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import KeyNumberPad from '../global/KeyNumberPad'
-import { Heading, HStack, VStack, Image, Text } from 'native-base'
-import { Entypo } from "@expo/vector-icons";
+import Button from '../global/Button';
 import colors from '@/colors';
+import { Dimensions, StyleSheet } from 'react-native'
+import { Heading, HStack, VStack, Image, Text, Pressable } from 'native-base'
+import { MaterialIcons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from 'react-redux';
 import { FORMAT_CURRENCY, FORMAT_PHONE_NUMBER } from '@/helpers';
-import Button from '../global/Button';
 import { scale } from 'react-native-size-matters';
 import { topupActions } from '@/redux/slices/topupSlice';
 
@@ -14,10 +14,11 @@ import { topupActions } from '@/redux/slices/topupSlice';
 
 type Props = {
     next: () => void
+    back: () => void
 }
 
 const { height } = Dimensions.get('window')
-const NewTopUpQuantity: React.FC<Props> = ({ next }: Props) => {
+const NewTopUpQuantity: React.FC<Props> = ({ next, back }: Props) => {
     const dispatch = useDispatch();
     const { newTopUp } = useSelector((state: any) => state.topupReducer)
     const { account } = useSelector((state: any) => state.globalReducer)
@@ -48,18 +49,16 @@ const NewTopUpQuantity: React.FC<Props> = ({ next }: Props) => {
         setInput(value)
     }
 
-
-
-    useEffect(() => {
-        console.log(newTopUp);
-
-    }, [newTopUp])
-
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
             <VStack>
-                <HStack w={"100%"} mt={"10px"} alignItems={"center"} justifyContent={"center"}>
+                <HStack w={"100%"} mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
+                    <Pressable _pressed={{ opacity: 0.5 }} onPress={() => back()} right={"7px"}>
+                        <MaterialIcons name="arrow-back-ios" size={30} color={colors.white} />
+                        {/* <Ionicons name="chevron-back-outline" size={35} color={colors.white} /> */}
+                    </Pressable>
                     <Heading size={"md"} color={colors.mainGreen} textAlign={"center"}>{FORMAT_CURRENCY(account.balance)}</Heading>
+                    <HStack w={"35px"} />
                 </HStack>
                 <HStack w={"100%"} h={"100px"} justifyContent={"space-between"} alignItems={"center"}>
                     <HStack alignItems={"center"}>

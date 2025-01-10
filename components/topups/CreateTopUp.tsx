@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import colors from '@/colors'
 import BottomSheet from '@/components/global/BottomSheet'
 import Input from '@/components/global/Input'
@@ -16,6 +16,7 @@ import { useLazyQuery } from '@apollo/client'
 import { TopUpApolloQueries } from '@/apollo/query'
 import { TopUpAuthSchema } from '@/auth/topUpAuth'
 import { z } from 'zod'
+import { TopUpContext } from '@/contexts/topUpContext'
 
 
 type Props = {
@@ -24,15 +25,14 @@ type Props = {
 
 const { height, width } = Dimensions.get('window')
 const CreateTopUp: React.FC<Props> = ({ next }: Props) => {
+    const { phoneNumber, fullName, company, setCompany, setFullName, setPhoneNumber } = useContext(TopUpContext)
+
     const [topUpCompanies] = useLazyQuery(TopUpApolloQueries.topUpCompanies())
-    const { topup } = useSelector((state: any) => state.topupReducer)
+    const { topup, newTopUp } = useSelector((state: any) => state.topupReducer)
     const dispatch = useDispatch()
 
-    const [selectedCompany, setSelectedCompany] = useState<any>(topup?.company || {});
     const [openBottomSheet, setOpenBottomSheet] = useState(false);
     const [enabledButton, setEnabledButton] = useState(false);
-    const [phoneNumber, setPhoneNumber] = useState<string>(topup?.phone || "");
-    const [fullName, setFullName] = useState<string>(topup?.fullName || "");
     const [companies, setCompanies] = useState<z.infer<typeof TopUpAuthSchema.company>[]>([]);
 
 
@@ -50,8 +50,8 @@ const CreateTopUp: React.FC<Props> = ({ next }: Props) => {
         setOpenBottomSheet(false)
     }
 
-    const onCompanySelect = (company: any) => {
-        setSelectedCompany(company)
+    const onCompanySelect = async (company: any) => {
+        setCompany(company)
         setOpenBottomSheet(false)
     }
 
@@ -62,7 +62,8 @@ const CreateTopUp: React.FC<Props> = ({ next }: Props) => {
 
     const onNext = async () => {
         await dispatch(topupActions.setNewTopUp({
-            company: selectedCompany,
+            logo: company?.logo,
+            company: company,
             phone: phoneNumber,
             fullName
         }))
@@ -74,8 +75,8 @@ const CreateTopUp: React.FC<Props> = ({ next }: Props) => {
     }, [])
 
     useEffect(() => {
-        setEnabledButton((Object.keys(selectedCompany).length > 0 && isAValidPhoneNumber(phoneNumber) && fullName.length > 1))
-    }, [selectedCompany, phoneNumber, fullName])
+        setEnabledButton((Boolean(company?.id) && isAValidPhoneNumber(phoneNumber) && fullName?.length > 1))
+    }, [company, phoneNumber, fullName])
 
     return (
         <VStack variant={"body"} justifyContent={"space-between"}>
@@ -84,11 +85,11 @@ const CreateTopUp: React.FC<Props> = ({ next }: Props) => {
                 <TouchableWithoutFeedback style={{ flex: 1 }} onPress={Keyboard.dismiss}>
                     <VStack h={"70%"}>
                         <Pressable onPress={() => setOpenBottomSheet(true)} mt={"20px"} h={60} px={"15px"} _pressed={{ opacity: 0.5 }} flexDirection={"row"} bg={colors.lightGray} justifyContent={"space-between"} alignItems={"center"} borderRadius={10}>
-                            {Object.keys(selectedCompany).length > 0 ? (
+                            {company?.name ? (
                                 <HStack justifyContent={"space-between"} w={"100%"} h={"100%"} alignItems={"center"}>
                                     <HStack alignItems={"center"}>
-                                        <Image w={"35px"} h={"35px"} alt='logo-selectedCompany-image' borderRadius={100} resizeMode='contain' source={{ uri: selectedCompany.logo }} />
-                                        <Heading px={"10px"} fontSize={18} color={colors.white}>{selectedCompany.name}</Heading>
+                                        <Image w={"35px"} h={"35px"} alt='logo-selectedCompany-image' borderRadius={100} resizeMode='contain' source={{ uri: company.logo }} />
+                                        <Heading px={"10px"} fontSize={18} color={colors.white}>{company.name}</Heading>
                                     </HStack>
                                     <Entypo name="chevron-down" size={24} color={colors.white} />
                                 </HStack>
@@ -102,7 +103,7 @@ const CreateTopUp: React.FC<Props> = ({ next }: Props) => {
                         <VStack w={"100%"} mt={"30px"} justifyContent={"center"} alignItems={"center"}>
                             <Input
                                 h={60}
-                                style={fullName.length >= 2 ? styles.InputsSucess : fullName ? styles.InputsFail : {}}
+                                style={fullName?.length >= 2 ? styles.InputsSucess : fullName ? styles.InputsFail : {}}
                                 value={fullName}
                                 onChangeText={(value) => setFullName(value)}
                                 placeholder={"Nombre Completo*"}
@@ -111,8 +112,8 @@ const CreateTopUp: React.FC<Props> = ({ next }: Props) => {
                                 h={60}
                                 style={isAValidPhoneNumber(phoneNumber) ? styles.InputsSucess : phoneNumber ? styles.InputsFail : {}}
                                 maxLength={14}
-                                value={phoneNumber.length === 10 ? FORMAT_PHONE_NUMBER(phoneNumber) : phoneNumber}
-                                isInvalid={(!isAValidPhoneNumber(phoneNumber) && Boolean(phoneNumber.length === 10))}
+                                value={phoneNumber?.length === 10 ? FORMAT_PHONE_NUMBER(phoneNumber) : phoneNumber}
+                                isInvalid={(!isAValidPhoneNumber(phoneNumber) && Boolean(phoneNumber?.length === 10))}
                                 errorMessage='Este no es un numero no es de República Dominicana'
                                 keyboardType="phone-pad"
                                 onChangeText={(value) => setPhoneNumber(value.replaceAll(/[^0-9]/g, ''))}
@@ -143,9 +144,9 @@ const CreateTopUp: React.FC<Props> = ({ next }: Props) => {
                         style={styles.gridView}
                         spacing={15}
                         renderItem={({ item: company }) => (
-                            <Pressable onPress={() => onCompanySelect(company)} h={120} my={"3px"} key={company.name} px={"15px"} _pressed={{ opacity: 0.5 }} bg={colors.lightGray} justifyContent={"center"} alignItems={"center"} borderRadius={10}>
-                                <Image w={"45px"} h={"45px"} alt='logo-topUpCompanies-BottomSheet-image' borderRadius={100} resizeMode='contain' source={{ uri: company.logo }} />
-                                <Heading mt={"5px"} fontSize={18} color={colors.white}>{company.name}</Heading>
+                            <Pressable onPress={() => onCompanySelect(company)} h={120} my={"3px"} key={company?.name} px={"15px"} _pressed={{ opacity: 0.5 }} bg={colors.lightGray} justifyContent={"center"} alignItems={"center"} borderRadius={10}>
+                                <Image w={"45px"} h={"45px"} alt='logo-topUpCompanies-BottomSheet-image' borderRadius={100} resizeMode='contain' source={{ uri: company?.logo }} />
+                                <Heading mt={"5px"} fontSize={18} color={colors.white}>{company?.name}</Heading>
                             </Pressable>
                         )}
                     />

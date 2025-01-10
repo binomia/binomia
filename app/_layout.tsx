@@ -16,6 +16,7 @@ import { GlobalContextProvider } from '@/contexts/globalContext';
 import { LogBox, View } from 'react-native';
 import { useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
 import { SocketContextProvider } from '@/contexts/socketContext';
+import { TopUpContextProvider } from '@/contexts/topUpContext';
 
 LogBox.ignoreAllLogs(true);
 LogBox.ignoreLogs(['In React 18']);
@@ -69,14 +70,16 @@ export default () => {
 					<SessionContextProvider>
 						<GlobalContextProvider>
 							<SocketContextProvider>
-								<View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-									<Stack>
-										<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-										<Stack.Screen name="(signup)" options={{ headerShown: false }} />
-										<Stack.Screen name="(modals)" options={{ headerShown: false, headerBackVisible: false, gestureEnabled: true, presentation: "card" }} />
-										<Stack.Screen name="+not-found" />
-									</Stack>
-								</View>
+								<TopUpContextProvider>
+									<View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+										<Stack>
+											<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+											<Stack.Screen name="(signup)" options={{ headerShown: false }} />
+											<Stack.Screen name="(modals)" options={{ headerShown: false, headerBackVisible: false, gestureEnabled: true, presentation: "card" }} />
+											<Stack.Screen name="+not-found" />
+										</Stack>
+									</View>
+								</TopUpContextProvider>
 							</SocketContextProvider>
 						</GlobalContextProvider>
 					</SessionContextProvider>

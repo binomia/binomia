@@ -3,6 +3,7 @@ import { TransactionAuthSchema } from "@/auth/transactionAuth";
 import { UserAuthSchema } from "@/auth/userAuth"
 import z from "zod";
 import * as Notifications from 'expo-notifications';
+import { TopUpAuthSchema } from "@/auth/topUpAuth";
 
 
 export type SessionContextType = {
@@ -66,6 +67,17 @@ export type Address = {
     city: string
     province: string
     municipality: string
+}
+
+export type TopUpContextType = {
+    amount: number
+    setAmount: (value: number) => void
+    phoneNumber: string
+    setPhoneNumber: (value: string) => void
+    fullName: string
+    setFullName: (value: string) => void
+    company: z.infer<typeof TopUpAuthSchema.company>
+    setCompany: (value: any) => void
 }
 
 
