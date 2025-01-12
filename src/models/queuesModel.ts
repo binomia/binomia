@@ -11,6 +11,9 @@ const QueuesModel = db.define('queues', {
 	jobName: {
 		type: STRING
 	},
+	queueType: {
+		type: STRING
+	},
 	jobTime: {
 		type: STRING
 	},

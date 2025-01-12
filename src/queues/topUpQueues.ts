@@ -46,6 +46,7 @@ export default class TopUpQueue {
             case "weekly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_WEEKLY_PATTERN[jobTime as WeeklyQueueTitleType]);
                 const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
+                    queueType: "topup",
                     jobTime,
                     jobName,
                     userId,
@@ -58,6 +59,7 @@ export default class TopUpQueue {
             case "biweekly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_BIWEEKLY_PATTERN);
                 const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
+                    queueType: "topup",
                     jobTime,
                     jobName,
                     userId,
@@ -70,6 +72,7 @@ export default class TopUpQueue {
             case "monthly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_MONTHLY_PATTERN[jobTime as MonthlyQueueTitleType]);
                 const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
+                    queueType: "topup",
                     jobTime,
                     jobName,
                     userId,
@@ -83,6 +86,7 @@ export default class TopUpQueue {
                 const time = 1000 * 60 * 30 // 30 minutes
                 const job = await this.queue.add(jobId, data, { delay: time, repeat: { every: time }, jobId });
                 const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
+                    queueType: "topup",
                     jobTime,
                     jobName,
                     userId,

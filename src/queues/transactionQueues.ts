@@ -45,6 +45,7 @@ export default class TransactionsQueue {
             case "weekly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_WEEKLY_PATTERN[jobTime as WeeklyQueueTitleType]);
                 const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
+                    queueType: "transaction",
                     jobTime,
                     jobName,                    
                     userId,
@@ -57,6 +58,7 @@ export default class TransactionsQueue {
             case "biweekly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_BIWEEKLY_PATTERN);
                 const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
+                    queueType: "transaction",
                     jobTime,
                     jobName,
                     userId,
@@ -69,6 +71,7 @@ export default class TransactionsQueue {
             case "monthly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_MONTHLY_PATTERN[jobTime as MonthlyQueueTitleType]);
                 const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
+                    queueType: "transaction",
                     jobTime,
                     jobName,
                     userId,
@@ -81,6 +84,7 @@ export default class TransactionsQueue {
             case "pendingTransaction": {
                 const job = await this.queue.add(jobId, data, { delay: 1000 * 60 * 30, repeat: { every: 1000 * 60 * 30 }, jobId }); // 30 minutes
                 const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
+                    queueType: "transaction",
                     jobTime,
                     jobName,
                     userId,

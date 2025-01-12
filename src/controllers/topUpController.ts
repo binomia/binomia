@@ -30,10 +30,6 @@ export class TopUpController {
                 // [TODO]: implement pending transaction
                 const isTrue = true
                 if (isTrue) {
-
-                    console.log(JSON.parse(decryptedData));
-                    
-
                     const toptup = await TopUpsModel.findOne({
                         where: {
                             id
@@ -100,7 +96,13 @@ export class TopUpController {
             case QUEUE_JOBS_NAME.PENDING_TOPUP: {
                 const { jobName, jobTime, jobId, amount, userId, data } = JSON.parse(payload);
                 const encryptedData = await Cryptography.encrypt(JSON.stringify(data));
-
+                
+                await topUpQueue.createJobs({ jobId, jobName, jobTime, amount, userId, data: encryptedData });
+            }
+            case QUEUE_JOBS_NAME.CREATE_TOPUP: {
+                const { jobName, jobTime, jobId, amount, userId, data } = JSON.parse(payload);
+                const encryptedData = await Cryptography.encrypt(JSON.stringify(data));
+                
                 await topUpQueue.createJobs({ jobId, jobName, jobTime, amount, userId, data: encryptedData });
             }
 
@@ -109,4 +111,4 @@ export class TopUpController {
             }
         }
     }
-}
+} 

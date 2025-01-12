@@ -10,6 +10,7 @@ import { Op } from "sequelize";
 interface RecurrenceTransactionsParams extends JobJson {
     userId: number,
     amount: number,
+    queueType: string
     jobName: string
     jobTime: string
     status?: string
@@ -18,54 +19,72 @@ interface RecurrenceTransactionsParams extends JobJson {
 
 export default class MainController {
     static createQueue = async (transactionData: RecurrenceTransactionsParams) => {
-        const { repeatJobKey, userId, jobTime, status = "active", jobName, amount, id, timestamp, data } = transactionData
-        const hash = await Cryptography.hash(JSON.stringify({
-            jobId: id,
-            userId,
-            amount,
-            repeatJobKey,
-            jobTime,
-            jobName,
-            ZERO_ENCRYPTION_KEY
-        }))
+        try {
+            const { repeatJobKey, userId, queueType, jobTime, status = "active", jobName, amount, id, timestamp, data } = transactionData
+            const queue = await QueuesModel.findOne({
+                where: { repeatJobKey }
+            })
 
-        const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
-        const transaction = await QueuesModel.create({
-            jobId: id,
-            userId,
-            amount,
-            repeatJobKey,
-            jobName,
-            jobTime,
-            timestamp,
-            status,
-            repeatedCount: 0,
-            data,
-            signature
-        })
+            if (queue) return
+            
+            const hash = await Cryptography.hash(JSON.stringify({
+                jobId: id,
+                userId,
+                amount,
+                repeatJobKey,
+                queueType,
+                jobTime,
+                jobName,
+                ZERO_ENCRYPTION_KEY
+            }))
 
-        return transaction.toJSON()
+            const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+            const transaction = await QueuesModel.create({
+                jobId: id,
+                userId,
+                amount,
+                repeatJobKey,
+                queueType,
+                jobName,
+                jobTime,
+                timestamp,
+                status,
+                repeatedCount: 0,
+                data,
+                signature
+            })
+
+            return transaction.toJSON()
+
+        } catch (error) {
+            throw error
+        }
     }
 
     static inactiveTransaction = async (repeatJobKey: string, status: string = "completed") => {
-        const queue = await QueuesModel.findOne({
-            where: {
-                [Op.and]: [
-                    { repeatJobKey },
-                    { status: "active" }
-                ]
-            }
-        })
-
-        if (!queue)
-            throw "queue not found";
-
-        await queue.update({
-            status,
-            repeatedCount: queue.toJSON().repeatedCount + 1
-        })
-
-        return (await queue.reload()).toJSON()
+        try {
+            const queue = await QueuesModel.findOne({
+                where: {
+                    [Op.and]: [
+                        { repeatJobKey },
+                        { status: "active" }
+                    ]
+                }
+            })
+    
+            if (!queue)
+                throw "queue not found";
+    
+            await queue.update({
+                status,
+                repeatedCount: queue.toJSON().repeatedCount + 1
+            })
+    
+            return (await queue.reload()).toJSON()
+            
+        } catch (error) {
+            throw error
+        }
     }
 
     static listenToRedisEvent = async ({ channel, payload, bullDashboard }: { channel: string, payload: string, bullDashboard: ReturnType<typeof createBullBoard> }) => {
