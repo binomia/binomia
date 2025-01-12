@@ -10,6 +10,12 @@ const type = () => {
             companyId: Int
         }
 
+        input TopUpRecurrenceInput {
+            title: String
+            time: String
+        }
+
+
         type TopUpCompany {
             id: ID
             uuid: String
@@ -71,7 +77,7 @@ const query = () => {
 
 const mutation = () => {
     return `
-        createTopUp(data: TopUpInput!): TopUpsType
+        createTopUp(data: TopUpInput!, recurrence: TopUpRecurrenceInput!): TopUpsType
     `
 }
 

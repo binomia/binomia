@@ -8,4 +8,9 @@ export class TopUpSchema {
         amount: z.number().positive(),
         companyId: z.number()
     })
+
+    static recurrenceTopUp = z.object({
+        title: z.string(),
+        time: z.string()
+    })
 }

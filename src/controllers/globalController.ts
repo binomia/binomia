@@ -31,7 +31,6 @@ export class GlobalController {
             await seedDatabase()
             // const session = await checkForProtectedRequests(req);
 
-
             return null;
 
         } catch (error: any) {

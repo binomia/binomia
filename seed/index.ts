@@ -1,6 +1,11 @@
-import { TopUpCompanyModel, TransactionsModel, UsersModel } from '@/models';
+import { GlobalZodSchema, UserJoiSchema } from '@/auth';
+import { AccountModel, kycModel, SessionModel, TopUpCompanyModel, TransactionsModel, UsersModel } from '@/models';
 import { faker } from '@faker-js/faker';
-import short from 'short-uuid';
+import { Op } from 'sequelize';
+import short, { generate } from 'short-uuid';
+import bcrypt from 'bcrypt';
+import { ZERO_ENCRYPTION_KEY } from '@/constants';
+import jwt from 'jsonwebtoken';
 
 const createUsers = async () => {
     for (let i = 0; i < 10; i++) {
@@ -70,12 +75,139 @@ const createTopUpCompany = async () => {
 
 }
 
+const createBinomiaUser = async () => {
+    try {
+        const data = {
+            "fullName": "binomia",
+            "username": "$binomia",
+            "phone": "8297809087",
+            "addressAgreementSigned": true,
+            "userAgreementSigned": true,
+            "email": "lpmrloki@gmail.com.com",
+            "idFrontUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
+            "idBackUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
+            "faceVideoUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
+            "dniNumber": "000-0000000-0",
+            "gender": null,
+            "bloodType": null,
+            "occupation": null,
+            "profileImageUrl": null,
+            "address": "test",
+            "dob": "2025-01-01T00:00:00.000Z",
+            "dniExpiration": "2023-01-10T00:00:00.000Z",
+            "password": "123456"
+        }
+
+        const validatedData = await UserJoiSchema.createUser.parseAsync(data)
+        const registerHeader = await GlobalZodSchema.registerHeader.parseAsync({
+            "session-auth-identifier": "00000000000fb36cc0bde8cb00923b2ba6a7a6665cc6b7dde6f8d8c256976030",
+            device: "{}"
+        })
+
+        const regexPattern = new RegExp('^\\d{3}-\\d{7}-\\d{1}');
+
+        if (!regexPattern.test(validatedData.dniNumber)) {
+            console.log("Invalid dni number: " + validatedData.dniNumber);
+            return
+        }
+
+
+        const userExists = await UsersModel.findOne({
+            where: {
+                [Op.or]: [
+                    { email: validatedData.email },
+                    { username: validatedData.username }
+                ]
+            },
+            attributes: ["email", "username", "dniNumber"]
+        })
+
+        if (userExists?.toJSON().email === validatedData.email) {
+            console.log("A user with email: " + validatedData.email + " already exists");
+            return
+        }
+
+        if (userExists?.toJSON().username === validatedData.username) {
+            console.log("A user with username: " + validatedData.username + " already exists");
+            return
+        }
+
+
+        const kycExists = await kycModel.findOne({
+            where: {
+                dniNumber: validatedData.dniNumber
+            }
+        })
+
+        if (kycExists) {
+            console.log("A user with dni: " + validatedData.dniNumber + " already exists");
+            return
+        }
+
+
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(validatedData.password, salt);
+
+        const user = await UsersModel.create(Object.assign({}, validatedData, {
+            password: hashedPassword
+        }))
+
+        const userData = user.toJSON()
+
+        const account = await AccountModel.create({
+            username: user.dataValues.username,
+            currency: "DOP",
+        })
+
+        const kyc = await kycModel.create({
+            userId: userData.id,
+            dniNumber: validatedData.dniNumber,
+            dob: validatedData.dob,
+            status: "validated",
+            expiration: validatedData.dniExpiration,
+            occupation: validatedData.occupation,
+            gender: validatedData.gender,
+            maritalStatus: validatedData.maritalStatus,
+            bloodType: validatedData.bloodType
+        })
+
+        const sid = `${generate()}${generate()}${generate()}`
+        const token = jwt.sign({
+            userId: userData.id,
+            sid
+        }, ZERO_ENCRYPTION_KEY);
+
+        const expires = new Date(Date.now() + 1000 * 60 * 60 * 24) // 1 day
+
+        await SessionModel.create({
+            sid,
+            deviceId: registerHeader['session-auth-identifier'],
+            jwt: token,
+            userId: user.dataValues.id,
+            expires,
+            data: registerHeader.device || {}
+        })
+
+        return {
+            ...userData,
+            accounts: [account.toJSON()],
+            kyc: kyc.toJSON(),
+            token
+        }
+
+    } catch (error: any) {
+        console.log(error);
+    }
+}
+
 
 // 9Gud3MqryACQ3mD4pKyStB9Gud3MqryACQ3mD4pKyStB
 
 
 export const seedDatabase = async () => {
+    await createBinomiaUser()
     // await createUsers()
-    await createTopUpCompany()
+    // await createTopUpCompany()
     // await createTransactions()
 }
