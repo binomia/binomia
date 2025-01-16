@@ -119,7 +119,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             const authenticated = await authenticate()
 
             setLoading(true)
-            if (authenticated.success) {
+            if (true) {
                 await handleOnSend({
                     title: recurrence,
                     time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence

@@ -129,8 +129,8 @@ export const TopupsRight: React.FC = () => {
     }
 
     return (
-        <Pressable _pressed={{ opacity: 0.5 }} onPress={onPress}>
-            <AntDesign name="pluscircle" size={22} color="white" />
+        <Pressable w={"50px"} h={"40px"} alignItems={"flex-end"} _pressed={{ opacity: 0.5 }} onPress={onPress}>
+            <AntDesign name="pluscircle" size={25} color="white" />
             <NewTopUp onClose={() => setOpenBottomSheet(false)} open={openBottomSheet} />
         </Pressable>
     )

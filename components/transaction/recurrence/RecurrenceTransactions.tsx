@@ -95,6 +95,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                     variables: {
                         data: {
                             repeatJobKey: transaction.repeatJobKey,
+                            queueType: transaction.queueType,
                             jobName: recurrence,
                             jobTime: recurrenceDaySelected
                         }
@@ -109,7 +110,9 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
             }
 
         } catch (error) {
-            console.log({ onSave: error });
+            setVisible(false)
+            setSpin(false)
+            setTransaction({})
         }
     }
 
@@ -132,15 +135,14 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
     const onSelectTransaction = async (transaction: any) => {
         const data = {
             ...transaction,
-            profileImageUrl: transaction.receiver?.user?.profileImageUrl,
+            profileImageUrl: transaction.referenceData.logo,
             repeatJobKey: transaction.repeatJobKey,
-            fullName: transaction.receiver.user.fullName,
+            fullName: transaction.referenceData.fullName,
             amount: transaction.amount,
             jobName: transaction.jobName,
             jobTime: transaction.jobTime
         }
 
-        console.log(JSON.stringify(data, null, 2));
         setTransaction(data)
 
         const jobName = handleDefualtJobName(transaction.jobName, transaction.jobTime)
@@ -155,12 +157,13 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
     const onDelete = async () => {
         try {
             setStartDeleting(true)
-            const { repeatJobKey } = transaction
+            const { repeatJobKey, queueType } = transaction
             if (!repeatJobKey) return
 
             await deleteRecurrentTransactions({
                 variables: {
-                    repeatJobKey
+                    repeatJobKey,
+                    queueType
                 }
             })
 
@@ -171,6 +174,8 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
 
         } catch (error) {
             console.error({ onDelete: error });
+            setVisible(false)
+            setSpin(false)
         }
     }
 
@@ -293,7 +298,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
 
     const onCancelEdit = async () => {
         setCancelSpin(true)
-        
+
         await delay(500)
         setCancelSpin(false)
         ref.current?.setPage(0)
@@ -320,7 +325,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                         {transactions.length > 0 ? (
                             <ScrollView px={"20px"} w={"100%"} h={"100%"} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                                 <VStack>
-                                    <Heading fontSize={scale(20)} mt={"30px"} fontWeight={"500"} color={"white"}>Transacciones</Heading>
+                                    <Heading fontSize={scale(20)} mt={"30px"} fontWeight={"500"} color={"white"}>Recurrentes</Heading>
                                     <FlatList
                                         scrollEnabled={false}
                                         data={transactions}
@@ -328,17 +333,17 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                                         renderItem={({ item, index }) => (
                                             <Pressable key={`${item.repeatJobKey}-${index}`} onPress={() => onSelectTransaction(item)} my={"10px"} _pressed={{ opacity: 0.5 }} flexDirection={"row"} justifyContent={"space-between"}>
                                                 <HStack alignItems={"center"}>
-                                                    {item.receiver.user.profileImageUrl ?
-                                                        <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: item.receiver.user.profileImageUrl }} />
+                                                    {item.referenceData.logo ?
+                                                        <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: item.referenceData.logo }} />
                                                         :
                                                         <DefaultIcon
-                                                            value={item.receiver.user.fullName}
-                                                            contentContainerStyle={[styles.contentContainerStyle, { width: scale(45), height: scale(45), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.receiver.user.fullName ?? "") }]}
+                                                            value={item.referenceData.fullName}
+                                                            contentContainerStyle={[styles.contentContainerStyle, { width: scale(45), height: scale(45), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.referenceData.fullName ?? "") }]}
                                                             textStyle={styles.textStyle}
                                                         />
                                                     }
                                                     <VStack ml={"10px"} justifyContent={"center"}>
-                                                        <Heading textTransform={"capitalize"} fontSize={scale(14)} color={"white"}>{item.profileImageUrl}{MAKE_FULL_NAME_SHORTEN(item.receiver.user.fullName)}</Heading>
+                                                        <Heading textTransform={"capitalize"} fontSize={scale(14)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item.referenceData.fullName)}</Heading>
                                                         <Text textTransform={"capitalize"} fontSize={scale(10)} color={colors.lightSkyGray}>{formatTransactionRecurrenceTime(item.jobName, item.jobTime)}</Text>
                                                         <Text textTransform={"capitalize"} fontSize={scale(10)} color={colors.lightSkyGray}>Proximo pago: {moment(formatTransactionNextDate(item.jobName, item.jobTime)).format("ll")}</Text>
                                                     </VStack>
@@ -439,8 +444,8 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                     <VStack>
                         <HStack p={"20px"} justifyContent={"space-between"}>
                             <HStack alignItems={"center"}>
-                                {transaction.receiver?.user?.profileImageUrl ?
-                                    <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: transaction.receiver.user.profileImageUrl }} />
+                                {transaction.profileImageUrl ?
+                                    <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: transaction.profileImageUrl }} />
                                     :
                                     <DefaultIcon
                                         value={transaction.fullName}

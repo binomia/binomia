@@ -124,7 +124,7 @@ const Topups: React.FC = () => {
                     renderItem={({ item: topUp }) => (
                         <Pressable key={topUp.phone} style={[styles.itemContainer]} _pressed={{ opacity: 0.5 }} onPress={() => onSelectedPhone(topUp)}>
                             <Image borderRadius={"100px"} w={"50px"} h={"50px"} alt={`${topUp.phone}`} resizeMode='contain' source={{ uri: topUp.company?.logo }} />
-                            <Heading mt={"10px"} textTransform={"capitalize"} fontSize={scale(14)} color={colors.white}>{topUp.fullName}</Heading>
+                            <Heading mt={"10px"} textTransform={"capitalize"} fontSize={scale(12)} color={colors.white}>{topUp.fullName}</Heading>
                             <Text fontSize={scale(11)} color={colors.white}>{FORMAT_PHONE_NUMBER(topUp.phone)}</Text>
                         </Pressable>
                     )}
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.lightGray,
         borderRadius: 10,
         padding: 20,
-        height: 150,
+        height: 130,
     }
 });
 

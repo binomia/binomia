@@ -432,25 +432,16 @@ export class TransactionApolloQueries {
                     amount
                     jobTime
                     jobName
+                    jobId
                     repeatJobKey
                     status
                     repeatedCount
                     createdAt
                     updatedAt
-                    receiver {
-                        id
-                        balance
-                        status
-                        hash
-                        currency
-                        user {
-                            id
-                            fullName
-                            username
-                            profileImageUrl
-                            status
-                        }
-                    }
+                    referenceData
+                    queueType
+                    signature
+                    data
                 }
             }
         `
@@ -458,8 +449,8 @@ export class TransactionApolloQueries {
 
     static deleteRecurrentTransactions = () => {
         return gql`
-            mutation DeleteRecurrentTransactions($repeatJobKey: String!) {
-                deleteRecurrentTransactions(repeatJobKey: $repeatJobKey) {
+            mutation DeleteRecurrentTransactions($repeatJobKey: String!, $queueType: String) {
+                deleteRecurrentTransactions(repeatJobKey: $repeatJobKey, queueType: $queueType) {
                     jobId
                     repeatJobKey
                     jobName
@@ -470,6 +461,9 @@ export class TransactionApolloQueries {
                     signature
                     createdAt
                     updatedAt
+                    queueType
+                    jobTime
+                    referenceData
                 }
             }
         `
@@ -481,6 +475,7 @@ export class TransactionApolloQueries {
                 updateRecurrentTransactions(data: $data) {
                     jobId
                     repeatJobKey
+                    queueType
                     jobName
                     status
                     repeatedCount

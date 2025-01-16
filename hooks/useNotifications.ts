@@ -24,16 +24,18 @@ export const useNotifications = (): PushNotificationType => {
     const registerForPushNotificationsAsync = async () => {
         let token;
 
-        if (Platform.OS === 'android') {
-            await Notifications.setNotificationChannelAsync('myNotificationChannel', {
-                name: 'A channel is needed for the permissions prompt to appear',
-                importance: Notifications.AndroidImportance.MAX,
-                vibrationPattern: [0, 250, 250, 250],
-                lightColor: '#FF231F7C',
-            });
-        }
-
         if (Device.isDevice) {
+            console.log('Platform.OS', Platform.OS);
+            
+            if (Platform.OS === 'android') {
+                await Notifications.setNotificationChannelAsync('myNotificationChannel', {
+                    name: 'A channel is needed for the permissions prompt to appear',
+                    importance: Notifications.AndroidImportance.MAX,
+                    vibrationPattern: [0, 250, 250, 250],
+                    lightColor: '#FF231F7C',
+                });
+            }
+
             const { status: existingStatus } = await Notifications.getPermissionsAsync();
             let finalStatus = existingStatus;
             if (existingStatus !== 'granted') {

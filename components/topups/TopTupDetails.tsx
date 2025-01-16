@@ -53,7 +53,7 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
-            const newTopUpData = await TopUpAuthSchema.createTopUp.parseAsync({
+            const data = await TopUpAuthSchema.createTopUp.parseAsync({
                 phone: newTopUp.phone,
                 amount: newTopUp.amount,
                 fullName: newTopUp.fullName?.trim(),
@@ -61,14 +61,12 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
             })
 
             await createTopUp({
-                variables: {
-                    data: newTopUpData
-                }
+                variables: { data, recurrence }
             })
 
             await dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance - Number(newTopUp.amount) })))
             await dispatch(topupActions.setHasNewTransaction(true))
-            
+
             onClose()
 
         } catch (error: any) {

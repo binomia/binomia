@@ -1,15 +1,16 @@
 import { StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import BottomSheet from './BottomSheet'
-import { Camera, Frame, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera'
+import { Camera, Frame, useCameraDevice, useFrameProcessor, useSkiaFrameProcessor } from 'react-native-vision-camera'
 import { Face, FaceDetectionOptions, useFaceDetector } from 'react-native-vision-camera-face-detector'
 import { Heading, HStack, VStack, ZStack } from 'native-base'
 import Fade from 'react-native-fade'
-import { Worklets } from 'react-native-worklets-core'
+import { useSharedValue, Worklets } from 'react-native-worklets-core'
 import colors from '@/colors'
 import { ImageEditor } from "expo-crop-image";
 import { useDispatch } from 'react-redux'
 import { registerActions } from '@/redux/slices/registerSlice'
+import Animated from 'react-native-reanimated'
 
 type Props = {
     open?: boolean
@@ -25,6 +26,7 @@ const { height, width } = Dimensions.get('window')
 const CameraComponent: React.FC<Props> = ({ open, onCloseFinish, setVideo, setImage, cameraType = "back", video = false }: Props) => {
     const ref = useRef<Camera>(null);
     const dispatch = useDispatch()
+    const faceBox = useSharedValue({ x: 0, y: 0, width: 0, height: 0 })
 
     const [progress, setProgress] = useState<number>(5);
     const [recording, setRecording] = useState<boolean>(false);
@@ -44,12 +46,14 @@ const CameraComponent: React.FC<Props> = ({ open, onCloseFinish, setVideo, setIm
     const frameProcessor = useFrameProcessor((frame) => {
         'worklet'
         const faces = detectFaces(frame)
-
+        
         if (faces.length > 0) {
-            faces[0].bounds
+            faceBox.value = faces[0].bounds
+            console.log("face detected", faces[0].bounds);
         }
 
         handleDetectedFaces(faces, frame)
+        // faceBox.value = { x: 0, y: 0, width: 0, height: 0 }
 
     }, [])
 
@@ -132,6 +136,7 @@ const CameraComponent: React.FC<Props> = ({ open, onCloseFinish, setVideo, setIm
                         pixelFormat="rgb"
                         isActive
                     />
+                    <Animated.View style={[faceBox.value, {borderWidth: 1, backgroundColor: "red"}]}/>
                     <VStack w={"100%"} h={"100%"}>
                         {previewUrl ?
                             <HStack w={"100%"} h={"90%"} bg={"black"} justifyContent={"center"} alignItems={"center"} p={"20px"}>

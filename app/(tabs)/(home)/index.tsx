@@ -3,7 +3,7 @@ import colors from '@/colors';
 import Button from '@/components/global/Button';
 import QRScannerScreen from '@/components/global/QRScanner';
 import HomeSkeleton from '@/components/home/homeSkeleton';
-import { Alert, Dimensions, RefreshControl, Button as RNBButton } from 'react-native'
+import { Alert, Dimensions, RefreshControl, StyleSheet } from 'react-native'
 import { Heading, HStack, Image, Pressable, VStack, Text, ScrollView } from 'native-base';
 import { bagIcon, bills, cars, house, phone, sendIcon } from '@/assets';
 import { useLazyQuery } from '@apollo/client';
@@ -14,12 +14,17 @@ import { FORMAT_CURRENCY } from '@/helpers';
 import { scale } from 'react-native-size-matters';
 import { router, Stack, useNavigation } from 'expo-router';
 import Transactions from '@/components/transaction/transactions';
-import { Ionicons, Entypo, AntDesign } from '@expo/vector-icons';
+import { Ionicons, Entypo, AntDesign, MaterialIcons } from '@expo/vector-icons';
 import Popover, { PopoverMode } from 'react-native-popover-view';
+import CameraComponent from '@/components/global/Camera';
+import { FlatGrid } from 'react-native-super-grid';
+import RecentTransactions from '@/components/transaction/RecentTransactions';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
 	const isFocused = useNavigation().isFocused()
+	const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
+
 
 	const { account } = useSelector((state: any) => state.globalReducer)
 	const dispatch = useDispatch()
@@ -84,6 +89,33 @@ const HomeScreen: React.FC = () => {
 		])
 	}
 
+	const services = [
+		{
+			id: 0,
+			name: "Recargas",
+			image: phone,
+			onPress: () => router.navigate("/topups")
+		},
+		{
+			id: 1,
+			name: "Seguros",
+			image: cars,
+			onPress: () => { }
+		},
+		{
+			id: 2,
+			name: "Electricidad",
+			image: house,
+			onPress: () => { }
+		},
+		{
+			id: 3,
+			name: "Facturas",
+			image: bills,
+			onPress: () => { }
+		}
+	]
+
 	return (isLoading ? (<HomeSkeleton />) : (
 		<VStack p={"20px"} w={width} bg={colors.darkGray} flex={1} alignItems={"center"}>
 			<ScrollView w={"100%"} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
@@ -115,33 +147,38 @@ const HomeScreen: React.FC = () => {
 						</HStack>
 					</VStack>
 				</VStack>
-				<VStack w={"100%"} pt={"30px"} px={"5px"}>
-					<Heading fontSize={scale(24)} color={"white"}>Servicios</Heading>
-					<HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
-						<Pressable onPress={() => router.navigate("/topups")} _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
-							<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={phone} />
-							<Text color={"white"}>Recargas</Text>
-						</Pressable>
-						<Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
-							<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={cars} />
-							<Text color={"white"}>Seguros</Text>
-						</Pressable>
+				<VStack w={"100%"} pt={"20px"}>
+					<Heading fontSize={scale(18)} color={"white"}>Servicios</Heading>
+					<HStack mt={"10px"} mb={"20px"} justifyContent={"space-between"}>
+						{services.map((item, index) => (
+							<VStack key={`service-${item.name}-${index}`} alignItems={"center"}>
+								<Pressable onPress={item.onPress} _pressed={{ opacity: 0.5 }} borderRadius={"15px"} bg={colors.lightGray} w={width * 0.2} h={width * 0.2} justifyContent={"center"} alignItems={"center"}>
+									<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={item.image} />
+								</Pressable>
+								<Text fontWeight={"bold"} color={"white"}>{item.name}</Text>
+							</VStack>
+						))}
 					</HStack>
-					<HStack mt={"10px"} alignItems={"center"} justifyContent={"space-between"}>
-						<Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
-							<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={house} />
-							<Text color={"white"}>Electricidad</Text>
-						</Pressable>
-						<Pressable _pressed={{ opacity: 0.5 }} borderRadius={"10px"} bg={colors.lightGray} w={"49%"} h={scale(120)} justifyContent={"center"} alignItems={"center"}>
-							<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={bills} />
-							<Text color={"white"}>Facturas</Text>
-						</Pressable>
-					</HStack>
+					<RecentTransactions showNewTransaction={false} />
 				</VStack>
 				<QRScannerScreen defaultPage={1} open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
+				<VStack w={"100%"} alignItems={"center"}>
+					<HStack bg={colors.lightGray} w={"40px"} h={"40px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
+						<MaterialIcons name="security" size={24} color={colors.mainGreen} />
+					</HStack>
+					<Text mt={"10px"} w={"80%"} fontSize={scale(12)} textAlign={"center"} color={"white"}>
+						Binomia es una plataforma de servicios financieros. todos los servicios son realizados en línea.
+						Para más información, visita nuestra página de privacidad y términos.
+					</Text>
+					<Text mt={"30px"} w={"80%"} fontSize={scale(12)} textAlign={"center"} color={"white"}>
+						© 2025 Binomia. Todos los derechos reservados.
+					</Text>
+				</VStack>
 			</ScrollView>
+
 		</VStack>
 	))
 }
+
 
 export default HomeScreen
