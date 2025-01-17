@@ -16,6 +16,21 @@ export class TopUpApolloQueries {
         `
     }
 
+    static recentTopUps = () => {
+        return gql`
+            query RecentTopUps {
+                recentTopUps {
+                    id
+                    status
+                    amount
+                    referenceId
+                    createdAt
+                    updatedAt
+                }
+            }
+        `
+    }
+
     static topUpPhones = () => {
         return gql`
             query TopUpPhones($page: Int!, $pageSize: Int!) {

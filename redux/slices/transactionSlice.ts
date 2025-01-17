@@ -7,6 +7,7 @@ const transactionSlice = createSlice({
         receiver: {},
         transaction: {},
         transactions: [],
+        recentTransactions: [],
         transactionDeytails: {},
         createTransactionBody: {},
         hasNewTransaction: false
@@ -23,6 +24,9 @@ const transactionSlice = createSlice({
         },
         setTransactions: (state, action) => {
             state.transactions = action.payload
+        },
+        setRecentTransactions: (state, action) => {
+            state.recentTransactions = action.payload
         },
         setCreateTransactionBody: (state, action) => {
             state.createTransactionBody = action.payload

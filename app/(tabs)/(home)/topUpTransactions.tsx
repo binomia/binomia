@@ -17,7 +17,6 @@ import { cancelIcon, checked, pendingClock } from '@/assets';
 import { router, useNavigation } from 'expo-router';
 import { transactionStatus } from '@/mocks';
 import { TEXT_HEADING_FONT_SIZE } from '@/constants';
-import { TopUpContext } from '@/contexts/topUpContext';
 
 
 type Props = {
@@ -188,10 +187,10 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                             scrollEnabled={false}
                             data={topups}
                             renderItem={({ item, index }: any) => (
-                                <TouchableOpacity key={`transactions(tgrtgnrhbfhrbgr)-${item.transactionId}-${index}-${item.transactionId}`} onPress={() => onOpenBottomSheet(item)}>
+                                <Pressable bg={colors.lightGray} my={"5px"} borderRadius={10} px={"15px"} py={"10px"} key={`transactions(tgrtgnrhbfhrbgr)-${item.transactionId}-${index}-${item.transactionId}`} onPress={() => onOpenBottomSheet(item)}>
                                     <HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
                                         <HStack alignItems={"center"}>
-                                            <HStack w={scale(40)} h={scale(40)} bg={colors.lightGray} alignItems={"center"} justifyContent={"center"} borderRadius={100}>
+                                            <HStack w={scale(40)} h={scale(40)} bg={colors.darkGray} alignItems={"center"} justifyContent={"center"} borderRadius={100}>
                                                 <Entypo name="phone" size={24} color={colors.mainGreen} />
                                             </HStack>
                                             <VStack ml={"10px"} justifyContent={"center"}>
@@ -200,7 +199,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                                             </VStack>
                                         </HStack>
                                     </HStack>
-                                </TouchableOpacity>
+                                </Pressable>
                             )}
                         />
                     </VStack>

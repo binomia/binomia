@@ -3,7 +3,7 @@ import colors from '@/colors';
 import Button from '@/components/global/Button';
 import QRScannerScreen from '@/components/global/QRScanner';
 import HomeSkeleton from '@/components/home/homeSkeleton';
-import { Alert, Dimensions, RefreshControl, StyleSheet } from 'react-native'
+import { Alert, Dimensions, RefreshControl } from 'react-native'
 import { Heading, HStack, Image, Pressable, VStack, Text, ScrollView } from 'native-base';
 import { bagIcon, bills, cars, house, phone, sendIcon } from '@/assets';
 import { useLazyQuery } from '@apollo/client';
@@ -12,20 +12,16 @@ import { AccountApolloQueries } from '@/apollo/query';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { FORMAT_CURRENCY } from '@/helpers';
 import { scale } from 'react-native-size-matters';
-import { router, Stack, useNavigation } from 'expo-router';
-import Transactions from '@/components/transaction/transactions';
-import { Ionicons, Entypo, AntDesign, MaterialIcons } from '@expo/vector-icons';
-import Popover, { PopoverMode } from 'react-native-popover-view';
-import CameraComponent from '@/components/global/Camera';
-import { FlatGrid } from 'react-native-super-grid';
+import { router } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
+
 import RecentTransactions from '@/components/transaction/RecentTransactions';
+import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
+import { transactionActions } from '@/redux/slices/transactionSlice';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
-	const isFocused = useNavigation().isFocused()
-	const [openBottomSheet, setOpenBottomSheet] = useState<boolean>(false);
-
-
+	const [fetchRecentTransactions] = useLazyQuery(TransactionApolloQueries.recentTransactions())
 	const { account } = useSelector((state: any) => state.globalReducer)
 	const dispatch = useDispatch()
 
@@ -34,6 +30,8 @@ const HomeScreen: React.FC = () => {
 
 	const [refreshing, setRefreshing] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
+	const [transactions, setTransactions] = useState<any[]>([])
+
 
 	const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -51,6 +49,7 @@ const HomeScreen: React.FC = () => {
 			setRefreshing(true);
 
 			await fetchAccount();
+			await fetchAccountTransactions();
 
 			setTimeout(() => {
 				setRefreshing(false);
@@ -61,9 +60,26 @@ const HomeScreen: React.FC = () => {
 
 	}, []);
 
+	const fetchAccountTransactions = async () => {
+		try {
+			const { data } = await fetchRecentTransactions()
+
+			await dispatch(transactionActions.setRecentTransactions(data.recentTransactions))
+			// setTransactions(data.recentTransactions)
+			setIsLoading(false)
+
+		} catch (error) {
+			console.error(error)
+			setTransactions([])
+			setIsLoading(false)
+		}
+	}
+
 
 	useEffect(() => {
 		(async () => {
+			await fetchAccountTransactions();
+
 			if (Object.keys(account).length > 0) {
 				await delay(1000)
 				setIsLoading(false)
@@ -149,7 +165,7 @@ const HomeScreen: React.FC = () => {
 				</VStack>
 				<VStack w={"100%"} pt={"20px"}>
 					<Heading fontSize={scale(18)} color={"white"}>Servicios</Heading>
-					<HStack mt={"10px"} mb={"20px"} justifyContent={"space-between"}>
+					<HStack mt={"10px"} mb={"30px"} justifyContent={"space-between"}>
 						{services.map((item, index) => (
 							<VStack key={`service-${item.name}-${index}`} alignItems={"center"}>
 								<Pressable onPress={item.onPress} _pressed={{ opacity: 0.5 }} borderRadius={"15px"} bg={colors.lightGray} w={width * 0.2} h={width * 0.2} justifyContent={"center"} alignItems={"center"}>
@@ -159,10 +175,9 @@ const HomeScreen: React.FC = () => {
 							</VStack>
 						))}
 					</HStack>
-					<RecentTransactions showNewTransaction={false} />
+					<RecentTransactions />
 				</VStack>
-				<QRScannerScreen defaultPage={1} open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
-				<VStack w={"100%"} alignItems={"center"}>
+				<VStack w={"100%"} my={"40px"} alignItems={"center"}>
 					<HStack bg={colors.lightGray} w={"40px"} h={"40px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
 						<MaterialIcons name="security" size={24} color={colors.mainGreen} />
 					</HStack>
@@ -175,7 +190,7 @@ const HomeScreen: React.FC = () => {
 					</Text>
 				</VStack>
 			</ScrollView>
-
+			<QRScannerScreen defaultPage={1} open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
 		</VStack>
 	))
 }
