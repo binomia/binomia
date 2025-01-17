@@ -367,7 +367,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                                         <Text textAlign={"center"} fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
                                     </VStack>
                                     <Pressable onPress={onPressNewTransaction} mt={"20px"} _pressed={{ opacity: 0.5 }} justifyContent={"center"} alignItems={"center"} >
-                                        <Ionicons name="add-circle" style={{ fontSize: scale(70) }} color={colors.mainGreen} />
+                                        <Ionicons name="add-circle" style={{ fontSize: scale(50) }} color={colors.mainGreen} />
                                     </Pressable>
                                 </VStack>
                             </VStack>

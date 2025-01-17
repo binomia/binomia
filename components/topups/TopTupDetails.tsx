@@ -22,6 +22,7 @@ import { TopUpApolloQueries } from '@/apollo/query';
 import { TopUpAuthSchema } from '@/auth/topUpAuth';
 import { topupActions } from '@/redux/slices/topupSlice';
 import { z } from 'zod';
+import { fetchRecentTransactions } from '@/redux/fetchHelper';
 
 
 
@@ -66,7 +67,7 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
 
             await dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance - Number(newTopUp.amount) })))
             await dispatch(topupActions.setHasNewTransaction(true))
-
+            
             onClose()
 
         } catch (error: any) {
@@ -93,8 +94,10 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
                     title: recurrence,
                     time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
                 })
+                
             }
-
+            
+            await dispatch(fetchRecentTransactions())
             await dispatch(transactionActions.setHasNewTransaction(true))
 
             setLoading(false)

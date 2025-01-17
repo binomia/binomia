@@ -1,11 +1,13 @@
 import { createSlice } from '@reduxjs/toolkit'
 import phone from 'phone'
+import { fetchRecentTopUps } from '../fetchHelper'
 
 const topupSlice = createSlice({
     name: 'topups',
     initialState: {
         topup: {},
         newTopUp: {},
+        recentTopUps: [],
         phoneNumber: "",
         fullName: "",
         company: {},
@@ -30,7 +32,15 @@ const topupSlice = createSlice({
         setHasNewTransaction: (state, action) => {
             state.hasNewTransaction = action.payload
         }
-    }
+    },
+    extraReducers(builder) {
+        builder.addCase(fetchRecentTopUps.fulfilled, (state, action) => {
+            state.recentTopUps = action.payload
+        })
+        builder.addCase(fetchRecentTopUps.rejected, (state) => {
+            state.recentTopUps = []
+        })
+    },
 })
 
 export const topupActions = topupSlice.actions

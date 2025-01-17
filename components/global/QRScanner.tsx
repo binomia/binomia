@@ -92,14 +92,16 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                             data={user?.username || ""}
                                             pieceLiquidRadius={0}
                                             pieceStrokeWidth={1}
-                                            pieceStroke={colors.darkGray}
+                                            pieceStroke={colors.lightGray}
+                                            padding={10}
+                                            
                                             logo={{
                                                 href: icon,
-                                                padding: 10,
+                                                padding: 5,
                                                 opacity: 0.8
                                             }}
                                             style={{
-                                                backgroundColor: "transparent"
+                                                backgroundColor: "transparent"                                                                                         
                                             }}
                                             outerEyesOptions={{ borderRadius: 30 }}
                                             innerEyesOptions={{ borderRadius: 20, color: colors.mainGreen }}

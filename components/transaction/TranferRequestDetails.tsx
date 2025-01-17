@@ -6,7 +6,7 @@ import Button from '@/components/global/Button';
 import BottomSheet from '../global/BottomSheet';
 import { StyleSheet, Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, FlatList } from 'native-base'
-import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { recurenceMonthlyData, recurenceWeeklyData } from '@/mocks';
@@ -16,6 +16,7 @@ import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { z } from 'zod';
 
 
 type Props = {
@@ -23,7 +24,7 @@ type Props = {
     goNext?: () => void
 }
 
-const { width } = Dimensions.get("screen")
+const { width, height } = Dimensions.get("screen")
 const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { } }) => {
     const dispatch = useDispatch();
 
@@ -184,6 +185,14 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
         )
     }
 
+    const transactionLocation = (location: z.infer<typeof TransactionAuthSchema.transactionLocation>) => {
+        const neighbourhood = location?.neighbourhood ? location.neighbourhood : ""
+        const town = location?.town ? location.town : ""
+        const county = location.county ? location.county : ""
+
+        return `${neighbourhood}${town ? ", " : ""}${town}${county ? ", " : ""}${county}`
+    }
+
 
     useEffect(() => {
         getLocationInfo(location)
@@ -193,7 +202,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
         <SafeAreaView style={{ flex: 0.95, backgroundColor: colors.darkGray }}>
             <VStack px={"10px"} mt={"10px"} h={"100%"}>
                 <VStack pb={"30px"} flex={1} justifyContent={"space-between"} alignItems={"center"} borderRadius={10}>
-                    <VStack w={"100%"} h={"50%"} alignItems={"center"} justifyContent={"center"}>
+                    <VStack w={"100%"} pt={"20px"} alignItems={"center"} justifyContent={"center"}>
                         <HStack my={"10px"}>
                             {transactionDeytails.profileImageUrl ?
                                 <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(60)} h={scale(60)} source={{ uri: transactionDeytails.profileImageUrl }} />
@@ -207,7 +216,24 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
                         </HStack>
                         <Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transactionDeytails?.fullName || "")}</Heading>
                         <Text fontSize={scale(16)} color={colors.lightSkyGray}>{transactionDeytails?.username}</Text>
-                        <Heading textTransform={"capitalize"} mt={"30px"} fontSize={scale(45)} color={"mainGreen"}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
+                        <Heading textTransform={"capitalize"} fontSize={scale(45)} color={"mainGreen"}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
+                    </VStack>
+                    <VStack px={"20px"} w={"100%"} justifyContent={"center"}>
+                        <HStack w={"85%"} mb={"5px"}>
+                            <Heading fontSize={scale(16)} textTransform={"capitalize"} color={"white"}>{transactionLocation(location ?? {}) || "Ubicación"}</Heading>
+                        </HStack>
+                        <Image
+                            alt='fine-location-image-alt'
+                            resizeMode="cover"
+                            w={"100%"}
+                            h={height / 3}
+                            source={{
+                                uri: getMapLocationImage({ latitude: location?.latitude, longitude: location?.longitude })
+                            }}
+                            style={{
+                                borderRadius: 10
+                            }}
+                        />
                     </VStack>
 
                     <HStack w={"100%"} px={"10px"} justifyContent={"space-between"}>

@@ -16,6 +16,7 @@ import { TransactionApolloQueries } from "@/apollo/query/transactionQuery";
 import { transactionActions } from "@/redux/slices/transactionSlice";
 import { AccountAuthSchema } from "@/auth/accountAuth";
 import { useNotifications } from "@/hooks/useNotifications";
+import { fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -70,7 +71,9 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 dispatch(globalActions.setKyc(kycData ?? {})),
                 dispatch(globalActions.setAccount(accountsData ?? {})),
                 dispatch(globalActions.setCards(cardsData ?? {})),
-                dispatch(globalActions.setCard(primaryCard ?? {}))
+                dispatch(globalActions.setCard(primaryCard ?? {})),
+                dispatch(fetchRecentTransactions()),
+                dispatch(fetchRecentTopUps())
             ])
 
         } catch (error) {

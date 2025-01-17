@@ -18,14 +18,23 @@ export class TopUpApolloQueries {
 
     static recentTopUps = () => {
         return gql`
-            query RecentTopUps {
-                recentTopUps {
+            query RecentTopUps($page: Int!, $pageSize: Int!) {
+                recentTopUps(page: $page, pageSize: $pageSize) {
                     id
                     status
                     amount
                     referenceId
                     createdAt
-                    updatedAt
+                    phone {
+                        fullName
+                        phone
+                    }
+                    user {
+                        fullName
+                    }
+                    company {
+                        logo
+                    }
                 }
             }
         `

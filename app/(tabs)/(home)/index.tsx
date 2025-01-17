@@ -16,12 +16,10 @@ import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import RecentTransactions from '@/components/transaction/RecentTransactions';
-import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { transactionActions } from '@/redux/slices/transactionSlice';
+import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
-	const [fetchRecentTransactions] = useLazyQuery(TransactionApolloQueries.recentTransactions())
 	const { account } = useSelector((state: any) => state.globalReducer)
 	const dispatch = useDispatch()
 
@@ -30,7 +28,6 @@ const HomeScreen: React.FC = () => {
 
 	const [refreshing, setRefreshing] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
-	const [transactions, setTransactions] = useState<any[]>([])
 
 
 	const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -49,7 +46,8 @@ const HomeScreen: React.FC = () => {
 			setRefreshing(true);
 
 			await fetchAccount();
-			await fetchAccountTransactions();
+			await dispatch(fetchRecentTransactions());
+			await dispatch(fetchRecentTopUps());
 
 			setTimeout(() => {
 				setRefreshing(false);
@@ -60,25 +58,10 @@ const HomeScreen: React.FC = () => {
 
 	}, []);
 
-	const fetchAccountTransactions = async () => {
-		try {
-			const { data } = await fetchRecentTransactions()
-
-			await dispatch(transactionActions.setRecentTransactions(data.recentTransactions))
-			// setTransactions(data.recentTransactions)
-			setIsLoading(false)
-
-		} catch (error) {
-			console.error(error)
-			setTransactions([])
-			setIsLoading(false)
-		}
-	}
-
 
 	useEffect(() => {
 		(async () => {
-			await fetchAccountTransactions();
+			await dispatch(fetchRecentTransactions());
 
 			if (Object.keys(account).length > 0) {
 				await delay(1000)

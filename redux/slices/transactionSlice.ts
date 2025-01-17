@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { fetchRecentTransactions } from '../fetchHelper'
 
 const transactionSlice = createSlice({
     name: 'transaction',
@@ -37,7 +38,15 @@ const transactionSlice = createSlice({
         setHasNewTransaction: (state, action) => {
             state.hasNewTransaction = action.payload
         }
-    }
+    },
+    extraReducers(builder) {
+        builder.addCase(fetchRecentTransactions.fulfilled, (state, action) => {
+            state.recentTransactions = action.payload
+        })
+        builder.addCase(fetchRecentTransactions.rejected, (state, action) => {
+            state.recentTransactions = []
+        })
+    },
 })
 
 export const transactionActions = transactionSlice.actions

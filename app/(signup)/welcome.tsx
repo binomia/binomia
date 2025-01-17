@@ -5,6 +5,7 @@ import { SafeAreaView, Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack } from 'native-base'
 import { welcome } from '@/assets'
 import { useNavigation } from '@react-navigation/native'
+import { router } from 'expo-router'
 
 const { height } = Dimensions.get('window')
 const WelcomeScreen: React.FC = () => {
@@ -19,7 +20,7 @@ const WelcomeScreen: React.FC = () => {
 					<Text textAlign={"center"} w={"75%"} color={"white"}>Tu dinero, siempre a tu alcance. Seguro y rápido. Todo en un solo lugar.</Text>
 				</VStack>
 				<VStack w={"100%"} px={"20px"} alignItems={"center"}>
-					<Button w={"100%"} bg={"mainGreen"} mb="20px" title="Crear una Cuenta" onPress={() => navigation.navigate("RegisterScreen")} />
+					<Button w={"100%"} bg={"mainGreen"} mb="20px" title="Crear una Cuenta" onPress={() => router.navigate("register")} />
 				</VStack>
 			</VStack>
 		</SafeAreaView>

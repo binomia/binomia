@@ -48,10 +48,6 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
         setDisabledButton(true)
     }
 
-    const getAppInBackgroundTime = async () => {
-        const appInBackgroundTime = await getItem("appInBackgroundTime");
-        return appInBackgroundTime;
-    }
 
     useEffect(() => {
         const subscription = AppState.addEventListener('change', async (nextAppState) => {

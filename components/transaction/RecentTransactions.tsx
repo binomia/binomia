@@ -24,6 +24,7 @@ const RecentTransactions: React.FC = () => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { user } = useSelector((state: any) => state.globalReducer)
+	const { recentTopUps } = useSelector((state: any) => state.topupReducer)
 	const { hasNewTransaction, recentTransactions } = useSelector((state: any) => state.transactionReducer)
 	const isFocused = useNavigation().isFocused()
 
@@ -33,6 +34,7 @@ const RecentTransactions: React.FC = () => {
 	const [showPayButton, setShowPayButton] = useState<boolean>(false);
 	const [openBottomSheet, setOpenBottomSheet] = useState(false);
 	const [transaction, setTransaction] = useState<any>({})
+	const [transactions, setTransactions] = useState<any[]>([])
 
 
 
@@ -155,9 +157,36 @@ const RecentTransactions: React.FC = () => {
 		await Sharing.shareAsync("http://test.com")
 	}
 
+	useEffect(() => {
+		const topupsMapped = recentTopUps?.map((topup: any) => {
+			return {
+				type: "topup",
+				timestamp: topup.createdAt,
+				data: topup
+			}
+		})
+
+		const transactionsMapped = recentTransactions?.map((transaction: any) => {
+			return {
+				type: "transaction",
+				timestamp: transaction.createdAt,
+				data: transaction
+			}
+		})
+
+		if (transactionsMapped?.length > 0 && topupsMapped?.length > 0) {
+			const combinedTransactions = [...transactionsMapped, ...topupsMapped].sort((a: any, b: any) => {
+				return new Date(Number(b.timestamp)).getTime() - new Date(Number(a.timestamp)).getTime()
+			});
+
+			setTransactions(combinedTransactions.slice(0, 10))
+		}
+
+	}, [recentTopUps, recentTransactions])
+
 	return (
 		<VStack flex={1}>
-			{recentTransactions.length > 0 ?
+			{transactions?.length > 0 ?
 				<VStack w={"100%"} >
 					<HStack w={"100%"} justifyContent={"space-between"}>
 						<Heading fontSize={scale(18)} color={"white"}>{"Recientes"}</Heading>
@@ -168,7 +197,7 @@ const RecentTransactions: React.FC = () => {
 					<FlatList
 						mt={"10px"}
 						scrollEnabled={false}
-						data={recentTransactions}
+						data={transactions}
 						renderItem={({ item: { data, type }, index }: any) => (
 							type === "transaction" ? (
 								<Pressable bg={colors.lightGray} my={"5px"} borderRadius={10} px={"15px"} py={"10px"} key={`transactions(tgrtgnrhbfhrbgr)-${data.transactionId}-${index}-${data.transactionId}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(data)}>
@@ -185,7 +214,7 @@ const RecentTransactions: React.FC = () => {
 											}
 											<VStack ml={"10px"} justifyContent={"center"}>
 												<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(data).fullName || "")}</Heading>
-												<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(data.createdAt).format("lll")}</Text>
+												<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(data.createdAt)).format("lll")}</Text>
 											</VStack>
 										</HStack>
 										<VStack ml={"10px"} justifyContent={"center"}>
@@ -215,7 +244,7 @@ const RecentTransactions: React.FC = () => {
 											}
 											<VStack ml={"10px"} justifyContent={"center"}>
 												<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(data.phone.fullName || "")}</Heading>
-												<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(data.createdAt).format("lll")}</Text>
+												<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(data.createdAt)).format("lll")}</Text>
 											</VStack>
 										</HStack>
 										<VStack ml={"10px"} justifyContent={"center"}>

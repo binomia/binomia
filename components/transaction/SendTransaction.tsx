@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { router } from 'expo-router';
 import { pendingClock } from '@/assets';
+import { fetchRecentTransactions } from '@/redux/fetchHelper';
 
 type Props = {
     open?: boolean
@@ -33,10 +34,11 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
         setInput("0")
 
         if (currentPage === 2) {
-            router.dismissAll()
-            router.navigate("(transactions)")
+            await dispatch(fetchRecentTransactions())
 
+            router.navigate("(home)")
             ref.current?.setPage(0)
+
             setCurrentPage(0)
             await dispatch(transactionActions.setHasNewTransaction(true))
         }

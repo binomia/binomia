@@ -9,6 +9,7 @@ import { globalActions } from "@/redux/slices/globalSlice";
 import { transactionActions } from "@/redux/slices/transactionSlice";
 import { useLazyQuery } from "@apollo/client";
 import { AccountApolloQueries } from "@/apollo/query";
+import { fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
 
 
 export const SocketContext = createContext({});
@@ -47,7 +48,10 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                     await Promise.all([
                         refreshAccount(),
                         dispatch(globalActions.setHaveAccountChanged(false)),
-                        dispatch(transactionActions.setHasNewTransaction(true))
+                        dispatch(transactionActions.setHasNewTransaction(true)),
+                        dispatch(fetchRecentTransactions()),
+                        dispatch(fetchRecentTopUps())
+
                     ])
                 })
 
@@ -55,18 +59,33 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                     await Promise.all([
                         dispatch(globalActions.setAccount(transaction.from)),
                         dispatch(globalActions.setHaveAccountChanged(false)),
-                        dispatch(transactionActions.setHasNewTransaction(true))
+                        dispatch(transactionActions.setHasNewTransaction(true)),
+                        dispatch(fetchRecentTransactions()),
+                        dispatch(fetchRecentTopUps())
                     ])
                 })
 
                 socket.on(SOCKET_EVENTS.TRANSACTION_CREATED_FROM_QUEUE, async (data: any) => {
-                    dispatch(globalActions.setAccount(data.from))
+                    await Promise.all([
+                        dispatch(globalActions.setAccount(data.from)),
+                        dispatch(fetchRecentTransactions()),
+                        dispatch(fetchRecentTopUps())
+                    ])
+                })
+
+                socket.on(SOCKET_EVENTS.TRANSACTION_REQUEST_CANCELED, async (data: any) => {
+                    await Promise.all([
+                        dispatch(globalActions.setAccount(data.from)),
+                        dispatch(fetchRecentTransactions()),
+                        dispatch(fetchRecentTopUps())
+                    ])
                 })
             })
 
             return () => {
                 socket.off("connect");
             }
+
         }).catch((error) => {
             console.error({ error });
         })

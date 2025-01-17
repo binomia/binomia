@@ -24,11 +24,10 @@ import { router } from 'expo-router';
 type Props = {
     goBack?: () => void
     goNext?: () => void
-    handleOnClose?: () => void
 }
 
 const { width } = Dimensions.get("screen")
-const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }, handleOnClose = () => { } }) => {
+const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }}) => {
     const { receiver, transactions } = useSelector((state: any) => state.transactionReducer)
     const { location, account, user } = useSelector((state: any) => state.globalReducer)
 
