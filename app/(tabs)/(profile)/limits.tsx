@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { VStack, Text, HStack, ZStack, ScrollView } from 'native-base'
+import { VStack, Text, HStack, ZStack, ScrollView, Heading } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
@@ -11,7 +11,7 @@ import { AccountLimitsType } from '@/types'
 import { AccountAuthSchema } from '@/auth/accountAuth'
 import { useNavigation } from 'expo-router'
 import { globalActions } from '@/redux/slices/globalSlice'
-import { Feather } from '@expo/vector-icons';
+import { Feather, MaterialIcons } from '@expo/vector-icons';
 import { TEXT_PARAGRAPH_FONT_SIZE } from '@/constants'
 import { RefreshControl } from 'react-native'
 
@@ -71,8 +71,8 @@ const LimitsScreen: React.FC = () => {
     }, [])
 
     return (
-        <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
-            <ScrollView borderRadius={10} w={"100%"} h={"auto"} mt={"50px"} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
+        <VStack px={"20px"} flex={1} bg={colors.darkGray}  justifyContent={"space-between"}>
+            <ScrollView borderRadius={10} w={"100%"} h={"100%"} flex={1} mt={"50px"} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                 <VStack bg={"lightGray"} borderRadius={10} px={"10px"}>
                     {limitsScreenData(limits, account).map((item, index) => (
                         <HStack key={`limits-creen-data-${index}`} bg={"lightGray"} w={"100%"} space={2} pl={"10px"} py={"18px"} >
@@ -89,11 +89,9 @@ const LimitsScreen: React.FC = () => {
                                     activeStrokeWidth={5}
                                 />
                             </HStack>
-                            <VStack flex={1} px={"10px"}>
-                                <HStack justifyContent={"space-between"} alignItems={"center"}>
-                                    <HStack h={"30px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
-                                        <Text numberOfLines={3} fontSize={scale(13)} color={colors.white}>{item.title}</Text>
-                                    </HStack>
+                            <VStack flex={1} h={"35px"} px={"10px"}>
+                                <HStack h={"30px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
+                                    <Heading fontSize={scale(13)} textTransform={"capitalize"} color={colors.white}>{item.title}</Heading>
                                 </HStack>
                                 <ZStack w={"100%"} h={"7px"} bg={colors.darkGray} borderRadius={10}>
                                     <HStack w={`${item.percentage}%`} h={`100%`} borderRadius={10} bg={colors.mainGreen} />
@@ -102,13 +100,15 @@ const LimitsScreen: React.FC = () => {
                         </HStack>
                     ))}
                 </VStack>
-                <HStack mt={"30px"} >
-                    <Feather style={{ marginTop: 5 }} name="alert-circle" size={24} color={colors.warning} />
-                    <Text ml={"10px"} fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"85%"} color={colors.warning}>
-                        Los recursos de tu cuenta son limitados y se actualizan semanalmente, específicamente cada lunes.
-                    </Text>
-                </HStack>
             </ScrollView>
+            <VStack w={"100%"} my={"50px"} bottom={"20px"} alignItems={"center"}>
+                <HStack bg={colors.lightGray} w={"40px"} h={"40px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
+                    <MaterialIcons name="security" size={24} color={colors.mainGreen} />
+                </HStack>
+                <Text mt={"10px"} w={"80%"} fontSize={scale(12)} textAlign={"center"} color={"white"}>
+                    Los recursos de tu cuenta son limitados y se actualizan semanalmente, específicamente cada lunes.
+                </Text>
+            </VStack>
         </VStack>
     )
 }

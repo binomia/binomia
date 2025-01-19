@@ -1,6 +1,6 @@
 import { Linking, StyleSheet, } from 'react-native'
 import React, { useContext } from 'react'
-import { Image, VStack, Text, HStack, Divider, FlatList, Pressable } from 'native-base'
+import { Image, VStack, Text, HStack, Divider, FlatList, Pressable, Heading } from 'native-base'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
 import Feather from '@expo/vector-icons/Feather';
@@ -51,27 +51,20 @@ const SupportScreen: React.FC = () => {
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
-            <VStack borderRadius={10} bg={"lightGray"} p={"5px"} w={"100%"} h={"auto"} mt={"50px"}>
+            <VStack borderRadius={10} p={"5px"} w={"100%"} h={"auto"} mt={"50px"}>
                 {supportScreenData({ openEmail, openPhone, openWhatsApp }).map((item, index) => (
-                    <Pressable key={`support-screen-data-${index}-${item.name}`} _pressed={{ opacity: 0.5 }} onPress={item.onPress}>
-                        <HStack space={2} pl={"10px"} py={index === 2 ? "2px" : "7px"} alignItems={"center"}>
-                            <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
-                                <Image alt='logo-image' resizeMode='contain' w={"18px"} h={"18px"} source={item.icon} />
-                            </HStack>
-                            <VStack width={"90%"} h={"30px"} borderRadius={10}>
-                                <HStack pr={"10px"} justifyContent={"space-between"} alignItems={"center"}>
-                                    <Text textTransform={index === 2 ? "capitalize" : "lowercase"} fontSize={scale(15)} color={colors.white}>{item.name}</Text>
-                                    <Feather name="chevron-right" size={24} color="white" />
-                                </HStack>
-                                {index !== 2 ? <Divider mt={"10px"} width={"100%"} h={"0.5px"} bg={colors.gray} /> : null}
-                            </VStack>
+                    <Pressable _pressed={{ opacity: 0.5 }} key={item.name + index + "support"} flexDirection={"row"} w={"100%"} h={scale(45)} justifyContent={"space-between"} alignItems={"center"} onPress={item.onPress}>
+                        <HStack alignItems={"center"}>
+                            <Image alt='logo-image' borderRadius={100} resizeMode='contain' w={scale(35)} h={scale(35)} source={item.icon} />
+                            <Heading ml={"10px"} fontSize={scale(15)} textTransform={index === 1 ? "lowercase" : "capitalize"} color={colors.white}>{item.name}</Heading>
+                        </HStack>
+                        <HStack w={"35px"} h={"35px"} borderRadius={10} bg={colors.lightGray} justifyContent={"center"} alignItems={"center"}>
+                            <Feather name="chevron-right" size={28} color="white" />
                         </HStack>
                     </Pressable>
                 ))}
             </VStack>
-            <HStack mb={"30px"} justifyContent={"center"}>
-                <Button fontWeight={"bold"} bg={"lightGray"} color='red' title='Cerrar Sesion' onPress={onLogout} w={'80%'} />
-            </HStack>
+
         </VStack>
     )
 }

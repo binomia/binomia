@@ -112,7 +112,7 @@ const BankingScreen: React.FC = () => {
             amount: transaction.amount,
             fullName: user.fullName,
             username: user.username,
-        }        
+        }
 
         return data
     }
@@ -172,7 +172,7 @@ const BankingScreen: React.FC = () => {
                         <Heading size={"md"} color={colors.mainGreen}>Depositar</Heading>
                     </Pressable>
                     <Pressable onPress={() => handleMakeTransaction("Retiro")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
-                        <Image alt='logo-image' resizeMode='contain' tintColor={colors.mainGreen} w={scale(45)} h={scale(45)} source={withdrawIcon} />
+                        <Image alt='logo-image' resizeMode='contain' w={scale(45)} h={scale(45)} source={withdrawIcon} />
                         <Heading size={"md"} color={colors.mainGreen}>Retirar</Heading>
                     </Pressable>
                 </HStack>

@@ -105,7 +105,7 @@ export const personalScreenData = (user: any) => [
         icon: userIcon,
     },
     {
-        name: user.email,
+        name: String(user?.email || "").toLowerCase(),
         icon: mailIcon,
     },
     {

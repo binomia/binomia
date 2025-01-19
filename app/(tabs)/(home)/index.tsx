@@ -133,10 +133,10 @@ const HomeScreen: React.FC = () => {
 								borderRadius={"10px"}
 								title="Enviar"
 								onPress={() => account?.allowSend ? router.navigate("/user") : handleAlert()}
-								leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"18px"} h={"18px"} source={sendIcon} />}
+								leftRender={<Image resizeMode='contain' tintColor={colors.white} alt='send-image-icon' w={"25px"} h={"25px"} source={sendIcon} />}
 							/>
 							<Button
-								leftRender={<Image resizeMode='contain' alt='send-image-icon' w={"20px"} h={"20px"} source={bagIcon} />}
+								leftRender={<Image resizeMode='contain' tintColor={colors.white} alt='send-image-icon' w={"25px"} h={"25px"} source={bagIcon} />}
 								w={"49%"}
 								bg={"darkGray"}
 								mt={"20px"}
