@@ -17,6 +17,7 @@ import { router, useNavigation } from 'expo-router';
 import { TEXT_HEADING_FONT_SIZE } from '@/constants';
 import { transactionStatus } from '@/mocks';
 import { Entypo } from '@expo/vector-icons';
+import SingleTopTup from '../topups/SingleTopTup';
 
 
 const { height, width } = Dimensions.get('window')
@@ -95,15 +96,6 @@ const RecentTransactions: React.FC = () => {
 		setNeedRefresh(true)
 		ref.current?.setPage(next)
 	}
-
-	useEffect(() => {
-		(async () => {
-			if (hasNewTransaction) {
-				await dispatch(transactionActions.setHasNewTransaction(false))
-			}
-		})()
-
-	}, [isFocused, hasNewTransaction])
 
 	const onCloseFinish = async () => {
 		setOpenBottomSheet(false)
@@ -184,6 +176,16 @@ const RecentTransactions: React.FC = () => {
 
 	}, [recentTopUps, recentTransactions])
 
+	useEffect(() => {
+		(async () => {
+			if (hasNewTransaction) {
+				await dispatch(transactionActions.setHasNewTransaction(false))
+			}
+		})()
+
+	}, [isFocused, hasNewTransaction])
+
+
 	return (
 		<VStack flex={1}>
 			{transactions?.length > 0 ?
@@ -257,31 +259,8 @@ const RecentTransactions: React.FC = () => {
 					/>
 					<BottomSheet height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
 						<SingleSentTransaction iconImage={pendingClock} showPayButton={showPayButton} goNext={goNext} onClose={onCloseFinishSingleTransaction} title={singleTransactionTitle} />
-					</BottomSheet>
-					<BottomSheet height={height * 0.50} open={openBottomSheet} onCloseFinish={onCloseFinish}>
-						<VStack px={"20px"} pt={"30px"} w={"100%"} h={"80%"} justifyContent={"space-between"}>
-							<HStack alignItems={"center"}>
-								<Image borderRadius={"100px"} w={"55px"} h={"55px"} alt={"top-image"} resizeMode='contain' source={{ uri: transaction.company?.logo }} />
-								<VStack ml={"10px"} justifyContent={"center"}>
-									<Heading fontSize={scale(16)} color={colors.pureGray} textTransform={"capitalize"}>{transaction.phone?.fullName}</Heading>
-									<Text fontWeight={"semibold"} fontSize={scale(12)} color={colors.pureGray}>{FORMAT_PHONE_NUMBER(transaction.phone?.phone || "")}</Text>
-								</VStack>
-							</HStack>
-							<VStack alignItems={"center"} borderRadius={10}>
-								<VStack alignItems={"center"}>
-									<Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={colors.pureGray}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
-									<Text mb={"10px"} color={colors.lightSkyGray}>{moment(transaction?.createdAt).format("lll")}</Text>
-									<HStack mb={"20px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
-										{StatuIcon(transaction.status)}
-										<Text ml={"3px"} fontSize={scale(16)} color={colors.lightSkyGray}>{transactionStatus(transaction.status)}</Text>
-									</HStack>
-									<Pressable onPress={handleShare} _pressed={{ opacity: 0.5 }} w={scale(55)} h={scale(55)} shadow={1} borderWidth={0.4} borderColor={colors.placeholder} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
-										<Entypo name="share" size={24} color="white" />
-									</Pressable>
-								</VStack>
-							</VStack>
-						</VStack>
-					</BottomSheet>
+					</BottomSheet>					
+					<SingleTopTup open={openBottomSheet} onClose={onCloseFinish} topup={transaction}/>
 				</VStack>
 				: (
 					<VStack w={"100%"} h={height / 3} px={"20px"} >

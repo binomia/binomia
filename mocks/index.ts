@@ -215,9 +215,9 @@ export const notificationsScreenData = ({ pushNotifications, emailNotifications,
 
 export const supportScreenData = ({ openEmail, openPhone, openWhatsApp }: any) => [
     {
-        name: FORMAT_PHONE_NUMBER(SUPPORT_PHONE_NUMBER),
-        icon: phoneIcon,
-        onPress: () => openPhone(),
+        name: "Whatsapp",
+        icon: whatsappIcon,
+        onPress: () => openWhatsApp()
     },
     {
         name: SUPPORT_EMAIL,
@@ -225,9 +225,9 @@ export const supportScreenData = ({ openEmail, openPhone, openWhatsApp }: any) =
         onPress: () => openEmail(),
     },
     {
-        name: "Whatsapp",
-        icon: whatsappIcon,
-        onPress: () => openWhatsApp()
+        name: "Contactanos",
+        icon: phoneIcon,
+        onPress: () => openPhone(),
     }
 ]
 

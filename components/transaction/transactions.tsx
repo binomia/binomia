@@ -10,7 +10,7 @@ import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
 import PagerView from 'react-native-pager-view';
 import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
 import { z } from 'zod'
-import { StyleSheet, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
+import { StyleSheet, Keyboard, Dimensions, TouchableWithoutFeedback, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Spinner, Pressable, ScrollView } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
@@ -22,6 +22,8 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { noTransactions, pendingClock } from '@/assets';
 import { router, useNavigation } from 'expo-router';
+import { fetchAllTransactions } from '@/redux/fetchHelper';
+import SingleTopTup from '../topups/SingleTopTup';
 
 type Props = {}
 
@@ -30,26 +32,26 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { user } = useSelector((state: any) => state.globalReducer)
-	const { hasNewTransaction } = useSelector((state: any) => state.transactionReducer)
+	const { hasNewTransaction, loading, transactions } = useSelector((state: any) => state.transactionReducer)
 	const isFocused = useNavigation().isFocused()
 
-	const [accountTransactions, { refetch: refetchAccountTransactions }] = useLazyQuery(TransactionApolloQueries.accountTransactions())
 	const [searchAccountTransactions] = useLazyQuery(TransactionApolloQueries.searchAccountTransactions())
 	const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
 
 	const [singleTransactionTitle, setSingleTransactionTitle] = useState<string>("Ver Detalles");
 	const [refreshing, setRefreshing] = useState(false);
 	const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
-	const [transactions, setTransactions] = useState<any[]>([])
+	const [transaction, setTransaction] = useState<any>({})
 	const [filteredTransactions, setFilteredTransactions] = useState<any[]>([])
 	const [showSingleTransaction, setShowSingleTransaction] = useState<boolean>(false);
 	const [showSendTransaction, setShowSendTransaction] = useState<boolean>(false);
-	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [needRefresh, setNeedRefresh] = useState<boolean>(false);
 	const [showPayButton, setShowPayButton] = useState<boolean>(false);
 	const [page, setPage] = useState<number>(0);
 	const [isBottom, setIsBottom] = useState(false);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const [openBottomSheet, setOpenBottomSheet] = useState(false);
+
 
 	const handleSearch = async (value: string) => {
 		try {
@@ -113,23 +115,6 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 		setUsers(_users)
 	}
 
-	const fetchAccountTransactions = async (page: number = 1, pageSize: number = 10) => {
-		try {
-			const { data } = await accountTransactions({
-				variables: {
-					"page": page,
-					"pageSize": pageSize
-				}
-			})
-
-			setTransactions(data.accountTransactions)
-			setFilteredTransactions(data.accountTransactions)
-			setIsLoading(false)
-
-		} catch (error) {
-			console.error(error)
-		}
-	}
 
 	const onSelectUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>) => {
 		await dispatch(transactionActions.setReceiver(user))
@@ -160,7 +145,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
-		await fetchAccountTransactions()
+		// await fetchAccountTransactions()
 		setRefreshing(false);
 	}, []);
 
@@ -177,11 +162,20 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 		setIsBottom(isAtBottom);
 	}
 
+	const onOpenBottomSheet = async (transaction: any) => {
+		setTransaction(transaction)
+		setOpenBottomSheet(true)
+	}
+
+	const onBottomSheetClose = async () => {
+		setOpenBottomSheet(false)
+		setTransaction({})
+	}
+
 
 	useEffect(() => {
 		(async () => {
 			if (hasNewTransaction) {
-				await fetchAccountTransactions()
 				await dispatch(transactionActions.setHasNewTransaction(false))
 			}
 		})()
@@ -189,9 +183,10 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 	}, [isFocused, hasNewTransaction])
 
 	useEffect(() => {
-		setIsLoading(true)
-		fetchSearchedUser()
-		fetchAccountTransactions()
+		(async () => {
+			await fetchSearchedUser()
+			await dispatch(fetchAllTransactions({ page: 1, pageSize: 10 }))
+		})()
 	}, [])
 
 	useEffect(() => {
@@ -200,11 +195,13 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 				try {
 					setIsLoadingMore(true)
 
-					const { data } = await refetchAccountTransactions({ page: page + 1, pageSize: 20 })
+					const transactionsLength = transactions?.length
 
-					if (data.accountTransactions.length > 0) {
+					await dispatch(fetchAllTransactions({ page: page + 1, pageSize: 10 }))
+
+
+					if (transactions.length > transactionsLength) {
 						setPage(page + 1)
-						setTransactions([...transactions, ...data.accountTransactions])
 					}
 
 					setIsLoadingMore(false)
@@ -217,8 +214,15 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 
 	}, [isBottom])
 
+	useEffect(() => {
+		if (transactions.length > 0) {
+			setFilteredTransactions(transactions)
+		}
+
+	}, [transactions])
+
 	return (
-		isLoading ? <TransactionSkeleton /> : (
+		loading ? <TransactionSkeleton /> : (
 			<VStack flex={1} pt={"20px"} bg={colors.darkGray}>
 				<VStack px={"20px"} w={"100%"} alignItems={"center"}>
 					<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -260,40 +264,65 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 								<Heading px={"20px"} fontSize={scale(18)} color={"white"}>{"Transacciones"}</Heading>
 							</HStack>
 							<FlatList
-								px={"20px"}
 								mt={"10px"}
+								px={"20px"}
 								scrollEnabled={false}
 								data={transactions}
-								renderItem={({ item, index }: any) => (
-									<Pressable bg={colors.lightGray} my={"5px"} borderRadius={10} px={"15px"} py={"10px"} _pressed={{ opacity: 0.5 }} key={`transactions(hjbhubhjbhjuhuyguhb)-${item.transactionId}-${index}-${item.transactionId}`} onPress={() => onSelectTransaction(item)}>
-										<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
-											<HStack>
-												{formatTransaction(item).profileImageUrl ?
-													<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(item).profileImageUrl }} />
-													:
-													<DefaultIcon
-														value={formatTransaction(item).fullName || ""}
-														contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "") }]}
-														textStyle={styles.textStyle}
-													/>
-												}
+								renderItem={({ item: { data, type }, index }: any) => (
+									type === "transaction" ? (
+										<Pressable bg={colors.lightGray} my={"5px"} borderRadius={10} px={"15px"} py={"10px"} key={`transactions(tgrtgnrhbfhrbgr)-${data?.transactionId}-${index}-${data?.transactionId}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(data)}>
+											<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
+												<HStack>
+													{formatTransaction(data).profileImageUrl ?
+														<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(data).profileImageUrl }} />
+														:
+														<DefaultIcon
+															value={formatTransaction(data).fullName || ""}
+															contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(data).fullName || "") }]}
+															textStyle={styles.textStyle}
+														/>
+													}
+													<VStack ml={"10px"} justifyContent={"center"}>
+														<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(data).fullName || "")}</Heading>
+														<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(data.createdAt)).format("lll")}</Text>
+													</VStack>
+												</HStack>
 												<VStack ml={"10px"} justifyContent={"center"}>
-													<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
-													<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
+													{formatTransaction(data).showPayButton ?
+														<HStack space={1} px={"12px"} h={"40px"} bg={colors.mainGreen} borderRadius={25} color='white' justifyContent={"center"} alignItems={"center"}>
+															<Heading textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>Pagar</Heading>
+															<Text fontWeight={"semibold"} fontSize={scale(11)} color={colors.white}>{FORMAT_CURRENCY(formatTransaction(data).amount)}</Text>
+														</HStack>
+														:
+														<Heading opacity={data.status === "cancelled" ? 0.5 : 1} textDecorationLine={data.status === "cancelled" ? "line-through" : "none"} fontWeight={"bold"} textTransform={"capitalize"} fontSize={scale(14)} color={formatTransaction(data).amountColor}>{FORMAT_CURRENCY(formatTransaction(data).amount)}</Heading>
+													}
 												</VStack>
 											</HStack>
-											<VStack ml={"10px"} justifyContent={"center"}>
-												{formatTransaction(item).showPayButton ?
-													<HStack space={1} px={"10px"} h={"40px"} bg={colors.mainGreen} borderRadius={25} color='white' justifyContent={"center"} alignItems={"center"}>
-														<Heading textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>Pagar</Heading>
-														<Text fontWeight={"bold"} fontSize={scale(11)} color={colors.white}>{FORMAT_CURRENCY(formatTransaction(item).amount)}</Text>
-													</HStack>
-													:
-													<Heading opacity={item.status === "cancelled" ? 0.5 : 1} textDecorationLine={item.status === "cancelled" ? "line-through" : "none"} fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(13)} color={formatTransaction(item).amountColor}>{FORMAT_CURRENCY(formatTransaction(item).amount)}</Heading>
-												}
-											</VStack>
-										</HStack>
-									</Pressable>
+										</Pressable>
+									) : (
+										<Pressable bg={colors.lightGray} my={"5px"} borderRadius={10} px={"15px"} py={"10px"} key={`transactions(tgrtgnrhbfhrbgr)-${data?.transactionId}-${index}-${data?.transactionId}`} _pressed={{ opacity: 0.5 }} onPress={() => onOpenBottomSheet(data)}>
+											<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
+												<HStack>
+													{data?.company?.logo ?
+														<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: data?.company?.logo }} />
+														:
+														<DefaultIcon
+															value={data?.phone?.fullName || ""}
+															contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(data?.phone?.fullName || "") }]}
+															textStyle={styles.textStyle}
+														/>
+													}
+													<VStack ml={"10px"} justifyContent={"center"}>
+														<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(data?.phone?.fullName || "")}</Heading>
+														<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(data?.createdAt)).format("lll")}</Text>
+													</VStack>
+												</HStack>
+												<VStack ml={"10px"} justifyContent={"center"}>
+													<Heading opacity={data?.status === "cancelled" ? 0.5 : 1} textDecorationLine={data?.status === "cancelled" ? "line-through" : "none"} fontWeight={"bold"} textTransform={"capitalize"} fontSize={scale(14)} color={colors.mainGreen}>{FORMAT_CURRENCY(data?.amount)}</Heading>
+												</VStack>
+											</HStack>
+										</Pressable>
+									)
 								)}
 							/>
 						</VStack>
@@ -313,6 +342,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 					<SingleSentTransaction iconImage={pendingClock} showPayButton={showPayButton} goNext={goNext} onClose={onCloseFinishSingleTransaction} title={singleTransactionTitle} />
 				</BottomSheet>
 				<SendTransaction open={showSendTransaction} onCloseFinish={onSendCloseFinish} onSendFinish={onSendCloseFinish} />
+				<SingleTopTup open={openBottomSheet} onClose={onBottomSheetClose} topup={transaction} />
 			</VStack>
 		)
 	)

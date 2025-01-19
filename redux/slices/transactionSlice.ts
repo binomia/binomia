@@ -1,9 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { fetchRecentTransactions } from '../fetchHelper'
+import { fetchAllTransactions, fetchRecentTransactions } from '../fetchHelper'
 
 const transactionSlice = createSlice({
     name: 'transaction',
     initialState: {
+        loading: false,
         sender: {},
         receiver: {},
         transaction: {},
@@ -46,7 +47,19 @@ const transactionSlice = createSlice({
         builder.addCase(fetchRecentTransactions.rejected, (state, action) => {
             state.recentTransactions = []
         })
-    },
+
+        builder.addCase(fetchAllTransactions.fulfilled, (state, action) => {
+            state.transactions = action.payload
+            state.loading = false
+        })
+        builder.addCase(fetchAllTransactions.rejected, (state, action) => {
+            state.transactions = []
+            state.loading = false
+        })
+        builder.addCase(fetchAllTransactions.pending, (state, action) => {
+            state.loading = true
+        })
+    }
 })
 
 export const transactionActions = transactionSlice.actions
