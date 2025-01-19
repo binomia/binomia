@@ -10,10 +10,10 @@ import DepositOrWithdrawTransaction from '@/components/banking/deposit'
 import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, ScrollView } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import { scale } from 'react-native-size-matters'
-import { depositIcon, noTransactions, withdrawIcon } from '@/assets'
+import { cashIn, cashout, depositIcon, noTransactions, withdrawIcon } from '@/assets'
 import { FORMAT_CURRENCY } from '@/helpers'
 import { globalActions } from '@/redux/slices/globalSlice'
-import { Dimensions, RefreshControl } from 'react-native'
+import { Alert, Dimensions, RefreshControl } from 'react-native'
 import { transactionActions } from '@/redux/slices/transactionSlice'
 import { router } from 'expo-router'
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery'
@@ -21,6 +21,7 @@ import { useLazyQuery, useMutation } from '@apollo/client'
 import { TransactionAuthSchema } from '@/auth/transactionAuth'
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication'
 import { accountActions } from '@/redux/slices/accountSlice';
+import { FlatGrid } from 'react-native-super-grid';
 
 
 const { height, width } = Dimensions.get('window')
@@ -28,7 +29,7 @@ const BankingScreen: React.FC = () => {
     const dispatch = useDispatch()
     const { authenticate } = useLocalAuthentication()
     const { location } = useSelector((state: any) => state.globalReducer)
-    const { user, cards, card, account, } = useSelector((state: any) => state.accountReducer)
+    const { user, cards, card, limits, account, } = useSelector((state: any) => state.accountReducer)
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
     const [transactions, setTransactions] = useState<any[]>([])
@@ -38,6 +39,8 @@ const BankingScreen: React.FC = () => {
     const [showDeposit, setShowDeposit] = useState(false);
     const [showWithdraw, setShowWithdraw] = useState(false);
     const [showSingleTransaction, setShowSingleTransaction] = useState(false);
+    const [enableDeposit, setEnableDeposit] = useState(false);
+    const [enableWithdraw, setEnableWithdraw] = useState(false);
 
     const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -91,7 +94,23 @@ const BankingScreen: React.FC = () => {
     }
 
     const handleMakeTransaction = async (title: string) => {
-        console.log(JSON.stringify(account, null, 2));
+        console.log(JSON.stringify({ limits, account }, null, 2));
+
+        if (title === "Deposito" && enableDeposit) {
+            Alert.alert(
+                'Limite Alcanzado',
+                'Su limite de deposito diario ha sido alcanzado. Por favor, espere hasta el siguiente dia para realizar un nuevo deposito'
+            )
+            return
+        }
+
+        if (title === "Retiro" && enableWithdraw) {
+            Alert.alert(
+                'Limite Alcanzado',
+                'Su limite de retiro diario ha sido alcanzado. Por favor, espere hasta el siguiente dia para realizar un nuevo retiro'
+            )
+            return
+        }
 
         if (cards.length > 0) {
             const primaryCard = cards.find((card: any) => card.isPrimary)
@@ -167,17 +186,23 @@ const BankingScreen: React.FC = () => {
         fetchAccountBankingTransactions()
     }, [])
 
+    useEffect(() => {
+        setEnableDeposit(limits.depositAmount >= account.depositLimit)
+        setEnableWithdraw(limits.withdrawAmount >= account.withdrawLimit)
+        
+    }, [limits, account])
+
     return (
         <VStack variant={"body"} h={"100%"}>
             <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}  >
                 <HStack borderRadius={10} w={"100%"} mt={"50px"} space={2} justifyContent={"space-between"}>
-                    <Pressable onPress={() => handleMakeTransaction("Deposito")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
-                        <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={depositIcon} />
-                        <Heading size={"md"} color={colors.mainGreen}>Depositar</Heading>
+                    <Pressable opacity={!enableDeposit ? 1 : 0.5} onPress={() => handleMakeTransaction("Deposito")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
+                        <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={cashIn} />
+                        <Heading size={"md"} mt={"10px"} color={colors.white}>Depositar</Heading>
                     </Pressable>
-                    <Pressable onPress={() => handleMakeTransaction("Retiro")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
-                        <Image alt='logo-image' resizeMode='contain' w={scale(45)} h={scale(45)} source={withdrawIcon} />
-                        <Heading size={"md"} color={colors.mainGreen}>Retirar</Heading>
+                    <Pressable opacity={!enableWithdraw ? 1 : 0.5} onPress={() => handleMakeTransaction("Retiro")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
+                        <Image alt='logo-image' resizeMode='contain' w={scale(45)} h={scale(45)} source={cashout} />
+                        <Heading size={"md"} mt={"10px"} color={!enableWithdraw ? colors.white : colors.gray}>Retirar</Heading>
                     </Pressable>
                 </HStack>
                 <VStack mt={"30px"}>
@@ -224,7 +249,7 @@ const BankingScreen: React.FC = () => {
                 <DepositOrWithdrawTransaction onSendFinish={(amount: number) => onDepositBankingTransaction(amount, "deposit")} />
             </BottomSheet>
             <BottomSheet height={height * 0.9} onCloseFinish={() => setShowWithdraw(false)} open={showWithdraw}>
-                <DepositOrWithdrawTransaction title='Retirar' onSendFinish={(amount: number) => onDepositBankingTransaction(amount, "withdraw")} />
+                <DepositOrWithdrawTransaction title='Retirar' showBalance={true} onSendFinish={(amount: number) => onDepositBankingTransaction(amount, "withdraw")} />
             </BottomSheet>
         </VStack>
     )

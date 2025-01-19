@@ -1,7 +1,7 @@
 import React from 'react';
 import colors from '@/colors';
 import { Stack } from 'expo-router';
-import { TransactionsHeaderRight } from '@/components/navigation/HeaderBar';
+import { BankingHeaderRight } from '@/components/navigation/HeaderBar';
 
 export default function TabLayout() {
 	const defaultHeaderStyles = {
@@ -24,7 +24,7 @@ export default function TabLayout() {
 
 	return (
 		<Stack screenOptions={{ headerShadowVisible: false }}>
-			<Stack.Screen name='banking' options={{ ...defaultscreenOptions, title: "Deposito & Retiros", headerRight: () => <TransactionsHeaderRight /> }} />
+			<Stack.Screen name='banking' options={{ ...defaultscreenOptions, title: "Deposito & Retiros", headerRight: () => <BankingHeaderRight /> }} />
 		</Stack>
 	);
 }

@@ -29,9 +29,12 @@ import cardHolder from './card-holder.png';
 import cardBackHolder from './card-back-holder.png';
 import mastercardLogo from './mastercard.png';
 import visaLogo from './visa.png';
-import icon from './icon.png';
+import americanExpressLogo from './american-express.png';
+import jcbLogo from './jcb.png';
 
 // icons
+import plusIconGreen from './icons/plus.png';
+import icon from './icon.png';
 import qrIcon from './qr.png';
 import sendIcon from './sendIcon.png';
 import bagIcon from './receiveIcon.png';
@@ -63,9 +66,16 @@ import pendingClock from './icons/pendingClock.png';
 import cancelIcon from './icons/cancel.png';
 import claroLogo from './claroLogo.png';
 import articeLogo from './articeLogo.png';
+import cashout from './icons/cashout.png';
+import cashIn from './icons/cash-in.png';
 
 
 export {
+    plusIconGreen,
+    americanExpressLogo,
+    jcbLogo,
+    cashout,
+    cashIn,
     pendingClock,
     articeLogo,
     claroLogo,

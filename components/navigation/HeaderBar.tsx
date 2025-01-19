@@ -43,9 +43,20 @@ export const TransactionsHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) =
     return (
         <VStack p={p}>
             <Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} w={"40px"} h={"40px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} onPress={() => setShowBottomSheet(true)}>
-                <Image alt='logo-image'  w={"22px"} h={"22px"} source={recurrenceIcon} />
+                <Image alt='logo-image' w={"22px"} h={"22px"} source={recurrenceIcon} />
             </Pressable>
             <RecurrenceTransactions open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} onSendFinish={() => setShowBottomSheet(false)} />
+        </VStack>
+    )
+}
+export const BankingHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
+    const [showBottomSheet, setShowBottomSheet] = useState(false)
+    return (
+        <VStack p={p}>
+            <Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} w={"40px"} h={"40px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} onPress={() => setShowBottomSheet(true)}>
+                <Image alt='logo-image' w={"22px"} h={"22px"} source={creditCard} />
+            </Pressable>
+            <Cards onCloseFinish={() => setShowBottomSheet(false)} open={showBottomSheet} />
         </VStack>
     )
 }
@@ -53,7 +64,7 @@ export const TransactionsHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) =
 export const RecurrencesHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
     return (
         <VStack p={p}>
-            <Pressable _pressed={{ opacity: 0.5 }}  onPress={() => router.navigate("recurrences")}>
+            <Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.navigate("recurrences")}>
                 <Image alt='logo-image' tintColor={"white"} w={"25px"} h={"25px"} source={recurrenceIcon} />
             </Pressable>
         </VStack>

@@ -1,8 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { fetchAccountLimit } from '../fetchHelper'
 
 const accountSlice = createSlice({
     name: 'global',
     initialState: {
+        limits: {},
         haveAccountChanged: false,
         account: {},
         card: {},
@@ -13,6 +15,9 @@ const accountSlice = createSlice({
     reducers: {
         setCard: (state, action) => {
             state.card = action.payload
+        },
+        setLimits: (state, action) => {
+            state.limits = action.payload
         },
         setCards: (state, action) => {
             state.cards = action.payload
@@ -29,6 +34,14 @@ const accountSlice = createSlice({
         setHaveAccountChanged: (state, action) => {
             state.haveAccountChanged = action.payload
         }
+    },
+    extraReducers(builder) {
+        builder.addCase(fetchAccountLimit.fulfilled, (state, action) => {
+            state.limits = action.payload
+        })
+        builder.addCase(fetchAccountLimit.rejected, (state, action) => {
+            state.limits = {}
+        })
     }
 })
 

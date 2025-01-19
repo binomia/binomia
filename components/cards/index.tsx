@@ -4,19 +4,18 @@ import BottomSheet from '../global/BottomSheet'
 import CardModification from './CardModification'
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Button from '../global/Button'
-import { VStack, Text, HStack, FlatList, Heading, Image, Pressable } from 'native-base'
+import PagerView from 'react-native-pager-view';
+import CreateCard from './CreateCard';
+import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, ZStack } from 'native-base'
 import { scale } from 'react-native-size-matters'
 import { Dimensions, SafeAreaView } from 'react-native'
-import { globalActions } from '@/redux/slices/globalSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { FlagsList } from 'aws-sdk/clients/guardduty'
 import { CardType } from '@/types'
 import { mastercardLogo, noCard, visaLogo } from '@/assets'
-import PagerView from 'react-native-pager-view';
 import { useMutation } from '@apollo/client';
 import { CardApolloQueries } from '@/apollo/query/cardQuery';
 import { CardAuthSchema } from '@/auth/cardAuth';
-import CreateCard from './CreateCard';
 import { accountActions } from '@/redux/slices/accountSlice';
 
 type Props = {
@@ -32,7 +31,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
     const pagerRef = useRef<PagerView>(null);
     const dispatch = useDispatch()
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
-    const [showAddCard, setShowAddCard] = useState<boolean>(false)
+    const [setShowAddCard] = useState<boolean>(false)
     const { cards }: { cards: CardType[] } = useSelector((state: any) => state.accountReducer)
     const [createCard] = useMutation(CardApolloQueries.createCard())
 
@@ -49,7 +48,6 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
 
     const handleOnClose = async () => {
         onCloseFinish()
-        setShowCardModification(false)
         pagerRef.current?.setPage(0)
     }
 
@@ -72,7 +70,6 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
             const { data } = await createCard({ variables: { data: validatedCardData } })
 
             await dispatch(accountActions.setCards([...cards, data.createCard]))
-            setShowAddCard(false)
 
             setShowCardModification(false)
             pagerRef.current?.setPage(0)
@@ -91,13 +88,17 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                 <SafeAreaView style={{ flex: 1 }}>
                     <VStack variant={"body"} flex={1}>
                         <HStack justifyContent={"flex-end"}>
-                            <Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} onPress={() => pagerRef.current?.setPage(1)}>
-                                <AntDesign name="pluscircle" size={scale(25)} color="white" />
-                            </Pressable>
+
                         </HStack>
                         <VStack flex={0.95}>
                             <HStack justifyContent={"space-between"} alignItems={"center"}>
                                 <Heading fontSize={scale(24)} color={colors.white}>Tarjetas</Heading>
+                                <Pressable w={"35px"} h={"35px"} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} onPress={() => pagerRef.current?.setPage(1)}>
+                                    <ZStack pl={"1px"} w={"35px"} h={"35px"} alignItems={"center"} justifyContent={"center"}>
+                                        <HStack w={"20px"} h={"20px"} borderRadius={"100px"} bg={colors.white} />
+                                        <AntDesign name="pluscircle" size={scale(20)} color={colors.mainGreen} />
+                                    </ZStack>
+                                </Pressable>
                             </HStack>
                             {cards.length > 0 ? (
                                 <FlatList
@@ -112,7 +113,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                                             {renderCardLogo(item.brand)}
                                             <VStack ml={"10px"}>
                                                 <Heading textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.brand} {item.last4Number}</Heading>
-                                                <Text textTransform={"capitalize"} fontSize={scale(15)} color={colors.pureGray}>{item.alias}</Text>
+                                                <Text fontSize={scale(15)} color={colors.pureGray}>{item.alias}</Text>
                                             </VStack>
                                         </Pressable>
                                     )}
@@ -123,7 +124,6 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                                     <Button w={"90%"} onPress={() => pagerRef.current?.setPage(1)} title="Añadir Tarjeta" bg={colors.mainGreen} />
                                 </VStack>
                             )}
-
                         </VStack>
                         <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
                     </VStack>

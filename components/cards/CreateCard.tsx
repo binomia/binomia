@@ -3,7 +3,6 @@ import Button from '../global/Button';
 import Input from '../global/Input';
 import colors from '@/colors';
 import PagerView from 'react-native-pager-view';
-import cardValidator from "card-validator";
 import { Dimensions, Keyboard, TouchableWithoutFeedback, View } from 'react-native'
 import { HStack, Pressable, Image, VStack, Text, Heading, ScrollView } from 'native-base'
 import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-sticky-footer-avoiding-scroll-view';
@@ -16,7 +15,6 @@ import { CreditCardFormField, CreditCardIssuer } from 'react-native-credit-card-
 import { useLazyQuery } from '@apollo/client';
 import { CardApolloQueries } from '@/apollo/query/cardQuery';
 import { useDispatch, useSelector } from 'react-redux';
-import { globalActions } from '@/redux/slices/globalSlice';
 import { CardType } from '@/types';
 import { accountActions } from '@/redux/slices/accountSlice';
 
@@ -35,7 +33,6 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose 
     const [fetchCard] = useLazyQuery(CardApolloQueries.card())
     const dispatch = useDispatch()
     const { card }: { card: CardType } = useSelector((state: any) => state.accountReducer)
-
 
     const [number, setNumber] = useState("")
     const [expiry, setExpiry] = useState("")
@@ -139,14 +136,13 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose 
         setFocusedField("")
     }
 
-
     const StickyFooter: React.FC = () => {
         return (
             <HStack w={"100%"} px={"20px"} py={"10px"} bg={colors.darkGray} justifyContent={"space-between"}>
                 <Button
                     w={"49%"}
-                    bg={colors.lightGray}
-                    color={colors.mainGreen}
+                    bg={colors.mainGreen}
+                    color={colors.white}
                     title={"Atras"}
                     onPress={onClose}
                 />
@@ -173,10 +169,11 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose 
     useEffect(() => {
         if (openToEdit)
             fetchDecryptedCard()
+
     }, [openToEdit])
 
     return (
-        <PagerView style={{ flex: 1 }} initialPage={0} ref={ref}>
+        <PagerView style={{ flex: 0.95 }} initialPage={0} ref={ref}>
             <KeyboardAvoidingScrollView stickyFooter={<StickyFooter />}>
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <VStack flex={1} p={"20px"}>
@@ -193,7 +190,6 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose 
                                 type={type as any}
                             />
                         </HStack>
-
                         <VStack mt={"10px"} w={"100%"} bg={colors.lightGray} borderRadius={10} py={"10px"}>
                             <HStack px={"10px"} justifyContent={"space-between"}>
                                 <Input bg={colors.darkGray} value={name} onFocus={() => setFocusedField("name")} h={scale(45)} placeholder='Nombre De La Tarjeta' onChangeText={(text) => setName(text)} />
@@ -211,7 +207,6 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose 
                                 Agregue tarjeta como principal.
                             </Text>
                         </HStack>
-
                     </VStack>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingScrollView>

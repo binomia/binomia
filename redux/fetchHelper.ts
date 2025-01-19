@@ -5,7 +5,7 @@ import { AccountAuthSchema } from "@/auth/accountAuth";
 import { createAsyncThunk } from "@reduxjs/toolkit"
 
 
-const fetchAccountLimit = createAsyncThunk('fetchAccountLimit', async () => {
+export const fetchAccountLimit = createAsyncThunk('fetchAccountLimit', async (): Promise<any> => {
     try {
         const { data } = await apolloClient.query({ query: AccountApolloQueries.accountLimit() });
         const limitData = await AccountAuthSchema.accountLimits.parseAsync(data.accountLimit)

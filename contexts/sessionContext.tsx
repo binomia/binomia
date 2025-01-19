@@ -16,7 +16,7 @@ import { TransactionApolloQueries } from "@/apollo/query/transactionQuery";
 import { transactionActions } from "@/redux/slices/transactionSlice";
 import { AccountAuthSchema } from "@/auth/accountAuth";
 import { useNotifications } from "@/hooks/useNotifications";
-import { fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
+import { fetchAccountLimit, fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
 import { accountActions } from "@/redux/slices/accountSlice";
 
 export const SessionContext = createContext<SessionPropsType>({
@@ -74,7 +74,8 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 dispatch(accountActions.setCards(cardsData ?? {})),
                 dispatch(accountActions.setCard(primaryCard ?? {})),
                 dispatch(fetchRecentTransactions()),
-                dispatch(fetchRecentTopUps())
+                dispatch(fetchRecentTopUps()),
+                dispatch(fetchAccountLimit()),
             ])
 
         } catch (error) {
