@@ -116,7 +116,7 @@ const ProfileScreen: React.FC = () => {
 								</VStack>
 							</HStack>
 							<Pressable onPress={() => setShowBottomSheet(true)} w={"60px"} h={"60px"} bg={colors.darkGray} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
-								<Image alt='logo-image' resizeMode='contain' w={"25px"} h={"25px"} source={qrIcon} />
+								<Image alt='logo-image' tintColor={colors.mainGreen} resizeMode='contain' w={"25px"} h={"25px"} source={qrIcon} />
 							</Pressable>
 						</HStack>
 						<Heading mt={"50px"} mb={"10px"} textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>Configuraciónes</Heading>

@@ -32,7 +32,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { user } = useSelector((state: any) => state.globalReducer)
-	const { hasNewTransaction, loading, transactions } = useSelector((state: any) => state.transactionReducer)
+	const { hasNewTransaction, transactions } = useSelector((state: any) => state.transactionReducer)
 	const isFocused = useNavigation().isFocused()
 
 	const [searchAccountTransactions] = useLazyQuery(TransactionApolloQueries.searchAccountTransactions())
@@ -50,6 +50,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 	const [page, setPage] = useState<number>(0);
 	const [isBottom, setIsBottom] = useState(false);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 	const [openBottomSheet, setOpenBottomSheet] = useState(false);
 
 
@@ -215,14 +216,16 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 	}, [isBottom])
 
 	useEffect(() => {
-		if (transactions.length > 0) {
-			setFilteredTransactions(transactions)
-		}
+		setIsLoading(true)
+
+		setFilteredTransactions(transactions)
+		
+		setIsLoading(false)
 
 	}, [transactions])
 
 	return (
-		loading ? <TransactionSkeleton /> : (
+		isLoading ? <TransactionSkeleton /> : (
 			<VStack flex={1} pt={"20px"} bg={colors.darkGray}>
 				<VStack px={"20px"} w={"100%"} alignItems={"center"}>
 					<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -267,7 +270,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 								mt={"10px"}
 								px={"20px"}
 								scrollEnabled={false}
-								data={transactions}
+								data={filteredTransactions}
 								renderItem={({ item: { data, type }, index }: any) => (
 									type === "transaction" ? (
 										<Pressable bg={colors.lightGray} my={"5px"} borderRadius={10} px={"15px"} py={"10px"} key={`transactions(tgrtgnrhbfhrbgr)-${data?.transactionId}-${index}-${data?.transactionId}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(data)}>
