@@ -18,11 +18,12 @@ import { UserApolloQueries } from '@/apollo/query'
 import { globalActions } from '@/redux/slices/globalSlice'
 import { profileScreenData } from '@/mocks'
 import ImageView from "react-native-image-viewing";
+import { accountActions } from '@/redux/slices/accountSlice'
 
 
 const ProfileScreen: React.FC = () => {
     const dispatch = useDispatch()
-    const { user } = useSelector((state: any) => state.globalReducer)
+    const { user } = useSelector((state: any) => state.accountReducer)
     const navigation = useNavigation<any>()
     const { onLogout } = useContext(SessionContext)
     const { uploadImage } = useCloudinary()
@@ -51,7 +52,7 @@ const ProfileScreen: React.FC = () => {
                 }
             })
 
-            await dispatch(globalActions.setUser(updatedUser.data.updateUser))
+            await dispatch(accountActions.setUser(updatedUser.data.updateUser))
 
             setProfileImage(url);
             setIsLoading(false)

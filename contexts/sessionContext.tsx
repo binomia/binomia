@@ -17,6 +17,7 @@ import { transactionActions } from "@/redux/slices/transactionSlice";
 import { AccountAuthSchema } from "@/auth/accountAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import { fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
+import { accountActions } from "@/redux/slices/accountSlice";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -39,7 +40,7 @@ export const SessionContext = createContext<SessionPropsType>({
 
 export const SessionContextProvider = ({ children }: SessionContextType) => {
     const dispatch = useDispatch()
-    const state = useSelector((state: any) => state.globalReducer)
+    const { device, network, location } = useSelector((state: any) => state.globalReducer)
     const { getLocation } = useLocation()
     const { setItem, getItem, deleteItem } = useAsyncStorage()
     const [jwt, setJwt] = useState<string>("");
@@ -67,11 +68,11 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             const primaryCard = cardsData.find((card: any) => card.isPrimary === true)
 
             await Promise.all([
-                dispatch(globalActions.setUser(userProfileData ?? {})),
-                dispatch(globalActions.setKyc(kycData ?? {})),
-                dispatch(globalActions.setAccount(accountsData ?? {})),
-                dispatch(globalActions.setCards(cardsData ?? {})),
-                dispatch(globalActions.setCard(primaryCard ?? {})),
+                dispatch(accountActions.setUser(userProfileData ?? {})),
+                dispatch(accountActions.setKyc(kycData ?? {})),
+                dispatch(accountActions.setAccount(accountsData ?? {})),
+                dispatch(accountActions.setCards(cardsData ?? {})),
+                dispatch(accountActions.setCard(primaryCard ?? {})),
                 dispatch(fetchRecentTransactions()),
                 dispatch(fetchRecentTopUps())
             ])
@@ -122,9 +123,9 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 variables: { email, password },
                 context: {
                     headers: {
-                        device: JSON.stringify({ ...state.device, network: state.network, location: state.location }),
-                        "session-auth-identifier": state.applicationId,
-                        "authorization": state.applicationId,
+                        device: JSON.stringify({ ...device, network , location }),
+                        "session-auth-identifier": applicationId,
+                        "authorization": applicationId,
                         expoNotificationToken: expoNotificationToken || "",
                     }
                 }

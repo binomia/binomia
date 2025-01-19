@@ -1,8 +1,20 @@
 import { apolloClient } from "@/apollo";
-import { TopUpApolloQueries } from "@/apollo/query";
+import { AccountApolloQueries, TopUpApolloQueries } from "@/apollo/query";
 import { TransactionApolloQueries } from "@/apollo/query/transactionQuery"
+import { AccountAuthSchema } from "@/auth/accountAuth";
 import { createAsyncThunk } from "@reduxjs/toolkit"
 
+
+const fetchAccountLimit = createAsyncThunk('fetchAccountLimit', async () => {
+    try {
+        const { data } = await apolloClient.query({ query: AccountApolloQueries.accountLimit() });
+        const limitData = await AccountAuthSchema.accountLimits.parseAsync(data.accountLimit)
+        return limitData
+
+    } catch (error) {
+        console.log(error);
+    }
+})
 
 export const fetchRecentTransactions = createAsyncThunk('fetchRecentTransactions', async () => {
     try {
@@ -23,7 +35,6 @@ export const fetchRecentTopUps = createAsyncThunk('fetchRecentTopUps', async () 
         console.error({ fetchRecentTopUps: error });
     }
 })
-
 
 export const fetchAllTransactions = createAsyncThunk('fetchAllTransactions', async ({ page, pageSize }: { page: number, pageSize: number }): Promise<any> => {
     try {
@@ -53,7 +64,7 @@ export const fetchAllTransactions = createAsyncThunk('fetchAllTransactions', asy
             });
 
             console.log(JSON.stringify(combinedTransactions, null, 4));
-            
+
 
             return combinedTransactions
         }

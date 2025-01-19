@@ -20,6 +20,7 @@ import { cancelIcon, checked, pendingClock } from '@/assets';
 import { z } from 'zod';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
+import { accountActions } from '@/redux/slices/accountSlice';
 
 
 type Props = {
@@ -36,7 +37,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPa
 	const dispatch = useDispatch()
 	const { authenticate } = useLocalAuthentication()
 	const { transaction } = useSelector((state: any) => state.transactionReducer)
-	const { account, user }: { account: any, user: any, location: z.infer<typeof TransactionAuthSchema.transactionLocation> } = useSelector((state: any) => state.globalReducer)
+	const { account, user }: { account: any, user: any, location: z.infer<typeof TransactionAuthSchema.transactionLocation> } = useSelector((state: any) => state.accountReducer)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [hasNewStatus, setHasNewStatus] = useState<boolean>(false)
 	const [isCancelLoading, setIsCancelLoading] = useState<boolean>(false)
@@ -88,7 +89,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPa
 					setHasNewStatus(true)
 
 					await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...data.payRequestTransaction, ...formatTransaction(data.payRequestTransaction) })))
-					await dispatch(globalActions.setAccount(Object.assign({}, account, { balance: Number(account.balance) - Number(transaction?.amount) })))
+					await dispatch(accountActions.setAccount(Object.assign({}, account, { balance: Number(account.balance) - Number(transaction?.amount) })))
 
 					setIsLoading(false)
 					setIsCancelLoading(false)

@@ -17,10 +17,11 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 import RecentTransactions from '@/components/transaction/RecentTransactions';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
+import { accountActions } from '@/redux/slices/accountSlice';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
-	const { account } = useSelector((state: any) => state.globalReducer)
+	const { account } = useSelector((state: any) => state.accountReducer)
 	const dispatch = useDispatch()
 
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
@@ -35,7 +36,7 @@ const HomeScreen: React.FC = () => {
 	const fetchAccount = async () => {
 		try {
 			const { data } = await getAccount()
-			await dispatch(globalActions.setAccount(data.account))
+			await dispatch(accountActions.setAccount(data.account))
 		} catch (error) {
 			console.log(error);
 		}

@@ -18,6 +18,7 @@ import { CardApolloQueries } from '@/apollo/query/cardQuery';
 import { useDispatch, useSelector } from 'react-redux';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { CardType } from '@/types';
+import { accountActions } from '@/redux/slices/accountSlice';
 
 
 type Props = {
@@ -33,7 +34,7 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose 
     const [fetchCards] = useLazyQuery(CardApolloQueries.cards())
     const [fetchCard] = useLazyQuery(CardApolloQueries.card())
     const dispatch = useDispatch()
-    const { card }: { card: CardType } = useSelector((state: any) => state.globalReducer)
+    const { card }: { card: CardType } = useSelector((state: any) => state.accountReducer)
 
 
     const [number, setNumber] = useState("")
@@ -62,7 +63,7 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose 
     const onRefreshCards = useCallback(async () => {
         try {
             const { data } = await fetchCards()
-            await dispatch(globalActions.setCards(data.cards))
+            await dispatch(accountActions.setCards(data.cards))
 
         } catch (error) {
             console.log({

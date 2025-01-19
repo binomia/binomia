@@ -18,6 +18,7 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocation } from '@/hooks/useLocation';
 import { router } from 'expo-router';
+import { accountActions } from '@/redux/slices/accountSlice';
 
 
 
@@ -27,9 +28,10 @@ type Props = {
 }
 
 const { width } = Dimensions.get("screen")
-const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }}) => {
+const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { } }) => {
     const { receiver, transactions } = useSelector((state: any) => state.transactionReducer)
-    const { location, account, user } = useSelector((state: any) => state.globalReducer)
+    const { location } = useSelector((state: any) => state.globalReducer)
+    const { account, user } = useSelector((state: any) => state.accountReducer)
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
@@ -68,8 +70,8 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
 
             await Promise.all([
                 dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),
-                dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionDeytails.amount }))),
-                dispatch(globalActions.setHaveAccountChanged(false)),
+                dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionDeytails.amount }))),
+                dispatch(accountActions.setHaveAccountChanged(false)),
                 dispatch(transactionActions.setHasNewTransaction(true)),
                 dispatch(transactionActions.setTransaction({
                     ...transactionSent,
@@ -78,7 +80,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
                     profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
                     username: formatTransaction(transactionSent).username,
                     isFromMe: formatTransaction(transactionSent).isFromMe,
-                }))            
+                }))
             ])
 
             goNext()

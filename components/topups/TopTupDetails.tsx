@@ -23,6 +23,7 @@ import { TopUpAuthSchema } from '@/auth/topUpAuth';
 import { topupActions } from '@/redux/slices/topupSlice';
 import { z } from 'zod';
 import { fetchRecentTransactions } from '@/redux/fetchHelper';
+import { accountActions } from '@/redux/slices/accountSlice';
 
 
 
@@ -36,7 +37,7 @@ const { width } = Dimensions.get("screen")
 const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }, onClose = (_?: any) => { } }) => {
     const [createTopUp] = useMutation(TopUpApolloQueries.createTopUp())
     const { newTopUp, topup } = useSelector((state: any) => state.topupReducer)
-    const { account } = useSelector((state: any) => state.globalReducer)
+    const { account } = useSelector((state: any) => state.accountReducer)
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
@@ -65,7 +66,7 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
                 variables: { data, recurrence }
             })
 
-            await dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance - Number(newTopUp.amount) })))
+            await dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance - Number(newTopUp.amount) })))
             await dispatch(topupActions.setHasNewTransaction(true))
             
             onClose()

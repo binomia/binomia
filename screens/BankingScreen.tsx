@@ -15,15 +15,15 @@ import CardModification from '@/components/cards/CardModification'
 import { Dimensions, RefreshControl } from 'react-native'
 import SingleTransactionScreen from './SingleTransactionScreen'
 import { transactionActions } from '@/redux/slices/transactionSlice'
-import { transactionsMocks } from '@/mocks'
 import { useNavigation } from '@react-navigation/native'
+import { accountActions } from '@/redux/slices/accountSlice'
 
 
 const { height } = Dimensions.get('window')
 const BankingScreen: React.FC = () => {
     const navigation = useNavigation<any>()
     const dispatch = useDispatch()
-    const { user } = useSelector((state: any) => state.globalReducer)
+    const { user } = useSelector((state: any) => state.accountReducer)
     const [showMakeTransaction, setShowMakeTransaction] = useState<boolean>(false)
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
@@ -44,13 +44,13 @@ const BankingScreen: React.FC = () => {
     const handleMakeTransaction = async (title: string) => {
         setTransactionTitle(title)
 
-        await dispatch(globalActions.setCard(cards[0]))
+        await dispatch(accountActions.setCard(cards[0]))
         navigation.navigate("Deposit")
         // setShowMakeTransaction(true)
     }
 
     const handleCloseMakeTransaction = async () => {
-        await dispatch(globalActions.setCard({}))
+        await dispatch(accountActions.setCard({}))
         setShowMakeTransaction(false)
     }
 
@@ -111,9 +111,9 @@ const BankingScreen: React.FC = () => {
                     <Heading fontSize={scale(19)} color={colors.white}>Transacciones</Heading>
                     <FlatList
                         mt={"20px"}
-                        data={transactionsMocks}
+                        data={[] as any}
                         scrollEnabled={false}
-                        renderItem={({ item, index }) => (
+                        renderItem={({ item, index }: any) => (
                             <Pressable key={`transaction-banking-${index}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(item)} mb={"25px"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} >
                                 <HStack >
                                     <HStack w={"50px"} h={"50px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>

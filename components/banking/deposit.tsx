@@ -10,6 +10,7 @@ import { scale } from 'react-native-size-matters';
 import { useSelector } from 'react-redux';
 import { mastercardLogo, visaLogo } from '@/assets';
 import { FORMAT_CURRENCY } from '@/helpers';
+import { MaterialIcons } from '@expo/vector-icons';
 
 
 type Props = {
@@ -20,7 +21,7 @@ type Props = {
 }
 
 const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", showAvailable = false, onSendFinish = (_: number) => { } }) => {
-    const { card, account } = useSelector((state: any) => state.globalReducer)
+    const { card, account } = useSelector((state: any) => state.accountReducer)
     const [input, setInput] = useState<string>("0");
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
@@ -66,7 +67,14 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", sh
                             <Button w={"100%"} color={showPayButton ? colors.white : colors.mainGreen} onPress={() => onSendFinish(Number(input))} title={title} />
                         </Pressable>
                     </HStack>
-                    {showAvailable ? <Text fontSize={scale(13)} textAlign={"center"} color={colors.mainGreen}>{FORMAT_CURRENCY(account.balance)} Disponible</Text> : null}
+                    <VStack w={"100%"} alignItems={"center"}>
+                        <HStack bg={colors.lightGray} w={"40px"} h={"40px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
+                            <MaterialIcons name="security" size={24} color={colors.warning} />
+                        </HStack>
+                        <Text mt={"10px"} w={"80%"} fontSize={scale(12)} textAlign={"center"} color={"white"}>
+                            El limite que puedes depositar es de {FORMAT_CURRENCY(account.balance)}. Para depositar más, debes de esperar haz el siguien Lunes
+                        </Text>
+                    </VStack>
                 </VStack>
                 <VStack mb={"15px"}>
                     <KeyNumberPad onChange={(value: string) => onChange(Number(value))} />

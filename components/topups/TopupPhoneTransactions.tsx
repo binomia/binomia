@@ -31,7 +31,7 @@ type Props = {
 const { height } = Dimensions.get('window')
 const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => {
     const dispatch = useDispatch()
-    const { user } = useSelector((state: any) => state.globalReducer)
+    const { user } = useSelector((state: any) => state.accountReducer)
     const { hasNewTransaction } = useSelector((state: any) => state.topupReducer)
     const isFocused = useNavigation().isFocused()
 

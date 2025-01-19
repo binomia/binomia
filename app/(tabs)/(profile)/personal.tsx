@@ -9,7 +9,7 @@ import Feather from '@expo/vector-icons/Feather';
 
 
 const PersonalScreen: React.FC = () => {
-    const { user } = useSelector((state: any) => state.globalReducer)
+    const { user } = useSelector((state: any) => state.accountReducer)
 
     return (
         <VStack px={"20px"} variant={"body"} h={"100%"}>

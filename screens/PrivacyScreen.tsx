@@ -9,10 +9,12 @@ import { globalActions } from '@/redux/slices/globalSlice'
 import { useMutation } from '@apollo/client'
 import { AccountApolloQueries } from '@/apollo/query'
 import { privacyScreenData } from '@/mocks'
+import { accountActions } from '@/redux/slices/accountSlice'
 
 const PrivacyScreen: React.FC = () => {
     const dispatch = useDispatch()
-    const { allowFaceId, account } = useSelector((state: any) => state.globalReducer)
+    const { allowFaceId } = useSelector((state: any) => state.globalReducer)
+    const { account } = useSelector((state: any) => state.accountReducer)
     const [updateAccountPermissions] = useMutation(AccountApolloQueries.updateAccountPermissions())
 
 
@@ -31,7 +33,7 @@ const PrivacyScreen: React.FC = () => {
                     }
                 })
 
-                await dispatch(globalActions.setAccount(account.data.updateAccountPermissions))
+                await dispatch(accountActions.setAccount(account.data.updateAccountPermissions))
 
             } else if (name === "Enviar Dinero") {
                 const account = await updateAccountPermissions({
@@ -42,7 +44,7 @@ const PrivacyScreen: React.FC = () => {
                     }
                 })
 
-                await dispatch(globalActions.setAccount(account.data.updateAccountPermissions))
+                await dispatch(accountActions.setAccount(account.data.updateAccountPermissions))
 
             } else if (name === "Solicitarme Dinero") {
                 const account = await updateAccountPermissions({
@@ -53,7 +55,7 @@ const PrivacyScreen: React.FC = () => {
                     }
                 })
 
-                await dispatch(globalActions.setAccount(account.data.updateAccountPermissions))
+                await dispatch(accountActions.setAccount(account.data.updateAccountPermissions))
             }
 
         } catch (error) {

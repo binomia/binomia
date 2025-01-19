@@ -21,13 +21,14 @@ import ImageView from "react-native-image-viewing";
 import { router } from 'expo-router'
 import { qrIcon } from '@/assets'
 import QRScanner from '@/components/global/QRScanner'
+import { accountActions } from '@/redux/slices/accountSlice'
 
 
 const ProfileScreen: React.FC = () => {
 	const { onLogout } = useContext(SessionContext)
 
 	const dispatch = useDispatch()
-	const { user } = useSelector((state: any) => state.globalReducer)
+	const { user } = useSelector((state: any) => state.accountReducer)
 
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const { uploadImage } = useCloudinary()
@@ -56,7 +57,7 @@ const ProfileScreen: React.FC = () => {
 				}
 			})
 
-			await dispatch(globalActions.setUser(updatedUser.data.updateUser))
+			await dispatch(accountActions.setUser(updatedUser.data.updateUser))
 
 			setProfileImage(url);
 			setIsLoading(false)

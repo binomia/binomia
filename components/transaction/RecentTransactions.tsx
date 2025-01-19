@@ -24,7 +24,7 @@ const { height, width } = Dimensions.get('window')
 const RecentTransactions: React.FC = () => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
-	const { user } = useSelector((state: any) => state.globalReducer)
+	const { user } = useSelector((state: any) => state.accountReducer)
 	const { recentTopUps } = useSelector((state: any) => state.topupReducer)
 	const { hasNewTransaction, recentTransactions } = useSelector((state: any) => state.transactionReducer)
 	const isFocused = useNavigation().isFocused()
@@ -41,7 +41,7 @@ const RecentTransactions: React.FC = () => {
 
 	const formatTransaction = (transaction: any) => {
 		const { transactionType, status, amount } = transaction
-		const isFromMe = transaction.from.user?.id === user.id
+		const isFromMe = transaction.from.user?.id === user?.id
 
 		const profileImageUrl = isFromMe ? transaction.to.user?.profileImageUrl : transaction.from.user?.profileImageUrl
 		const fullName = isFromMe ? transaction.to.user?.fullName : transaction.from.user?.fullName

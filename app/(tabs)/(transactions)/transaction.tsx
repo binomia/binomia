@@ -18,6 +18,7 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { transactionStatus } from '@/mocks';
 import PagerView from 'react-native-pager-view';
 import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-sticky-footer-avoiding-scroll-view';
+import { accountActions } from '@/redux/slices/accountSlice';
 
 
 type Props = {
@@ -33,7 +34,7 @@ const Transaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage, showP
     const ref = useRef<PagerView>(null);
     const dispatch = useDispatch()
     const { transaction } = useSelector((state: any) => state.transactionReducer)
-    const { account, user, location } = useSelector((state: any) => state.globalReducer)
+    const { account, user } = useSelector((state: any) => state.accountReducer)
     const [openDetail, setOpenDetail] = useState<boolean>(false)
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [isCancelLoading, setIsCancelLoading] = useState<boolean>(false)
@@ -118,7 +119,7 @@ const Transaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage, showP
                 })
 
                 await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...data.payRequestTransaction, ...formatTransaction(data.payRequestTransaction) })))
-                await dispatch(globalActions.setAccount(Object.assign({}, account, { balance: Number(account.balance) - Number(transaction?.amount) })))
+                await dispatch(accountActions.setAccount(Object.assign({}, account, { balance: Number(account.balance) - Number(transaction?.amount) })))
 
                 setIsLoading(false)
                 setIsCancelLoading(false)

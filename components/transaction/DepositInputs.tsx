@@ -28,9 +28,7 @@ const DepositInputs: React.FC<Props> = ({ title = "Deposito", open = true, onSen
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
 
-    const { receiver } = useSelector((state: any) => state.transactionReducer)
-    const { card } = useSelector((state: any) => state.globalReducer)
-    const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
+    const { card } = useSelector((state: any) => state.accountReducer)
 
     const [input, setInput] = useState<string>("0");
     const [visible, setVisible] = useState<boolean>(open);

@@ -14,6 +14,7 @@ import { globalActions } from '@/redux/slices/globalSlice'
 import { Feather, MaterialIcons } from '@expo/vector-icons';
 import { TEXT_PARAGRAPH_FONT_SIZE } from '@/constants'
 import { RefreshControl } from 'react-native'
+import { accountActions } from '@/redux/slices/accountSlice'
 
 
 const LimitsScreen: React.FC = () => {
@@ -21,7 +22,7 @@ const LimitsScreen: React.FC = () => {
 
     const isFocused = useNavigation().isFocused()
 
-    const { account, haveAccountChanged } = useSelector((state: any) => state.globalReducer)
+    const { account, haveAccountChanged } = useSelector((state: any) => state.accountReducer)
     const [accountLimit] = useLazyQuery(AccountApolloQueries.accountLimit())
     const [limits, setLimits] = useState<AccountLimitsType>({} as AccountLimitsType)
     const [refreshing, setRefreshing] = useState(false);
@@ -59,7 +60,7 @@ const LimitsScreen: React.FC = () => {
         (async () => {
             if (haveAccountChanged) {
                 await fetchAccountLimit()
-                await dispatch(globalActions.setHaveAccountChanged(false))
+                await dispatch(accountActions.setHaveAccountChanged(false))
             }
 
         })()

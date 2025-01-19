@@ -5,13 +5,7 @@ import * as Device from 'expo-device';
 const globalSlice = createSlice({
     name: 'global',
     initialState: {
-        haveAccountChanged: false,
-        appInBackgroundTime: 0,
-        account: {},
-        card: {},
-        cards: [],
-        kyc: {},
-        user: {},
+        appInBackgroundTime: 0,       
         applicationId: "",
         expoNotificationToken: "",
         jwt: "",
@@ -39,13 +33,7 @@ const globalSlice = createSlice({
     reducers: {
         setExpoNotificationToken: (state, action) => {
             state.expoNotificationToken = action.payload
-        },
-        setCard: (state, action) => {
-            state.card = action.payload
-        },
-        setCards: (state, action) => {
-            state.cards = action.payload
-        },
+        },      
         setAppInBackgroundTime: (state, action) => {
             state.appInBackgroundTime = action.payload
         },
@@ -63,16 +51,7 @@ const globalSlice = createSlice({
         },
         setAllowFaceId: (state, action) => {
             state.allowFaceId = action.payload
-        },
-        setAccount: (state, action) => {
-            state.account = action.payload
-        },
-        setKyc: (state, action) => {
-            state.kyc = action.payload
-        },
-        setUser: (state, action) => {
-            state.user = action.payload
-        },
+        },      
         setNetwork: (state, action) => {
             state.network = action.payload
         },
@@ -84,9 +63,6 @@ const globalSlice = createSlice({
         },
         setApplicationId: (state, action) => {
             state.applicationId = action.payload
-        },
-        setHaveAccountChanged: (state, action) => {
-            state.haveAccountChanged = action.payload
         }
     }
 })

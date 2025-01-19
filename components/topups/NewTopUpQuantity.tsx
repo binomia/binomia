@@ -21,7 +21,7 @@ const { height } = Dimensions.get('window')
 const NewTopUpQuantity: React.FC<Props> = ({ next, back }: Props) => {
     const dispatch = useDispatch();
     const { newTopUp } = useSelector((state: any) => state.topupReducer)
-    const { account } = useSelector((state: any) => state.globalReducer)
+    const { account } = useSelector((state: any) => state.accountReducer)
 
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
     const [input, setInput] = useState<string>("0");

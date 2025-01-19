@@ -17,25 +17,23 @@ import { useNavigation } from '@react-navigation/native';
 import QRScannerScreen from './QRScannerScreen';
 import { SocketContext } from '@/contexts/socketContext';
 import { SOCKET_EVENTS } from '@/constants';
+import { accountActions } from '@/redux/slices/accountSlice';
 
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
-    const { account } = useSelector((state: any) => state.globalReducer)
+    const { account } = useSelector((state: any) => state.accountReducer)
     const dispatch = useDispatch()
 
     const navigation = useNavigation<any>();
     const [showBottomSheet, setShowBottomSheet] = useState(false)
-    const socket = useContext(SocketContext);
     const [getAccount] = useLazyQuery(AccountApolloQueries.account());
 
     const [refreshing, setRefreshing] = useState(false);
 
 
     const onPress = async () => {
-        socket.emit("test", {
-            message: "test"
-        })
+        
     }
 
     const onRefresh = useCallback(async () => {
@@ -43,7 +41,7 @@ const HomeScreen: React.FC = () => {
 
         try {
             const data = await getAccount()
-            await dispatch(globalActions.setAccount(data.data.account))
+            await dispatch(accountActions.setAccount(data.data.account))
         } catch (error) {
             console.log(error);
         }

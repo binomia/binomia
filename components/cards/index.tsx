@@ -17,6 +17,7 @@ import { useMutation } from '@apollo/client';
 import { CardApolloQueries } from '@/apollo/query/cardQuery';
 import { CardAuthSchema } from '@/auth/cardAuth';
 import CreateCard from './CreateCard';
+import { accountActions } from '@/redux/slices/accountSlice';
 
 type Props = {
     open?: boolean
@@ -32,12 +33,12 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
     const dispatch = useDispatch()
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
     const [showAddCard, setShowAddCard] = useState<boolean>(false)
-    const { cards }: { cards: CardType[] } = useSelector((state: any) => state.globalReducer)
+    const { cards }: { cards: CardType[] } = useSelector((state: any) => state.accountReducer)
     const [createCard] = useMutation(CardApolloQueries.createCard())
 
 
     const onPressCard = async (card: any) => {
-        await dispatch(globalActions.setCard(card))
+        await dispatch(accountActions.setCard(card))
 
         if (justSelecting) {
             onCloseFinish()
@@ -70,7 +71,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
             const validatedCardData = await CardAuthSchema.createCard.parseAsync(cardData)
             const { data } = await createCard({ variables: { data: validatedCardData } })
 
-            await dispatch(globalActions.setCards([...cards, data.createCard]))
+            await dispatch(accountActions.setCards([...cards, data.createCard]))
             setShowAddCard(false)
 
             setShowCardModification(false)

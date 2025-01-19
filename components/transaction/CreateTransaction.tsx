@@ -25,7 +25,7 @@ type Props = {
 const CreateTransaction: React.FC<Props> = ({ input, title = "Siguiente", showBalance = true, setInput, nextPage = () => { }, onCloseFinish = () => { } }) => {
     const dispatch = useDispatch();
     const { receiver } = useSelector((state: any) => state.transactionReducer)
-    const { account } = useSelector((state: any) => state.globalReducer)
+    const { account } = useSelector((state: any) => state.accountReducer)
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
 
     const onNextPage = async () => {

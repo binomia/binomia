@@ -8,10 +8,11 @@ import { globalActions } from '@/redux/slices/globalSlice'
 import { useMutation } from '@apollo/client'
 import { AccountApolloQueries } from '@/apollo/query'
 import { privacyScreenData } from '@/mocks'
+import { accountActions } from '@/redux/slices/accountSlice'
 
 const PrivacyScreen: React.FC = () => {
     const dispatch = useDispatch()
-    const { account } = useSelector((state: any) => state.globalReducer)
+    const { account } = useSelector((state: any) => state.accountReducer)
     const [updateAccountPermissions] = useMutation(AccountApolloQueries.updateAccountPermissions())
 
     const onSwitchChange = async (id: string, allow: boolean) => {
@@ -28,7 +29,7 @@ const PrivacyScreen: React.FC = () => {
                     }
                 })
 
-                await dispatch(globalActions.setAccount(data.updateAccountPermissions))
+                await dispatch(accountActions.setAccount(data.updateAccountPermissions))
             }
 
         } catch (error) {

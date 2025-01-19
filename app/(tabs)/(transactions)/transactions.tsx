@@ -29,7 +29,7 @@ const { height } = Dimensions.get('window')
 const TransactionsScreen: React.FC = () => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
-	const { user } = useSelector((state: any) => state.globalReducer)
+	const { user } = useSelector((state: any) => state.accountReducer)
 	const { hasNewTransaction } = useSelector((state: any) => state.transactionReducer)
 	const isFocused = useNavigation().isFocused()
 

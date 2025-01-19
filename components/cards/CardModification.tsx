@@ -12,6 +12,7 @@ import { useMutation } from '@apollo/client'
 import { CardApolloQueries } from '@/apollo/query/cardQuery'
 import { CardAuthSchema } from '@/auth/cardAuth'
 import EditCard from './EditCard'
+import { accountActions } from '@/redux/slices/accountSlice'
 
 type Props = {
     open?: boolean
@@ -23,7 +24,7 @@ const { height } = Dimensions.get('window')
 const CardModification: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => {
     const ref = useRef<PagerView>(null);
     const dispatch = useDispatch()
-    const { card, cards } = useSelector((state: any) => state.globalReducer)
+    const { card, cards } = useSelector((state: any) => state.accountReducer)
     const [bottomSheetHeight, setBottomSheetHeight] = useState<number>(height * 0.42)
     const [currentPage, setCurrentPage] = useState<number>(0)
     const [deleteCard] = useMutation(CardApolloQueries.deleteCard())
@@ -33,7 +34,7 @@ const CardModification: React.FC<Props> = ({ open = false, onCloseFinish = () =>
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
 
     const onClose = async () => {
-        await dispatch(globalActions.setCard({}))
+        await dispatch(accountActions.setCard({}))
         onCloseFinish()
         setBottomSheetHeight(height * 0.4)
         ref.current?.setPage(0)
@@ -74,7 +75,7 @@ const CardModification: React.FC<Props> = ({ open = false, onCloseFinish = () =>
 
                 const cardsFiltered = cards.filter((item: any) => item.hash !== card.hash)
                 if (data.deleteCard) {
-                    await dispatch(globalActions.setCards(cardsFiltered))
+                    await dispatch(accountActions.setCards(cardsFiltered))
 
                     onClose()
                     setIsDeleting(false)

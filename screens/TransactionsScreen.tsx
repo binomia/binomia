@@ -21,12 +21,11 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { noTransactions } from '@/assets';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
-import { FormatTransactionType } from '@/types';
 
 const { height } = Dimensions.get('window')
 const TransactionsScreen: React.FC = () => {
 	const dispatch = useDispatch()
-	const { user, account } = useSelector((state: any) => state.globalReducer)
+	const { user, account } = useSelector((state: any) => state.accountReducer)
 	const navigation = useNavigation<any>();
 
 	const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())

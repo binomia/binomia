@@ -27,7 +27,7 @@ type Props = {
 const { height, width } = Dimensions.get('window')
 const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0 }: Props) => {
     const dispatch = useDispatch()
-    const { user } = useSelector((state: any) => state.globalReducer)
+    const { user } = useSelector((state: any) => state.accountReducer)
     const [searchSingleUser] = useLazyQuery(UserApolloQueries.searchSingleUser())
 
     const pageFef = useRef<PagerView>(null);

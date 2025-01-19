@@ -10,8 +10,7 @@ import { useSelector } from 'react-redux'
 import { supportScreenData } from '@/mocks'
 
 const SupportScreen: React.FC = () => {
-    const {user} = useSelector((state: any) => state.globalReducer)
-
+    const { user } = useSelector((state: any) => state.accountReducer)
 
     const openEmail = async () => {
         try {
@@ -44,7 +43,6 @@ const SupportScreen: React.FC = () => {
             console.error(error);
         }
     };
-
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>

@@ -11,7 +11,7 @@ import { useSelector } from "react-redux";
 
 export const useSqlite = () => {
     const dbContext = useSQLiteContext();
-    const { user } = useSelector((state: any) => state.globalReducer);
+    const { user } = useSelector((state: any) => state.accountReducer);
     const db = drizzle(dbContext);
 
     const getOneSearchedUser = async (id: number) => {

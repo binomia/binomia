@@ -20,6 +20,7 @@ import { CardApolloQueries } from '@/apollo/query/cardQuery'
 import { CardAuthSchema } from '@/auth/cardAuth'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { BackHeaderIcon } from '@/components/navigation/HeaderBar'
+import { accountActions } from '@/redux/slices/accountSlice'
 
 type Props = {
     open?: boolean
@@ -37,11 +38,11 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => 
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
     const [refreshing, setRefreshing] = useState(false);
     const [showAddCard, setShowAddCard] = useState<boolean>(false)
-    const { cards }: { cards: CardType[] } = useSelector((state: any) => state.globalReducer)
+    const { cards }: { cards: CardType[] } = useSelector((state: any) => state.accountReducer)
     const { justSelecting } = useLocalSearchParams()
 
     const onPressCard = async (card: any) => {
-        await dispatch(globalActions.setCard(card))
+        await dispatch(accountActions.setCard(card))
 
         if (justSelecting) {
             router.back()
@@ -68,7 +69,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => 
             const validatedCardData = await CardAuthSchema.createCard.parseAsync(cardData)
             const { data } = await createCard({ variables: { data: validatedCardData } })
 
-            await dispatch(globalActions.setCards([...cards, data.createCard]))
+            await dispatch(accountActions.setCards([...cards, data.createCard]))
             setShowAddCard(false)
 
         } catch (error) {
@@ -84,7 +85,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { } }) => 
             setRefreshing(true);
 
             const { data } = await fetchCards()
-            await dispatch(globalActions.setCards(data.cards))
+            await dispatch(accountActions.setCards(data.cards))
 
         } catch (error) {
             console.log({

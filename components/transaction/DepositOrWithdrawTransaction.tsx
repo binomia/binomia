@@ -29,7 +29,7 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Deposito", ope
     const navigation = useNavigation<any>()
 
     const { receiver } = useSelector((state: any) => state.transactionReducer)
-    const { card } = useSelector((state: any) => state.globalReducer)
+    const { card } = useSelector((state: any) => state.accountReducer)
     const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
 
     const [input, setInput] = useState<string>("0");

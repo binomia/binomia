@@ -30,7 +30,8 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
 
     const { authenticate } = useLocalAuthentication();
     const { receiver, transactions } = useSelector((state: any) => state.transactionReducer)
-    const { location, user } = useSelector((state: any) => state.globalReducer)
+    const { location } = useSelector((state: any) => state.globalReducer)
+    const { user } = useSelector((state: any) => state.accountReducer)
     const [createRequestTransaction] = useMutation(TransactionApolloQueries.createRequestTransaction())
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)

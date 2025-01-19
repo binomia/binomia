@@ -10,6 +10,7 @@ import { transactionActions } from "@/redux/slices/transactionSlice";
 import { useLazyQuery } from "@apollo/client";
 import { AccountApolloQueries } from "@/apollo/query";
 import { fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
+import { accountActions } from "@/redux/slices/accountSlice";
 
 
 export const SocketContext = createContext({});
@@ -25,7 +26,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
     const refreshAccount = useCallback(async () => {
         try {
             const { data } = await getAccount()
-            await dispatch(globalActions.setAccount(data.account))
+            await dispatch(accountActions.setAccount(data.account))
         } catch (error) {
             console.log(error);
         }
@@ -47,7 +48,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                 socket.on(SOCKET_EVENTS.TRANSACTION_CREATED, async () => {
                     await Promise.all([
                         refreshAccount(),
-                        dispatch(globalActions.setHaveAccountChanged(false)),
+                        dispatch(accountActions.setHaveAccountChanged(false)),
                         dispatch(transactionActions.setHasNewTransaction(true)),
                         dispatch(fetchRecentTransactions()),
                         dispatch(fetchRecentTopUps())
@@ -57,8 +58,8 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
 
                 socket.on(SOCKET_EVENTS.TRANSACTION_REQUEST_PAIED, async (transaction: any) => {
                     await Promise.all([
-                        dispatch(globalActions.setAccount(transaction.from)),
-                        dispatch(globalActions.setHaveAccountChanged(false)),
+                        dispatch(accountActions.setAccount(transaction.from)),
+                        dispatch(accountActions.setHaveAccountChanged(false)),
                         dispatch(transactionActions.setHasNewTransaction(true)),
                         dispatch(fetchRecentTransactions()),
                         dispatch(fetchRecentTopUps())
@@ -67,7 +68,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
 
                 socket.on(SOCKET_EVENTS.TRANSACTION_CREATED_FROM_QUEUE, async (data: any) => {
                     await Promise.all([
-                        dispatch(globalActions.setAccount(data.from)),
+                        dispatch(accountActions.setAccount(data.from)),
                         dispatch(fetchRecentTransactions()),
                         dispatch(fetchRecentTopUps())
                     ])
@@ -75,7 +76,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
 
                 socket.on(SOCKET_EVENTS.TRANSACTION_REQUEST_CANCELED, async (data: any) => {
                     await Promise.all([
-                        dispatch(globalActions.setAccount(data.from)),
+                        dispatch(accountActions.setAccount(data.from)),
                         dispatch(fetchRecentTransactions()),
                         dispatch(fetchRecentTopUps())
                     ])

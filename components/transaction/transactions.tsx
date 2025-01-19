@@ -31,7 +31,7 @@ const { height, width } = Dimensions.get('window')
 const Transactions: React.FC<Props> = ({ }: Props) => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
-	const { user } = useSelector((state: any) => state.globalReducer)
+	const { user } = useSelector((state: any) => state.accountReducer)
 	const { hasNewTransaction, transactions } = useSelector((state: any) => state.transactionReducer)
 	const isFocused = useNavigation().isFocused()
 

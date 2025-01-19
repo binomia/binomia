@@ -20,13 +20,15 @@ import { TransactionApolloQueries } from '@/apollo/query/transactionQuery'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { TransactionAuthSchema } from '@/auth/transactionAuth'
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication'
+import { accountActions } from '@/redux/slices/accountSlice';
 
 
 const { height, width } = Dimensions.get('window')
 const BankingScreen: React.FC = () => {
     const dispatch = useDispatch()
     const { authenticate } = useLocalAuthentication()
-    const { user, cards, card, account, location } = useSelector((state: any) => state.globalReducer)
+    const { location } = useSelector((state: any) => state.globalReducer)
+    const { user, cards, card, account, } = useSelector((state: any) => state.accountReducer)
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
     const [transactions, setTransactions] = useState<any[]>([])
@@ -59,7 +61,7 @@ const BankingScreen: React.FC = () => {
             setTransactions([data.createBankingTransaction, ...transactions])
 
             await Promise.all([
-                dispatch(globalActions.setAccount(Object.assign({}, account, { balance: account.balance + amount }))),
+                dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance + amount }))),
 
             ]).then(async () => {
                 setShowDeposit(false)
@@ -89,9 +91,11 @@ const BankingScreen: React.FC = () => {
     }
 
     const handleMakeTransaction = async (title: string) => {
+        console.log(JSON.stringify(account, null, 2));
+
         if (cards.length > 0) {
             const primaryCard = cards.find((card: any) => card.isPrimary)
-            await dispatch(globalActions.setCard(primaryCard))
+            await dispatch(accountActions.setCard(primaryCard))
 
             if (title === "Deposito")
                 setShowDeposit(true)

@@ -8,13 +8,9 @@ import { CAPITALIZE_WORDS } from '@/helpers'
 import { SUPPORT_EMAIL, SUPPORT_PHONE_NUMBER } from '@/constants'
 import { useSelector } from 'react-redux'
 import { supportScreenData } from '@/mocks'
-import Button from '@/components/global/Button'
-import { SessionContext } from '@/contexts/sessionContext'
 
 const SupportScreen: React.FC = () => {
-    const { user } = useSelector((state: any) => state.globalReducer)
-    const { onLogout } = useContext(SessionContext)
-
+    const { user } = useSelector((state: any) => state.accountReducer)
 
 
     const openEmail = async () => {
