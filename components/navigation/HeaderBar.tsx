@@ -29,8 +29,8 @@ export const HomeHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
 
     return (
         <VStack p={p}>
-            <Pressable _pressed={{ opacity: 0.5 }} onPress={() => setShowBottomSheet(true)}>
-                <Image alt='logo-image' w={"25px"} h={"25px"} source={qrIcon} />
+            <Pressable bg={colors.lightGray} w={"40px"} h={"40px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} _pressed={{ opacity: 0.5 }} onPress={() => setShowBottomSheet(true)}>
+                <Image alt='logo-image' w={"22px"} tintColor={colors.mainGreen} h={"22px"} source={qrIcon} />
             </Pressable>
             <QRScanner open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
         </VStack>

@@ -145,7 +145,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
-		// await fetchAccountTransactions()
+		await dispatch(fetchAllTransactions({ page: 1, pageSize: 10 }))
 		setRefreshing(false);
 	}, []);
 

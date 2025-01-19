@@ -50,14 +50,14 @@ const transactionSlice = createSlice({
 
         builder.addCase(fetchAllTransactions.fulfilled, (state, action) => {
             state.transactions = action.payload
-            state.loading = false
+            // state.loading = false
         })
         builder.addCase(fetchAllTransactions.rejected, (state, action) => {
             state.transactions = []
-            state.loading = false
+            // state.loading = false
         })
         builder.addCase(fetchAllTransactions.pending, (state, action) => {
-            state.loading = true
+            // state.loading = true
         })
     }
 })
