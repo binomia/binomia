@@ -22,6 +22,7 @@ import TranferRequestDetails from '@/components/transaction/TranferRequestDetail
 import { router } from 'expo-router';
 import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
 import { pendingClock } from '@/assets';
+import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 
 const { height } = Dimensions.get('window')
 
@@ -87,11 +88,11 @@ const Request: React.FC = () => {
 
         if (currentPage === 2) {
             router.dismissAll()
-            router.navigate("(transactions)")
+            router.navigate("(home)")
 
             ref.current?.setPage(0)
             setCurrentPage(0)
-            await dispatch(transactionActions.setHasNewTransaction(true))
+            await dispatch(fetchRecentTransactions())
         }
     }
 

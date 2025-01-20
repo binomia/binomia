@@ -166,20 +166,9 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 		setTransaction({})
 	}
 
-
-	// useEffect(() => {
-	// 	(async () => {
-	// 		if (hasNewTransaction) {
-	// 			await dispatch(transactionActions.setHasNewTransaction(false))
-	// 		}
-	// 	})()
-
-	// }, [isFocused, hasNewTransaction])
-
 	useEffect(() => {
 		(async () => {
 			await fetchSearchedUser()
-			// await dispatch(fetchAllTransactions({ page: 1, pageSize: 10 }))
 		})()
 	}, [])
 
@@ -197,7 +186,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 						<ScrollView horizontal>
 							<VStack justifyContent={"center"} alignItems={"center"}>
 								<Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} w={scale(55)} h={scale(55)} alignItems={"center"} justifyContent={"center"} onPress={() => router.navigate("/user")}>
-									<AntDesign name="pluscircle" size={30} color="white" />
+									<AntDesign name="plus" size={30} color={colors.mainGreen} />
 								</Pressable>
 								<Heading mt={"5px"} textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>Nueva</Heading>
 							</VStack>

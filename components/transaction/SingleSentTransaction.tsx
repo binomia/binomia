@@ -12,15 +12,15 @@ import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
-import { statuTransactionIcons, transactionStatus } from '@/mocks';
+import { transactionStatus } from '@/mocks';
 import { Ionicons, Entypo } from '@expo/vector-icons';
 import { cancelIcon, checked, pendingClock } from '@/assets';
 import { z } from 'zod';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { accountActions } from '@/redux/slices/accountSlice';
+import { fetchRecentTransactions } from '@/redux/fetchHelper';
 
 
 type Props = {
@@ -32,16 +32,16 @@ type Props = {
 }
 
 const { height, width } = Dimensions.get('window')
-const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPayButton = false, goNext = (_?: number) => { }, onClose = async () => { } }) => {
+const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClose = () => { }, showPayButton = false, goNext = (_?: number) => { } }) => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { authenticate } = useLocalAuthentication()
-	const { transaction } = useSelector((state: any) => state.transactionReducer)
+	const { transaction, recentTransactions } = useSelector((state: any) => state.transactionReducer)
 	const { account, user }: { account: any, user: any, location: z.infer<typeof TransactionAuthSchema.transactionLocation> } = useSelector((state: any) => state.accountReducer)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
-	const [hasNewStatus, setHasNewStatus] = useState<boolean>(false)
 	const [isCancelLoading, setIsCancelLoading] = useState<boolean>(false)
 	const [payRequestTransaction] = useMutation(TransactionApolloQueries.payRequestTransaction());
+	const [cancelRequestedTransaction] = useMutation(TransactionApolloQueries.cancelRequestedTransaction());
 
 	const handleShare = async () => {
 		const isAvailableAsync = await Sharing.isAvailableAsync()
@@ -70,6 +70,27 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPa
 		}
 	}
 
+	const onCancelRequestedTransaction = async () => {
+		setIsCancelLoading(true)
+		const { data } = await cancelRequestedTransaction({
+			variables: {
+				transactionId: transaction.transactionId
+			}
+		})
+
+		await dispatch(transactionActions.setRecentTransactions([
+			{
+				type: "transaction",
+				...data.cancelRequestedTransaction
+			},
+			...recentTransactions
+		]))
+
+		await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...data.cancelRequestedTransaction, ...formatTransaction(data.cancelRequestedTransaction) })))
+
+		setIsCancelLoading(false)
+	}
+
 	const onPress = async (paymentApproved: boolean) => {
 		if (transaction?.showPayButton) {
 			try {
@@ -86,8 +107,6 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPa
 						}
 					})
 
-					setHasNewStatus(true)
-
 					await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...data.payRequestTransaction, ...formatTransaction(data.payRequestTransaction) })))
 					await dispatch(accountActions.setAccount(Object.assign({}, account, { balance: Number(account.balance) - Number(transaction?.amount) })))
 
@@ -98,14 +117,15 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPa
 
 			} catch (error) {
 				setIsLoading(false)
-				console.log({ payRequestTransaction: error });
+				await dispatch(fetchRecentTransactions())
+				onClose()
 			}
 
 		} else
 			ref.current?.setPage(1)
 	}
 
-	const StatuIcon = (status: string) => {
+	const StatuIcon: React.FC<{ status: string }> = ({ status }: { status: string }) => {
 		if (status === "completed") {
 			return (
 				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
@@ -137,7 +157,6 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPa
 			)
 		}
 	}
-	
 
 	const transactionLocation = (location: z.infer<typeof TransactionAuthSchema.transactionLocation>) => {
 		const neighbourhood = location?.neighbourhood ? location.neighbourhood : ""
@@ -174,8 +193,8 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPa
 					<VStack mt={"20px"} alignItems={"center"}>
 						<Heading textTransform={"capitalize"} fontSize={scale(38)} color={colors.white}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
 						<Text mb={"10px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-						{transaction.showMap ? <VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
-							{StatuIcon(transaction.status)}							
+						{transaction.isFromMe ? <VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
+							<StatuIcon status={transaction?.status || ""} />
 							<VStack w={"80%"}>
 								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status)}</Text>
 							</VStack>
@@ -214,7 +233,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPa
 						/>
 					</HStack>
 				</VStack>
-				: transaction.showMap ?
+				: transaction.isFromMe ?
 					<VStack w={"100%"} justifyContent={"center"}>
 						<HStack w={"85%"} mb={"5px"}>
 							<Heading fontSize={scale(16)} textTransform={"capitalize"} color={"white"}>{transactionLocation(transaction.location ?? {}) || "Ubicación"}</Heading>
@@ -231,10 +250,20 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", showPa
 								borderRadius: 10
 							}}
 						/>
+						{transaction.status === "requested" ? <HStack mt={"20px"} w={"100%"} justifyContent={"center"}>
+							<Button
+								onPress={onCancelRequestedTransaction}
+								spin={isCancelLoading}
+								w={"49%"}
+								bg={colors.lightGray}
+								color={colors.red}
+								title={"Cancelar"}
+							/>
+						</HStack> : null}
 					</VStack> :
-					<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>						
+					<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
 						<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
-							{StatuIcon(transaction.status)}							
+							<StatuIcon status={transaction?.status || ""} />
 							<VStack w={"80%"}>
 								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status)}</Text>
 							</VStack>

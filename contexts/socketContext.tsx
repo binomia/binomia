@@ -9,7 +9,7 @@ import { globalActions } from "@/redux/slices/globalSlice";
 import { transactionActions } from "@/redux/slices/transactionSlice";
 import { useLazyQuery } from "@apollo/client";
 import { AccountApolloQueries } from "@/apollo/query";
-import { fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
+import { fetchAllTransactions, fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
 import { accountActions } from "@/redux/slices/accountSlice";
 
 
@@ -17,8 +17,6 @@ export const SocketContext = createContext({});
 
 export const SocketContextProvider = ({ children }: { children: JSX.Element }) => {
     const [getAccount] = useLazyQuery(AccountApolloQueries.account());
-
-
 
     const { getItem } = useAsyncStorage()
     const dispatch = useDispatch()
@@ -78,6 +76,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                     await Promise.all([
                         dispatch(accountActions.setAccount(data.from)),
                         dispatch(fetchRecentTransactions()),
+                        dispatch(fetchAllTransactions({page: 1, pageSize: 10})),
                         dispatch(fetchRecentTopUps())
                     ])
                 })

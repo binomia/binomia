@@ -43,7 +43,7 @@ export default () => {
 					),
 				}}
 			/>
-			<Tabs.Screen
+			{/* <Tabs.Screen
 				name="(transactions)"
 				options={{
 					...defaultHeaderOptions,
@@ -53,7 +53,7 @@ export default () => {
 						<Image resizeMode='contain' tintColor={focused ? colors.mainGreen : colors.pureGray} w={'25px'} h={'25px'} source={focused ? transationsOn : transationsOff} alt='home-on' />
 					),
 				}}
-			/>
+			/> */}
 			<Tabs.Screen
 				name="(banking)"
 				options={{

@@ -83,12 +83,4 @@ export const fetchAccountBankingTransactions = createAsyncThunk('fetchAccountBan
     }
 })
 
-export const fetchAccount = createAsyncThunk('fetchAccount', async () => {
-    try {
-        const { data } = await apolloClient.query({ query: AccountApolloQueries.account() });
-        return data.account
-    } catch (error) {
-        console.log(error);
-    }
-})
 

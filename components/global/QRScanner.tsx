@@ -47,15 +47,7 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
     const onBarcodeScanned = async ({ data }: { data: string }) => {
         if (isScanning) return;
         setIsScanning(true);
-
-        console.log({ data });
-        if (data === user.username) {
-            Alert.alert("Advertencia", "No puedes enviarte dinero a ti mismo", [{
-                onPress: () => setIsScanning(false)
-            }]);
-
-        } else {
-            
+        if (data !== user.username) {
             const singleUser = await searchSingleUser({
                 variables: {
                     search: {
@@ -69,12 +61,13 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
 
                 onCloseFinished();
                 setShowSendTransaction(true);
-                
+
             } else {
                 Alert.alert("Usuario no encontrado", "El usuario no se encuentra registrado en la plataforma", [{
                     onPress: () => setIsScanning(false)
                 }]);
             }
+
         }
     }
 
@@ -94,14 +87,14 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                             pieceStrokeWidth={1}
                                             pieceStroke={colors.lightGray}
                                             padding={10}
-                                            
+
                                             logo={{
                                                 href: icon,
                                                 padding: 5,
                                                 opacity: 0.8
                                             }}
                                             style={{
-                                                backgroundColor: "transparent"                                                                                         
+                                                backgroundColor: "transparent"
                                             }}
                                             outerEyesOptions={{ borderRadius: 30 }}
                                             innerEyesOptions={{ borderRadius: 20, color: colors.mainGreen }}

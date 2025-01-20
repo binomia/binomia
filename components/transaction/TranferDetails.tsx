@@ -30,7 +30,7 @@ type Props = {
 
 const { width } = Dimensions.get("screen")
 const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { } }) => {
-    const { receiver, transactions } = useSelector((state: any) => state.transactionReducer)
+    const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
     const { account, user } = useSelector((state: any) => state.accountReducer)
 
@@ -100,6 +100,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
         return {
             ...transaction,
             isFromMe,
+            showMap: true,
             profileImageUrl: profileImageUrl || "",
             amount: transaction.amount,
             fullName: fullName || "",
@@ -121,7 +122,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             const authenticated = await authenticate()
 
             setLoading(true)
-            if (true) {
+            if (authenticated.success) {
                 await handleOnSend({
                     title: recurrence,
                     time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence

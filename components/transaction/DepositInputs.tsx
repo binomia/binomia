@@ -23,15 +23,8 @@ type Props = {
     onCloseFinish?: () => void
 }
 
-const { height } = Dimensions.get('window')
-const DepositInputs: React.FC<Props> = ({ title = "Deposito", open = true, onSendFinish = () => { }, onCloseFinish = () => { } }) => {
-    const dispatch = useDispatch();
-    const navigation = useNavigation<any>()
-
+const DepositInputs: React.FC<Props> = ({ onSendFinish = () => { }, onCloseFinish = () => { } }) => {   
     const { card } = useSelector((state: any) => state.accountReducer)
-
-    const [input, setInput] = useState<string>("0");
-    const [visible, setVisible] = useState<boolean>(open);
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
 
@@ -41,17 +34,8 @@ const DepositInputs: React.FC<Props> = ({ title = "Deposito", open = true, onSen
             setShowPayButton(true)
         else
             setShowPayButton(false)
-
-        setInput(value)
     }
 
-    const handleOnClose = async () => {
-        await dispatch(transactionActions.setReceiver({}))
-
-        onCloseFinish()
-        setVisible(false)
-        navigation.goBack()
-    }
 
     const renderCardLogo = (brand: string) => {
         switch (brand) {
@@ -65,10 +49,6 @@ const DepositInputs: React.FC<Props> = ({ title = "Deposito", open = true, onSen
                 return null
         }
     }
-
-    useEffect(() => {
-        setVisible(open)
-    }, [open])
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>

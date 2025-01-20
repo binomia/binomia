@@ -1,12 +1,12 @@
 import React from 'react';
 import colors from '@/colors';
 import { Stack } from 'expo-router';
-import { HomeHeaderLeft, HomeHeaderRight, TopupsRight } from '@/components/navigation/HeaderBar';
+import { HomeHeaderLeft, HomeHeaderRight, TopupsRight, TransactionsHeaderRight } from '@/components/navigation/HeaderBar';
 
 export default function TabLayout() {
 	const defaultHeaderStyles = {
 		backgroundColor: colors.darkGray,
-		shadowOpacity: 0,
+		shadowOpacity: 0
 	}
 	const defaultTabStyles = {
 		backgroundColor: colors.darkGray,
@@ -18,7 +18,7 @@ export default function TabLayout() {
 		headerBackTitleVisible: false,
 		headerTintColor: colors.white,
 		headerStyle: { ...defaultHeaderStyles },
-		tabBarStyle: { ...defaultTabStyles }
+		tabBarStyle: { ...defaultTabStyles },
 
 	}
 
@@ -30,6 +30,7 @@ export default function TabLayout() {
 			<Stack.Screen name='topups' options={{ title: "Recargas", ...defaultscreenOptions, headerRight: () => <TopupsRight /> }} />
 			<Stack.Screen name='topUpTransactions' options={{ title: "", ...defaultscreenOptions, headerRight: () => <TopupsRight /> }} />
 			<Stack.Screen name='createTopUp' options={{ title: "Nueva Recarga", ...defaultscreenOptions }} />
+			<Stack.Screen name='transactions' options={{ ...defaultscreenOptions, title: "Transacciones", headerRight: () => <TransactionsHeaderRight /> }} />
 		</Stack>
 	);
 }
