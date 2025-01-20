@@ -10,9 +10,8 @@ import DepositOrWithdrawTransaction from '@/components/banking/deposit'
 import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, ScrollView } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import { scale } from 'react-native-size-matters'
-import { cashIn, cashout, depositIcon, noTransactions, withdrawIcon } from '@/assets'
+import { cashIn, cashout, noTransactions } from '@/assets'
 import { FORMAT_CURRENCY } from '@/helpers'
-import { globalActions } from '@/redux/slices/globalSlice'
 import { Alert, Dimensions, RefreshControl } from 'react-native'
 import { transactionActions } from '@/redux/slices/transactionSlice'
 import { router } from 'expo-router'
@@ -21,7 +20,7 @@ import { useLazyQuery, useMutation } from '@apollo/client'
 import { TransactionAuthSchema } from '@/auth/transactionAuth'
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication'
 import { accountActions } from '@/redux/slices/accountSlice';
-import { FlatGrid } from 'react-native-super-grid';
+import { fetchAccountBankingTransactions } from '@/redux/fetchHelper';
 
 
 const { height, width } = Dimensions.get('window')
@@ -30,10 +29,10 @@ const BankingScreen: React.FC = () => {
     const { authenticate } = useLocalAuthentication()
     const { location } = useSelector((state: any) => state.globalReducer)
     const { user, cards, card, limits, account, } = useSelector((state: any) => state.accountReducer)
+    const { bankingTransactions } = useSelector((state: any) => state.transactionReducer)
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
-    const [transactions, setTransactions] = useState<any[]>([])
-    const [accountBankingTransactions] = useLazyQuery(TransactionApolloQueries.accountBankingTransactions())
+    const [transactions, setTransactions] = useState<any[]>(bankingTransactions)
     const [createBankingTransaction] = useMutation(TransactionApolloQueries.createBankingTransaction())
     const [refreshing, setRefreshing] = useState(false);
     const [showDeposit, setShowDeposit] = useState(false);
@@ -61,10 +60,11 @@ const BankingScreen: React.FC = () => {
                 variables
             })
 
-            setTransactions([data.createBankingTransaction, ...transactions])
+            setTransactions([data.createBankingTransaction, ...bankingTransactions])
 
+            const newBalance = transactionType === "deposit" ? account.balance + amount : account.balance - amount
             await Promise.all([
-                dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance + amount }))),
+                dispatch(accountActions.setAccount(Object.assign({}, account, { balance: newBalance }))),
 
             ]).then(async () => {
                 setShowDeposit(false)
@@ -77,19 +77,6 @@ const BankingScreen: React.FC = () => {
 
         } catch (errors: any) {
             console.log(errors);
-        }
-    }
-
-    const fetchAccountBankingTransactions = async (page: number = 1, pageSize: number = 10) => {
-        try {
-            const { data } = await accountBankingTransactions({
-                variables: { page, pageSize }
-            })
-
-            setTransactions(data.accountBankingTransactions)
-
-        } catch (error) {
-            console.error({ accountBankingTransactions: error });
         }
     }
 
@@ -175,21 +162,18 @@ const BankingScreen: React.FC = () => {
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
-        await fetchAccountBankingTransactions().catch(error => console.log(error))
+        await dispatch(fetchAccountBankingTransactions({ page: 1, pageSize: 30 }))
 
         setTimeout(() => {
             setRefreshing(false);
         }, 1000);
     }, []);
 
-    useEffect(() => {
-        fetchAccountBankingTransactions()
-    }, [])
 
     useEffect(() => {
         setEnableDeposit(limits.depositAmount >= account.depositLimit)
         setEnableWithdraw(limits.withdrawAmount >= account.withdrawLimit)
-        
+
     }, [limits, account])
 
     return (
@@ -211,7 +195,7 @@ const BankingScreen: React.FC = () => {
                             <Heading fontSize={scale(19)} color={colors.white}>Transacciones</Heading>
                             <FlatList
                                 mt={"20px"}
-                                data={transactions}
+                                data={transactions as any[]}
                                 scrollEnabled={false}
                                 renderItem={({ item, index }) => (
                                     <Pressable key={`transaction-banking-${index}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(item)} mb={"25px"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} >
@@ -224,7 +208,7 @@ const BankingScreen: React.FC = () => {
                                                 <Text fontSize={scale(12)} color={colors.pureGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
                                             </VStack>
                                         </HStack>
-                                        <Heading fontSize={scale(12)} color={formatTransaction(item).isDeposit ? colors.mainGreen : colors.red} >{formatTransaction(item).isDeposit ? "+" : "-"}{FORMAT_CURRENCY(item.amount)}</Heading>
+                                        <Heading fontSize={scale(12)} color={formatTransaction(item).isDeposit ? colors.mainGreen : colors.red} >{FORMAT_CURRENCY(item.amount)}</Heading>
                                     </Pressable>
                                 )}
                             />

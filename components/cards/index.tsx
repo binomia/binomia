@@ -17,6 +17,7 @@ import { useMutation } from '@apollo/client';
 import { CardApolloQueries } from '@/apollo/query/cardQuery';
 import { CardAuthSchema } from '@/auth/cardAuth';
 import { accountActions } from '@/redux/slices/accountSlice';
+import { Entypo } from '@expo/vector-icons';
 
 type Props = {
     open?: boolean
@@ -94,10 +95,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                             <HStack justifyContent={"space-between"} alignItems={"center"}>
                                 <Heading fontSize={scale(24)} color={colors.white}>Tarjetas</Heading>
                                 <Pressable w={"35px"} h={"35px"} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} onPress={() => pagerRef.current?.setPage(1)}>
-                                    <ZStack pl={"1px"} w={"35px"} h={"35px"} alignItems={"center"} justifyContent={"center"}>
-                                        <HStack w={"20px"} h={"20px"} borderRadius={"100px"} bg={colors.white} />
-                                        <AntDesign name="pluscircle" size={scale(20)} color={colors.mainGreen} />
-                                    </ZStack>
+                                    <Entypo name="plus" size={scale(20)} color={colors.mainGreen} />
                                 </Pressable>
                             </HStack>
                             {cards.length > 0 ? (

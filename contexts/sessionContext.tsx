@@ -13,10 +13,9 @@ import * as Crypto from 'expo-crypto';
 import * as Network from 'expo-network';
 import { useLocation } from "@/hooks/useLocation";
 import { TransactionApolloQueries } from "@/apollo/query/transactionQuery";
-import { transactionActions } from "@/redux/slices/transactionSlice";
 import { AccountAuthSchema } from "@/auth/accountAuth";
 import { useNotifications } from "@/hooks/useNotifications";
-import { fetchAccountLimit, fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
+import { fetchAccountBankingTransactions, fetchAccountLimit, fetchAllTransactions, fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
 import { accountActions } from "@/redux/slices/accountSlice";
 
 export const SessionContext = createContext<SessionPropsType>({
@@ -52,7 +51,6 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const [login] = useMutation(SessionApolloQueries.login());
     const [createUser] = useMutation(UserApolloQueries.createUser());
     const [getSessionUser] = useLazyQuery(UserApolloQueries.sessionUser());
-    const [accountTransactions] = useLazyQuery(TransactionApolloQueries.accountTransactions())
 
     const { registerForPushNotificationsAsync } = useNotifications()
 
@@ -73,7 +71,10 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 dispatch(accountActions.setAccount(accountsData ?? {})),
                 dispatch(accountActions.setCards(cardsData ?? {})),
                 dispatch(accountActions.setCard(primaryCard ?? {})),
+
                 dispatch(fetchRecentTransactions()),
+                dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
+                dispatch(fetchAccountBankingTransactions({ page: 1, pageSize: 30 })),
                 dispatch(fetchRecentTopUps()),
                 dispatch(fetchAccountLimit()),
             ])
@@ -124,7 +125,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 variables: { email, password },
                 context: {
                     headers: {
-                        device: JSON.stringify({ ...device, network , location }),
+                        device: JSON.stringify({ ...device, network, location }),
                         "session-auth-identifier": applicationId,
                         "authorization": applicationId,
                         expoNotificationToken: expoNotificationToken || "",
@@ -274,15 +275,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
                 await dispatch(globalActions.setApplicationId(applicationId))
                 await setNotifications();
-
-                const { data } = await accountTransactions({
-                    variables: {
-                        "page": 1,
-                        "pageSize": 10
-                    }
-                })
-                await dispatch(transactionActions.setTransactions(data.accountTransactions ?? []))
-
+              
                 setJwt(jwt)
 
             } else {

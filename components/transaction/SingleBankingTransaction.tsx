@@ -2,15 +2,15 @@ import React, { useState } from 'react'
 import colors from '@/colors'
 import BottomSheet from '@/components/global/BottomSheet';
 import moment from 'moment';
+import * as Sharing from 'expo-sharing';
 import { StyleSheet, SafeAreaView, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, Stack } from 'native-base'
+import { Heading, Image, Text, VStack, FlatList, HStack, Pressable } from 'native-base'
 import { FORMAT_CURRENCY } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useSelector } from 'react-redux';
 import { checked, mastercardLogo, visaLogo } from '@/assets';
-import { AntDesign, Entypo } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
 import { TEXT_HEADING_FONT_SIZE } from '@/constants';
-import * as Sharing from 'expo-sharing';
 
 
 type Props = {
@@ -98,9 +98,9 @@ const SingleTransactionBanking: React.FC<Props> = ({ }) => {
 							<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>{transaction.transactionType}</Heading>
 						</VStack>
 						<VStack alignItems={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={!transaction.isDeposit ? "red" : "mainGreen"}>{!transaction.isDeposit ? "-" : "+"}{FORMAT_CURRENCY(transaction?.amount)}</Heading>
+							<Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={!transaction.isDeposit ? "red" : "mainGreen"}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
 							<Text mb={"20px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-							<Pressable  onPress={handleShare} _pressed={{ opacity: 0.5 }}  w={scale(60)} h={scale(60)} shadow={1} borderWidth={0.4} borderColor={colors.placeholder} alignItems={"center"} justifyContent={"center"}  borderRadius={100} bg={colors.lightGray}>
+							<Pressable onPress={handleShare} _pressed={{ opacity: 0.5 }} w={scale(60)} h={scale(60)} shadow={1} borderWidth={0.4} borderColor={colors.placeholder} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
 								<Entypo name="share" size={24} color="white" />
 							</Pressable>
 						</VStack>

@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { fetchAllTransactions, fetchRecentTransactions } from '../fetchHelper'
+import { fetchAccountBankingTransactions, fetchAllTransactions, fetchRecentTransactions } from '../fetchHelper'
 
 const transactionSlice = createSlice({
     name: 'transaction',
@@ -9,6 +9,7 @@ const transactionSlice = createSlice({
         receiver: {},
         transaction: {},
         transactions: [],
+        bankingTransactions: [],
         recentTransactions: [],
         transactionDeytails: {},
         createTransactionBody: {},
@@ -23,10 +24,7 @@ const transactionSlice = createSlice({
         },
         setTransaction: (state, action) => {
             state.transaction = action.payload
-        },
-        setTransactions: (state, action) => {
-            state.transactions = action.payload
-        },
+        },       
         setRecentTransactions: (state, action) => {
             state.recentTransactions = action.payload
         },
@@ -41,6 +39,7 @@ const transactionSlice = createSlice({
         }
     },
     extraReducers(builder) {
+        // fetchRecentTransactions
         builder.addCase(fetchRecentTransactions.fulfilled, (state, action) => {
             state.recentTransactions = action.payload
         })
@@ -48,17 +47,22 @@ const transactionSlice = createSlice({
             state.recentTransactions = []
         })
 
+        // fetchAllTransactions
         builder.addCase(fetchAllTransactions.fulfilled, (state, action) => {
             state.transactions = action.payload
-            // state.loading = false
         })
         builder.addCase(fetchAllTransactions.rejected, (state, action) => {
             state.transactions = []
-            // state.loading = false
         })
-        builder.addCase(fetchAllTransactions.pending, (state, action) => {
-            // state.loading = true
+
+        // fetchAccountBankingTransactions
+        builder.addCase(fetchAccountBankingTransactions.fulfilled, (state, action) => {
+            state.bankingTransactions = action.payload
         })
+        builder.addCase(fetchAccountBankingTransactions.rejected, (state, action) => {
+            state.bankingTransactions = []
+        })
+        
     }
 })
 

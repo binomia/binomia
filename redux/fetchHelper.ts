@@ -75,3 +75,15 @@ export const fetchAllTransactions = createAsyncThunk('fetchAllTransactions', asy
         console.error({ fetchAllTransactions: error });
     }
 })
+
+
+export const fetchAccountBankingTransactions = createAsyncThunk('fetchAccountBankingTransactions', async ({ page = 1, pageSize = 10 }: { page: number, pageSize: number }) => {
+    try {
+        const { data } = await apolloClient.query({ query: TransactionApolloQueries.accountBankingTransactions(), variables: { page, pageSize } })
+        return data.accountBankingTransactions
+
+    } catch (error) {
+        console.error({ accountBankingTransactions: error });
+    }
+})
+

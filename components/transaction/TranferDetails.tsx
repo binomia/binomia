@@ -19,6 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocation } from '@/hooks/useLocation';
 import { router } from 'expo-router';
 import { accountActions } from '@/redux/slices/accountSlice';
+import { fetchAllTransactions } from '@/redux/fetchHelper';
 
 
 
@@ -69,10 +70,10 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             }
 
             await Promise.all([
-                dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),
                 dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionDeytails.amount }))),
                 dispatch(accountActions.setHaveAccountChanged(false)),
                 dispatch(transactionActions.setHasNewTransaction(true)),
+                dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
                 dispatch(transactionActions.setTransaction({
                     ...transactionSent,
                     amountColor: colors.red,

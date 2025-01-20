@@ -27,21 +27,21 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
 
 
     const handleOnClose = async () => {
+        if (currentPage === 2) {
+            await dispatch(fetchRecentTransactions())
+
+            ref.current?.setPage(0)
+            router.navigate("(home)")
+
+            setCurrentPage(0)
+            await dispatch(transactionActions.setHasNewTransaction(true))
+        }
+
         await dispatch(transactionActions.setReceiver({}))
 
         onCloseFinish()
         setVisible(false)
         setInput("0")
-
-        if (currentPage === 2) {
-            await dispatch(fetchRecentTransactions())
-
-            router.navigate("(home)")
-            ref.current?.setPage(0)
-
-            setCurrentPage(0)
-            await dispatch(transactionActions.setHasNewTransaction(true))
-        }
     }
 
 

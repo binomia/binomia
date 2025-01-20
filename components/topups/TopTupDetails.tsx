@@ -68,7 +68,8 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
 
             await dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance - Number(newTopUp.amount) })))
             await dispatch(topupActions.setHasNewTransaction(true))
-            
+            await dispatch(fetchRecentTransactions())
+
             onClose()
 
         } catch (error: any) {
@@ -95,9 +96,9 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
                     title: recurrence,
                     time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
                 })
-                
+
             }
-            
+
             await dispatch(fetchRecentTransactions())
             await dispatch(transactionActions.setHasNewTransaction(true))
 

@@ -9,7 +9,7 @@ import { VStack, Image, Pressable, HStack, Text, Stack, Heading } from "native-b
 import { StyleSheet } from "react-native"
 import { useState } from "react"
 import { router } from "expo-router"
-import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, Entypo, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { scale } from "react-native-size-matters"
 import { Dimensions, Platform } from "react-native"
 import { useSelector } from "react-redux"
@@ -91,7 +91,6 @@ export const TransactionCenter: React.FC<{ p?: string }> = ({ p = "0" }) => {
         </HStack>
     )
 }
-
 export const HeaderBankingRight: React.FC = () => {
     const [showBottomSheet, setShowBottomSheet] = useState(false)
 
@@ -135,13 +134,9 @@ export const CardsRight: React.FC = () => {
 export const TopupsRight: React.FC = () => {
     const [openBottomSheet, setOpenBottomSheet] = useState(false)
 
-    const onPress = async () => {
-        setOpenBottomSheet(true)
-    }
-
     return (
-        <Pressable w={"50px"} h={"40px"} alignItems={"flex-end"} _pressed={{ opacity: 0.5 }} onPress={onPress}>
-            <AntDesign name="pluscircle" size={25} color="white" />
+        <Pressable w={"35px"} h={"35px"} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} onPress={() => setOpenBottomSheet(true)}>
+            <Entypo name="plus" size={scale(20)} color={colors.mainGreen} />
             <NewTopUp onClose={() => setOpenBottomSheet(false)} open={openBottomSheet} />
         </Pressable>
     )
@@ -179,7 +174,6 @@ export const BackHeaderIcon: React.FC = () => {
         </HStack>
     )
 }
-
 
 const styles = StyleSheet.create({
     contentContainerStyle: {

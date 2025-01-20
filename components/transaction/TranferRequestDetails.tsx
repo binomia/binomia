@@ -77,7 +77,6 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
 
 
             await Promise.all([
-                dispatch(transactionActions.setTransactions([transaction.createTransaction, ...transactions])),
                 dispatch(transactionActions.setTransaction(Object.assign({}, transaction.createRequestTransaction, {
                     ...transaction.createTransaction,
                     ...formatTransaction(transactionSent),
