@@ -168,11 +168,6 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
         )
     }
 
-    useEffect(() => {
-        // console.log(JSON.stringify({topup,newTopUp}, null, 2));
-
-    }, [newTopUp, topup])
-
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
             <VStack px={"10px"} mt={"10px"} h={"100%"}>

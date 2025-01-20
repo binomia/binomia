@@ -19,7 +19,7 @@ type Props = {
 }
 
 const { height } = Dimensions.get('window')
-const SingleTopTup: React.FC<Props> = ({ topup,  open, onClose }: Props) => {
+const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
     const onCloseFinish = async () => {
         onClose(false)
     }
@@ -80,14 +80,14 @@ const SingleTopTup: React.FC<Props> = ({ topup,  open, onClose }: Props) => {
                 </HStack>
                 <VStack alignItems={"center"} borderRadius={10}>
                     <VStack alignItems={"center"}>
-                        <Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={colors.pureGray}>{FORMAT_CURRENCY(topup?.amount)}</Heading>
+                        <Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={colors.red}>{FORMAT_CURRENCY(topup?.amount)}</Heading>
                         <Text mb={"10px"} color={colors.lightSkyGray}>{moment(topup?.createdAt).format("lll")}</Text>
                         <HStack mb={"20px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
                             {StatuIcon(topup.status)}
                             <Text ml={"3px"} fontSize={scale(16)} color={colors.lightSkyGray}>{transactionStatus(topup.status)}</Text>
                         </HStack>
-                        <Pressable onPress={handleShare} _pressed={{ opacity: 0.5 }} w={scale(55)} h={scale(55)} shadow={1} borderWidth={0.4} borderColor={colors.placeholder} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
-                            <Entypo name="share" size={24} color="white" />
+                        <Pressable onPress={handleShare} _pressed={{ opacity: 0.5 }} w={scale(55)} h={scale(55)} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
+                            <Entypo name="share" size={24} color={colors.mainGreen} />
                         </Pressable>
                     </VStack>
                 </VStack>

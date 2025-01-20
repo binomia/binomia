@@ -63,9 +63,6 @@ export const fetchAllTransactions = createAsyncThunk('fetchAllTransactions', asy
                 return new Date(Number(b.timestamp)).getTime() - new Date(Number(a.timestamp)).getTime()
             });
 
-            console.log(JSON.stringify(combinedTransactions, null, 4));
-
-
             return combinedTransactions
         }
 
@@ -76,7 +73,6 @@ export const fetchAllTransactions = createAsyncThunk('fetchAllTransactions', asy
     }
 })
 
-
 export const fetchAccountBankingTransactions = createAsyncThunk('fetchAccountBankingTransactions', async ({ page = 1, pageSize = 10 }: { page: number, pageSize: number }) => {
     try {
         const { data } = await apolloClient.query({ query: TransactionApolloQueries.accountBankingTransactions(), variables: { page, pageSize } })
@@ -84,6 +80,15 @@ export const fetchAccountBankingTransactions = createAsyncThunk('fetchAccountBan
 
     } catch (error) {
         console.error({ accountBankingTransactions: error });
+    }
+})
+
+export const fetchAccount = createAsyncThunk('fetchAccount', async () => {
+    try {
+        const { data } = await apolloClient.query({ query: AccountApolloQueries.account() });
+        return data.account
+    } catch (error) {
+        console.log(error);
     }
 })
 

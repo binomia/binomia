@@ -29,10 +29,6 @@ export const useContacts = () => {
                 return validContacts;
             }, [] as Array<{ id: string, name: string, phoneNumbers: Contacts.PhoneNumber[] }>);
 
-            // console.log(JSON.stringify(contacts, null, 4));
-
-
-
             return contacts
         } else {
             console.log('Permission to access contacts was denied');

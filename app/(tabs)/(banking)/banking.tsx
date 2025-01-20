@@ -81,8 +81,6 @@ const BankingScreen: React.FC = () => {
     }
 
     const handleMakeTransaction = async (title: string) => {
-        console.log(JSON.stringify({ limits, account }, null, 2));
-
         if (title === "Deposito" && enableDeposit) {
             Alert.alert(
                 'Limite Alcanzado',

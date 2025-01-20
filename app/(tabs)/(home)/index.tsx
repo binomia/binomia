@@ -1,21 +1,18 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import colors from '@/colors';
 import Button from '@/components/global/Button';
 import QRScannerScreen from '@/components/global/QRScanner';
-import HomeSkeleton from '@/components/home/homeSkeleton';
+import RecentTransactions from '@/components/transaction/RecentTransactions';
 import { Alert, Dimensions, RefreshControl } from 'react-native'
 import { Heading, HStack, Image, Pressable, VStack, Text, ScrollView } from 'native-base';
 import { bagIcon, bills, cars, house, phone, sendIcon } from '@/assets';
 import { useLazyQuery } from '@apollo/client';
 import { useDispatch, useSelector } from 'react-redux';
 import { AccountApolloQueries } from '@/apollo/query';
-import { globalActions } from '@/redux/slices/globalSlice';
 import { FORMAT_CURRENCY } from '@/helpers';
 import { scale } from 'react-native-size-matters';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-
-import RecentTransactions from '@/components/transaction/RecentTransactions';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
 
@@ -23,15 +20,10 @@ const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
 	const { account } = useSelector((state: any) => state.accountReducer)
 	const dispatch = useDispatch()
-
-	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
 
+	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const [refreshing, setRefreshing] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
-
-
-	const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 	const fetchAccount = async () => {
 		try {
@@ -58,22 +50,6 @@ const HomeScreen: React.FC = () => {
 		}
 
 	}, []);
-
-
-	useEffect(() => {
-		(async () => {
-			await dispatch(fetchRecentTransactions());
-
-			if (Object.keys(account).length > 0) {
-				await delay(1000)
-				setIsLoading(false)
-
-			} else {
-				await fetchAccount();
-				setIsLoading(false)
-			}
-		})()
-	}, [])
 
 	const handleAlert = () => {
 		Alert.alert('Envio De Dinero', 'La opción de enviar dinero está desactivada.', [
@@ -116,7 +92,8 @@ const HomeScreen: React.FC = () => {
 		}
 	]
 
-	return (isLoading ? (<HomeSkeleton />) : (
+
+	return (
 		<VStack p={"20px"} w={width} bg={colors.darkGray} flex={1} alignItems={"center"}>
 			<ScrollView w={"100%"} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
 				<VStack w={"100%"} justifyContent={"center"} alignItems={"center"} borderRadius={"10px"}>
@@ -176,7 +153,7 @@ const HomeScreen: React.FC = () => {
 			</ScrollView>
 			<QRScannerScreen defaultPage={1} open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
 		</VStack>
-	))
+	)
 }
 
 

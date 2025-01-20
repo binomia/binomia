@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { fetchAccountLimit } from '../fetchHelper'
+import { fetchAccount, fetchAccountLimit } from '../fetchHelper'
 
 const accountSlice = createSlice({
     name: 'global',
@@ -36,11 +36,20 @@ const accountSlice = createSlice({
         }
     },
     extraReducers(builder) {
+        // fetchAccountLimit
         builder.addCase(fetchAccountLimit.fulfilled, (state, action) => {
             state.limits = action.payload
         })
-        builder.addCase(fetchAccountLimit.rejected, (state, action) => {
+        builder.addCase(fetchAccountLimit.rejected, (state) => {
             state.limits = {}
+        })
+
+        // fetchAccount
+        builder.addCase(fetchAccount.fulfilled, (state, action) => {
+            state.account = action.payload
+        })
+        builder.addCase(fetchAccount.rejected, (state) => {
+            state.account = {}
         })
     }
 })

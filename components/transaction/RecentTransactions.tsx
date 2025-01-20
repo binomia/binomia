@@ -5,18 +5,14 @@ import BottomSheet from '@/components/global/BottomSheet';
 import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
-import * as Sharing from 'expo-sharing';
 import { StyleSheet, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ZStack } from 'native-base'
-import { FORMAT_CURRENCY, FORMAT_PHONE_NUMBER, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { Heading, Image, Text, VStack, FlatList, HStack, Pressable } from 'native-base'
+import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
-import { cancelIcon, checked, noTransactions, pendingClock } from '@/assets';
+import { noTransactions, pendingClock } from '@/assets';
 import { router, useNavigation } from 'expo-router';
-import { TEXT_HEADING_FONT_SIZE } from '@/constants';
-import { transactionStatus } from '@/mocks';
-import { Entypo } from '@expo/vector-icons';
 import SingleTopTup from '../topups/SingleTopTup';
 
 
@@ -107,47 +103,6 @@ const RecentTransactions: React.FC = () => {
 		setOpenBottomSheet(true)
 	}
 
-	const StatuIcon = (status: string) => {
-		const _w = "25px"
-		const _h = "25px"
-		if (status === "completed") {
-			return (
-				<ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-					<HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
-					<Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={checked} />
-				</ZStack>
-			)
-		} else if (status === "cancelled") {
-			return (
-				<ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-					<HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
-					<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={cancelIcon} />
-				</ZStack>
-			)
-
-		} else if (status === "pending") {
-			return (
-				<ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-					<HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
-					<Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
-				</ZStack>
-			)
-		} else if (status === "requested") {
-			return (
-				<ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-					<HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
-					<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
-				</ZStack>
-			)
-		}
-	}
-
-	const handleShare = async () => {
-		const isAvailableAsync = await Sharing.isAvailableAsync()
-		if (!isAvailableAsync) return
-
-		await Sharing.shareAsync("http://test.com")
-	}
 
 	useEffect(() => {
 		const topupsMapped = recentTopUps?.map((topup: any) => {
@@ -250,7 +205,7 @@ const RecentTransactions: React.FC = () => {
 											</VStack>
 										</HStack>
 										<VStack ml={"10px"} justifyContent={"center"}>
-											<Heading opacity={data.status === "cancelled" ? 0.5 : 1} textDecorationLine={data.status === "cancelled" ? "line-through" : "none"} fontWeight={"bold"} textTransform={"capitalize"} fontSize={scale(14)} color={colors.mainGreen}>{FORMAT_CURRENCY(data.amount)}</Heading>
+											<Heading opacity={data.status === "cancelled" ? 0.5 : 1} textDecorationLine={data.status === "cancelled" ? "line-through" : "none"} fontWeight={"bold"} textTransform={"capitalize"} fontSize={scale(14)} color={colors.red}>{FORMAT_CURRENCY(data.amount)}</Heading>
 										</VStack>
 									</HStack>
 								</Pressable>
@@ -259,8 +214,8 @@ const RecentTransactions: React.FC = () => {
 					/>
 					<BottomSheet height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
 						<SingleSentTransaction iconImage={pendingClock} showPayButton={showPayButton} goNext={goNext} onClose={onCloseFinishSingleTransaction} title={singleTransactionTitle} />
-					</BottomSheet>					
-					<SingleTopTup open={openBottomSheet} onClose={onCloseFinish} topup={transaction}/>
+					</BottomSheet>
+					<SingleTopTup open={openBottomSheet} onClose={onCloseFinish} topup={transaction} />
 				</VStack>
 				: (
 					<VStack w={"100%"} h={height / 3} px={"20px"} >
