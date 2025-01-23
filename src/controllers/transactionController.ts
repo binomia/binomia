@@ -221,10 +221,10 @@ export default class TransactionController {
         switch (channel) {
             case QUEUE_JOBS_NAME.CREATE_TRANSACTION:
             case QUEUE_JOBS_NAME.PENDING_TRANSACTION: {
-                const { jobName, jobTime, jobId, amount, userId, data } = JSON.parse(payload);
+                const { jobName, jobTime, jobId,referenceData, amount, userId, data } = JSON.parse(payload);
                 const encryptedData = await Cryptography.encrypt(JSON.stringify(data));
 
-                await transactionsQueue.createJobs({ jobId, jobName, jobTime, amount, userId, data: encryptedData });
+                await transactionsQueue.createJobs({ jobId, referenceData, jobName, jobTime, amount, userId, data: encryptedData });
                 break;
             }
             case QUEUE_JOBS_NAME.REMOVE_TRANSACTION_FROM_QUEUE: {

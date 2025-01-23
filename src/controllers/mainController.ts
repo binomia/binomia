@@ -11,6 +11,7 @@ interface RecurrenceTransactionsParams extends JobJson {
     userId: number,
     amount: number,
     queueType: string
+    referenceData: any
     jobName: string
     jobTime: string
     status?: string
@@ -20,13 +21,13 @@ interface RecurrenceTransactionsParams extends JobJson {
 export default class MainController {
     static createQueue = async (transactionData: RecurrenceTransactionsParams) => {
         try {
-            const { repeatJobKey, userId, queueType, jobTime, status = "active", jobName, amount, id, timestamp, data } = transactionData
+            const { repeatJobKey, referenceData, userId, queueType, jobTime, status = "active", jobName, amount, id, timestamp, data } = transactionData
             const queue = await QueuesModel.findOne({
                 where: { repeatJobKey }
             })
 
             if (queue) return
-            
+
             const hash = await Cryptography.hash(JSON.stringify({
                 jobId: id,
                 userId,
@@ -51,6 +52,7 @@ export default class MainController {
                 status,
                 repeatedCount: 0,
                 data,
+                referenceData,
                 signature
             })
 
@@ -65,23 +67,41 @@ export default class MainController {
         try {
             const queue = await QueuesModel.findOne({
                 where: {
-                    [Op.and]: [
-                        { repeatJobKey },
-                        { status: "active" }
-                    ]
+                    repeatJobKey
                 }
             })
-    
+
             if (!queue)
                 throw "queue not found";
-    
+
             await queue.update({
                 status,
                 repeatedCount: queue.toJSON().repeatedCount + 1
             })
-    
+
             return (await queue.reload()).toJSON()
-            
+
+        } catch (error) {
+            throw error
+        }
+    }
+    static updateQueue = async (repeatJobKey: string, newData: any) => {
+        try {
+            const queue = await QueuesModel.findOne({
+                where: {
+                    repeatJobKey
+                }
+            })
+
+            if (!queue)
+                throw "queue not found";
+
+            await queue.update({
+                ...newData
+            })
+
+            return (await queue.reload()).toJSON()
+
         } catch (error) {
             throw error
         }

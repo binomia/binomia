@@ -5,7 +5,6 @@ import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PA
 import TransactionController from "@/controllers/transactionController";
 import MainController from "@/controllers/mainController";
 
-
 export default class TransactionsQueue {
     queue: Queue;
 
@@ -40,17 +39,18 @@ export default class TransactionsQueue {
     }
 
 
-    createJobs = async ({ jobId, jobName, jobTime, amount, userId, data }: { jobId: string, userId: number, amount: number, jobName: string, jobTime: string, data: string }) => {        
+    createJobs = async ({ jobId, referenceData, jobName, jobTime, amount, userId, data }: { jobId: string, referenceData: any, userId: number, amount: number, jobName: string, jobTime: string, data: string }) => {
         switch (jobName) {
             case "weekly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_WEEKLY_PATTERN[jobTime as WeeklyQueueTitleType]);
                 const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
                     queueType: "transaction",
                     jobTime,
-                    jobName,                    
+                    jobName,
                     userId,
                     amount,
                     data,
+                    referenceData
                 }))
 
                 return transaction
@@ -63,7 +63,8 @@ export default class TransactionsQueue {
                     jobName,
                     userId,
                     amount,
-                    data
+                    data,
+                    referenceData
                 }))
 
                 return transaction
@@ -76,7 +77,8 @@ export default class TransactionsQueue {
                     jobName,
                     userId,
                     amount,
-                    data
+                    data,
+                    referenceData
                 }))
 
                 return transaction
@@ -90,6 +92,7 @@ export default class TransactionsQueue {
                     userId,
                     amount,
                     data,
+                    referenceData
                 }))
 
                 return transaction
@@ -120,26 +123,25 @@ export default class TransactionsQueue {
         }
     }
 
-    updateJob = async (repeatJobKey: string, jobName: string, jobTime: WeeklyQueueTitleType): Promise<any> => {
+    updateTransactionJob = async (repeatJobKey: string, jobName: string, jobTime: WeeklyQueueTitleType): Promise<any> => {
         try {
-            // const job = await this.queue.getJobScheduler(repeatJobKey)
             const job = await this.queue.removeJobScheduler(repeatJobKey)
-            if (job) {
-                const transaction = await MainController.inactiveTransaction(repeatJobKey, "cancelled")
 
-                const newTransaction = await this.createJobs({
-                    jobId: `${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`,
-                    amount: transaction.amount,
-                    jobName,
-                    jobTime,
-                    userId: transaction.userId,
-                    data: transaction.data
-                })
+            if (!job)
+                throw "error removing job"
 
-                return newTransaction;
-            }
+            const queue = await MainController.inactiveTransaction(repeatJobKey, "cancelled")
+            const newJob = await this.createJobs({
+                jobId: `${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`,
+                amount: queue.amount,
+                jobName,
+                jobTime,
+                userId: queue.userId,
+                data: queue.data,
+                referenceData: queue.referenceData
+            })
 
-            throw "Job not found"
+            return newJob;
 
         } catch (error: any) {
             throw error.toString()

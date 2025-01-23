@@ -41,7 +41,7 @@ export default class TopUpQueue {
     }
 
 
-    createJobs = async ({ jobId, jobName, jobTime, amount, userId, data }: { jobId: string, userId: number, amount: number, jobName: string, jobTime: string, data: string }) => {
+    createJobs = async ({ jobId, jobName, referenceData, jobTime, amount, userId, data }: { jobId: string, referenceData: any, userId: number, amount: number, jobName: string, jobTime: string, data: string }) => {
         switch (jobName) {
             case "weekly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_WEEKLY_PATTERN[jobTime as WeeklyQueueTitleType]);
@@ -52,6 +52,7 @@ export default class TopUpQueue {
                     userId,
                     amount,
                     data,
+                    referenceData
                 }))
 
                 return transaction
@@ -64,7 +65,8 @@ export default class TopUpQueue {
                     jobName,
                     userId,
                     amount,
-                    data
+                    data,
+                    referenceData
                 }))
 
                 return transaction
@@ -77,7 +79,8 @@ export default class TopUpQueue {
                     jobName,
                     userId,
                     amount,
-                    data
+                    data,
+                    referenceData
                 }))
 
                 return transaction
@@ -92,6 +95,7 @@ export default class TopUpQueue {
                     userId,
                     amount,
                     data,
+                    referenceData
                 }))
 
                 return transaction
@@ -122,25 +126,26 @@ export default class TopUpQueue {
         }
     }
 
-    updateJob = async (repeatJobKey: string, jobName: string, jobTime: WeeklyQueueTitleType): Promise<any> => {
+    updateTopUpJob = async (repeatJobKey: string, jobName: string, jobTime: WeeklyQueueTitleType): Promise<any> => {
         try {
             const job = await this.queue.removeJobScheduler(repeatJobKey)
-            if (job) {
-                const transaction = await MainController.inactiveTransaction(repeatJobKey, "cancelled")
 
-                const newTransaction = await this.createJobs({
-                    jobId: `${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`,
-                    amount: transaction.amount,
-                    jobName,
-                    jobTime,
-                    userId: transaction.userId,
-                    data: transaction.data
-                })
+            if (!job)
+                throw "error removing job"
+            
+            const queue = await MainController.inactiveTransaction(repeatJobKey, "cancelled")
+            
+            const newJob = await this.createJobs({
+                jobId: `${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`,
+                amount: queue.amount,
+                jobName,
+                jobTime,
+                userId: queue.userId,
+                data: queue.data,
+                referenceData: queue.referenceData
+            })
 
-                return newTransaction;
-            }
-
-            throw "Job not found"
+            return newJob;
 
         } catch (error: any) {
             throw error.toString()
