@@ -146,9 +146,6 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 }
             });
 
-            console.log(JSON.stringify({ onLogin: data }, null, 2));
-
-
             if (data.login.token) {
                 await setItem("jwt", data.login.token)
 

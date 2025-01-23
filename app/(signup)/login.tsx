@@ -124,9 +124,6 @@ const LoginComponent: React.FC = (): JSX.Element => {
         try {
             const { data } = await verifySession({ variables: { ...sessionVerificationData } })
 
-            console.log(JSON.stringify({ onVerifyNextPress: data }, null, 2));
-
-
             if (data.verifySession) {
                 if (sessionVerificationData.token)
                     await setItem("jwt", sessionVerificationData.token)

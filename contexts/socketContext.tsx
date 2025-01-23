@@ -9,7 +9,7 @@ import { globalActions } from "@/redux/slices/globalSlice";
 import { transactionActions } from "@/redux/slices/transactionSlice";
 import { useLazyQuery } from "@apollo/client";
 import { AccountApolloQueries } from "@/apollo/query";
-import { fetchAllTransactions, fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
+import { fetchAccountLimit, fetchAllTransactions, fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
 import { accountActions } from "@/redux/slices/accountSlice";
 
 
@@ -49,7 +49,8 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                         dispatch(accountActions.setHaveAccountChanged(false)),
                         dispatch(transactionActions.setHasNewTransaction(true)),
                         dispatch(fetchRecentTransactions()),
-                        dispatch(fetchRecentTopUps())
+                        dispatch(fetchRecentTopUps()),
+                        dispatch(fetchAccountLimit())
 
                     ])
                 })
@@ -60,7 +61,8 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                         dispatch(accountActions.setHaveAccountChanged(false)),
                         dispatch(transactionActions.setHasNewTransaction(true)),
                         dispatch(fetchRecentTransactions()),
-                        dispatch(fetchRecentTopUps())
+                        dispatch(fetchRecentTopUps()),
+                        dispatch(fetchAccountLimit())
                     ])
                 })
 
@@ -68,7 +70,8 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                     await Promise.all([
                         dispatch(accountActions.setAccount(data.from)),
                         dispatch(fetchRecentTransactions()),
-                        dispatch(fetchRecentTopUps())
+                        dispatch(fetchRecentTopUps()),
+                        dispatch(fetchAccountLimit())
                     ])
                 })
 
@@ -76,8 +79,9 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                     await Promise.all([
                         dispatch(accountActions.setAccount(data.from)),
                         dispatch(fetchRecentTransactions()),
-                        dispatch(fetchAllTransactions({page: 1, pageSize: 10})),
-                        dispatch(fetchRecentTopUps())
+                        dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
+                        dispatch(fetchRecentTopUps()),
+                        dispatch(fetchAccountLimit())
                     ])
                 })
             })
