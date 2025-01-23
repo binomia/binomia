@@ -1,7 +1,7 @@
 import { STRING, JSONB, TEXT, INTEGER } from "sequelize"
 import { db } from "@/config"
 
-const QueueTransactionsModel = db.define('queue_transactions', {
+const QueuesModel = db.define('queues', {
 	jobId: {
 		type: STRING
 	},
@@ -9,6 +9,9 @@ const QueueTransactionsModel = db.define('queue_transactions', {
 		type: STRING
 	},
 	jobName: {
+		type: STRING
+	},
+	queueType: {
 		type: STRING
 	},
 	jobTime: {
@@ -31,6 +34,10 @@ const QueueTransactionsModel = db.define('queue_transactions', {
 		type: TEXT,
 		allowNull: false
 	},
+	referenceData: {
+		type: JSONB,
+		allowNull: false
+	},
 	signature: {
 		type: TEXT,
 		allowNull: false
@@ -39,4 +46,4 @@ const QueueTransactionsModel = db.define('queue_transactions', {
 
 
 
-export default QueueTransactionsModel
+export default QueuesModel

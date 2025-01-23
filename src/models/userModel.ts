@@ -1,5 +1,6 @@
 import { BOOLEAN, STRING } from "sequelize";
 import { db } from "@/config";
+import { allow } from "joi";
 
 const UsersModel = db.define('users', {
     fullName: {
@@ -33,9 +34,25 @@ const UsersModel = db.define('users', {
         type: STRING,
         allowNull: true
     },
-    addressAgreementSigned: {
+    allowWhatsappNotification: {
         type: BOOLEAN,
-        allowNull: false
+        allowNull: false,
+        defaultValue: true
+    },
+    allowEmailNotification: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowSmsNotification: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowPushNotification: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
     },
     userAgreementSigned: {
         type: BOOLEAN,

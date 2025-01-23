@@ -1,14 +1,13 @@
-import { AccountModel, kycModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, SessionModel, SugestedUsers } from '@/models'
+import { AccountModel, kycModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, SessionModel, QueuesModel } from '@/models'
 import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
 import { Cryptography } from '@/helpers/cryptography';
 import { QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
+import { queueServer } from '@/rpc/queueRPC';
 import redis from '@/redis';
 import shortUUID from 'short-uuid';
-import { queueServer } from '@/rpc/queueRPC';
-import QueueTransactionsModel from '@/models/queueTransactionModel';
 
 export class TransactionsController {
     static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
@@ -327,6 +326,61 @@ export class TransactionsController {
         }
     }
 
+    static cancelRequestedTransaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any) => {
+        try {            
+            const { user } = await checkForProtectedRequests(context.req);
+
+            const transaction = await TransactionsModel.findOne({
+                where: {
+                    [Op.and]: [
+                        { transactionId },
+                        { status: "requested" },
+                        { transactionType: "request" },
+                        { fromAccount: user.account.id }
+                    ]
+                }
+            })
+
+            if (!transaction)
+                throw new GraphQLError("transaction not found");
+
+            await transaction.update({ status: "cancelled" })
+
+            const transactionData = await transaction.reload({
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'from',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'to',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    }
+                ]
+            })
+
+            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_CANCELED, JSON.stringify({
+                data: transaction.toJSON(),
+                senderSocketRoom: user.username,
+                recipientSocketRoom: transactionData.toJSON().to.user.username
+            }))
+            
+
+            return transactionData.toJSON()
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
     static payRequestTransaction = async (_: unknown, { transactionId, paymentApproved }: { transactionId: string, paymentApproved: boolean }, context: any) => {
         try {
             const session = await checkForProtectedRequests(context.req);
@@ -409,16 +463,6 @@ export class TransactionsController {
 
 
             if (!paymentApproved) {
-                if (senderAccount.toJSON().balance < transaction.toJSON().amount)
-                    throw new GraphQLError("insufficient balance");
-
-                if (!senderAccount.toJSON().allowSend)
-                    throw new GraphQLError("sender account is not allowed to send money");
-
-
-                if (!receiverAccount.toJSON().allowReceive)
-                    throw new GraphQLError("receiver account is not allowed to receive money");
-
                 await transaction.update({
                     status: "cancelled"
                 })
@@ -431,52 +475,53 @@ export class TransactionsController {
 
                 const transactionData = await transaction.reload()
                 return transactionData.toJSON()
+
+            } else {
+                const message = `${senderAccount.toJSON().username}&${receiverAccount.toJSON().username}@${transaction.toJSON().amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
+
+                // [TODO] Verify signature
+                const verify = await Cryptography.verify(message, transaction.toJSON().signature, ZERO_SIGN_PRIVATE_KEY)
+                if (!verify)
+                    throw new GraphQLError("error verificando transacción");
+
+
+                const newSenderBalance = Number(senderAccount.toJSON().balance) - Number(transaction.toJSON().amount)
+                await senderAccount.update({
+                    balance: Number(newSenderBalance.toFixed(4))
+                })
+
+                const newReceiverBalance = Number(receiverAccount.toJSON().balance) + Number(transaction.toJSON().amount)
+                await receiverAccount.update({
+                    balance: Number(newReceiverBalance.toFixed(4))
+                })
+
+                await transaction.update({
+                    status: "pending",
+                })
+
+                const transactionData = await transaction.reload()
+
+                await Promise.all([
+                    redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_PAIED, JSON.stringify({
+                        data: transactionData.toJSON(),
+                        senderSocketRoom: senderAccount.toJSON().user.username,
+                        recipientSocketRoom: receiverAccount.toJSON().user.username
+                    })),
+
+                    redis.publish(QUEUE_JOBS_NAME.PENDING_TRANSACTION, JSON.stringify({
+                        jobId: `pendingTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
+                        jobName: "pendingTransaction",
+                        jobTime: "everyThirtyMinutes",
+                        senderId: senderAccount.toJSON().id,
+                        receiverId: receiverAccount.toJSON().id,
+                        amount: transactionData.toJSON().amount,
+                        data: { transactionId: transactionData.toJSON().transactionId },
+                    }))
+                ])
+
+                return transactionData.toJSON()
+
             }
-
-
-            const message = `${senderAccount.toJSON().username}&${receiverAccount.toJSON().username}@${transaction.toJSON().amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
-
-            // [TODO] Verify signature
-            const verify = await Cryptography.verify(message, transaction.toJSON().signature, ZERO_SIGN_PRIVATE_KEY)
-            if (!verify)
-                throw new GraphQLError("error verificando transacción");
-
-
-            const newSenderBalance = Number(senderAccount.toJSON().balance) - Number(transaction.toJSON().amount)
-            await senderAccount.update({
-                balance: Number(newSenderBalance.toFixed(4))
-            })
-
-            const newReceiverBalance = Number(receiverAccount.toJSON().balance) + Number(transaction.toJSON().amount)
-            await receiverAccount.update({
-                balance: Number(newReceiverBalance.toFixed(4))
-            })
-
-            await transaction.update({
-                status: "pending",
-            })
-
-            const transactionData = await transaction.reload()
-
-            await Promise.all([
-                redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_PAIED, JSON.stringify({
-                    data: transactionData.toJSON(),
-                    senderSocketRoom: senderAccount.toJSON().user.username,
-                    recipientSocketRoom: receiverAccount.toJSON().user.username
-                })),
-
-                redis.publish(QUEUE_JOBS_NAME.PENDING_TRANSACTION, JSON.stringify({
-                    jobId: `pendingTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
-                    jobName: "pendingTransaction",
-                    jobTime: "everyThirtyMinutes",
-                    senderId: senderAccount.toJSON().id,
-                    receiverId: receiverAccount.toJSON().id,
-                    amount: transactionData.toJSON().amount,
-                    data: { transactionId: transactionData.toJSON().transactionId },
-                }))
-            ])
-
-            return transactionData.toJSON()
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -759,47 +804,24 @@ export class TransactionsController {
     static accountRecurrentTransactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(context.req);
-
             const fields = getQueryResponseFields(fieldNodes, 'transactions')
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
             const limit = _pageSize;
             const offset = (page - 1) * _pageSize;
 
-            const transactions = await QueueTransactionsModel.findAll({
+            const transactions = await QueuesModel.findAll({
                 limit,
                 offset,
                 order: [['createdAt', 'DESC']],
                 attributes: fields['transactions'],
                 where: {
                     [Op.and]: [
-                        { senderId: session.user.account.id },
+                        { userId: session.userId },
                         { status: "active" },
-                        { jobName: { [Op.ne]: "pendingTransaction" } }
+                        { jobName: { [Op.notIn]: ["pendingTopUp", "pendingTransaction"] } }
                     ]
-                },
-                include: [
-                    {
-                        model: AccountModel,
-                        as: 'sender',
-                        attributes: fields['sender'],
-                        include: [{
-                            model: UsersModel,
-                            as: 'user',
-                            attributes: fields['user']
-                        }]
-                    },
-                    {
-                        model: AccountModel,
-                        as: 'receiver',
-                        attributes: fields['receiver'],
-                        include: [{
-                            model: UsersModel,
-                            as: 'user',
-                            attributes: fields['user']
-                        }]
-                    },
-                ]
+                }
             })
 
             if (!transactions)
@@ -812,10 +834,10 @@ export class TransactionsController {
         }
     }
 
-    static deleteRecurrentTransactions = async (_: unknown, { repeatJobKey }: { repeatJobKey: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+    static deleteRecurrentTransactions = async (_: unknown, { repeatJobKey, queueType }: { repeatJobKey: string, queueType: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             await checkForProtectedRequests(context.req);
-            const job = await queueServer("removeJob", { jobKey: repeatJobKey })
+            const job = await queueServer("removeJob", { jobKey: repeatJobKey, queueType })
             return job
 
         } catch (error: any) {
@@ -823,12 +845,13 @@ export class TransactionsController {
         }
     }
 
-    static updateRecurrentTransactions = async (_: unknown, { data: { repeatJobKey, jobName, jobTime } }: { data: { repeatJobKey: string, jobName: string, jobTime: string } }, context: any) => {
+    static updateRecurrentTransactions = async (_: unknown, { data: { repeatJobKey, queueType, jobName, jobTime } }: { data: { repeatJobKey: string, queueType: string, jobName: string, jobTime: string } }, context: any) => {
         try {
             await checkForProtectedRequests(context.req);
             const job = await queueServer("updateJob", {
                 jobKey: repeatJobKey,
                 jobName,
+                queueType,
                 jobTime
             })
             return job
@@ -837,4 +860,5 @@ export class TransactionsController {
             throw new GraphQLError(error);
         }
     }
+
 }

@@ -30,6 +30,7 @@ const type = () => {
 
         input UpdateQueuedTransactionInput {
             repeatJobKey: String
+            queueType: String
             jobName: String
             jobTime: String
         }
@@ -151,23 +152,33 @@ const type = () => {
             repeatedCount: Int
             amount: Int
             data: JSON
+            referenceData: JSON
             signature: String
             receiver: AccountTypeWithUser
             sender: AccountTypeWithUser
             createdAt: String
             updatedAt: String
         }
+       
         type OnlyRecurrentTransactionType {
             jobId: String
             repeatJobKey: String
+            jobTime: String
+            queueType: String
             jobName: String
             status: String
             repeatedCount: Int
             amount: Int
             data: JSON
+            referenceData: JSON
             signature: String          
             createdAt: String
             updatedAt: String
+        }
+
+        type RecentTransactionsType {
+            type: String
+            data: JSON
         }
     `
 }
@@ -178,18 +189,19 @@ const query = () => {
         transaction: TransactionType
         accountTransactions(page: Int!, pageSize: Int!): [TransactionType]
         searchAccountTransactions(page: Int!, pageSize: Int!, fullName: String!): [TransactionType]
-        accountRecurrentTransactions(page: Int!, pageSize: Int!): [RecurrentTransactionType]
+        accountRecurrentTransactions(page: Int!, pageSize: Int!): [OnlyRecurrentTransactionType]
         accountBankingTransactions(page: Int!, pageSize: Int!): [BankingTransactionType]
     `
 }
 
 const mutation = () => {
     return `
-        deleteRecurrentTransactions(repeatJobKey: String!): OnlyRecurrentTransactionType
+        deleteRecurrentTransactions(repeatJobKey: String!, queueType: String): OnlyRecurrentTransactionType
         updateRecurrentTransactions(data: UpdateQueuedTransactionInput!): OnlyRecurrentTransactionType
         createTransaction(data: TransactionInput!, recurrence: TransactionRecurrenceInput!): TransactionType
         payRequestTransaction(transactionId: String!, paymentApproved: Boolean!): TransactionType
         createRequestTransaction(data: TransactionInput!, recurrence: TransactionRecurrenceInput!): TransactionType
+        cancelRequestedTransaction(transactionId: String!): TransactionType
         createBankingTransaction(cardId: Int!, data: BankingTransactionInput!): BankingTransactionCreatedType
     `
 }
@@ -198,7 +210,7 @@ const subscription = () => {
     return ``
 }
 
-const { createTransaction, searchAccountTransactions, updateRecurrentTransactions, payRequestTransaction, createRequestTransaction, deleteRecurrentTransactions, accountBankingTransactions, accountRecurrentTransactions, accountTransactions, createBankingTransaction } = TransactionsController
+const { createTransaction,cancelRequestedTransaction, searchAccountTransactions, updateRecurrentTransactions, payRequestTransaction, createRequestTransaction, deleteRecurrentTransactions, accountBankingTransactions, accountRecurrentTransactions, accountTransactions, createBankingTransaction } = TransactionsController
 const resolvers = {
     query: {
         accountTransactions,
@@ -209,6 +221,7 @@ const resolvers = {
     mutation: {
         createTransaction,
         createRequestTransaction,
+        cancelRequestedTransaction,
         payRequestTransaction,
         createBankingTransaction,
         deleteRecurrentTransactions,

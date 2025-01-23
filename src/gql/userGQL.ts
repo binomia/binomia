@@ -8,7 +8,6 @@ const type = () => {
             username: String
             password: String
             phone: String
-            addressAgreementSigned: Boolean
             userAgreementSigned: Boolean
             profileImageUrl: String
             idFrontUrl: String
@@ -29,7 +28,6 @@ const type = () => {
             fullName: String
             username: String
             phone: String
-            addressAgreementSigned: Boolean
             userAgreementSigned: Boolean
             profileImageUrl: String
             idFrontUrl: String
@@ -57,7 +55,10 @@ const type = () => {
             password: String
             dniNumber: String
             profileImageUrl: String
-            addressAgreementSigned: Boolean
+            allowWhatsappNotification: Boolean
+            allowEmailNotification: Boolean
+            allowSmsNotification: Boolean
+            allowPushNotification: Boolean
             userAgreementSigned: Boolean
             idFrontUrl: String
             status: String
@@ -80,7 +81,10 @@ const type = () => {
             dniNumber: String
             password: String
             profileImageUrl: String
-            addressAgreementSigned: Boolean
+            allowWhatsappNotification: Boolean
+            allowEmailNotification: Boolean
+            allowSmsNotification: Boolean
+            allowPushNotification: Boolean
             userAgreementSigned: Boolean
             idFrontUrl: String
             status: String
@@ -101,7 +105,10 @@ const type = () => {
             dniNumber: String
             password: String
             profileImageUrl: String
-            addressAgreementSigned: Boolean
+            allowWhatsappNotification: Boolean
+            allowEmailNotification: Boolean
+            allowSmsNotification: Boolean
+            allowPushNotification: Boolean
             userAgreementSigned: Boolean
             idFrontUrl: String
             status: String

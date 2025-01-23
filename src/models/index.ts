@@ -5,7 +5,7 @@ import CardsModel from "./cardsModel"
 import TransactionsModel from "./transactionModel"
 import kycModel from "./kycModel"
 import BankingTransactionsModel from "./bankingTransactionModel"
-import QueueTransactionsModel from "./queueTransactionModel"
+import QueuesModel from "./queuesModel"
 import SugestedUsers from "./SugestedUsers"
 import TopUpsModel from "./topups/topUpModel"
 import TopUpCompanyModel from "./topups/topUpCompanyModel"
@@ -43,8 +43,8 @@ UsersModel.hasMany(CardsModel)
 TransactionsModel.belongsTo(AccountModel, { foreignKey: 'fromAccount', targetKey: 'id', as: 'from' })
 TransactionsModel.belongsTo(AccountModel, { foreignKey: 'toAccount', targetKey: 'id', as: 'to' })
 
-QueueTransactionsModel.belongsTo(AccountModel, { foreignKey: 'senderId', targetKey: 'id', as: 'sender' })
-QueueTransactionsModel.belongsTo(AccountModel, { foreignKey: 'receiverId', targetKey: 'id', as: 'receiver' })
+QueuesModel.belongsTo(UsersModel)
+UsersModel.hasMany(QueuesModel)
 
 AccountModel.hasMany(TransactionsModel, { foreignKey: 'fromAccount', sourceKey: 'id', as: 'incomingTransactions' })
 AccountModel.hasMany(TransactionsModel, { foreignKey: 'toAccount', sourceKey: 'id', as: 'outgoingTransactions' })
@@ -59,6 +59,7 @@ BankingTransactionsModel.belongsTo(AccountModel)
 AccountModel.hasMany(BankingTransactionsModel)
 
 export {
+	QueuesModel,
 	TopUpPhonesModel,
 	SugestedUsers,
 	UsersModel,

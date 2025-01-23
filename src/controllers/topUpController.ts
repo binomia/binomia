@@ -37,6 +37,51 @@ export class TopUpController {
             throw new GraphQLError(error.message);
         }
     }
+    static recentTopUps = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            try {
+                const session = await checkForProtectedRequests(context.req);
+                const fields = getQueryResponseFields(fieldNodes, 'topups')
+
+                const _pageSize = pageSize > 50 ? 50 : pageSize
+                const offset = (page - 1) * _pageSize;
+                const limit = _pageSize;
+
+                const tupups = await TopUpsModel.findAll({
+                    limit,
+                    offset,
+                    order: [['createdAt', 'DESC']],
+                    attributes: fields['topups'],
+                    where: { userId: session.userId },
+                    include: [
+                        {
+                            model: UsersModel,
+                            as: 'user',
+                            attributes: fields['user']
+                        },
+                        {
+                            model: TopUpCompanyModel,
+                            as: 'company',
+                            attributes: fields['company']
+                        },
+                        {
+                            model: TopUpPhonesModel,
+                            as: 'phone',
+                            attributes: fields['card']
+                        }
+                    ]
+                })
+
+                return tupups
+
+            } catch (error: any) {
+                throw new GraphQLError(error.message);
+            }
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
 
     static topUpPhones = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
@@ -75,7 +120,6 @@ export class TopUpController {
             const session = await checkForProtectedRequests(context.req);
             const topUpData = await TopUpSchema.createTopUp.parseAsync(data)
             const recurrenceData = await TopUpSchema.recurrenceTopUp.parseAsync(recurrence)
-
 
             const [phone] = await TopUpPhonesModel.findOrCreate({
                 limit: 1,
@@ -202,6 +246,10 @@ export class TopUpController {
                     amount: topUpData.amount,
                     referenceId: topUp.toJSON().referenceId
                 },
+                referenceData: {
+                    fullName: topUpData.fullName,
+                    logo: topUp.toJSON().company.logo,
+                }
             }))
 
             if (recurrenceData.time !== "oneTime") {
@@ -216,6 +264,10 @@ export class TopUpController {
                         phone: topUpData.phone,
                         amount: topUpData.amount,
                         referenceId: topUp.toJSON().referenceId
+                    },
+                    referenceData: {
+                        fullName: topUpData.fullName,
+                        logo: topUp.toJSON().company.logo,
                     }
                 }))
             }

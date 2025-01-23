@@ -50,6 +50,7 @@ export class AccountController {
             throw new GraphQLError(error.message);
         }
     }
+
     static accountPermissions = async (_: unknown, ___: unknown, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(req);

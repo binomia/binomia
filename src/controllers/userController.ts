@@ -247,7 +247,8 @@ export class UsersController {
                 where: {
                     [Op.and]: [
                         { [Op.or]: searchFilter },
-                        { id: { [Op.ne]: req.session.userId } }
+                        { id: { [Op.ne]: req.session.userId } },
+                        { username: { [Op.ne]: "$binomia" } }
                     ]
                 }
             })
@@ -594,7 +595,7 @@ export class UsersController {
                 return acc;
             }, []);
 
-            await redis.set(`sugestedUsers:${session.userId}`, JSON.stringify(users), 'EX', 1000 * 60 * 30)
+            await redis.set(`sugestedUsers:${session.userId}`, JSON.stringify(users), 'EX', 1000 * 60) 
 
             return users
 
