@@ -37,6 +37,11 @@ export const initRedisEventSubcription = (io: Server) => {
                 io.to(senderSocketRoom).emit(channel, data)
                 break;
             }
+            case REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_CANCELED: {
+                const { data, senderSocketRoom } = JSON.parse(payload)
+                io.to(senderSocketRoom).emit(channel, data)
+                break;
+            }
             case REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE: {
                 const { data: { user, code } } = JSON.parse(payload)
 

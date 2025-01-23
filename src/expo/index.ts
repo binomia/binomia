@@ -19,6 +19,9 @@ export const sendNotification = async (tokens: ExpoPushToken[]) => {
             }
         });
 
+        console.log({ messages });
+
+
         await expo.sendPushNotificationsAsync(messages);
 
     } catch (error) {
