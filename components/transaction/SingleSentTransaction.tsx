@@ -176,7 +176,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 							:
 							<DefaultIcon
 								value={transaction?.fullName || ""}
-								contentContainerStyle={[styles.contentContainerStyle, { width: scale(width / 4), height: scale(width / 4), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "") }]}
+								contentContainerStyle={[styles.contentContainerStyle, { width: scale(50), height: scale(50), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "") }]}
 								textStyle={styles.textStyle}
 							/>
 						}

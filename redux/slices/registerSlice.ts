@@ -1,31 +1,36 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 
+const initialState = {
+    fullName: "",
+    username: "",
+    phone: "",
+    email: "",
+    password: "",
+    profileImageUrl: null,
+    addressAgreementSigned: false,
+    userAgreementSigned: false,
+    idBackUrl: "",
+    idFrontUrl: "",
+    faceVideoUrl: "",
+    address: "",
+
+    dniNumber: "",
+    dob: "",
+    dniExpiration: "",
+    gender: null,
+    occupation: null,
+    maritalStatus: null,
+    bloodType: null
+}
+
 const registerSlice = createSlice({
     name: 'register',
-    initialState: {
-        fullName: "",
-        username: "",
-        phone: "",
-        email: "",
-        password: "",
-        profileImageUrl: null,
-        addressAgreementSigned: false,
-        userAgreementSigned: false,
-        idBackUrl: "",
-        idFrontUrl: "",
-        faceVideoUrl: "",
-        address: "",
-        
-        dniNumber: "",
-        dob: "",
-        dniExpiration: "",
-        gender: null,
-        occupation: null,
-        maritalStatus: null,
-        bloodType: null
-    },
+    initialState,
     reducers: {
+        reSetAllState: (state) => {
+            state = initialState
+        },
         setUserAgreement: (state, action) => {
             state.userAgreementSigned = action.payload
         },

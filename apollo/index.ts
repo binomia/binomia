@@ -23,10 +23,10 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
             const { message } = error;
 
             if (message.includes("INVALID_SESSION")) {
-                await SecureStore.deleteItemAsync("jwt").then(async () => {
-                    Alert.alert("Your session has expired. Please login again.");
-                    await Updates.reloadAsync();
-                });
+                // await SecureStore.deleteItemAsync("jwt").then(async () => {
+                //     Alert.alert("Your session has expired. Please login again.");
+                //     await Updates.reloadAsync();
+                // });
             }
         });
 });

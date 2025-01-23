@@ -14,6 +14,7 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { noTransactions, pendingClock } from '@/assets';
 import { router, useNavigation } from 'expo-router';
 import SingleTopTup from '../topups/SingleTopTup';
+import { fetchRecentTransactions } from '@/redux/fetchHelper';
 
 
 const { height, width } = Dimensions.get('window')
@@ -31,7 +32,6 @@ const RecentTransactions: React.FC = () => {
 	const [showPayButton, setShowPayButton] = useState<boolean>(false);
 	const [openBottomSheet, setOpenBottomSheet] = useState(false);
 	const [transaction, setTransaction] = useState<any>({})
-	const [transactions, setTransactions] = useState<any[]>([])
 
 
 
@@ -105,33 +105,6 @@ const RecentTransactions: React.FC = () => {
 
 
 	useEffect(() => {
-		const topupsMapped = recentTopUps?.map((topup: any) => {
-			return {
-				type: "topup",
-				timestamp: topup.createdAt,
-				data: topup
-			}
-		})
-
-		const transactionsMapped = recentTransactions?.map((transaction: any) => {
-			return {
-				type: "transaction",
-				timestamp: transaction.createdAt,
-				data: transaction
-			}
-		})
-
-		if (transactionsMapped?.length > 0 && topupsMapped?.length > 0) {
-			const combinedTransactions = [...transactionsMapped, ...topupsMapped].sort((a: any, b: any) => {
-				return new Date(Number(b.timestamp)).getTime() - new Date(Number(a.timestamp)).getTime()
-			});
-
-			setTransactions(combinedTransactions.slice(0, 10))
-		}
-
-	}, [recentTopUps, recentTransactions])
-
-	useEffect(() => {
 		(async () => {
 			if (hasNewTransaction) {
 				await dispatch(transactionActions.setHasNewTransaction(false))
@@ -140,10 +113,9 @@ const RecentTransactions: React.FC = () => {
 
 	}, [isFocused, hasNewTransaction])
 
-
 	return (
 		<VStack flex={1}>
-			{transactions?.length > 0 ?
+			{recentTransactions?.length > 0 ?
 				<VStack w={"100%"} >
 					<HStack w={"100%"} justifyContent={"space-between"}>
 						<Heading fontSize={scale(18)} color={"white"}>{"Recientes"}</Heading>
@@ -154,7 +126,7 @@ const RecentTransactions: React.FC = () => {
 					<FlatList
 						mt={"10px"}
 						scrollEnabled={false}
-						data={transactions}
+						data={recentTransactions}
 						renderItem={({ item: { data, type }, index }: any) => (
 							type === "transaction" ? (
 								<Pressable bg={colors.lightGray} my={"5px"} borderRadius={10} px={"15px"} py={"10px"} key={`transactions(tgrtgnrhbfhrbgr)-${data.transactionId}-${index}-${data.transactionId}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(data)}>

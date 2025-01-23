@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import colors from '@/colors';
 import Button from '@/components/global/Button';
 import QRScannerScreen from '@/components/global/QRScanner';
@@ -91,6 +91,10 @@ const HomeScreen: React.FC = () => {
 			onPress: () => { }
 		}
 	]
+
+	useEffect(() => {
+		dispatch(fetchRecentTransactions())
+	}, [])
 
 
 	return (

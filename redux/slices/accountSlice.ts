@@ -1,18 +1,23 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { fetchAccountLimit } from '../fetchHelper'
 
+const initialState = {
+    limits: {},
+    haveAccountChanged: false,
+    account: {},
+    card: {},
+    cards: [],
+    kyc: {},
+    user: {}
+}
+
 const accountSlice = createSlice({
     name: 'global',
-    initialState: {
-        limits: {},
-        haveAccountChanged: false,
-        account: {},
-        card: {},
-        cards: [],
-        kyc: {},
-        user: {},
-    },
+    initialState,
     reducers: {
+        reSetAllState: (state) => {
+            state = initialState
+        },
         setCard: (state, action) => {
             state.card = action.payload
         },

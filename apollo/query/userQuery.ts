@@ -13,7 +13,10 @@ export class UserApolloQueries {
                     password
                     dniNumber
                     profileImageUrl
-                    addressAgreementSigned
+                    allowEmailNotification
+                    allowPushNotification
+                    allowSmsNotification
+                    allowWhatsappNotification
                     userAgreementSigned
                     idFrontUrl
                     status
@@ -56,7 +59,10 @@ export class UserApolloQueries {
                 password
                 dniNumber
                 profileImageUrl
-                addressAgreementSigned
+                allowEmailNotification
+                allowPushNotification
+                allowSmsNotification
+                allowWhatsappNotification
                 userAgreementSigned
                 idFrontUrl
                 status
@@ -82,13 +88,18 @@ export class UserApolloQueries {
                     password
                     dniNumber
                     profileImageUrl
-                    addressAgreementSigned
+                    allowWhatsappNotification
+                    allowEmailNotification
+                    allowSmsNotification
+                    allowPushNotification
                     userAgreementSigned
                     idFrontUrl
                     status
                     idBackUrl
                     faceVideoUrl
                     address
+                    createdAt
+                    updatedAt
                     account {
                         id
                         balance
@@ -114,12 +125,19 @@ export class UserApolloQueries {
                             transactionType
                             currency
                             status
+                            createdAt
+                            updatedAt
                             location {
                                 latitude
                                 longitude
-                            }
-                            createdAt
-                            updatedAt
+                                neighbourhood
+                                road
+                                town
+                                county
+                                state
+                                postcode
+                                country
+                            }                            
                         }
                     }
                     cards {
@@ -139,7 +157,10 @@ export class UserApolloQueries {
                             dniNumber
                             password
                             profileImageUrl
-                            addressAgreementSigned
+                            allowWhatsappNotification
+                            allowEmailNotification
+                            allowSmsNotification
+                            allowPushNotification
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -151,7 +172,7 @@ export class UserApolloQueries {
                         }
                         createdAt
                         updatedAt
-                    }
+                    }                    
                     kyc {
                         id
                         dniNumber
@@ -164,9 +185,7 @@ export class UserApolloQueries {
                         bloodType
                         createdAt
                         updatedAt
-                    }
-                    createdAt
-                    updatedAt
+                    }                      
                 }
             }
         `
@@ -192,7 +211,10 @@ export class UserApolloQueries {
                     password
                     dniNumber
                     profileImageUrl
-                    addressAgreementSigned
+                    allowEmailNotification
+                    allowPushNotification
+                    allowSmsNotification
+                    allowWhatsappNotification
                     userAgreementSigned
                     idFrontUrl
                     status
@@ -218,7 +240,10 @@ export class UserApolloQueries {
                     dniNumber
                     password
                     profileImageUrl
-                    addressAgreementSigned
+                    allowEmailNotification
+                    allowPushNotification
+                    allowSmsNotification
+                    allowWhatsappNotification
                     userAgreementSigned
                     idFrontUrl
                     status
@@ -254,7 +279,10 @@ export class UserApolloQueries {
                     dniNumber
                     password
                     profileImageUrl
-                    addressAgreementSigned
+                    allowEmailNotification
+                    allowPushNotification
+                    allowSmsNotification
+                    allowWhatsappNotification
                     userAgreementSigned
                     idFrontUrl
                     status

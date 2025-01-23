@@ -26,7 +26,10 @@ export class SessionApolloQueries {
                     password
                     dniNumber
                     profileImageUrl
-                    addressAgreementSigned
+                    allowEmailNotification
+                    allowPushNotification
+                    allowSmsNotification
+                    allowWhatsappNotification
                     userAgreementSigned
                     idFrontUrl
                     status
@@ -83,7 +86,10 @@ export class SessionApolloQueries {
                         dniNumber
                         password
                         profileImageUrl
-                        addressAgreementSigned
+                        allowEmailNotification
+                        allowPushNotification
+                        allowSmsNotification
+                        allowWhatsappNotification
                         userAgreementSigned
                         idFrontUrl
                         status

@@ -108,7 +108,7 @@ const BankingScreen: React.FC = () => {
                 setShowWithdraw(true)
 
         } else
-            router.push("/cards")
+            setShowAllCards(true)
     }
 
     const formatTransaction = (transaction: any) => {

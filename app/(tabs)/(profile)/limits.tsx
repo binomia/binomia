@@ -80,7 +80,7 @@ const LimitsScreen: React.FC = () => {
                     <MaterialIcons name="security" size={24} color={colors.mainGreen} />
                 </HStack>
                 <Text mt={"10px"} w={"80%"} fontSize={scale(12)} textAlign={"center"} color={"white"}>
-                    Los recursos de tu cuenta son limitados y se actualizan semanalmente, específicamente cada lunes.
+                    Los fondos de tu cuenta son limitados y se actualizan diariamente, al final de cada día.
                 </Text>
             </VStack>
         </VStack>

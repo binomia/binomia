@@ -17,6 +17,9 @@ import { AccountAuthSchema } from "@/auth/accountAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import { fetchAccountBankingTransactions, fetchAccountLimit, fetchAllTransactions, fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
 import { accountActions } from "@/redux/slices/accountSlice";
+import { registerActions } from "@/redux/slices/registerSlice";
+import { topupActions } from "@/redux/slices/topupSlice";
+import { transactionActions } from "@/redux/slices/transactionSlice";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -110,7 +113,17 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const onLogout = async () => {
         try {
             await deleteItem("jwt");
+
+            await Promise.all([
+                dispatch(globalActions.setJwt("")),
+                dispatch(accountActions.reSetAllState()),
+                dispatch(registerActions.reSetAllState()),
+                dispatch(topupActions.reSetAllState()),
+                dispatch(transactionActions.reSetAllState())
+            ])
+
             router.navigate("login")
+
 
         } catch (error) {
             console.log({ onLogout: error });
@@ -132,6 +145,9 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                     }
                 }
             });
+
+            console.log(JSON.stringify({ onLogin: data }, null, 2));
+
 
             if (data.login.token) {
                 await setItem("jwt", data.login.token)
@@ -275,7 +291,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
                 await dispatch(globalActions.setApplicationId(applicationId))
                 await setNotifications();
-              
+
                 setJwt(jwt)
 
             } else {

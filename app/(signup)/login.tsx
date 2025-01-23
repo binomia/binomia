@@ -23,6 +23,8 @@ import useAsyncStorage from '@/hooks/useAsyncStorage';
 import { UserAuthSchema } from '@/auth/userAuth';
 import { useDispatch } from 'react-redux';
 import { globalActions } from '@/redux/slices/globalSlice';
+import { accountActions } from '@/redux/slices/accountSlice';
+import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 
 const LoginComponent: React.FC = (): JSX.Element => {
     const [verifySession] = useMutation(SessionApolloQueries.verifySession());
@@ -46,25 +48,25 @@ const LoginComponent: React.FC = (): JSX.Element => {
 
     const fetchSessionUser = async (user: any) => {
         try {
-            const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user)
+            // const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user)
             const kycData = await UserAuthSchema.kycData.parseAsync(user.kyc)
             const accountsData = await UserAuthSchema.accountsData.parseAsync(user.account)
             const cardsData = await UserAuthSchema.cardsData.parseAsync(user.cards)
             const primaryCard = cardsData.find((card: any) => card.isPrimary === true)
 
             await Promise.all([
-                dispatch(globalActions.setUser(userProfileData)),
-                dispatch(globalActions.setKyc(kycData)),
-                dispatch(globalActions.setAccount(accountsData)),
-                dispatch(globalActions.setCards(cardsData)),
-                dispatch(globalActions.setCard(primaryCard ?? {}))
+                dispatch(accountActions.setUser(user)),
+                dispatch(accountActions.setKyc(kycData)),
+                dispatch(accountActions.setAccount(accountsData)),
+                dispatch(accountActions.setCards(cardsData)),
+                dispatch(accountActions.setCard(primaryCard ?? {}))
             ])
 
             router.navigate("(home)")
 
         } catch (error) {
             onLogout()
-            console.error({error});
+            console.error({ error });
         }
     }
 
@@ -122,11 +124,18 @@ const LoginComponent: React.FC = (): JSX.Element => {
         try {
             const { data } = await verifySession({ variables: { ...sessionVerificationData } })
 
+            console.log(JSON.stringify({ onVerifyNextPress: data }, null, 2));
+
+
             if (data.verifySession) {
                 if (sessionVerificationData.token)
                     await setItem("jwt", sessionVerificationData.token)
 
-                await fetchSessionUser(data.verifySession)
+                await Promise.all([
+                    fetchSessionUser(data.verifySession),
+                    dispatch(fetchRecentTransactions()),
+                    dispatch(fetchAllTransactions({ page: 1, pageSize: 10 }))
+                ])
 
                 setEmail("")
                 setPassword("")

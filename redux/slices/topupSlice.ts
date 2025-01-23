@@ -2,18 +2,23 @@ import { createSlice } from '@reduxjs/toolkit'
 import phone from 'phone'
 import { fetchRecentTopUps } from '../fetchHelper'
 
+const initialState = {
+    topup: {},
+    newTopUp: {},
+    recentTopUps: [],
+    phoneNumber: "",
+    fullName: "",
+    company: {},
+    hasNewTransaction: false
+}
+
 const topupSlice = createSlice({
     name: 'topups',
-    initialState: {
-        topup: {},
-        newTopUp: {},
-        recentTopUps: [],
-        phoneNumber: "",
-        fullName: "",
-        company: {},
-        hasNewTransaction: false
-    },
+    initialState,
     reducers: {
+        reSetAllState: (state) => {
+            state = initialState
+        },
         setPhoneNumber: (state, action) => {
             state.phoneNumber = action.payload
         },

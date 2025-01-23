@@ -22,6 +22,8 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
     const [invalidCode, setInvalidCode] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(false);
 
+    const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
     const [code, setCode] = useState('');
     const ref = useBlurOnFulfill({ value: code, cellCount: 6 });
     const [props, getCellOnLayoutHandler] = useClearByFocusCell({
@@ -40,8 +42,12 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
         try {
             setLoading(true)
             nextPage()
+            await delay(2000)
             setLoading(false)
-            
+
+            console.log({ onPressNext: code });
+
+
         } catch (error) {
             console.log({ onPressNext: error });
         }

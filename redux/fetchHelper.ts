@@ -18,12 +18,41 @@ export const fetchAccountLimit = createAsyncThunk('fetchAccountLimit', async ():
 
 export const fetchRecentTransactions = createAsyncThunk('fetchRecentTransactions', async () => {
     try {
-        const { data } = await apolloClient.query({ query: TransactionApolloQueries.accountTransactions(), variables: { page: 1, pageSize: 5 } });
-        return data.accountTransactions
+        const { data: recentTransactions } = await apolloClient.query({ query: TransactionApolloQueries.accountTransactions(), variables: { page: 1, pageSize: 10 } });
+        const { data: recentTopUps } = await apolloClient.query({ query: TopUpApolloQueries.recentTopUps(), variables: { page: 1, pageSize: 5 } });
+
+
+        const topupsMapped = recentTopUps.recentTopUps?.map((topup: any) => {
+            return {
+                type: "topup",
+                timestamp: topup.createdAt,
+                data: topup
+            }
+        })
+
+        const transactionsMapped = recentTransactions.accountTransactions?.map((transaction: any) => {
+            return {
+                type: "transaction",
+                timestamp: transaction.createdAt,
+                data: transaction
+            }
+        })
+
+        const combinedTransactions = [...transactionsMapped, ...topupsMapped].sort((a: any, b: any) => {
+            return new Date(Number(b.timestamp)).getTime() - new Date(Number(a.timestamp)).getTime()
+        });
+        
+        return combinedTransactions
+
 
     } catch (error) {
         console.error({ fetchRecentTransactions: error });
     }
+
+
+
+
+
 })
 
 export const fetchRecentTopUps = createAsyncThunk('fetchRecentTopUps', async () => {

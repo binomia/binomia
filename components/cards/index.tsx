@@ -12,7 +12,7 @@ import { Dimensions, SafeAreaView } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
 import { FlagsList } from 'aws-sdk/clients/guardduty'
 import { CardType } from '@/types'
-import { mastercardLogo, noCard, visaLogo } from '@/assets'
+import { americanExpressLogo, jcbLogo, mastercardLogo, noCard, visaLogo } from '@/assets'
 import { useMutation } from '@apollo/client';
 import { CardApolloQueries } from '@/apollo/query/cardQuery';
 import { CardAuthSchema } from '@/auth/cardAuth';
@@ -52,13 +52,19 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
         pagerRef.current?.setPage(0)
     }
 
-    const renderCardLogo = (brand: string) => {
+    const RenderCardLogo: React.FC<{ brand: string }> = ({ brand }: { brand: string }) => {
         switch (brand) {
             case "visa":
-                return <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={visaLogo} />
+                return <Image alt='logo-image' mr={"10px"} resizeMode='contain' w={"50px"} h={"50px"} source={visaLogo} />
 
             case "mastercard":
-                return <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={mastercardLogo} />
+                return <Image alt='logo-image' mr={"10px"} resizeMode='contain' w={"50px"} h={"50px"} source={mastercardLogo} />
+
+            case "american-express":
+                return <Image alt='logo-image' mr={"10px"} resizeMode='contain' w={"50px"} h={"50px"} source={americanExpressLogo} />
+
+            case "jcb":
+                return <Image alt='logo-image' mr={"10px"} resizeMode='contain' w={"50px"} h={"50px"} source={jcbLogo} />
 
             default:
                 return null
@@ -108,7 +114,7 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                                     scrollEnabled={true}
                                     renderItem={({ item, index }) => (
                                         <Pressable onPress={() => onPressCard(item)} w={"100%"} key={`card-${index}-${item.last4Number}`} _pressed={{ opacity: 0.5 }} flexDirection={"row"} p={"15px"} borderRadius={10} bg={colors.lightGray} mt={"15px"} mr={"10px"} alignItems={"center"}>
-                                            {renderCardLogo(item.brand)}
+                                            <RenderCardLogo brand={item.brand} />
                                             <VStack ml={"10px"}>
                                                 <Heading textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.brand} {item.last4Number}</Heading>
                                                 <Text fontSize={scale(15)} color={colors.pureGray}>{item.alias}</Text>

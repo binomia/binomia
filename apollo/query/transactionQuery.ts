@@ -240,7 +240,10 @@ export class TransactionApolloQueries {
                             dniNumber
                             password
                             profileImageUrl
-                            addressAgreementSigned
+                            allowEmailNotification
+                            allowPushNotification
+                            allowSmsNotification
+                            allowWhatsappNotification
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -277,7 +280,10 @@ export class TransactionApolloQueries {
                             dniNumber
                             password
                             profileImageUrl
-                            addressAgreementSigned
+                            allowEmailNotification
+                            allowPushNotification
+                            allowSmsNotification
+                            allowWhatsappNotification
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -337,7 +343,10 @@ export class TransactionApolloQueries {
                             dniNumber
                             password
                             profileImageUrl
-                            addressAgreementSigned
+                            allowEmailNotification
+                            allowPushNotification
+                            allowSmsNotification
+                            allowWhatsappNotification
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -368,7 +377,10 @@ export class TransactionApolloQueries {
                             dniNumber
                             password
                             profileImageUrl
-                            addressAgreementSigned
+                            allowEmailNotification
+                            allowPushNotification
+                            allowSmsNotification
+                            allowWhatsappNotification
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -550,7 +562,10 @@ export class TransactionApolloQueries {
                             dniNumber
                             password
                             profileImageUrl
-                            addressAgreementSigned
+                            allowEmailNotification
+                            allowPushNotification
+                            allowSmsNotification
+                            allowWhatsappNotification
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -587,7 +602,10 @@ export class TransactionApolloQueries {
                             dniNumber
                             password
                             profileImageUrl
-                            addressAgreementSigned
+                            allowEmailNotification
+                            allowPushNotification
+                            allowSmsNotification
+                            allowWhatsappNotification
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -653,7 +671,10 @@ export class TransactionApolloQueries {
                             dniNumber
                             password
                             profileImageUrl
-                            addressAgreementSigned
+                            allowEmailNotification
+                            allowPushNotification
+                            allowSmsNotification
+                            allowWhatsappNotification
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -690,7 +711,10 @@ export class TransactionApolloQueries {
                             dniNumber
                             password
                             profileImageUrl
-                            addressAgreementSigned
+                            allowEmailNotification
+                            allowPushNotification
+                            allowSmsNotification
+                            allowWhatsappNotification
                             userAgreementSigned
                             idFrontUrl
                             status

@@ -8,7 +8,7 @@ export class UserAuthSchema {
         dniNumber: z.string(),
         phone: z.string().length(10),
         email: z.string().email(),
-        profileImageUrl: z.string().url().optional().nullable().default(null),
+        profileImageUrl: z.string().nullish().transform(v => v ?? ""),
         addressAgreementSigned: z.boolean().default(false),
         userAgreementSigned: z.boolean().default(false),
         idFrontUrl: z.string().url(),
@@ -24,7 +24,7 @@ export class UserAuthSchema {
         email: z.string().email(),
         dniNumber: z.string().regex(/^[0-9]{3}-[0-9]{7}-[0-9]{1}$/),
         phone: z.string().length(10),
-        profileImageUrl: z.string().url().optional().nullable().default(null),
+        profileImageUrl: z.string().nullish().transform(v => v ?? ""),
         addressAgreementSigned: z.boolean().default(false),
         userAgreementSigned: z.boolean().default(false),
         idFrontUrl: z.string().url(),
@@ -41,19 +41,9 @@ export class UserAuthSchema {
         username: z.string(),
         email: z.string().email(),
         dniNumber: z.string().regex(/^[0-9]{3}-[0-9]{7}-[0-9]{1}$/),
-        profileImageUrl: z.string().url().optional().nullable().default(null),
+        profileImageUrl: z.string().nullish().transform(v => v ?? ""),
         status: z.string(),
     })
-
-
-    // id:  Int
-    // last4Number: String
-    // hash: String
-    // brand: String
-    // alias: String
-    // data: String
-    // createdAt: String
-    // updatedAt: String
 
     static cardData = z.object({
         id: z.number(),
@@ -109,8 +99,11 @@ export class UserAuthSchema {
         phone: z.string().length(10),
         email: z.string().email(),
         password: z.string().min(6),
-        profileImageUrl: z.string().url().optional().nullable().default(null),
-        addressAgreementSigned: z.boolean().default(false),
+        profileImageUrl: z.string().nullish().transform(v => v ?? ""),
+        allowWhatsappNotification: z.boolean().default(true),
+        allowEmailNotification: z.boolean().default(true),
+        allowSmsNotification: z.boolean().default(true),
+        allowPushNotification: z.boolean().default(true),
         userAgreementSigned: z.boolean().default(false),
         idFrontUrl: z.string().url(),
         idBackUrl: z.string().url(),

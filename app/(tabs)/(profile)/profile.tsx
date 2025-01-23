@@ -85,7 +85,7 @@ const ProfileScreen: React.FC = () => {
 					<VStack>
 						<HStack p={"20px"} bg={colors.lightGray} borderRadius={"15px"} justifyContent={"space-between"} alignItems={"center"} w={"100%"}>
 							<HStack>
-								<ZStack w={scale(80)} h={scale(80)} borderRadius={100} justifyContent={"center"}>
+								<ZStack w={scale(70)} h={scale(70)} borderRadius={100} justifyContent={"center"}>
 									{profileImage ?
 										<Pressable w={scale(70)} h={scale(70)} borderRadius={100} onPress={() => onOpenPreviewImage()} _pressed={{ opacity: 0.5 }}>
 											<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={{ uri: profileImage }} />
@@ -94,18 +94,18 @@ const ProfileScreen: React.FC = () => {
 										<Pressable onPress={() => pickImage()} _pressed={{ opacity: 0.5 }}>
 											<DefaultIcon
 												value={user?.fullName}
-												contentContainerStyle={[styles.contentContainerStyle, { width: scale(80), height: scale(80), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user?.fullName || "") }]}
+												contentContainerStyle={[styles.contentContainerStyle, { width: scale(65), height: scale(65), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user?.fullName || "") }]}
 												textStyle={styles.textStyle}
 											/>
 										</Pressable>
 									}
 									<HStack w={"90%"} justifyContent={"flex-end"} bottom={0}>
-										<Pressable onPress={() => pickImage()} _pressed={{ opacity: 0.5 }} w={"30px"} h={"30px"} borderRadius={100} bg={colors.lightGray} justifyContent={"center"} alignItems={"center"}>
-											<Fontisto name="camera" size={14} color="white" />
+										<Pressable onPress={() => pickImage()} _pressed={{ opacity: 0.5 }} w={"25px"} h={"25px"} borderRadius={100} bg={colors.lightGray} justifyContent={"center"} alignItems={"center"}>
+											<Fontisto name="camera" size={12} color="white" />
 										</Pressable>
 									</HStack>
 									{isLoading ?
-										<HStack pl={"10px"} pt={"10px"} justifyContent={"center"} alignItems={"center"} w={scale(90)} h={scale(90)}>
+										<HStack right={"3px"} justifyContent={"center"} alignItems={"center"} w={"100%"} h={"100%"}>
 											<Spinner size={"lg"} color={colors.mainGreen} />
 										</HStack>
 										: null
