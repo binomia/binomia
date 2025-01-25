@@ -160,7 +160,8 @@ export class TransactionsController {
                     data: transactionData.toJSON(),
                     senderSocketRoom: senderAccount.toJSON().user.username,
                     recipientSocketRoom: receiverAccount.toJSON().user.username,
-                    expoNotificationTokens
+                    expoNotificationTokens,
+                    
                 })),
 
                 redis.publish(QUEUE_JOBS_NAME.PENDING_TRANSACTION, JSON.stringify({
@@ -188,7 +189,8 @@ export class TransactionsController {
                     senderId: senderAccount.toJSON().id,
                     receiverId: receiverAccount.toJSON().id,
                     amount: validatedData.amount,
-                    data: recurrenceQueueData
+                    data: recurrenceQueueData,
+                    
                 }))
             }
 
@@ -298,7 +300,8 @@ export class TransactionsController {
             await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
                 data: transactionData.toJSON(),
                 senderSocketRoom: senderAccount.toJSON().user.username,
-                recipientSocketRoom: receiverAccount.toJSON().user.username
+                recipientSocketRoom: receiverAccount.toJSON().user.username,
+                
             }))
 
             if (recurrenceData.time !== "oneTime") {
@@ -315,7 +318,8 @@ export class TransactionsController {
                     senderId: senderAccount.toJSON().id,
                     receiverId: receiverAccount.toJSON().id,
                     amount: validatedData.amount,
-                    data: recurrenceQueueData
+                    data: recurrenceQueueData,
+                    
                 }))
             }
 
@@ -370,7 +374,8 @@ export class TransactionsController {
             await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_CANCELED, JSON.stringify({
                 data: transaction.toJSON(),
                 senderSocketRoom: user.username,
-                recipientSocketRoom: transactionData.toJSON().to.user.username
+                recipientSocketRoom: transactionData.toJSON().to.user.username,
+                
             }))
             
 
@@ -470,7 +475,8 @@ export class TransactionsController {
                 await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_CANCELED, JSON.stringify({
                     data: transaction.toJSON(),
                     senderSocketRoom: senderAccount.toJSON().user.username,
-                    recipientSocketRoom: receiverAccount.toJSON().user.username
+                    recipientSocketRoom: receiverAccount.toJSON().user.username,
+                    
                 }))
 
                 const transactionData = await transaction.reload()
@@ -516,6 +522,7 @@ export class TransactionsController {
                         receiverId: receiverAccount.toJSON().id,
                         amount: transactionData.toJSON().amount,
                         data: { transactionId: transactionData.toJSON().transactionId },
+                        
                     }))
                 ])
 
@@ -597,7 +604,10 @@ export class TransactionsController {
                 balance: newBalance[validatedData.transactionType]
             })
 
-            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.BANKING_TRANSACTION_CREATED, JSON.stringify(transaction.toJSON()))
+            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.BANKING_TRANSACTION_CREATED, JSON.stringify({
+                ...transaction.toJSON(),
+                
+            }))
 
             return Object.assign({}, transaction.toJSON(), { card: cardData })
 

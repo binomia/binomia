@@ -55,17 +55,17 @@ const createTopUpCompany = async () => {
         {
             status: "active",
             name: "Claro",
-            logo: "https://res.cloudinary.com/brayhandeaza/image/upload/e_make_transparent:10/v1735248474/bitnomia/cotxkgldk09jjsrnw4ap.jpg"
+            logo: "https://res.cloudinary.com/brayhandeaza/image/upload/v1737338468/r4vnvrtwkj7ylrsm3qd7.png"
         },
         {
             status: "active",
             name: "Viva",
-            logo: "https://res.cloudinary.com/brayhandeaza/image/upload/v1736125748/bitnomia/wjycvtfmmg2jroll8jqf.png"
+            logo: "https://res.cloudinary.com/brayhandeaza/image/upload/v1737339046/qm6jgueig8bn9m05y108.png"
         },
         {
             status: "active",
             name: "Artice",
-            logo: "https://res.cloudinary.com/brayhandeaza/image/upload/v1736112365/bitnomia/q17tq3gqiooyku5qduow.png"
+            logo: "https://res.cloudinary.com/brayhandeaza/image/upload/v1737338894/cgs9z445pxjumqs8xyiq.png"
         },
     ]
 
@@ -206,8 +206,8 @@ const createBinomiaUser = async () => {
 
 
 export const seedDatabase = async () => {
-    await createBinomiaUser()
+    // await createBinomiaUser()
     // await createUsers()
-    // await createTopUpCompany()
+    await createTopUpCompany()
     // await createTransactions()
 }
