@@ -36,7 +36,7 @@ const QueuesModel = db.define('queues', {
 	},
 	referenceData: {
 		type: JSONB,
-		allowNull: false
+		allowNull: true
 	},
 	signature: {
 		type: TEXT,

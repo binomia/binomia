@@ -52,7 +52,7 @@ export default class MainController {
                 status,
                 repeatedCount: 0,
                 data,
-                referenceData,
+                referenceData: referenceData ?? null,
                 signature
             })
 
