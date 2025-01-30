@@ -8,20 +8,37 @@ import { ZERO_ENCRYPTION_KEY } from '@/constants';
 import jwt from 'jsonwebtoken';
 
 const createUsers = async () => {
-    for (let i = 0; i < 10; i++) {
+    const users = [
+        {
+            "email": "brayhandeaza@gmail.com"
+        },
+        {
+            "email": "lpmrloki@gmail.com"
+        }
+    ]
+    for (let i = 0; i < 2; i++) {
         await UsersModel.create({
             fullName: faker.person.fullName(),
             username: faker.internet.userName(),
-            password: faker.internet.password(),
-            imageUrl: faker.image.avatar(),
-            email: faker.internet.email(),
-            dni: faker.database.mongodbObjectId(),
+            "phone":    `829180907${i}`,
+            "userAgreementSigned": true,
+            email: users[i].email,
+            "password": "123456",
+            profileImageUrl: faker.image.avatar(),
+            "dniNumber": `000-000000${i}-${i}`,
             sex: faker.person.sex(),
             address: faker.location.streetAddress(),
             dob: faker.date.birthdate(),
-            dniExpiration: faker.date.future()
+            dniExpiration: faker.date.future(),
+            "gender": null,
+            "bloodType": null,
+            "occupation": null,
+            "idFrontUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
+            "idBackUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
+            "faceVideoUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
         })
     }
+    await createBinomiaUser()
 }
 
 
@@ -81,9 +98,8 @@ const createBinomiaUser = async () => {
             "fullName": "binomia",
             "username": "$binomia",
             "phone": "8297809087",
-            "addressAgreementSigned": true,
             "userAgreementSigned": true,
-            "email": "lpmrloki@gmail.com.com",
+            "email": "brayhan.market@gmail.com",
             "idFrontUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
             "idBackUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
             "faceVideoUrl": "https://res.cloudinary.com/brayhandeaza/image/upload/v1727570912/dinero/cedulas/1727570911329.jpg",
@@ -207,7 +223,7 @@ const createBinomiaUser = async () => {
 
 export const seedDatabase = async () => {
     // await createBinomiaUser()
-    // await createUsers()
+    await createUsers()
     await createTopUpCompany()
     // await createTransactions()
 }

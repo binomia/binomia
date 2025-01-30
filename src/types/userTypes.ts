@@ -7,7 +7,6 @@ export type UserModelType = {
     email: string
     dniNumber: string
     profileImageUrl: string
-    addressAgreementSigned: boolean
     userAgreementSigned: boolean
     gender: string
     address: string

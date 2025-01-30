@@ -68,6 +68,26 @@ const AccountModel = db.define('accounts', {
         type: BOOLEAN,
         allowNull: false,
         defaultValue: true
+    },
+    allowWhatsappNotification: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowEmailNotification: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowSmsNotification: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowPushNotification: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
     }
 })
 
