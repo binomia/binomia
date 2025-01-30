@@ -47,15 +47,15 @@ const LoginComponent: React.FC = (): JSX.Element => {
 
 
     const fetchSessionUser = async (user: any) => {
-        try {
-            // const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user)
+        try {            
+            const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user)
             const kycData = await UserAuthSchema.kycData.parseAsync(user.kyc)
             const accountsData = await UserAuthSchema.accountsData.parseAsync(user.account)
             const cardsData = await UserAuthSchema.cardsData.parseAsync(user.cards)
             const primaryCard = cardsData.find((card: any) => card.isPrimary === true)
 
             await Promise.all([
-                dispatch(accountActions.setUser(user)),
+                dispatch(accountActions.setUser(userProfileData)),
                 dispatch(accountActions.setKyc(kycData)),
                 dispatch(accountActions.setAccount(accountsData)),
                 dispatch(accountActions.setCards(cardsData)),

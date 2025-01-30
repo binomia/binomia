@@ -8,7 +8,6 @@ const initialState = {
     email: "",
     password: "",
     profileImageUrl: null,
-    addressAgreementSigned: false,
     userAgreementSigned: false,
     idBackUrl: "",
     idFrontUrl: "",
@@ -53,7 +52,6 @@ const registerSlice = createSlice({
             state.address = action.payload
         },
         setAddressAgreement: (state, action) => {
-            state.addressAgreementSigned = action.payload
         },
         setDni: (state, action) => {
             state.dniNumber = action.payload

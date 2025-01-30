@@ -43,7 +43,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
             });
 
             socket.on("connect", () => {
-                socket.on(SOCKET_EVENTS.TRANSACTION_CREATED, async () => {
+                socket.on(SOCKET_EVENTS.NOTIFICATION_TRANSACTION_CREATED, async () => {
                     await Promise.all([
                         refreshAccount(),
                         dispatch(accountActions.setHaveAccountChanged(false)),
@@ -55,7 +55,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                     ])
                 })
 
-                socket.on(SOCKET_EVENTS.TRANSACTION_REQUEST_PAIED, async (transaction: any) => {
+                socket.on(SOCKET_EVENTS.NOTIFICATION_TRANSACTION_REQUEST_PAIED, async (transaction: any) => {
                     await Promise.all([
                         dispatch(accountActions.setAccount(transaction.from)),
                         dispatch(accountActions.setHaveAccountChanged(false)),
@@ -66,7 +66,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                     ])
                 })
 
-                socket.on(SOCKET_EVENTS.TRANSACTION_CREATED_FROM_QUEUE, async (data: any) => {
+                socket.on(SOCKET_EVENTS.NOTIFICATION_TRANSACTION_CREATED_FROM_QUEUE, async (data: any) => {
                     await Promise.all([
                         dispatch(accountActions.setAccount(data.from)),
                         dispatch(fetchRecentTransactions()),
@@ -75,7 +75,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                     ])
                 })
 
-                socket.on(SOCKET_EVENTS.TRANSACTION_REQUEST_CANCELED, async (data: any) => {
+                socket.on(SOCKET_EVENTS.NOTIFICATION_TRANSACTION_REQUEST_CANCELED, async (data: any) => {
                     await Promise.all([
                         dispatch(accountActions.setAccount(data.from)),
                         dispatch(fetchRecentTransactions()),

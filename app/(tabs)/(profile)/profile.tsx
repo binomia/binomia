@@ -87,7 +87,7 @@ const ProfileScreen: React.FC = () => {
 							<HStack>
 								<ZStack w={scale(70)} h={scale(70)} borderRadius={100} justifyContent={"center"}>
 									{profileImage ?
-										<Pressable w={scale(70)} h={scale(70)} borderRadius={100} onPress={() => onOpenPreviewImage()} _pressed={{ opacity: 0.5 }}>
+										<Pressable w={scale(65)} h={scale(65)} borderRadius={100} onPress={() => onOpenPreviewImage()} _pressed={{ opacity: 0.5 }}>
 											<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={{ uri: profileImage }} />
 										</Pressable>
 										:
@@ -112,12 +112,12 @@ const ProfileScreen: React.FC = () => {
 									}
 								</ZStack>
 								<VStack justifyContent={"center"}>
-									<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(user?.fullName || "")}</Heading>
-									<Text fontSize={scale(14)} color={colors.lightSkyGray}>{user?.username}</Text>
+									<Heading textTransform={"capitalize"} fontSize={scale(18)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(user?.fullName || "")}</Heading>
+									<Text fontSize={scale(13)} color={colors.lightSkyGray}>{user?.username}</Text>
 								</VStack>
 							</HStack>
-							<Pressable onPress={() => setShowBottomSheet(true)} w={"60px"} h={"60px"} bg={colors.darkGray} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
-								<Image alt='logo-image' tintColor={colors.mainGreen} resizeMode='contain' w={"25px"} h={"25px"} source={qrIcon} />
+							<Pressable onPress={() => setShowBottomSheet(true)} w={"55px"} h={"55px"} bg={colors.darkGray} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
+								<Image alt='logo-image' tintColor={colors.mainGreen} resizeMode='contain' w={"23px"} h={"23px"} source={qrIcon} />
 							</Pressable>
 						</HStack>
 						<Heading mt={"50px"} mb={"10px"} textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>Configuraciónes</Heading>

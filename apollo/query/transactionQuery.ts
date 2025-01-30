@@ -239,11 +239,7 @@ export class TransactionApolloQueries {
                             email
                             dniNumber
                             password
-                            profileImageUrl
-                            allowEmailNotification
-                            allowPushNotification
-                            allowSmsNotification
-                            allowWhatsappNotification
+                            profileImageUrl                            
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -279,11 +275,7 @@ export class TransactionApolloQueries {
                             email
                             dniNumber
                             password
-                            profileImageUrl
-                            allowEmailNotification
-                            allowPushNotification
-                            allowSmsNotification
-                            allowWhatsappNotification
+                            profileImageUrl                            
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -342,11 +334,7 @@ export class TransactionApolloQueries {
                             email
                             dniNumber
                             password
-                            profileImageUrl
-                            allowEmailNotification
-                            allowPushNotification
-                            allowSmsNotification
-                            allowWhatsappNotification
+                            profileImageUrl                           
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -376,11 +364,7 @@ export class TransactionApolloQueries {
                             email
                             dniNumber
                             password
-                            profileImageUrl
-                            allowEmailNotification
-                            allowPushNotification
-                            allowSmsNotification
-                            allowWhatsappNotification
+                            profileImageUrl                            
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -561,11 +545,7 @@ export class TransactionApolloQueries {
                             email
                             dniNumber
                             password
-                            profileImageUrl
-                            allowEmailNotification
-                            allowPushNotification
-                            allowSmsNotification
-                            allowWhatsappNotification
+                            profileImageUrl                            
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -601,11 +581,7 @@ export class TransactionApolloQueries {
                             email
                             dniNumber
                             password
-                            profileImageUrl
-                            allowEmailNotification
-                            allowPushNotification
-                            allowSmsNotification
-                            allowWhatsappNotification
+                            profileImageUrl                            
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -670,11 +646,7 @@ export class TransactionApolloQueries {
                             email
                             dniNumber
                             password
-                            profileImageUrl
-                            allowEmailNotification
-                            allowPushNotification
-                            allowSmsNotification
-                            allowWhatsappNotification
+                            profileImageUrl                            
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -710,11 +682,7 @@ export class TransactionApolloQueries {
                             email
                             dniNumber
                             password
-                            profileImageUrl
-                            allowEmailNotification
-                            allowPushNotification
-                            allowSmsNotification
-                            allowWhatsappNotification
+                            profileImageUrl                            
                             userAgreementSigned
                             idFrontUrl
                             status
