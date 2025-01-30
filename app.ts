@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 import { initRedisEventSubcription, subscriber } from "@/redis";
 import { setupMaster, setupWorker } from "@socket.io/sticky";
 import { createAdapter, setupPrimary } from "@socket.io/cluster-adapter";
-import { REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
+import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
 import { ip } from "address"
 const PORT = process.env.PORT || 8001;
 
@@ -30,7 +30,7 @@ if (cluster.isPrimary) {
         cluster.fork();
 
     subscriber.subscribe(...[
-        ...Object.values(REDIS_SUBSCRIPTION_CHANNEL)
+        ...Object.values(NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL)
     ])
 
     subscriber.on("message", async (channel, payload) => {
