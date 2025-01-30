@@ -22,9 +22,6 @@ export const initRedisEventSubcription = (io: Server) => {
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED: {
                 const { data, recipientSocketRoom, expoNotificationTokens } = JSON.parse(payload)
 
-                console.log({ NOTIFICATION_TRANSACTION_CREATED: { recipientSocketRoom, expoNotificationTokens } });
-
-
                 io.to(recipientSocketRoom).emit(channel, data)
                 await sendNotification(expoNotificationTokens)
 
