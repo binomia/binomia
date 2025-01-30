@@ -3,7 +3,7 @@ import BottomSheet from '@/components/global/BottomSheet';
 import PagerView from 'react-native-pager-view';
 import CreateTransaction from './CreateTransaction';
 import TransactionDetails from './TranferDetails';
-import SingleSentTransaction from './SingleSentTransaction';
+import SingleTransaction from './SingleTransaction';
 import { Dimensions, SafeAreaView } from 'react-native'
 import { useDispatch } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
@@ -72,7 +72,7 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
                 <PagerView style={{ flex: 1 }} scrollEnabled={false} ref={ref} initialPage={currentPage}>
                     <CreateTransaction key={"transaction-create-0"} input={input} onCloseFinish={handleOnClose} setInput={setInput} nextPage={nextPage} />
                     <TransactionDetails key={"TransactionDetailsScreen-1"} goNext={nextPage} goBack={prevPage} />
-                    <SingleSentTransaction key={"SingleTransactionScreen-2"} onClose={handleOnClose} iconImage={pendingClock} />
+                    <SingleTransaction key={"SingleTransactionScreen-2"} onClose={handleOnClose} iconImage={pendingClock} />
                 </PagerView>
             </SafeAreaView>
         </BottomSheet>

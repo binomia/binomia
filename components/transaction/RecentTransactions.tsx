@@ -14,7 +14,6 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { noTransactions, pendingClock } from '@/assets';
 import { router, useNavigation } from 'expo-router';
 import SingleTopTup from '../topups/SingleTopTup';
-import { fetchRecentTransactions } from '@/redux/fetchHelper';
 
 
 const { height, width } = Dimensions.get('window')
@@ -41,7 +40,7 @@ const RecentTransactions: React.FC = () => {
 
 		const profileImageUrl = isFromMe ? transaction.to.user?.profileImageUrl : transaction.from.user?.profileImageUrl
 		const fullName = isFromMe ? transaction.to.user?.fullName : transaction.from.user?.fullName
-		const username = isFromMe ? transaction.from.user?.username : transaction.to.user?.username
+		const username = isFromMe ? transaction.to.user?.username : transaction.from.user?.username
 		const showPayButton = transaction.transactionType === "request" && !isFromMe && transaction.status === "requested"
 		const showMap = (transaction.transactionType === "request" && isFromMe) || (transaction.transactionType === "transfer" && !isFromMe) ? false : true
 

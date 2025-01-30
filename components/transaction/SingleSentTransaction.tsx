@@ -55,7 +55,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 
 		const profileImageUrl = isFromMe ? transaction?.to.user?.profileImageUrl : transaction?.from.user?.profileImageUrl
 		const fullName = isFromMe ? transaction?.to.user?.fullName : transaction?.from.user?.fullName
-		const username = isFromMe ? transaction?.from.user?.username : transaction?.to.user?.username
+		const username = isFromMe ? transaction?.to.user?.username : transaction?.from.user?.username
 		const showPayButton = transaction?.transactionType === "request" && !isFromMe && transaction?.status === "pending"
 		const amountColor = (transaction?.transactionType === "request" && isFromMe) ? colors.mainGreen : colors.red
 
