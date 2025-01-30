@@ -33,10 +33,6 @@ const UsersModel = db.define('users', {
         type: STRING,
         allowNull: true
     },
-    addressAgreementSigned: {
-        type: BOOLEAN,
-        allowNull: false
-    },
     userAgreementSigned: {
         type: BOOLEAN,
         allowNull: false

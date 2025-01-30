@@ -5,6 +5,7 @@ import TransactionsModel from "./transactionModel"
 import BankingTransactionsModel from "./bankingTransactionModel"
 import QueuesModel from "./queuesModel"
 import TopUpsModel from "./topUpModel"
+import SessionModel from "./sessionModel"
 
 AccountModel.belongsTo(UsersModel, { foreignKey: 'username', targetKey: 'username', as: 'user' });
 UsersModel.hasOne(AccountModel, { foreignKey: 'username', sourceKey: 'username', as: 'account' });
@@ -18,6 +19,9 @@ TransactionsModel.belongsTo(AccountModel, { foreignKey: 'toAccount', targetKey: 
 
 QueuesModel.belongsTo(UsersModel)
 UsersModel.hasMany(QueuesModel)
+
+SessionModel.belongsTo(UsersModel)
+UsersModel.hasMany(SessionModel)
 
 AccountModel.hasMany(TransactionsModel, { foreignKey: 'fromAccount', sourceKey: 'id', as: 'incomingTransactions' })
 AccountModel.hasMany(TransactionsModel, { foreignKey: 'toAccount', sourceKey: 'id', as: 'outgoingTransactions' })
@@ -36,4 +40,5 @@ export {
 	TransactionsModel,
 	AccountModel,
 	CardsModel,
+	SessionModel
 }

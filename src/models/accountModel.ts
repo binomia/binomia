@@ -14,11 +14,6 @@ const AccountModel = db.define('accounts', {
         allowNull: false,
         defaultValue: "active"
     },
-    sentAmount: {
-        type: FLOAT,
-        allowNull: false,
-        defaultValue: 0.0
-    },
     sendLimit: {
         type: FLOAT,
         allowNull: false,
@@ -29,17 +24,12 @@ const AccountModel = db.define('accounts', {
         allowNull: false,
         defaultValue: 50e3
     },
-    receivedAmount: {
-        type: FLOAT,
-        allowNull: false,
-        defaultValue: 0.0
-    },
-    withdrawAmount: {
-        type: FLOAT,
-        allowNull: false,
-        defaultValue: 0.0
-    },
     withdrawLimit: {
+        type: FLOAT,
+        allowNull: false,
+        defaultValue: 50e3
+    },
+    depositLimit: {
         type: FLOAT,
         allowNull: false,
         defaultValue: 50e3
@@ -69,7 +59,32 @@ const AccountModel = db.define('accounts', {
         allowNull: false,
         defaultValue: true
     },
-    allowAsk: {
+    allowDeposit: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowRequestMe: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowWhatsappNotification: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowEmailNotification: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowSmsNotification: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
+    },
+    allowPushNotification: {
         type: BOOLEAN,
         allowNull: false,
         defaultValue: true

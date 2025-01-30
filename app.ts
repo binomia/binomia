@@ -2,7 +2,7 @@ import cluster from "cluster";
 import os from "os";
 import { redis, initRedisEventSubcription } from "@/redis";
 import { JSONRPCServer } from "json-rpc-2.0";
-import { DASHBOARD_FAVICON_URL, DASHBOARD_LOGO_URL, QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
+import { DASHBOARD_FAVICON_URL, DASHBOARD_LOGO_URL, NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL, QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
 import { unAuthorizedResponse } from "@/helpers";
@@ -10,9 +10,8 @@ import { initMethods } from "@/rpc";
 
 import { createBullBoard } from '@bull-board/api';
 import { ExpressAdapter } from '@bull-board/express';
-import { queuesBullAdapter } from "@/queues";
+import { queuesBullAdapter, transactionsQueue } from "@/queues";
 import { dbConnection } from "@/config";
-import { EventEmitter } from 'node:events';
 
 const app: Express = express();
 const serverAdapter = new ExpressAdapter();
@@ -31,14 +30,17 @@ if (cluster.isPrimary) {
         REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE,
         REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED_FROM_QUEUE,
         REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_PAIED,
+        REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED,
+
         QUEUE_JOBS_NAME.CREATE_TRANSACTION,
         QUEUE_JOBS_NAME.REMOVE_TRANSACTION_FROM_QUEUE,
         QUEUE_JOBS_NAME.PENDING_TRANSACTION,
-        
+        QUEUE_JOBS_NAME.QUEUE_TRANSACTION,
         QUEUE_JOBS_NAME.PENDING_TOPUP,
         QUEUE_JOBS_NAME.CREATE_TOPUP,
+        QUEUE_JOBS_NAME.CREATE_NEW_QUEUE,
 
-        QUEUE_JOBS_NAME.CREATE_NEW_QUEUE
+        ...Object.values(NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL)
     ])
 
 
@@ -87,8 +89,8 @@ if (cluster.isPrimary) {
         queues: queuesBullAdapter,
         serverAdapter: serverAdapter,
         options: {
+
             uiConfig: {
-                
                 boardTitle: "",
                 favIcon: {
                     default: DASHBOARD_FAVICON_URL,
@@ -114,6 +116,17 @@ if (cluster.isPrimary) {
     dbConnection()
     initMethods(server);
     initRedisEventSubcription(bullDashboard)
+
+    app.get('/metrics', async (req, res) => {
+        try {
+
+            const metrics = await transactionsQueue.queue.getMetrics("completed");
+            res.send(metrics);
+
+        } catch (err) {
+            // res.status(500).send(err.message);
+        }
+    });
 
     app.post("/", async (req: Request, res: Response) => {
         try {

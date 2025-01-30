@@ -12,7 +12,8 @@ export const connection = {
 
 export const redis = new Redis({
     host: "redis",
-    port: 6379
+    port: 6379,
+    keyPrefix: undefined
 })
 
 
