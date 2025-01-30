@@ -1,7 +1,7 @@
 import { Job, JobJson, Queue, Worker } from "bullmq";
 import { MonthlyQueueTitleType, WeeklyQueueTitleType } from "@/types";
-import shortUUID from "short-uuid";
 import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN } from "@/constants";
+import shortUUID from "short-uuid";
 import TransactionController from "@/controllers/transactionController";
 import MainController from "@/controllers/mainController";
 
@@ -96,21 +96,12 @@ export default class TransactionsQueue {
                 return transaction
             }
             case "pendingTransaction": {
-                const job = await this.queue.add(jobId, data, { delay: 1000 * 60 * 30, repeat: { every: 1000 * 60 * 30 }, jobId }); // 30 minutes
-                const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
-                    queueType: "transaction",
-                    jobTime,
-                    jobName,
-                    userId,
-                    amount,
-                    data,
-                    referenceData
-                }))
-
-                return transaction
+                const time = 1000 * 60 * 30 // 30 minutes
+                await this.queue.add(jobId, data, { jobId, delay: time, repeat: { every: time } });
+                break;
             }
             case "queueTransaction": {
-                const job = await this.queue.add(jobId, data, { removeOnComplete: true, removeOnFail: true });
+                const job = await this.queue.add(jobId, data, { jobId, removeOnComplete: true, removeOnFail: true });
                 return job.asJSON()
             }
             default: {

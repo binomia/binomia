@@ -1,10 +1,9 @@
 import { Job, JobJson, Queue, Worker } from "bullmq";
 import { MonthlyQueueTitleType, WeeklyQueueTitleType } from "@/types";
-import shortUUID from "short-uuid";
 import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN } from "@/constants";
-import TransactionController from "@/controllers/transactionController";
+import shortUUID from "short-uuid";
+import TopUpController from "@/controllers/topUpController";
 import MainController from "@/controllers/mainController";
-import { TopUpController } from "@/controllers/topUpController";
 
 
 export default class TopUpQueue {
@@ -17,10 +16,23 @@ export default class TopUpQueue {
 
     private executeJob = async (job: JobJson) => {
         try {
-            const prosessTransaction = await TopUpController.prosessTopUp(job)
-            if (prosessTransaction === "toptupStatusCompleted")
-                if (job.repeatJobKey)
-                    this.removeJob(job.repeatJobKey, "completed")
+            const name = job.name.split("@")[0]
+            switch (name) {
+                case "queueTopUp": {
+                    await TopUpController.createTopUp(job)
+                    console.log(`Job ${job.id} completed:`);
+
+                    break;
+                }
+                default: {
+                    const prosessTransaction = await TopUpController.prosessTopUp(job)
+                    if (prosessTransaction === "toptupStatusCompleted")
+                        if (job.repeatJobKey)
+                            this.removeJob(job.repeatJobKey, "completed")
+
+                    break;
+                }
+            }
 
         } catch (error) {
             console.log({ executeJob: error });
@@ -36,10 +48,9 @@ export default class TopUpQueue {
         });
 
         worker.on('completed', (job: Job) => {
-            console.log('Job completed', job.repeatJobKey);
+            console.log('Job completed', job.id);
         })
     }
-
 
     createJobs = async ({ jobId, jobName, referenceData, jobTime, amount, userId, data }: { jobId: string, referenceData: any, userId: number, amount: number, jobName: string, jobTime: string, data: string }) => {
         switch (jobName) {
@@ -87,18 +98,12 @@ export default class TopUpQueue {
             }
             case "pendingTopUp": {
                 const time = 1000 * 60 * 30 // 30 minutes
-                const job = await this.queue.add(jobId, data, { delay: time, repeat: { every: time }, jobId });
-                const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
-                    queueType: "topup",
-                    jobTime,
-                    jobName,
-                    userId,
-                    amount,
-                    data,
-                    referenceData
-                }))
-
-                return transaction
+                await this.queue.add(jobId, data, { delay: time, repeat: { every: time }, jobId });
+                break;
+            }
+            case "queueTopUp": {
+                const job = await this.queue.add(`${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`, data, { removeOnComplete: true, removeOnFail: true });
+                return job.asJSON()
             }
             default: {
                 return
@@ -132,9 +137,9 @@ export default class TopUpQueue {
 
             if (!job)
                 throw "error removing job"
-            
+
             const queue = await MainController.inactiveTransaction(repeatJobKey, "cancelled")
-            
+
             const newJob = await this.createJobs({
                 jobId: `${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`,
                 amount: queue.amount,

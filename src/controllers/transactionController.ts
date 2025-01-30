@@ -220,7 +220,7 @@ export default class TransactionController {
 
     static createQueuedTransaction = async (job: JobJson) => {
         try {
-            const { senderUsername, receiverUsername, recurrenceData, senderFullName, amount, transactionType, currency, location } = JSON.parse(job.data)
+            const { senderUsername, receiverUsername, recurrenceData, amount, transactionType, currency, location } = JSON.parse(job.data)
             const senderAccount = await AccountModel.findOne({
                 where: { username: senderUsername },
                 include: [
@@ -344,7 +344,6 @@ export default class TransactionController {
                 }
             })
 
-            // Needs Work
             const expoNotificationTokens: string[] = receiverSession.map(obj => obj.dataValues.expoNotificationToken);
             const encryptedData = await Cryptography.encrypt(JSON.stringify({ transactionId: transactionData.toJSON().transactionId }));
             await Promise.all([
@@ -354,17 +353,6 @@ export default class TransactionController {
                     recipientSocketRoom: receiverAccount.toJSON().user.username,
                     expoNotificationTokens,
                 })),
-
-                // redis.publish(QUEUE_JOBS_NAME.PENDING_TRANSACTION, JSON.stringify({
-                //     jobId: `pendingTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
-                //     jobName: "pendingTransaction",
-                //     jobTime: "everyThirtyMinutes",
-                //     senderId: senderAccount.toJSON().id,
-                //     receiverId: receiverAccount.toJSON().id,
-                //     amount: amount,
-                //     data: { transactionId: transactionData.toJSON().transactionId },
-                // })),
-
                 transactionsQueue.createJobs({
                     jobId: `pendingTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
                     jobName: "pendingTransaction",
@@ -433,10 +421,8 @@ export default class TransactionController {
                 break;
             }
             case QUEUE_JOBS_NAME.QUEUE_TRANSACTION: {
-
                 const { jobId, jobName, userId, jobTime, data, amount } = JSON.parse(payload);
-                // const encryptedData = await Cryptography.encrypt(JSON.stringify(JSON.parse(data)));
-
+                
                 await transactionsQueue.createJobs({
                     jobId,
                     jobName,

@@ -2,7 +2,7 @@ import Redis from "ioredis";
 import TransactionController from "@/controllers/transactionController";
 import MainController from "@/controllers/mainController";
 import { createBullBoard } from "@bull-board/api";
-import { TopUpController } from "@/controllers/topUpController";
+import TopUpController from "@/controllers/topUpController";
 
 
 export const connection = {
@@ -12,8 +12,7 @@ export const connection = {
 
 export const redis = new Redis({
     host: "redis",
-    port: 6379,
-    keyPrefix: undefined
+    port: 6379
 })
 
 

@@ -6,6 +6,25 @@ import BankingTransactionsModel from "./bankingTransactionModel"
 import QueuesModel from "./queuesModel"
 import TopUpsModel from "./topUpModel"
 import SessionModel from "./sessionModel"
+import TopUpPhonesModel from "./topups/topUpPhonesModel"
+import TopUpCompanyModel from "./topups/topUpCompanyModel"
+
+
+TopUpsModel.belongsTo(TopUpPhonesModel, { foreignKey: 'phoneId', targetKey: 'id', as: 'phone' })
+TopUpPhonesModel.hasMany(TopUpsModel, { as: 'topups', foreignKey: 'phoneId' })
+
+TopUpPhonesModel.belongsTo(TopUpCompanyModel, { as: 'company', foreignKey: 'companyId' })
+TopUpCompanyModel.hasMany(TopUpPhonesModel, { as: 'phones', foreignKey: 'companyId' })
+
+TopUpPhonesModel.belongsTo(UsersModel)
+UsersModel.hasMany(TopUpPhonesModel, { as: 'phones' })
+
+TopUpsModel.belongsTo(UsersModel)
+UsersModel.hasMany(TopUpsModel)
+
+TopUpsModel.belongsTo(TopUpCompanyModel, { foreignKey: 'companyId', targetKey: 'id', as: 'company' })
+TopUpCompanyModel.hasMany(TopUpsModel, { as: 'topups', foreignKey: 'companyId' })
+
 
 AccountModel.belongsTo(UsersModel, { foreignKey: 'username', targetKey: 'username', as: 'user' });
 UsersModel.hasOne(AccountModel, { foreignKey: 'username', sourceKey: 'username', as: 'account' });
@@ -40,5 +59,7 @@ export {
 	TransactionsModel,
 	AccountModel,
 	CardsModel,
-	SessionModel
+	SessionModel,
+	TopUpPhonesModel,
+	TopUpCompanyModel
 }
