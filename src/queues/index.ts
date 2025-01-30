@@ -14,7 +14,6 @@ export const topUpQueue = new TopUpQueue()
 
 export const queuesBullAdapter = [
     new BullMQAdapter(transactionsQueue.queue),
-    new BullMQAdapter(transactionsQueue.queueTransaction),
     new BullMQAdapter(topUpQueue.queue)
 ];
 
