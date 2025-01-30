@@ -16,11 +16,12 @@ export class TransactionsController {
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
             const { user } = session
+
             await redis.publish(QUEUE_JOBS_NAME.QUEUE_TRANSACTION, JSON.stringify({
                 jobId: `queueTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
                 jobName: "queueTransaction",
                 jobTime: "queueTransaction",
-                userId: user.id,
+                userId: session.userId,
                 amount: validatedData.amount,
                 data: JSON.stringify({
                     senderUsername: user.username,
@@ -33,7 +34,7 @@ export class TransactionsController {
                     transactionType: validatedData.transactionType
                 })
             }))
-         
+
             return null
 
         } catch (error: any) {

@@ -121,158 +121,22 @@ export class TopUpController {
             const topUpData = await TopUpSchema.createTopUp.parseAsync(data)
             const recurrenceData = await TopUpSchema.recurrenceTopUp.parseAsync(recurrence)
 
-            const [phone] = await TopUpPhonesModel.findOrCreate({
-                limit: 1,
-                where: {
-                    [Op.and]: [
-                        { phone: topUpData.phone },
-                        { userId: session.userId }
-                    ]
-                },
-                defaults: {
-                    fullName: topUpData.fullName,
-                    phone: topUpData.phone,
-                    userId: session.userId,
-                    companyId: topUpData.companyId
-                }
-            })
-
-            const { user: sender } = session
-            const senderAccount = await AccountModel.findOne({
-                where: { username: sender.username },
-                include: [
-                    {
-                        model: UsersModel,
-                        as: 'user',
-                        attributes: { exclude: ['createdAt', 'dniNumber', 'updatedAt', 'faceVideoUrl', 'idBackUrl', 'idFrontUrl', 'profileImageUrl', 'password'] },
-                        include: [
-                            {
-                                model: kycModel,
-                                as: 'kyc',
-                                attributes: ['id', 'dniNumber', 'dob', 'status', 'expiration']
-                            }
-                        ]
-                    }
-                ]
-            })
-
-            if (!senderAccount)
-                throw new GraphQLError('Sender account not found')
-
-
-            const receiverAccount = await AccountModel.findOne({
-                attributes: { exclude: ['username'] },
-                where: {
-                    username: "$binomia"
-                },
-                include: [
-                    {
-                        model: UsersModel,
-                        as: 'user',
-                        attributes: { exclude: ['createdAt', 'dniNumber', 'updatedAt', 'faceVideoUrl', 'idBackUrl', 'idFrontUrl', 'profileImageUrl', 'password'] },
-                        include: [
-                            {
-                                model: kycModel,
-                                as: 'kyc',
-                                attributes: ['id', 'dniNumber', 'dob', 'status', 'expiration']
-                            }
-                        ]
-                    }
-                ]
-            })
-
-            if (!receiverAccount)
-                throw new GraphQLError('Receiver account not found')
-
-
-            if (senderAccount.toJSON().balance < topUpData.amount)
-                throw new GraphQLError("insufficient balance");
-
-            if (!senderAccount.toJSON().allowSend)
-                throw new GraphQLError("sender account is not allowed to send money");
-
-            if (!receiverAccount.toJSON().allowReceive)
-                throw new GraphQLError("receiver account is not allowed to receive money");
-
-
-            // [TODO]: Implement topup externally
-            const topUp = await TopUpsModel.create({
-                companyId: topUpData.companyId,
-                userId: session.userId,
-                phoneId: phone.toJSON().id,
-                amount: topUpData.amount,
-                status: 'pending',
-                referenceId: `${shortUUID().uuid()}`, // [TODO]: Implement topup externally 
-            })
-
-
-            const newSenderBalance = Number(senderAccount.toJSON().balance - topUpData.amount).toFixed(4)
-            await senderAccount.update({
-                balance: Number(newSenderBalance)
-            })
-
-            const newReceiverBalance = Number(receiverAccount.toJSON().balance + topUpData.amount).toFixed(4)
-            await receiverAccount.update({
-                balance: Number(newReceiverBalance)
-            })
-
-
-            await topUp.reload({
-                include: [
-                    {
-                        model: TopUpCompanyModel,
-                        as: 'company',
-                    },
-                    {
-                        model: UsersModel,
-                        as: 'user',
-                    },
-                    {
-                        model: TopUpPhonesModel,
-                        as: 'phone',
-                    }
-                ]
-            })
-
-            redis.publish(QUEUE_JOBS_NAME.PENDING_TOPUP, JSON.stringify({
-                jobId: `pendingTopUp@${shortUUID.generate()}${shortUUID.generate()}`,
-                jobName: "pendingTopUp",
-                jobTime: "everyThirtyMinutes",
+            await redis.publish(QUEUE_JOBS_NAME.QUEUE_TOPUP, JSON.stringify({
+                jobId: `queueTopUp@${shortUUID.generate()}${shortUUID.generate()}`,
+                jobName: "queueTopUp",
+                jobTime: "queueTopUp",
                 userId: session.userId,
                 amount: topUpData.amount,
-                data: {
-                    id: topUp.toJSON().id,
-                    phone: topUpData.phone,
-                    amount: topUpData.amount,
-                    referenceId: topUp.toJSON().referenceId
-                },
-                referenceData: {
-                    fullName: topUpData.fullName,
-                    logo: topUp.toJSON().company.logo,
-                }
+                data: JSON.stringify({
+                    ...topUpData,
+                    phoneNumber: topUpData.phone,
+                    senderUsername: session.user.username,
+                    recurrenceData,
+                    userId: session.userId
+                })
             }))
 
-            if (recurrenceData.time !== "oneTime") {
-                await redis.publish(QUEUE_JOBS_NAME.CREATE_TOPUP, JSON.stringify({
-                    jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
-                    jobName: recurrenceData.title,
-                    jobTime: recurrenceData.time,
-                    userId: session.userId,
-                    amount: topUpData.amount,
-                    data: {
-                        id: topUp.toJSON().id,
-                        phone: topUpData.phone,
-                        amount: topUpData.amount,
-                        referenceId: topUp.toJSON().referenceId
-                    },
-                    referenceData: {
-                        fullName: topUpData.fullName,
-                        logo: topUp.toJSON().company.logo,
-                    }
-                }))
-            }
-
-            return Object.assign({}, topUp.toJSON(), { user: session.user })
+            return null
 
         } catch (error: any) {
             throw new GraphQLError(error.message);

@@ -450,6 +450,7 @@ export class UsersController {
             })
 
             const code = GENERATE_SIX_DIGIT_TOKEN()
+            
             const hash = await Cryptography.hash(JSON.stringify({
                 sid: sessionCreated.toJSON().sid,
                 code,
@@ -464,6 +465,9 @@ export class UsersController {
                     code,
                 }
             }))
+
+            console.log({ code });
+            
 
             return {
                 sid: sessionCreated.toJSON().sid,
