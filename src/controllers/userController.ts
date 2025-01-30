@@ -579,6 +579,8 @@ export class UsersController {
                 ]
             })
 
+            if(transactions.length === 0 || !transactions) return []
+
             const users = transactions.reduce((acc: any[], item: any) => {
                 // Check if the 'from' user is not the current user and is not already in the array
                 if (item.from && item.from.user.id !== req.session.user.id &&
@@ -595,7 +597,7 @@ export class UsersController {
                 return acc;
             }, []);
 
-            await redis.set(`sugestedUsers:${session.userId}`, JSON.stringify(users), 'EX', 1000 * 60) 
+            await redis.set(`sugestedUsers:${session.userId}`, JSON.stringify(users), 'EX', 60)
 
             return users
 
