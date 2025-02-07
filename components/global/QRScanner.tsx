@@ -45,29 +45,35 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
     }
 
     const onBarcodeScanned = async ({ data }: { data: string }) => {
-        if (isScanning) return;
-        setIsScanning(true);
-        if (data !== user.username) {
-            const singleUser = await searchSingleUser({
-                variables: {
-                    search: {
-                        username: data
+        try {
+            if (isScanning) return;
+            setIsScanning(true);
+            if (data !== user.username) {
+                const singleUser = await searchSingleUser({
+                    variables: {
+                        search: {
+                            username: data
+                        }
                     }
+                });
+
+                if (singleUser.data.searchSingleUser) {
+                    await dispatch(transactionActions.setReceiver(singleUser.data.searchSingleUser));
+
+                    onCloseFinished();
+                    setShowSendTransaction(true);
+
+                } else {
+
+                    // Alert.alert("Usuario no encontrado", "El usuario no se encuentra registrado en la plataforma", [{
+                    //     onPress: () => setIsScanning(false)
+                    // }]);
                 }
-            });
 
-            if (singleUser.data.searchSingleUser) {
-                await dispatch(transactionActions.setReceiver(singleUser.data.searchSingleUser));
-
-                onCloseFinished();
-                setShowSendTransaction(true);
-
-            } else {
-                Alert.alert("Usuario no encontrado", "El usuario no se encuentra registrado en la plataforma", [{
-                    onPress: () => setIsScanning(false)
-                }]);
             }
 
+        } catch (error) {
+            console.error({ error });
         }
     }
 

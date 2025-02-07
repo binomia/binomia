@@ -22,11 +22,16 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
         graphQLErrors.forEach(async (error) => {
             const { message } = error;
 
+            console.log("error", message);
+
+
             if (message.includes("INVALID_SESSION")) {
                 // await SecureStore.deleteItemAsync("jwt").then(async () => {
                 //     Alert.alert("Your session has expired. Please login again.");
                 //     await Updates.reloadAsync();
                 // });
+            } else if (message.includes("no puede recibir pagos")) {
+                Alert.alert(message);
             }
         });
 });

@@ -2,6 +2,11 @@ import React, { useEffect, useRef, useState } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
 import DefaultIcon from 'react-native-default-icon';
+import CreateTransaction from '@/components/transaction/CreateTransaction';
+import BottomSheet from '@/components/global/BottomSheet';
+import PagerView from 'react-native-pager-view';
+import TranferRequestDetails from '@/components/transaction/TranferRequestDetails';
+import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
 import { StyleSheet, SafeAreaView, Keyboard, TouchableWithoutFeedback, TouchableOpacity, Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
@@ -10,19 +15,11 @@ import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
 import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
-import SendTransaction from '@/components/transaction/SendTransaction';
 import { useDispatch } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
-import CreateTransaction from '@/components/transaction/CreateTransaction';
-import KeyNumberPad from '@/components/global/KeyNumberPad';
-import BottomSheet from '@/components/global/BottomSheet';
-import PagerView from 'react-native-pager-view';
-import SingleTransaction from '@/components/transaction/SingleTransaction';
-import TranferRequestDetails from '@/components/transaction/TranferRequestDetails';
 import { router } from 'expo-router';
-import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
 import { pendingClock } from '@/assets';
-import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
+import { fetchRecentTransactions } from '@/redux/fetchHelper';
 
 const { height } = Dimensions.get('window')
 
@@ -34,28 +31,24 @@ const Request: React.FC = () => {
     const [input, setInput] = useState<string>("0");
     const [openRequest, setOpenRequest] = useState<boolean>(false);
     const [currentPage, setCurrentPage] = useState<number>(0);
-
-
     const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
-    const [sugestedUsers, setSugestedUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
 
 
     const fetchSugestedUsers = async () => {
-        const sugestedUsers = await getSugestedUsers()
+        const sugestedUsers = await getSugestedUsers({ variables: { allowRequestMe: true } })
         const _users = await UserAuthSchema.searchUserData.parseAsync(sugestedUsers.data.sugestedUsers)
         setUsers(_users)
-        setSugestedUsers(_users)
     }
-
 
     const handleSearch = async (value: string) => {
         try {
             if (value === "") {
-                setUsers(sugestedUsers)
+                await fetchSugestedUsers()
 
             } else {
                 const { data } = await searchUser({
                     variables: {
+                        "allowRequestMe": true,
                         "limit": 5,
                         "search": {
                             "username": value,
@@ -73,7 +66,6 @@ const Request: React.FC = () => {
             console.log(error)
         }
     }
-
 
     const onSelectUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>) => {
         await dispatch(transactionActions.setReceiver(user))
@@ -114,6 +106,7 @@ const Request: React.FC = () => {
     useEffect(() => {
         fetchSugestedUsers()
     }, [])
+
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>

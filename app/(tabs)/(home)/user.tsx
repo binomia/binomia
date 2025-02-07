@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
 import DefaultIcon from 'react-native-default-icon';
+import SendTransaction from '@/components/transaction/SendTransaction';
 import { StyleSheet, SafeAreaView, Keyboard, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
@@ -10,7 +11,6 @@ import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
 import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
-import SendTransaction from '@/components/transaction/SendTransaction';
 import { useDispatch } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 
@@ -35,10 +35,9 @@ const SearchUserScreen: React.FC = () => {
 
     const handleSearch = async (value: string) => {
         try {
-            if (value === "") {
-                setUsers(sugestedUsers)
-
-            } else {
+            if (value === "")
+                await fetchSugestedUsers()
+            else {
                 const { data } = await searchUser({
                     variables: {
                         "limit": 5,
@@ -50,7 +49,6 @@ const SearchUserScreen: React.FC = () => {
                         }
                     }
                 })
-
                 setUsers(data.searchUsers)
             }
 

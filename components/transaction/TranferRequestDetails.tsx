@@ -200,7 +200,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
 
     return (
         <SafeAreaView style={{ flex: 0.95, backgroundColor: colors.darkGray }}>
-            <VStack px={"10px"} mt={"10px"} h={"100%"}>
+            <VStack px={"10px"} h={"100%"}>
                 <VStack pb={"30px"} flex={1} justifyContent={"space-between"} alignItems={"center"} borderRadius={10}>
                     <VStack w={"100%"} pt={"20px"} alignItems={"center"} justifyContent={"center"}>
                         <HStack my={"10px"}>
@@ -216,17 +216,17 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
                         </HStack>
                         <Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transactionDeytails?.fullName || "")}</Heading>
                         <Text fontSize={scale(16)} color={colors.lightSkyGray}>{transactionDeytails?.username}</Text>
-                        <Heading textTransform={"capitalize"} fontSize={scale(45)} color={"mainGreen"}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
+                        <Heading textTransform={"capitalize"} fontSize={scale(40)} color={"mainGreen"}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
                     </VStack>
-                    <VStack px={"20px"} w={"100%"} justifyContent={"center"}>
+                    <VStack px={"20px"} mt={"20px"} w={"100%"} justifyContent={"center"}>
                         <HStack w={"85%"} mb={"5px"}>
-                            <Heading fontSize={scale(16)} textTransform={"capitalize"} color={"white"}>{transactionLocation(location ?? {}) || "Ubicación"}</Heading>
+                            <Heading fontSize={scale(15)} textTransform={"capitalize"} color={"white"}>{transactionLocation(location ?? {}) || "Ubicación"}</Heading>
                         </HStack>
                         <Image
                             alt='fine-location-image-alt'
                             resizeMode="cover"
                             w={"100%"}
-                            h={height / 3}
+                            h={scale(height / 3.3)}
                             source={{
                                 uri: getMapLocationImage({ latitude: location?.latitude, longitude: location?.longitude })
                             }}
@@ -236,11 +236,11 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
                         />
                     </VStack>
 
-                    <HStack w={"100%"} px={"10px"} justifyContent={"space-between"}>
-                        <Button onPress={goBack} w={"49%"} bg={colors.lightGray} color={colors.mainGreen} title={"Atrás"} />
-                        <Button spin={loading} onPress={handleOnPress} w={"49%"} bg={"mainGreen"} color='white' title={"Solicitar"} />
-                    </HStack>
                 </VStack>
+                <HStack w={"100%"} mb={"5px"} px={"10px"} justifyContent={"space-between"}>
+                    <Button onPress={goBack} w={"49%"} bg={colors.lightGray} color={colors.mainGreen} title={"Atrás"} />
+                    <Button spin={loading} onPress={handleOnPress} w={"49%"} bg={"mainGreen"} color='white' title={"Solicitar"} />
+                </HStack>
             </VStack>
             <BottomSheet onCloseFinish={onCloseFinished} open={openOptions === "weekly"} height={scale(300)}>
                 <RenderWeeklyOption key={"RenderWeeklyOption"} />

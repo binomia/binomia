@@ -25,11 +25,7 @@ export class SessionApolloQueries {
                     email
                     password
                     dniNumber
-                    profileImageUrl
-                    allowEmailNotification
-                    allowPushNotification
-                    allowSmsNotification
-                    allowWhatsappNotification
+                    profileImageUrl                    
                     userAgreementSigned
                     idFrontUrl
                     status
@@ -53,72 +49,68 @@ export class SessionApolloQueries {
                         currency
                         createdAt
                         updatedAt
-                    transactions {
-                        transactionId
-                        amount
-                        deliveredAmount
-                        voidedAmount
-                        transactionType
-                        currency
-                        status
-                        location {
-                        latitude
-                        longitude
+                        transactions {
+                            transactionId
+                            amount
+                            deliveredAmount
+                            voidedAmount
+                            transactionType
+                            currency
+                            status
+                            location {
+                                latitude
+                                longitude
+                            }
+                            createdAt
+                            updatedAt
+                        }
+                    }
+                    cards {
+                        id
+                        last4Number
+                        isPrimary
+                        hash
+                        brand
+                        alias
+                        data
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            dniNumber
+                            password
+                            profileImageUrl                            
+                            userAgreementSigned
+                            idFrontUrl
+                            status
+                            idBackUrl
+                            faceVideoUrl
+                            address
+                            createdAt
+                            updatedAt
                         }
                         createdAt
                         updatedAt
                     }
-                    }
-                    cards {
-                    id
-                    last4Number
-                    isPrimary
-                    hash
-                    brand
-                    alias
-                    data
-                    user {
+                    kyc {
                         id
-                        fullName
-                        username
-                        phone
-                        email
                         dniNumber
-                        password
-                        profileImageUrl
-                        allowEmailNotification
-                        allowPushNotification
-                        allowSmsNotification
-                        allowWhatsappNotification
-                        userAgreementSigned
-                        idFrontUrl
+                        dob
                         status
-                        idBackUrl
-                        faceVideoUrl
-                        address
+                        expiration
+                        occupation
+                        gender
+                        maritalStatus
+                        bloodType
                         createdAt
                         updatedAt
                     }
                     createdAt
                     updatedAt
-                    }
-                    kyc {
-                    id
-                    dniNumber
-                    dob
-                    status
-                    expiration
-                    occupation
-                    gender
-                    maritalStatus
-                    bloodType
-                    createdAt
-                    updatedAt
-                    }
-                    createdAt
-                    updatedAt
                 }
-                }
+            }
         `
     }
 }

@@ -12,11 +12,7 @@ export class UserApolloQueries {
                     email
                     password
                     dniNumber
-                    profileImageUrl
-                    allowEmailNotification
-                    allowPushNotification
-                    allowSmsNotification
-                    allowWhatsappNotification
+                    profileImageUrl                    
                     userAgreementSigned
                     idFrontUrl
                     status
@@ -33,8 +29,8 @@ export class UserApolloQueries {
 
     static searchUser = () => {
         return gql`
-        query Query($search: UserInput!, $limit: Int) {
-            searchUsers(search: $search, limit: $limit) {
+        query Query($search: UserInput!, $limit: Int, $allowRequestMe: Boolean) {
+            searchUsers(search: $search, limit: $limit, allowRequestMe: $allowRequestMe) {
                 id
                 fullName
                 username
@@ -56,21 +52,12 @@ export class UserApolloQueries {
                 username
                 phone
                 email
-                password
                 dniNumber
-                profileImageUrl
-                allowEmailNotification
-                allowPushNotification
-                allowSmsNotification
-                allowWhatsappNotification
+                profileImageUrl                
                 userAgreementSigned
-                idFrontUrl
-                status
-                idBackUrl
+                status 
                 faceVideoUrl
-                address
-                createdAt
-                updatedAt
+                address              
             }
         }
         `
@@ -87,11 +74,7 @@ export class UserApolloQueries {
                     email
                     password
                     dniNumber
-                    profileImageUrl
-                    allowWhatsappNotification
-                    allowEmailNotification
-                    allowSmsNotification
-                    allowPushNotification
+                    profileImageUrl                   
                     userAgreementSigned
                     idFrontUrl
                     status
@@ -156,11 +139,7 @@ export class UserApolloQueries {
                             email
                             dniNumber
                             password
-                            profileImageUrl
-                            allowWhatsappNotification
-                            allowEmailNotification
-                            allowSmsNotification
-                            allowPushNotification
+                            profileImageUrl                            
                             userAgreementSigned
                             idFrontUrl
                             status
@@ -210,11 +189,7 @@ export class UserApolloQueries {
                     email
                     password
                     dniNumber
-                    profileImageUrl
-                    allowEmailNotification
-                    allowPushNotification
-                    allowSmsNotification
-                    allowWhatsappNotification
+                    profileImageUrl                   
                     userAgreementSigned
                     idFrontUrl
                     status
@@ -239,11 +214,7 @@ export class UserApolloQueries {
                     email
                     dniNumber
                     password
-                    profileImageUrl
-                    allowEmailNotification
-                    allowPushNotification
-                    allowSmsNotification
-                    allowWhatsappNotification
+                    profileImageUrl                    
                     userAgreementSigned
                     idFrontUrl
                     status
@@ -266,11 +237,11 @@ export class UserApolloQueries {
             }
         `
     }
-    
+
     static sugestedUsers = () => {
         return gql`
-            query SugestedUsers {
-                sugestedUsers {
+            query SugestedUsers($allowRequestMe: Boolean) {
+                sugestedUsers(allowRequestMe: $allowRequestMe) {
                     id
                     fullName
                     username
@@ -278,11 +249,7 @@ export class UserApolloQueries {
                     email
                     dniNumber
                     password
-                    profileImageUrl
-                    allowEmailNotification
-                    allowPushNotification
-                    allowSmsNotification
-                    allowWhatsappNotification
+                    profileImageUrl                    
                     userAgreementSigned
                     idFrontUrl
                     status
@@ -291,6 +258,19 @@ export class UserApolloQueries {
                     address
                     createdAt
                     updatedAt
+                }
+            }
+        `
+    }
+
+    static singleUser = () => {
+        return gql`
+            query SingleUser($username: String!) {
+                singleUser(username: $username) {
+                    account {
+                        allowReceive                        
+                        status                            
+                    }
                 }
             }
         `
