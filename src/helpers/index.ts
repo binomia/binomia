@@ -248,9 +248,14 @@ export const GENERATE_SIX_DIGIT_TOKEN = (): string => {
 }
 
 export const formatError = (formattedError: any, _: any) => {
-    console.log(JSON.stringify(formattedError, null, 2));
-
     return {
         message: formattedError.message
     }
 }
+
+
+export const toSnakeCase = (str: string) => {
+    return str.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
+}
+
+

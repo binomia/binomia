@@ -11,7 +11,7 @@ export const db = new Sequelize({
     logging: false
 })
 
-
+// postgres://postgres:postgres@postgres:5432/postgres
 export const dbConnection = async () => {
     try {
         db.authenticate()

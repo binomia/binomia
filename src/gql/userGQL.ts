@@ -54,11 +54,7 @@ const type = () => {
             email: String
             password: String
             dniNumber: String
-            profileImageUrl: String
-            allowWhatsappNotification: Boolean
-            allowEmailNotification: Boolean
-            allowSmsNotification: Boolean
-            allowPushNotification: Boolean
+            profileImageUrl: String           
             userAgreementSigned: Boolean
             idFrontUrl: String
             status: String
@@ -80,11 +76,7 @@ const type = () => {
             email: String
             dniNumber: String
             password: String
-            profileImageUrl: String
-            allowWhatsappNotification: Boolean
-            allowEmailNotification: Boolean
-            allowSmsNotification: Boolean
-            allowPushNotification: Boolean
+            profileImageUrl: String        
             userAgreementSigned: Boolean
             idFrontUrl: String
             status: String
@@ -104,11 +96,7 @@ const type = () => {
             email: String
             dniNumber: String
             password: String
-            profileImageUrl: String
-            allowWhatsappNotification: Boolean
-            allowEmailNotification: Boolean
-            allowSmsNotification: Boolean
-            allowPushNotification: Boolean
+            profileImageUrl: String           
             userAgreementSigned: Boolean
             idFrontUrl: String
             status: String
@@ -136,11 +124,12 @@ const type = () => {
 const query = () => {
     return `
         user: UserType
+        singleUser(username: String!): UserType
         sessionUser: UserType
         userByEmail(email: String!): Boolean
-        searchUsers(search: UserInput!, limit: Int): [UserType]
-        searchSingleUser(search: UserInput!): UserType
-        sugestedUsers: [OnlyUserType]
+        searchUsers(allowRequestMe: Boolean, search: UserInput!, limit: Int): [UserType]
+        searchSingleUser(allowRequestMe: Boolean, search: UserInput!): UserType
+        sugestedUsers(allowRequestMe: Boolean): [OnlyUserType]
     `
 }
 
@@ -163,10 +152,11 @@ const subscription = () => {
     `
 }
 
-const { userByEmail, sessionUser, verifySession, searchSingleUser, updateUserPassword, updateUser, sugestedUsers, user, createUser, searchUsers, login } = UsersController
+const { userByEmail, singleUser, sessionUser, verifySession, searchSingleUser, updateUserPassword, updateUser, sugestedUsers, user, createUser, searchUsers, login } = UsersController
 const resolvers = {
     query: {
         user,
+        singleUser,
         sessionUser,
         searchUsers,
         searchSingleUser,

@@ -71,7 +71,10 @@ export class TransactionsController {
 
             const receiverAccount = await AccountModel.findOne({
                 where: {
-                    username: validatedData.receiver
+                    [Op.and]: [
+                        { username: validatedData.receiver },
+                        { allowRequestMe: true }
+                    ]
                 },
                 include: [
                     {

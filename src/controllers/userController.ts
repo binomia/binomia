@@ -1,5 +1,5 @@
-import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel, SessionModel, SugestedUsers } from '@/models'
-import { Op, Sequelize } from 'sequelize'
+import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel, SessionModel } from '@/models'
+import { Op } from 'sequelize'
 import { getQueryResponseFields, checkForProtectedRequests, GENERATE_SIX_DIGIT_TOKEN } from '@/helpers'
 import { REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
@@ -13,12 +13,16 @@ import redis from '@/redis';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import KYCModel from '@/models/kycModel';
+import { Counter } from 'prom-client';
+import cluster from 'cluster';
+import UserMetrics from '@/metrics/userMetrics';
 
 
 export class UsersController {
     static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             await checkForProtectedRequests(context.req);
+
             const fields = getQueryResponseFields(fieldNodes, 'users')
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
@@ -55,11 +59,7 @@ export class UsersController {
                 ]
             })
 
-
-
             const response: any[] = users.map((user: any) => {
-                console.log(user.dataValues.cards);
-
                 const txs = user.dataValues.incomingTransactions.concat(user.dataValues.outgoingTransactions)
                 return Object.assign({}, user.dataValues, {
                     transactions: txs
@@ -70,6 +70,7 @@ export class UsersController {
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
+
         }
     }
 
@@ -136,12 +137,15 @@ export class UsersController {
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
+
         }
     }
 
-    static sessionUser = async (_: unknown, ___: any, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
+    static sessionUser = async (_: unknown, ___: any, { __, req }: { __: any, req: any }) => {
         try {
             const session = await checkForProtectedRequests(req);
+
+            await UserMetrics.sendPrometheusMetricsViaRedis("sessionUser")
             return session.user
 
         } catch (error: any) {
@@ -165,7 +169,46 @@ export class UsersController {
         }
     }
 
+    static singleUser = async (_: unknown, { username }: { username: string }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            await checkForProtectedRequests(req);
+            const fields = getQueryResponseFields(fieldNodes, 'user')
+            const user = await UsersModel.findOne({
+                attributes: fields['user'],
+                where: {
+                    username
+                },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'account',
+                        attributes: fields['account'],
+                    },
+                    {
+                        model: CardsModel,
+                        as: 'cards',
+                        attributes: fields['cards']
+                    },
+                    {
+                        model: kycModel,
+                        as: 'kyc',
+                        attributes: fields['kyc']
+                    }
+                ]
+            })
+
+            return user
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
     static updateUserPassword = async (_: unknown, { email, password, data }: { email: string, password: string, data: VerificationDataType }) => {
+        const counter = new Counter({
+            name: `binomia_apollo_update_user_password_resolver_calls`,
+            help: `Number of times the session_user resolver is called`,
+        })
         try {
             const validatedData = await UserJoiSchema.updateUserPassword.parseAsync({ email, password })
             const user = await UsersModel.findOne({
@@ -196,6 +239,8 @@ export class UsersController {
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
+        } finally {
+            counter.inc()
         }
     }
 
@@ -219,17 +264,27 @@ export class UsersController {
                         { [Op.or]: searchFilter },
                         { id: { [Op.ne]: req.session.userId } }
                     ]
-                }
+                },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'account',
+                        attributes: ["id", "allowReceive"]
+                    }
+                ]
             })
+
+            if (users?.toJSON().account.allowReceive !== true) throw new GraphQLError(`${users?.toJSON().fullName} no puede recibir pagos`);
 
             return users
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
+
         }
     }
 
-    static searchUsers = async (_: any, { search, limit }: { search: UserModelType, limit: number }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
+    static searchUsers = async (_: any, { allowRequestMe, search, limit }: { allowRequestMe: boolean, search: UserModelType, limit: number }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             await checkForProtectedRequests(req);
             const fields = getQueryResponseFields(fieldNodes, "users")
@@ -250,25 +305,38 @@ export class UsersController {
                         { id: { [Op.ne]: req.session.userId } },
                         { username: { [Op.ne]: "$binomia" } }
                     ]
-                }
+                },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'account',
+                        attributes: ["id", "allowReceive", "allowRequestMe"],
+                    }
+                ]
             })
 
-            return users
+            const filteredUsers = users.filter(user => {
+                const { allowReceive, allowRequestMe: requestMe } = user.toJSON().account
+
+                if (allowRequestMe)
+                    return requestMe === true
+
+                return allowReceive === true
+            })
+
+
+            return filteredUsers
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
+
         }
     }
 
     static createUser = async (_: unknown, { data }: { data: any }, { __, req }: { __: any, req: any }) => {
         try {
             const validatedData = await UserJoiSchema.createUser.parseAsync(data)
-
-            console.log(req.headers);
             const registerHeader = await GlobalZodSchema.registerHeader.parseAsync(req.headers)
-            console.log(registerHeader);
-
-
             const regexPattern = new RegExp('^\\d{3}-\\d{7}-\\d{1}');
 
             if (!regexPattern.test(validatedData.dniNumber))
@@ -362,7 +430,6 @@ export class UsersController {
         try {
             await checkForProtectedRequests(req);
             const validatedData = await UserJoiSchema.updateUser.parseAsync(data)
-            console.log(Boolean(validatedData));
             const user = await UsersModel.findOne({
                 where: {
                     id: req.session.user.id
@@ -450,7 +517,7 @@ export class UsersController {
             })
 
             const code = GENERATE_SIX_DIGIT_TOKEN()
-            
+
             const hash = await Cryptography.hash(JSON.stringify({
                 sid: sessionCreated.toJSON().sid,
                 code,
@@ -467,7 +534,7 @@ export class UsersController {
             }))
 
             console.log({ code });
-            
+
 
             return {
                 sid: sessionCreated.toJSON().sid,
@@ -523,8 +590,6 @@ export class UsersController {
 
             const verified = await Cryptography.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
 
-            console.log({ verified });
-
             if (!verified)
                 throw new GraphQLError('Failed to verify session');
 
@@ -532,20 +597,13 @@ export class UsersController {
             return session.toJSON().user
 
         } catch (error: any) {
-            console.error({ verifySession: error });
             throw new GraphQLError(error.message);
         }
     }
 
-    static sugestedUsers = async (_: unknown, ___: any, { req }: { req: any }) => {
+    static sugestedUsers = async (_: unknown, { allowRequestMe }: { allowRequestMe: boolean }, { req }: { req: any }) => {
         try {
-            const session = await checkForProtectedRequests(req);
-
-            const cacheUsers = await redis.get(`sugestedUsers:${session.userId}`)
-
-            if (cacheUsers)
-                return JSON.parse(cacheUsers)
-
+            await checkForProtectedRequests(req);
 
             const transactions = await TransactionsModel.findAll({
                 limit: 20,
@@ -564,7 +622,13 @@ export class UsersController {
                             {
                                 model: UsersModel,
                                 as: 'user',
-                                // attributes: ["id"]
+                                include: [
+                                    {
+                                        model: AccountModel,
+                                        as: 'account',
+                                        attributes: ["id", "allowReceive", "allowRequestMe"]
+                                    }
+                                ]
                             }
                         ]
                     },
@@ -576,14 +640,20 @@ export class UsersController {
                             {
                                 model: UsersModel,
                                 as: 'user',
-                                // attributes: []
+                                include: [
+                                    {
+                                        model: AccountModel,
+                                        as: 'account',
+                                        attributes: ["id", "allowReceive", "allowRequestMe"]
+                                    }
+                                ]
                             }
                         ]
                     }
                 ]
             })
 
-            if(transactions.length === 0 || !transactions) return []
+            if (transactions.length === 0 || !transactions) return []
 
             const users = transactions.reduce((acc: any[], item: any) => {
                 // Check if the 'from' user is not the current user and is not already in the array
@@ -601,9 +671,16 @@ export class UsersController {
                 return acc;
             }, []);
 
-            await redis.set(`sugestedUsers:${session.userId}`, JSON.stringify(users), 'EX', 60)
+            const filteredUsers = users.filter(user => {
+                const { allowReceive, allowRequestMe: requestMe } = user.account
 
-            return users
+                if (allowRequestMe)
+                    return requestMe === true
+
+                return allowReceive === true
+            })
+
+            return filteredUsers
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
