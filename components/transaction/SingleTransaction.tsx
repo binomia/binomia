@@ -20,7 +20,7 @@ import { z } from 'zod';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { fetchRecentTransactions } from '@/redux/fetchHelper';
+import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 
 
 type Props = {
@@ -110,6 +110,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 
 					await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...data.payRequestTransaction, ...formatTransaction(data.payRequestTransaction) })))
 					await dispatch(accountActions.setAccount(Object.assign({}, account, { balance: Number(account.balance) - Number(transaction?.amount) })))
+					await dispatch(fetchRecentTransactions())
 
 					setIsLoading(false)
 					setIsCancelLoading(false)

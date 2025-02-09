@@ -14,6 +14,7 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { noTransactions, pendingClock } from '@/assets';
 import { router, useNavigation } from 'expo-router';
 import SingleTopTup from '../topups/SingleTopTup';
+import { fetchAllTransactions, fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 
 
 const { height, width } = Dimensions.get('window')
@@ -74,12 +75,13 @@ const RecentTransactions: React.FC = () => {
 		setShowPayButton(formatTransaction(transaction).showPayButton)
 		setShowSingleTransaction(true)
 		setSingleTransactionTitle(formatTransaction(transaction).showPayButton ? "Pagar" : "Ver Detalles")
-
-		// router.push("/transaction")
 	}
 
 	const onCloseFinishSingleTransaction = async () => {
 		setShowSingleTransaction(false)
+
+		await dispatch(fetchRecentTransactions())
+		await dispatch(fetchRecentTopUps())
 
 		if (needRefresh)
 
@@ -100,6 +102,11 @@ const RecentTransactions: React.FC = () => {
 	const onOpenBottomSheet = async (transaction: any) => {
 		setTransaction(transaction)
 		setOpenBottomSheet(true)
+	}
+
+	const onPressVerMas = async () => {
+		await dispatch(fetchAllTransactions({ page: 1, pageSize: 10 }))
+		router.navigate("/transactions")
 	}
 
 
