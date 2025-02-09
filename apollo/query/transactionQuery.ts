@@ -4,71 +4,7 @@ export class TransactionApolloQueries {
     static createTransaction = () => {
         return gql`
             mutation CreateTransaction($data: TransactionInput!, $recurrence: TransactionRecurrenceInput!) {
-                createTransaction(data: $data, recurrence: $recurrence) {
-                    transactionId
-                    amount
-                    deliveredAmount
-                    voidedAmount
-                    transactionType
-                    currency
-                    status
-                    location {
-                        latitude
-                        longitude
-                        neighbourhood
-                        road
-                        town
-                        county
-                        state
-                        postcode
-                        country
-                    }
-                    createdAt
-                    updatedAt
-                    from {
-                        id
-                        balance
-                        status
-                        hash
-                        user {
-                            id
-                            fullName
-                            username
-                            phone
-                            email
-                            profileImageUrl
-                            status      
-                            address
-                            createdAt
-                            updatedAt
-                        }
-                        currency
-                        createdAt
-                        updatedAt
-                    }
-                    to {
-                        id
-                        balance
-                        status
-                        hash
-                        currency
-                        createdAt
-                        updatedAt
-                        user {
-                            id
-                            fullName
-                            username
-                            phone
-                            email
-                            profileImageUrl       
-                            idFrontUrl
-                            status       
-                            address
-                            createdAt
-                            updatedAt
-                        }            
-                    }
-                }
+                createTransaction(data: $data, recurrence: $recurrence)
             }
         `
     }

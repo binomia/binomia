@@ -13,11 +13,8 @@ import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { globalActions } from '@/redux/slices/globalSlice';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocation } from '@/hooks/useLocation';
-import { router } from 'expo-router';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAccountLimit, fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 

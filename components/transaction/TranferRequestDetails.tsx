@@ -186,8 +186,9 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                 })
             }
 
-            // setLoading(false)
+            setLoading(false)
         } catch (error) {
+            setLoading(false)
             console.log({ handleOnSend: error });
         }
     }
