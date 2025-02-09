@@ -31,6 +31,28 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
 
     }, []);
 
+
+    const runCallbackAfterEvents = async (data: any, runAll: boolean = false) => {
+        if (runAll)
+            await Promise.all([
+                refreshAccount(),
+                dispatch(accountActions.setHaveAccountChanged(false)),
+                dispatch(transactionActions.setHasNewTransaction(true)),
+                dispatch(fetchRecentTransactions()),
+                dispatch(fetchRecentTopUps()),
+                dispatch(fetchAccountLimit())
+
+            ])
+        else
+            await Promise.all([
+                dispatch(accountActions.setAccount(data.from)),
+                dispatch(fetchRecentTransactions()),
+                dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
+                dispatch(fetchRecentTopUps()),
+                dispatch(fetchAccountLimit())
+            ])
+    }
+
     useEffect(() => {
         getItem("jwt").then(async (jwt) => {
             if (!jwt) return
@@ -44,45 +66,24 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
 
             socket.on("connect", () => {
                 socket.on(SOCKET_EVENTS.NOTIFICATION_TRANSACTION_CREATED, async () => {
-                    await Promise.all([
-                        refreshAccount(),
-                        dispatch(accountActions.setHaveAccountChanged(false)),
-                        dispatch(transactionActions.setHasNewTransaction(true)),
-                        dispatch(fetchRecentTransactions()),
-                        dispatch(fetchRecentTopUps()),
-                        dispatch(fetchAccountLimit())
-
-                    ])
+                    await runCallbackAfterEvents({}, true)
                 })
 
-                socket.on(SOCKET_EVENTS.NOTIFICATION_TRANSACTION_REQUEST_PAIED, async (transaction: any) => {
-                    await Promise.all([
-                        dispatch(accountActions.setAccount(transaction.from)),
-                        dispatch(accountActions.setHaveAccountChanged(false)),
-                        dispatch(transactionActions.setHasNewTransaction(true)),
-                        dispatch(fetchRecentTransactions()),
-                        dispatch(fetchRecentTopUps()),
-                        dispatch(fetchAccountLimit())
-                    ])
+                socket.on(SOCKET_EVENTS.NOTIFICATION_TRANSACTION_REQUEST_PAIED, async () => {
+                    await runCallbackAfterEvents({}, true)
                 })
+
 
                 socket.on(SOCKET_EVENTS.NOTIFICATION_TRANSACTION_CREATED_FROM_QUEUE, async (data: any) => {
-                    await Promise.all([
-                        dispatch(accountActions.setAccount(data.from)),
-                        dispatch(fetchRecentTransactions()),
-                        dispatch(fetchRecentTopUps()),
-                        dispatch(fetchAccountLimit())
-                    ])
+                    await runCallbackAfterEvents(data)
                 })
 
                 socket.on(SOCKET_EVENTS.NOTIFICATION_TRANSACTION_REQUEST_CANCELED, async (data: any) => {
-                    await Promise.all([
-                        dispatch(accountActions.setAccount(data.from)),
-                        dispatch(fetchRecentTransactions()),
-                        dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
-                        dispatch(fetchRecentTopUps()),
-                        dispatch(fetchAccountLimit())
-                    ])
+                    await runCallbackAfterEvents(data)
+                })
+
+                socket.on(SOCKET_EVENTS.NOTIFICATION_QUEUE_TRANSACTION_CREATED, async (data: any) => {
+                    await runCallbackAfterEvents(data)
                 })
             })
 

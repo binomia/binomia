@@ -76,7 +76,15 @@ export class TransactionApolloQueries {
     static createRequestTransaction = () => {
         return gql`
             mutation CreateRequestTransaction($data: TransactionInput!, $recurrence: TransactionRecurrenceInput!) {
-                createRequestTransaction(data: $data, recurrence: $recurrence) {
+                createRequestTransaction(data: $data, recurrence: $recurrence)
+            }
+        `
+    }
+
+    static transaction = () => {
+        return gql`
+            query Query($transactionId: String!) {
+                transaction(transactionId: $transactionId) {
                     transactionId
                     amount
                     deliveredAmount
@@ -84,6 +92,8 @@ export class TransactionApolloQueries {
                     transactionType
                     currency
                     status
+                    createdAt
+                    updatedAt
                     location {
                         latitude
                         longitude
@@ -94,52 +104,6 @@ export class TransactionApolloQueries {
                         state
                         postcode
                         country
-                    }
-                    createdAt
-                    updatedAt
-                    from {
-                        id
-                        balance
-                        status
-                        hash
-                        user {
-                            id
-                            fullName
-                            username
-                            phone
-                            email
-                            profileImageUrl
-                            status      
-                            address
-                            createdAt
-                            updatedAt
-                        }
-                        currency
-                        createdAt
-                        updatedAt
-                    }
-                    to {
-                        id
-                        balance
-                        status
-                        hash
-                        currency
-                        createdAt
-                        updatedAt
-                        user {
-                            id
-                            fullName
-                            username
-                            phone
-                            email
-                            profileImageUrl       
-                            idFrontUrl
-                            status       
-                            address
-                            createdAt
-                            updatedAt
-                        }
-                    
                     }
                 }
             }

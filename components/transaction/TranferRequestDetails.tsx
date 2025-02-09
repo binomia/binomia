@@ -14,11 +14,10 @@ import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
 import { UserApolloQueries } from '@/apollo/query';
-
+import { transactionActions } from '@/redux/slices/transactionSlice';
 
 type Props = {
     goBack?: () => void
@@ -31,15 +30,15 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
     const dispatch = useDispatch();
 
     const { authenticate } = useLocalAuthentication();
-    const { receiver, transactions } = useSelector((state: any) => state.transactionReducer)
+    const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
     const { user } = useSelector((state: any) => state.accountReducer)
 
     const [createRequestTransaction] = useMutation(TransactionApolloQueries.createRequestTransaction())
+    const [singleTransaction] = useLazyQuery(TransactionApolloQueries.transaction())
     const [fetchSingleUser] = useLazyQuery(UserApolloQueries.singleUser())
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
-    const [recurrence, setRecurrence] = useState<string>("oneTime");
     const [recurrenceSelected, setRecurrenceSelected] = useState<string>("");
     const [recurrenceDaySelected, setRecurrenceDaySelected] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false)
@@ -98,7 +97,6 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
-            
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 transactionType: "request",
                 receiver: receiver.username,
@@ -110,24 +108,30 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                 variables: { data, recurrence }
             })
 
-            const transactionSent = Object.assign({}, transaction.createRequestTransaction, {
-                ...transaction.createTransaction,
-                to: receiver,
-                from: user
-            })
+            let i = 0
+            const interval = setInterval(async () => {
+                const singleTransaction = await fetchSingleTransaction(transaction.createRequestTransaction.transactionId)
 
+                i++;
+                if (i === 5 || singleTransaction) {
+                    clearInterval(interval)
 
+                    await Promise.all([
+                        dispatch(transactionActions.setTransaction(Object.assign({}, transaction.createRequestTransaction, {
+                            ...formatTransaction(Object.assign({}, singleTransaction, {
+                                to: receiver,
+                                from: user
+                            })),
+                            ...singleTransaction,
+                            to: receiver,
+                            from: user
+                        })))
+                    ])
 
-            await Promise.all([
-                dispatch(transactionActions.setTransaction(Object.assign({}, transaction.createRequestTransaction, {
-                    ...transaction.createTransaction,
-                    ...formatTransaction(transactionSent),
-                    to: receiver,
-                    from: user
-                })))
-            ])
+                    goNext()
+                }
+            }, 1500)
 
-            goNext()
 
         } catch (error: any) {
             console.error(error.message);
@@ -151,21 +155,38 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
         }
     }
 
+    const fetchSingleTransaction = async (transactionId: string) => {
+        try {
+            const { data } = await singleTransaction({
+                variables: {
+                    transactionId
+                }
+            })
+            return data.transaction
+
+        } catch (error) {
+            console.error(error);
+
+            setLoading(false)
+            goNext()
+        }
+    }
+
     const handleOnPress = async () => {
         try {
             await validateIfCanSend()
-            
+
             const authenticated = await authenticate()
             setLoading(true)
 
             if (authenticated.success) {
                 await handleOnSend({
-                    title: recurrence,
-                    time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
+                    title: "oneTime",
+                    time: "oneTime"
                 })
             }
 
-            setLoading(false)
+            // setLoading(false)
         } catch (error) {
             console.log({ handleOnSend: error });
         }

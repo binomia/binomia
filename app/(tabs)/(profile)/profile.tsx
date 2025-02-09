@@ -1,26 +1,24 @@
-import { StyleSheet, } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
-import { Heading, Image, VStack, Text, HStack, Divider, FlatList, Pressable, ZStack, Spinner, ScrollView } from 'native-base'
 import DefaultIcon from 'react-native-default-icon'
-import { useDispatch, useSelector } from 'react-redux'
-import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import colors from '@/colors'
-import { scale } from 'react-native-size-matters'
 import Feather from '@expo/vector-icons/Feather';
 import Button from '@/components/global/Button'
-import { SessionContext } from '@/contexts/sessionContext'
-import { useNavigation } from '@react-navigation/native'
 import Fontisto from '@expo/vector-icons/Fontisto';
+import ImageView from "react-native-image-viewing";
+import QRScanner from '@/components/global/QRScanner'
 import * as ImagePicker from 'expo-image-picker';
+import { StyleSheet, } from 'react-native'
+import { Heading, Image, VStack, Text, HStack, Pressable, ZStack, Spinner, ScrollView } from 'native-base'
+import { useDispatch, useSelector } from 'react-redux'
+import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { scale } from 'react-native-size-matters'
+import { SessionContext } from '@/contexts/sessionContext'
 import { useCloudinary } from '@/hooks/useCloudinary'
 import { useMutation } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
-import { globalActions } from '@/redux/slices/globalSlice'
 import { profileScreenData } from '@/mocks'
-import ImageView from "react-native-image-viewing";
 import { router } from 'expo-router'
 import { qrIcon } from '@/assets'
-import QRScanner from '@/components/global/QRScanner'
 import { accountActions } from '@/redux/slices/accountSlice'
 
 

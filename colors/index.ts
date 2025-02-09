@@ -1,7 +1,7 @@
 export default {
     mainGreen: '#1D9B48',
     lightGreen: 'rgba(29, 155, 72, 1)',
-    lightGray: "rgba(38, 38, 38,1)",
+    lightGray: "#262626",
     // lightGray: "#2C2C2C",
     darkGray: "#1E1E1E",
     white: '#FFFFFF',
