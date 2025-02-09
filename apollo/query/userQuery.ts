@@ -267,8 +267,10 @@ export class UserApolloQueries {
         return gql`
             query SingleUser($username: String!) {
                 singleUser(username: $username) {
+                    fullName
                     account {
-                        allowReceive                        
+                        allowReceive   
+                        allowRequestMe                     
                         status                            
                     }
                 }

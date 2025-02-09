@@ -1,5 +1,5 @@
 import { apolloClient } from "@/apollo";
-import { AccountApolloQueries, TopUpApolloQueries } from "@/apollo/query";
+import { AccountApolloQueries, TopUpApolloQueries, UserApolloQueries } from "@/apollo/query";
 import { TransactionApolloQueries } from "@/apollo/query/transactionQuery"
 import { AccountAuthSchema } from "@/auth/accountAuth";
 import { createAsyncThunk } from "@reduxjs/toolkit"
@@ -41,7 +41,7 @@ export const fetchRecentTransactions = createAsyncThunk('fetchRecentTransactions
         const combinedTransactions = [...transactionsMapped, ...topupsMapped].sort((a: any, b: any) => {
             return new Date(Number(b.timestamp)).getTime() - new Date(Number(a.timestamp)).getTime()
         });
-        
+
         return combinedTransactions
 
 

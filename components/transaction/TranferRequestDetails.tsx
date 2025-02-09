@@ -4,7 +4,7 @@ import colors from '@/colors'
 import DefaultIcon from 'react-native-default-icon';
 import Button from '@/components/global/Button';
 import BottomSheet from '../global/BottomSheet';
-import { StyleSheet, Dimensions } from 'react-native'
+import { StyleSheet, Dimensions, Alert } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, FlatList } from 'native-base'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -12,27 +12,31 @@ import { useDispatch, useSelector } from 'react-redux';
 import { recurenceMonthlyData, recurenceWeeklyData } from '@/mocks';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
-import { useMutation } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { z } from 'zod';
+import { UserApolloQueries } from '@/apollo/query';
 
 
 type Props = {
     goBack?: () => void
     goNext?: () => void
+    onCloseFinish?: () => void
 }
 
 const { width, height } = Dimensions.get("screen")
-const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { } }) => {
+const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFinish = () => { }, goBack = () => { } }) => {
     const dispatch = useDispatch();
 
     const { authenticate } = useLocalAuthentication();
     const { receiver, transactions } = useSelector((state: any) => state.transactionReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
     const { user } = useSelector((state: any) => state.accountReducer)
+
     const [createRequestTransaction] = useMutation(TransactionApolloQueries.createRequestTransaction())
+    const [fetchSingleUser] = useLazyQuery(UserApolloQueries.singleUser())
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
     const [recurrence, setRecurrence] = useState<string>("oneTime");
@@ -41,6 +45,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
     const [loading, setLoading] = useState<boolean>(false)
     const [openOptions, setOpenOptions] = useState<string>("")
     const [locationInfo, setLocationInfo] = useState<any>({})
+
 
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
 
@@ -55,8 +60,45 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
         }
     }
 
+    const validateIfCanSend = async () => {
+        try {
+            const { data } = await fetchSingleUser({
+                variables: {
+                    username: receiver.username
+                }
+            })
+
+            const { status, allowRequestMe } = data.singleUser.account
+            if (!allowRequestMe) {
+                Alert.alert("Advertencia", `${receiver.fullName} no puede recibir dinero en este momento.`, [{
+                    onPress: async () => {
+                        onCloseFinish()
+                    }
+                }])
+
+                throw new Error(`${receiver.fullName} no puede recibir dinero en este momento.`)
+            }
+
+            if (status !== "active") {
+                Alert.alert("Advertencia", `${receiver.fullName}  no se encuentra activo.`, [{
+                    onPress: async () => {
+                        onCloseFinish()
+                    }
+                }])
+
+                throw new Error(`${receiver.fullName} no puede recibir dinero en este momento.`)
+            }
+
+            return true
+
+        } catch (error) {
+            throw error
+        }
+    }
+
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
+            
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 transactionType: "request",
                 receiver: receiver.username,
@@ -111,6 +153,8 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, goBack = (
 
     const handleOnPress = async () => {
         try {
+            await validateIfCanSend()
+            
             const authenticated = await authenticate()
             setLoading(true)
 

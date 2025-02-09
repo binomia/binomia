@@ -7,7 +7,7 @@ import BottomSheet from '@/components/global/BottomSheet';
 import PagerView from 'react-native-pager-view';
 import TranferRequestDetails from '@/components/transaction/TranferRequestDetails';
 import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
-import { StyleSheet, SafeAreaView, Keyboard, TouchableWithoutFeedback, TouchableOpacity, Dimensions } from 'react-native'
+import { StyleSheet, SafeAreaView, Keyboard, TouchableWithoutFeedback, TouchableOpacity, Dimensions, Alert } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
@@ -15,7 +15,7 @@ import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
 import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { router } from 'expo-router';
 import { pendingClock } from '@/assets';
@@ -26,8 +26,12 @@ const { height } = Dimensions.get('window')
 const Request: React.FC = () => {
     const dispatch = useDispatch()
     const ref = useRef<PagerView>(null);
+    const { receiver } = useSelector((state: any) => state.transactionReducer)
+    const [fetchSingleUser] = useLazyQuery(UserApolloQueries.singleUser())
+
     const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
     const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
+
     const [input, setInput] = useState<string>("0");
     const [openRequest, setOpenRequest] = useState<boolean>(false);
     const [currentPage, setCurrentPage] = useState<number>(0);
@@ -88,6 +92,14 @@ const Request: React.FC = () => {
         }
     }
 
+    const onCloseFinishFromDetails = async () => {
+        await onCloseFinish()
+        await dispatch(transactionActions.setTransactionDetails({}))
+        await fetchSugestedUsers()
+
+        ref.current?.setPage(0)
+    }
+
     const nextPage = () => {
         ref.current?.setPage(currentPage + 1)
         setCurrentPage(currentPage + 1)
@@ -101,6 +113,45 @@ const Request: React.FC = () => {
             ref.current?.setPage(currentPage - 1)
 
         setCurrentPage(currentPage - 1)
+    }
+
+    const onPageSelected = async () => {
+        const { data } = await fetchSingleUser({
+            variables: {
+                username: receiver.username
+            }
+        })
+
+        const { status, allowRequestMe } = data.singleUser.account
+        if (!allowRequestMe) {
+            Alert.alert("Advertencia", `${receiver.fullName} no puede recibir dinero en este momento.`, [{
+                onPress: async () => {
+                    setCurrentPage(0)
+                    ref.current?.setPage(0)
+
+                    await onCloseFinish()
+                    await dispatch(transactionActions.setTransactionDetails({}))
+                    await fetchSugestedUsers()
+                }
+            }])
+
+            throw new Error(`${receiver.fullName} no puede recibir dinero en este momento.`)
+        }
+
+        if (status !== "active") {
+            Alert.alert("Advertencia", `${receiver.fullName}  no se encuentra activo.`, [{
+                onPress: async () => {
+                    await onCloseFinish()
+                    await dispatch(transactionActions.setTransactionDetails({}))
+                    await fetchSugestedUsers()
+
+                    ref.current?.setPage(0)
+                }
+            }])
+
+            throw new Error(`${receiver.fullName}  no se encuentra activo.`)
+        }
+
     }
 
     useEffect(() => {
@@ -141,11 +192,11 @@ const Request: React.FC = () => {
                         )}
                     />
                     <BottomSheet height={height * 0.9} open={openRequest} onCloseFinish={onCloseFinish}>
-                        <PagerView style={{ flex: 1 }} ref={ref} initialPage={currentPage}>
+                        <PagerView style={{ flex: 1 }} onPageSelected={onPageSelected} ref={ref} initialPage={currentPage}>
                             <HStack h={"95%"}>
                                 <CreateTransaction nextPage={nextPage} title='Solicitar' showBalance={false} setInput={setInput} input={input} />
                             </HStack>
-                            <TranferRequestDetails goBack={prevPage} goNext={nextPage} />
+                            <TranferRequestDetails goBack={prevPage} onCloseFinish={onCloseFinishFromDetails} goNext={nextPage} />
                             <SingleSentTransaction key={"single-request-transaction-2"} iconImage={pendingClock} />
                         </PagerView>
                     </BottomSheet>

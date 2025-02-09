@@ -214,7 +214,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                     data={recurenceWeeklyData}
                     renderItem={({ item }) => (
                         <HStack my={"10px"} w={"100%"} justifyContent={"space-between"}>
-                            {item.map(({ title, id }) => (
+                            {item?.map(({ title, id }) => (
                                 <Pressable w={width * 0.46} key={id} borderRadius={"5px"} justifyContent={"center"} alignItems={"center"} h={scale(45)} bg={recurrenceDaySelected === id ? colors.mainGreen : colors.lightGray} _pressed={{ opacity: 0.5 }} onPress={() => onSelecteOption(id, title)} borderColor={colors.mainGreen}>
                                     <Heading fontSize={scale(12)} fontWeight={"500"} color={recurrenceDaySelected === id ? colors.white : colors.mainGreen}>{title}</Heading>
                                 </Pressable>
@@ -240,7 +240,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                 <VStack space={"15px"}>
                     {recurenceMonthlyData.map((item, index) => (
                         <HStack px={"10px"} key={`recurenceMonthly${index}`} w={"100%"} justifyContent={"space-between"}>
-                            {item.map(({ title, id, day }) => (
+                            {item?.map(({ title, id, day }) => (
                                 <Pressable _pressed={{ opacity: 0.5 }} key={title} flexWrap={"nowrap"} onPress={() => onSelecteOption(id, title)} w={scale(width / 7)} h={scale(width / 7)} bg={recurrenceDaySelected === id ? colors.mainGreen : colors.lightGray} justifyContent={"center"} alignItems={"center"} borderRadius={10}>
                                     <Heading fontSize={scale(15)} fontWeight={"500"} color={recurrenceDaySelected === id ? colors.white : colors.mainGreen}>{day}</Heading>
                                 </Pressable>
@@ -283,6 +283,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                 return "Cada 1 y 16 de cada mes";
         }
     }
+    
     const formatTransactionNextDate = (jobName: string, jobTime: string) => {
         switch (jobName) {
             case "weekly":
@@ -331,25 +332,25 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                                         data={transactions}
                                         mt={"20px"}
                                         renderItem={({ item, index }) => (
-                                            <Pressable key={`${item.repeatJobKey}-${index}`} onPress={() => onSelectTransaction(item)} my={"10px"} _pressed={{ opacity: 0.5 }} flexDirection={"row"} justifyContent={"space-between"}>
+                                            <Pressable key={`${item?.repeatJobKey}-${index}`} onPress={() => onSelectTransaction(item)} my={"10px"} _pressed={{ opacity: 0.5 }} flexDirection={"row"} justifyContent={"space-between"}>
                                                 <HStack alignItems={"center"}>
-                                                    {item.referenceData.logo ?
-                                                        <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: item.referenceData.logo }} />
+                                                    {item?.referenceData?.logo ?
+                                                        <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: item?.referenceData?.logo }} />
                                                         :
                                                         <DefaultIcon
-                                                            value={item.referenceData.fullName}
-                                                            contentContainerStyle={[styles.contentContainerStyle, { width: scale(45), height: scale(45), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.referenceData.fullName ?? "") }]}
+                                                            value={item?.referenceData?.fullName}
+                                                            contentContainerStyle={[styles.contentContainerStyle, { width: scale(45), height: scale(45), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item?.referenceData?.fullName ?? "") }]}
                                                             textStyle={styles.textStyle}
                                                         />
                                                     }
                                                     <VStack ml={"10px"} justifyContent={"center"}>
-                                                        <Heading textTransform={"capitalize"} fontSize={scale(14)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item.referenceData.fullName)}</Heading>
-                                                        <Text textTransform={"capitalize"} fontSize={scale(10)} color={colors.lightSkyGray}>{formatTransactionRecurrenceTime(item.jobName, item.jobTime)}</Text>
-                                                        <Text textTransform={"capitalize"} fontSize={scale(10)} color={colors.lightSkyGray}>Proximo pago: {moment(formatTransactionNextDate(item.jobName, item.jobTime)).format("ll")}</Text>
+                                                        <Heading textTransform={"capitalize"} fontSize={scale(14)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item?.referenceData?.fullName || "")}</Heading>
+                                                        <Text textTransform={"capitalize"} fontSize={scale(10)} color={colors.lightSkyGray}>{formatTransactionRecurrenceTime(item?.jobName, item?.jobTime)}</Text>
+                                                        <Text textTransform={"capitalize"} fontSize={scale(10)} color={colors.lightSkyGray}>Proximo pago: {moment(formatTransactionNextDate(item?.jobName, item?.jobTime)).format("ll")}</Text>
                                                     </VStack>
                                                 </HStack>
                                                 <VStack ml={"10px"} justifyContent={"center"}>
-                                                    <Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(14)} color={"mainGreen"}>{FORMAT_CURRENCY(item.amount)}</Heading>
+                                                    <Heading fontWeight={"semibold"} textTransform={"capitalize"} fontSize={scale(14)} color={"mainGreen"}>{FORMAT_CURRENCY(item?.amount)}</Heading>
                                                 </VStack>
                                             </Pressable>
                                         )}

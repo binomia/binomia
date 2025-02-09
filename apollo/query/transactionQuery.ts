@@ -437,7 +437,13 @@ export class TransactionApolloQueries {
                     referenceData
                     queueType
                     signature
-                    data
+                    user {
+                        id
+                        fullName
+                        username
+                        phone   
+                        profileImageUrl                    
+                    }
                 }
             }
         `
