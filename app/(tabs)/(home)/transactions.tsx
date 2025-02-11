@@ -63,12 +63,20 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 				const { data } = await searchAccountTransactions({
 					variables: {
 						"page": 1,
-						"pageSize": 10,
+						"pageSize": 5,
 						"fullName": value.toLowerCase()
 					}
 				})
 
-				setFilteredTransactions(data.searchAccountTransactions.length > 0 ? data.searchAccountTransactions : [])
+				const transactionsMapped = data.searchAccountTransactions?.map((transaction: any) => {
+					return {
+						type: "transaction",
+						timestamp: transaction.createdAt,
+						data: transaction
+					}
+				})
+
+				setFilteredTransactions(transactionsMapped)
 			}
 
 		} catch (error) {
@@ -210,7 +218,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 							))}
 						</ScrollView>
 					</HStack>
-					{transactions?.length > 0 ?
+					{filteredTransactions?.length > 0 ?
 						<VStack w={"100%"} >
 							<HStack w={"100%"} justifyContent={"space-between"}>
 								<Heading px={"20px"} fontSize={scale(18)} color={"white"}>{"Transacciones"}</Heading>
@@ -219,7 +227,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 								mt={"10px"}
 								px={"20px"}
 								scrollEnabled={false}
-								data={transactions}
+								data={filteredTransactions}
 								renderItem={({ item: { data, type }, index }: any) => (
 									type === "transaction" ? (
 										Object.keys(data).length > 0 ? <Pressable bg={colors.lightGray} my={"5px"} borderRadius={10} px={"15px"} py={"10px"} key={`transactions(tgrtgnrhbfhrbgr)-${data?.transactionId}-${index}-${data?.transactionId}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(data)}>
