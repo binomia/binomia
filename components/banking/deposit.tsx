@@ -50,14 +50,14 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", sh
                 setShowWarning(false)
                 setWarningMessage("")
             }
-        
+
         } else {
             setShowPayButton(false)
 
             const limit = account.depositLimit - limits.depositAmount
-            setShowPayButton(value >= 10 && value <= account.balance && value <= limit)
+            setShowPayButton(value >= 10 && value <= limit)
 
-            const enableWarning = value > account.balance || value > limit
+            const enableWarning = value > limit
             if (enableWarning) {
                 setShowWarning(enableWarning)
 
@@ -109,16 +109,16 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", sh
             <VStack px={"20px"} w={"100%"} h={"100%"} justifyContent={"space-between"}>
                 <VStack space={5}>
                     <HStack w={"100%"} mt={"10px"} alignItems={"center"} justifyContent={"center"}>
-                        <Heading size={"sm"} color={colors.mainGreen} textAlign={"center"}>{FORMAT_CURRENCY(account.balance)}</Heading>
+                        <Heading size={"md"} color={colors.mainGreen} textAlign={"center"}>{FORMAT_CURRENCY(account.balance)}</Heading>
                     </HStack>
                     <HStack alignItems={"center"} justifyContent={"space-between"}>
                         <Pressable onPress={() => onCardPress(payFromCard)} _pressed={{ opacity: 0.5 }} flexDirection={"row"} alignItems={"center"}>
                             <RenderCardLogo brand={payFromCard.brand} />
                             <VStack justifyContent={"center"}>
-                                <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{payFromCard?.brand} {payFromCard?.last4Number}</Heading>
-                                <Text fontSize={scale(13)} color={colors.pureGray}>{payFromCard?.alias}</Text>
+                                <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{payFromCard?.alias}</Heading>
+                                <Text fontSize={scale(13)} color={colors.pureGray}>xxxx...{payFromCard?.last4Number}</Text>
                             </VStack>
-                            <Ionicons style={{ marginBottom: 20 }} name="chevron-forward" size={25} color={colors.gray} />
+                                <Ionicons style={{ }} name="chevron-forward" size={25} color={colors.gray} />
                         </Pressable>
                         <Pressable opacity={showPayButton ? 1 : 0.5} disabled={!showPayButton} shadow={2} w={scale(100)} h={scale(35)} justifyContent={"center"} alignItems={"center"} _pressed={{ opacity: 0.5 }} bg={showPayButton ? "mainGreen" : "lightGray"} p={"5px"} borderRadius={100}>
                             <Button w={"100%"} color={showPayButton ? colors.white : colors.mainGreen} onPress={() => onSendFinish(Number(input))} title={title} />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect } from 'react'
 import colors from '@/colors'
 import BottomSheet from '@/components/global/BottomSheet';
 import moment from 'moment';
@@ -25,7 +25,9 @@ const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
     }
 
 
-    const StatuIcon = (status: string) => {
+
+
+    const StatuIcon: React.FC<{ status: string }> = ({ status }: { status: string }) => {
         const _w = "25px"
         const _h = "25px"
         if (status === "completed") {
@@ -68,6 +70,12 @@ const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
     }
 
 
+    useEffect(() => {
+        console.log(JSON.stringify(topup, null, 2));
+
+    }, [])
+
+
     return (
         <BottomSheet height={height * 0.50} open={open} onCloseFinish={onCloseFinish}>
             <VStack px={"20px"} pt={"30px"} w={"100%"} h={"80%"} justifyContent={"space-between"}>
@@ -81,12 +89,12 @@ const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
                 <VStack alignItems={"center"} borderRadius={10}>
                     <VStack alignItems={"center"}>
                         <Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={colors.red}>{FORMAT_CURRENCY(topup?.amount)}</Heading>
-                        <Text mb={"10px"} color={colors.lightSkyGray}>{moment(topup?.createdAt).format("lll")}</Text>
+                        <Text mb={"10px"} color={colors.lightSkyGray}>{moment(Number(topup?.createdAt)).format("lll")}</Text>
                         <HStack mb={"20px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
-                            {StatuIcon(topup.status)}
+                            <StatuIcon status={topup.status} />
                             <Text ml={"3px"} fontSize={scale(16)} color={colors.lightSkyGray}>{transactionStatus(topup.status)}</Text>
                         </HStack>
-                        <Pressable onPress={handleShare} _pressed={{ opacity: 0.5 }} w={scale(55)} h={scale(55)} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
+                        <Pressable onPress={handleShare} _pressed={{ opacity: 0.5 }} w={scale(50)} h={scale(50)} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
                             <Entypo name="share" size={24} color={colors.mainGreen} />
                         </Pressable>
                     </VStack>

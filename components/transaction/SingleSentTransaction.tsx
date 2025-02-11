@@ -6,7 +6,7 @@ import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import * as Sharing from 'expo-sharing';
 import { StyleSheet, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Pressable, ZStack } from 'native-base'
+import { Heading, Image, Text, VStack, HStack, Pressable, ZStack, ScrollView } from 'native-base'
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,13 +14,13 @@ import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { transactionStatus } from '@/mocks';
-import { Ionicons, Entypo } from '@expo/vector-icons';
+import { Ionicons, Entypo, AntDesign } from '@expo/vector-icons';
 import { cancelIcon, checked, pendingClock } from '@/assets';
 import { z } from 'zod';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { fetchRecentTransactions } from '@/redux/fetchHelper';
+import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 
 
 type Props = {
@@ -71,24 +71,26 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 	}
 
 	const onCancelRequestedTransaction = async () => {
-		setIsCancelLoading(true)
-		const { data } = await cancelRequestedTransaction({
-			variables: {
-				transactionId: transaction.transactionId
-			}
-		})
+		try {
+			setIsCancelLoading(true)
+			const { data } = await cancelRequestedTransaction({
+				variables: {
+					transactionId: transaction.transactionId
+				}
+			})
 
-		await dispatch(transactionActions.setRecentTransactions([
-			{
-				type: "transaction",
-				...data.cancelRequestedTransaction
-			},
-			...recentTransactions
-		]))
+			await dispatch(fetchRecentTransactions())
+			await dispatch(fetchAllTransactions({ page: 1, pageSize: 5 }))
+			await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, {
+				...data.cancelRequestedTransaction,
+				...formatTransaction(data.cancelRequestedTransaction)
+			})))
 
-		await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...data.cancelRequestedTransaction, ...formatTransaction(data.cancelRequestedTransaction) })))
+			setIsCancelLoading(false)
 
-		setIsCancelLoading(false)
+		} catch (error) {
+			setIsCancelLoading(false)
+		}
 	}
 
 	const onPress = async (paymentApproved: boolean) => {
@@ -107,15 +109,20 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 						}
 					})
 
-					await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...data.payRequestTransaction, ...formatTransaction(data.payRequestTransaction) })))
-					await dispatch(accountActions.setAccount(Object.assign({}, account, { balance: Number(account.balance) - Number(transaction?.amount) })))
+					await Promise.all([
+						dispatch(fetchRecentTransactions()),
+						dispatch(fetchAllTransactions({ page: 1, pageSize: 5 })),
+						dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...data.payRequestTransaction, ...formatTransaction(data.payRequestTransaction) }))),
+						dispatch(accountActions.setAccount(Object.assign({}, account, { balance: Number(account.balance) - Number(transaction?.amount) })))
+					])
+
 
 					setIsLoading(false)
 					setIsCancelLoading(false)
 					goNext(paymentApproved ? 1 : 2)
 				}
 
-			} catch (error) {
+			} catch (error: any) {
 				setIsLoading(false)
 				await dispatch(fetchRecentTransactions())
 				onClose()
@@ -205,10 +212,17 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 			{showPayButton ?
 				<VStack w={"100%"} borderRadius={15} alignItems={"center"}>
 					<HStack w={"40px"} h={"40px"} bg={colors.lightGray} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
-						<Ionicons name="warning" size={22} color={colors.warning} />
+						{account.balance < transaction.amount ?
+							<AntDesign name="info" size={28} color={colors.red} />
+							:
+							<Ionicons name={"warning"} size={22} color={colors.warning} />
+						}
 					</HStack>
 					<Text textAlign={"center"} w={"85%"} fontSize={scale(15)} color={colors.pureGray}>
-						Responde solo a solicitudes de pago que conozcas con certeza para garantizar tu seguridad.
+						{account.balance < transaction.amount ?
+							"No hay suficiente dinero en tu cuenta para pagar esta transacción." :
+							"Responde solo a solicitudes de pago que conozcas con certeza para garantizar tu seguridad."
+						}
 					</Text>
 					<HStack w={"100%"} mt={"20px"} justifyContent={showPayButton ? "space-between" : "center"}>
 						<Button
@@ -222,13 +236,13 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 							title={"Cancelar"}
 						/>
 						<Button
-							disabled={isCancelLoading}
-							opacity={isCancelLoading ? 0.5 : 1}
+							disabled={isCancelLoading || account.balance < transaction.amount}
+							opacity={isCancelLoading || account.balance < transaction.amount ? 0.5 : 1}
 							onPress={() => onPress(true)}
 							spin={isLoading}
 							w={showPayButton ? "49%" : "80%"}
-							bg={colors.mainGreen}
-							color={colors.white}
+							bg={account.balance > transaction.amount ? colors.mainGreen : colors.lightGray}
+							color={account.balance > transaction.amount ? colors.white : colors.mainGreen}
 							title={title}
 						/>
 					</HStack>
@@ -242,7 +256,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 							alt='fine-location-image-alt'
 							resizeMode="cover"
 							w={"100%"}
-							h={height / 3}
+							h={height / 4}
 							source={{
 								uri: getMapLocationImage({ latitude: transaction?.location?.latitude, longitude: transaction?.location?.longitude })
 							}}

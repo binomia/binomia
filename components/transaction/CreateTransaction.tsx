@@ -76,7 +76,7 @@ const CreateTransaction: React.FC<Props> = ({ input, title = "Siguiente", showBa
                         }
                         <VStack justifyContent={"center"}>
                             <Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(receiver?.fullName || "")}</Heading>
-                            <Text color={colors.lightSkyGray}>{receiver?.username}</Text>
+                            <Text fontSize={scale(14)} color={colors.lightSkyGray}>{receiver?.username}</Text>
                         </VStack>
                     </HStack>
                     <Button

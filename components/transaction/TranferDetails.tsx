@@ -50,6 +50,8 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
+            setLoading(true)
+
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
@@ -84,7 +86,11 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             ])
 
             goNext()
+
+            await delay(1500)
+            setLoading(false)
         } catch (error: any) {
+            setLoading(false)
             console.error(error.message);
         }
     }
@@ -120,16 +126,14 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
         try {
             const authenticated = await authenticate()
 
-            setLoading(true)
-            if (authenticated.success) {
+            if (authenticated.success)
                 await handleOnSend({
                     title: recurrence,
                     time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
                 })
-            }
 
-            setLoading(false)
         } catch (error) {
+            setLoading(false)
             console.log({ handleOnSend: error });
         }
     }

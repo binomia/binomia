@@ -81,7 +81,7 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                 socket.on(SOCKET_EVENTS.NOTIFICATION_TRANSACTION_REQUEST_CANCELED, async (data: any) => {
                     await runCallbackAfterEvents(data)
                 })
-
+                
                 socket.on(SOCKET_EVENTS.NOTIFICATION_QUEUE_TRANSACTION_CREATED, async (data: any) => {
                     await runCallbackAfterEvents(data)
                 })

@@ -93,7 +93,7 @@ const SearchUserScreen: React.FC = () => {
                                     }
                                     <VStack ml={"10px"} justifyContent={"center"}>
                                         <Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item.fullName)}</Heading>
-                                        <Text color={colors.lightSkyGray}>{item.username}</Text>
+                                        <Text fontSize={scale(14)} color={colors.lightSkyGray}>{item.username}</Text>
                                     </VStack>
                                 </HStack>
                             </TouchableOpacity>

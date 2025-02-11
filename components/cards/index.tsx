@@ -40,6 +40,9 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
     const onPressCard = async (card: any) => {
         await dispatch(accountActions.setCard(card))
 
+        console.log(JSON.stringify(card, null, 2));
+        
+
         if (justSelecting) {
             onCloseFinish()
         } else {

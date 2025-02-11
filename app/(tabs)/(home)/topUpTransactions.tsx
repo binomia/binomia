@@ -83,7 +83,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
         setOpenBottomSheet(true)
     }
 
-    const StatuIcon = (status: string) => {
+    const StatuIcon: React.FC<{ status: string }> = ({ status }: { status: string }) => {
         const _w = "25px"
         const _h = "25px"
         if (status === "completed") {
@@ -216,10 +216,10 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                         </HStack>
                         <VStack alignItems={"center"} borderRadius={10}>
                             <VStack alignItems={"center"}>
-                                <Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={colors.pureGray}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
+                                <Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={colors.red}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
                                 <Text mb={"10px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
                                 <HStack mb={"20px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
-                                    {StatuIcon(transaction.status)}
+                                    <StatuIcon status={transaction.status} />
                                     <Text ml={"3px"} fontSize={scale(16)} color={colors.lightSkyGray}>{transactionStatus(transaction.status)}</Text>
                                 </HStack>
                                 <Pressable onPress={handleShare} _pressed={{ opacity: 0.5 }} w={scale(55)} h={scale(55)} shadow={1} borderWidth={0.4} borderColor={colors.placeholder} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>

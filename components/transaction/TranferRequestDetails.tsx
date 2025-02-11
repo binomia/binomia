@@ -97,6 +97,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
+            setLoading(true)
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 transactionType: "request",
                 receiver: receiver.username,
@@ -129,11 +130,15 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                     ])
 
                     goNext()
+
+                    await delay(1500)
+                    setLoading(false)
                 }
             }, 1500)
 
 
         } catch (error: any) {
+            setLoading(false)
             console.error(error.message);
         }
     }
@@ -177,16 +182,13 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
             await validateIfCanSend()
 
             const authenticated = await authenticate()
-            setLoading(true)
 
-            if (authenticated.success) {
+            if (authenticated.success)
                 await handleOnSend({
                     title: "oneTime",
                     time: "oneTime"
                 })
-            }
-
-            setLoading(false)
+            
         } catch (error) {
             setLoading(false)
             console.log({ handleOnSend: error });

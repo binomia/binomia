@@ -8,7 +8,7 @@ import { Heading, Image, Text, VStack, FlatList, HStack, Pressable } from 'nativ
 import { FORMAT_CURRENCY } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useSelector } from 'react-redux';
-import { checked, mastercardLogo, visaLogo } from '@/assets';
+import { americanExpressLogo, checked, jcbLogo, mastercardLogo, visaLogo } from '@/assets';
 import { Entypo } from '@expo/vector-icons';
 import { TEXT_HEADING_FONT_SIZE } from '@/constants';
 
@@ -38,13 +38,19 @@ const SingleTransactionBanking: React.FC<Props> = ({ }) => {
 		}
 	]
 
-	const renderCardLogo = (brand: string) => {
+	const RenderCardLogo: React.FC<{ brand: string }> = ({ brand }: { brand: string }) => {
 		switch (brand) {
 			case "visa":
 				return <Image alt='logo-image' mr={"10px"} resizeMode='contain' w={"50px"} h={"50px"} source={visaLogo} />
 
 			case "mastercard":
 				return <Image alt='logo-image' mr={"10px"} resizeMode='contain' w={"50px"} h={"50px"} source={mastercardLogo} />
+
+			case "american-express":
+				return <Image alt='logo-image' mr={"10px"} resizeMode='contain' w={"50px"} h={"50px"} source={americanExpressLogo} />
+
+			case "jcb":
+				return <Image alt='logo-image' mr={"10px"} resizeMode='contain' w={"50px"} h={"50px"} source={jcbLogo} />
 
 			default:
 				return null
@@ -87,7 +93,8 @@ const SingleTransactionBanking: React.FC<Props> = ({ }) => {
 			<VStack px={"20px"} h={"100%"}>
 				<VStack flex={1} pb={"40px"} my={"20px"} justifyContent={"space-between"}>
 					<HStack >
-						{renderCardLogo(transaction.card.brand)}
+						{/* {renderCardLogo(transaction.card.brand)} */}
+						<RenderCardLogo brand={transaction.card.brand} />
 						<VStack justifyContent={"center"}>
 							<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{transaction.card?.brand} {transaction.card?.last4Number}</Heading>
 							<Text fontSize={scale(13)} color={colors.pureGray}>{transaction.card?.alias}</Text>

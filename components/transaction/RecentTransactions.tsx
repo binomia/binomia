@@ -36,21 +36,21 @@ const RecentTransactions: React.FC = () => {
 
 
 	const formatTransaction = (transaction: any) => {
-		const { transactionType, status, amount } = transaction
+		const { transactionType, status } = transaction
 		const isFromMe = transaction.from.user?.id === user?.id
 
 		const profileImageUrl = isFromMe ? transaction.to.user?.profileImageUrl : transaction.from.user?.profileImageUrl
 		const fullName = isFromMe ? transaction.to.user?.fullName : transaction.from.user?.fullName
 		const username = isFromMe ? transaction.to.user?.username : transaction.from.user?.username
-		const showPayButton = transaction.transactionType === "request" && !isFromMe && transaction.status === "requested"
-		const showMap = (transaction.transactionType === "request" && isFromMe) || (transaction.transactionType === "transfer" && !isFromMe) ? false : true
+		const showPayButton = transaction?.transactionType === "request" && !isFromMe && transaction.status === "requested"
+		const showMap = (transaction?.transactionType === "request" && isFromMe) || (transaction?.transactionType === "transfer" && !isFromMe) ? false : true
 
 		let amountColor;
 
 		if ((transactionType === "request" && isFromMe && status === "requested")) {
 			amountColor = colors.pureGray
 
-		} else if ((transaction.transactionType === "request" && isFromMe || transaction.transactionType === "transfer" && !isFromMe) && transaction.status !== "cancelled") {
+		} else if ((transaction?.transactionType === "request" && isFromMe || transaction?.transactionType === "transfer" && !isFromMe) && transaction.status !== "cancelled") {
 			amountColor = colors.mainGreen
 
 		} else {
