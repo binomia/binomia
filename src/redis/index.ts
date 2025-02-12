@@ -32,6 +32,11 @@ export const initRedisEventSubcription = (io: Server) => {
                 io.to(recipientSocketRoom).emit(channel, data)
                 break;
             }
+            case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_QUEUE_TRANSACTION_CREATED: {
+                const { data, recipientSocketRoom } = JSON.parse(payload)
+                io.to(recipientSocketRoom).emit(channel, data)
+                break;
+            }
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED_FROM_QUEUE: {
                 const { data, senderSocketRoom } = JSON.parse(payload)
                 io.to(senderSocketRoom).emit(channel, data)
