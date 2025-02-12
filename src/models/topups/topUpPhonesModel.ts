@@ -1,9 +1,10 @@
-import { STRING } from "sequelize"
+import { DATE, STRING } from "sequelize"
 import { db } from "@/config"
 
 const TopUpPhonesModel = db.define('toptups-phones', {
     fullName: STRING,
-    phone: STRING
+    phone: STRING,
+    lastUpdated: DATE
 })
 
 

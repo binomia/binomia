@@ -24,6 +24,12 @@ export default class TransactionsQueue {
 
                     break;
                 }
+                case "queueRequestTransaction": {
+                    await TransactionController.createRequestQueueedTransaction(job)
+                    console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
+
+                    break;
+                }
                 default: {
                     const prosessTransaction = await TransactionController.prosessTransaction(job)
                     if (prosessTransaction === "transactionStatusCompleted")
@@ -51,7 +57,7 @@ export default class TransactionsQueue {
         })
     }
 
-    createJobs = async ({ jobId, referenceData, jobName, jobTime, amount, userId, data }: { jobId: string, referenceData: any, userId: number, amount: number, jobName: string, jobTime: string, data: string }) => {
+    createJobs = async ({ jobId, referenceData, jobName, jobTime, amount, userId, data }: { jobId: string, referenceData: any, userId: number, amount: number, jobName: string, jobTime: string, data: any }) => {
         switch (jobName) {
             case "weekly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_WEEKLY_PATTERN[jobTime as WeeklyQueueTitleType]);
@@ -100,7 +106,8 @@ export default class TransactionsQueue {
                 await this.queue.add(jobId, data, { jobId, delay: time, repeat: { every: time } });
                 break;
             }
-            case "queueTransaction": {
+            case "queueTransaction":
+            case "queueRequestTransaction": {
                 const job = await this.queue.add(jobId, data, { jobId, removeOnComplete: true, removeOnFail: true });
                 return job.asJSON()
             }
@@ -118,12 +125,11 @@ export default class TransactionsQueue {
     removeJob = async (repeatJobKey: string, newStatus: string = "cancelled") => {
         try {
             const job = await this.queue.removeJobScheduler(repeatJobKey)
-            if (job) {
-                const transaction = await MainController.inactiveTransaction(repeatJobKey, newStatus)
-                return transaction;
-            }
+            if (!job)
+                throw "Job not found"
 
-            throw "Job not found"
+            const transaction = await MainController.inactiveTransaction(repeatJobKey, newStatus)
+            return transaction;
 
         } catch (error: any) {
             throw error.toString()

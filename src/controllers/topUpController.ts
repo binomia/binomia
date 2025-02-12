@@ -6,7 +6,6 @@ import { JobJson } from "bullmq";
 import { Op } from "sequelize";
 import { TopUpSchema } from "@/auth/topUpSchema";
 import { topUpQueue } from "@/queues";
-import { redis } from "@/redis";
 
 
 export default class TopUpController {
@@ -160,6 +159,10 @@ export default class TopUpController {
                 balance: Number(newReceiverBalance)
             })
 
+            await phone.update({
+                lastUpdated: Date.now()
+            })
+
             await topUp.reload({
                 include: [
                     {
@@ -177,42 +180,40 @@ export default class TopUpController {
                 ]
             })
 
-            redis.publish(QUEUE_JOBS_NAME.PENDING_TOPUP, JSON.stringify({
+            const encryptedData = await Cryptography.encrypt(JSON.stringify({
+                id: topUp.toJSON().id,
+                phone: phoneNumber,
+                amount: amount,
+                referenceId: topUp.toJSON().referenceId
+            }))
+
+            await topUpQueue.createJobs({
                 jobId: `pendingTopUp@${shortUUID.generate()}${shortUUID.generate()}`,
                 jobName: "pendingTopUp",
                 jobTime: "everyThirtyMinutes",
-                userId: userId,
-                amount: amount,
-                data: {
-                    id: topUp.toJSON().id,
-                    phone: phoneNumber,
-                    amount: amount,
-                    referenceId: topUp.toJSON().referenceId
-                },
                 referenceData: {
                     fullName: fullName,
                     logo: topUp.toJSON().company.logo,
-                }
-            }))
+                },
+                amount,
+                userId,
+                data: encryptedData
+            });
 
-            if (recurrenceData.time !== "oneTime") {
-                await redis.publish(QUEUE_JOBS_NAME.CREATE_TOPUP, JSON.stringify({
+            if (recurrenceData.time !== "oneTime") {                
+                await topUpQueue.createJobs({
                     jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
                     jobName: recurrenceData.title,
                     jobTime: recurrenceData.time,
-                    userId,
-                    amount: amount,
-                    data: {
-                        id: topUp.toJSON().id,
-                        phone: phoneNumber,
-                        amount: amount,
-                        referenceId: topUp.toJSON().referenceId
-                    },
+
                     referenceData: {
-                        fullName: fullName,
+                        fullName,
                         logo: topUp.toJSON().company.logo,
-                    }
-                }))
+                    },
+                    amount,
+                    userId,
+                    data: encryptedData
+                });
             }
 
             return null
@@ -223,7 +224,6 @@ export default class TopUpController {
     }
 
     static listenToRedisEvent = async ({ channel, payload }: { channel: string, payload: string }) => {
-        console.log({ channel });
         switch (channel) {
             case QUEUE_JOBS_NAME.PENDING_TOPUP: {
                 const { jobName, jobTime, referenceData, jobId, amount, userId, data } = JSON.parse(payload);

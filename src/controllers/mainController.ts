@@ -85,6 +85,7 @@ export default class MainController {
             throw error
         }
     }
+    
     static updateQueue = async (repeatJobKey: string, newData: any) => {
         try {
             const queue = await QueuesModel.findOne({
