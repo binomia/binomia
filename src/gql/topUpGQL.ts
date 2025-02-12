@@ -70,6 +70,7 @@ const type = () => {
 const query = () => {
     return `
         topUps(phoneId: Int!, page: Int!, pageSize: Int!): [OnlyTopUpsType]
+        searchTopUps(page: Int!, pageSize: Int!, search: String!): [OnlyTopUpsType]
         recentTopUps(page: Int!, pageSize: Int!): [TopUpsType]
         topUpPhones(page: Int!, pageSize: Int!): [PhoneWithCompanyTopUpType]
         topUpCompanies: [TopUpCompany]
@@ -86,13 +87,14 @@ const subscription = () => {
     return ``
 }
 
-const { topUps, recentTopUps, topUpPhones, createTopUp, topUpCompanies } = TopUpController
+const { topUps, searchTopUps, recentTopUps, topUpPhones, createTopUp, topUpCompanies } = TopUpController
 const resolvers = {
     query: {
         topUps,
         recentTopUps,
         topUpPhones,
-        topUpCompanies
+        topUpCompanies,
+        searchTopUps
     },
     mutation: {
         createTopUp

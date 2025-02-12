@@ -45,6 +45,7 @@
     "axios": "^1.7.5",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
+    "bullmq": "^5.40.2",
     "card-validator": "^10.0.0",
     "connect-session-sequelize": "^7.1.7",
     "cookie-parser": "^1.4.7",

@@ -170,6 +170,7 @@ const type = () => {
             repeatedCount: Int
             amount: Int
             data: JSON
+            user: OnlyUserType
             referenceData: JSON
             signature: String          
             createdAt: String
@@ -186,7 +187,7 @@ const type = () => {
 
 const query = () => {
     return `
-        transaction: TransactionType
+        transaction(transactionId: String!): OnlyTransactionType
         accountTransactions(page: Int!, pageSize: Int!): [TransactionType]
         searchAccountTransactions(page: Int!, pageSize: Int!, fullName: String!): [TransactionType]
         accountRecurrentTransactions(page: Int!, pageSize: Int!): [OnlyRecurrentTransactionType]
@@ -198,9 +199,9 @@ const mutation = () => {
     return `
         deleteRecurrentTransactions(repeatJobKey: String!, queueType: String): OnlyRecurrentTransactionType
         updateRecurrentTransactions(data: UpdateQueuedTransactionInput!): OnlyRecurrentTransactionType
-        createTransaction(data: TransactionInput!, recurrence: TransactionRecurrenceInput!): TransactionType
+        createTransaction(data: TransactionInput!, recurrence: TransactionRecurrenceInput!): JSON
         payRequestTransaction(transactionId: String!, paymentApproved: Boolean!): TransactionType
-        createRequestTransaction(data: TransactionInput!, recurrence: TransactionRecurrenceInput!): TransactionType
+        createRequestTransaction(data: TransactionInput!, recurrence: TransactionRecurrenceInput!): JSON
         cancelRequestedTransaction(transactionId: String!): TransactionType
         createBankingTransaction(cardId: Int!, data: BankingTransactionInput!): BankingTransactionCreatedType
     `
@@ -210,9 +211,10 @@ const subscription = () => {
     return ``
 }
 
-const { createTransaction,cancelRequestedTransaction, searchAccountTransactions, updateRecurrentTransactions, payRequestTransaction, createRequestTransaction, deleteRecurrentTransactions, accountBankingTransactions, accountRecurrentTransactions, accountTransactions, createBankingTransaction } = TransactionsController
+const { createTransaction, transaction, cancelRequestedTransaction, searchAccountTransactions, updateRecurrentTransactions, payRequestTransaction, createRequestTransaction, deleteRecurrentTransactions, accountBankingTransactions, accountRecurrentTransactions, accountTransactions, createBankingTransaction } = TransactionsController
 const resolvers = {
     query: {
+        transaction,
         accountTransactions,
         searchAccountTransactions,
         accountBankingTransactions,

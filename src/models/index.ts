@@ -25,7 +25,7 @@ TopUpPhonesModel.belongsTo(UsersModel)
 UsersModel.hasMany(TopUpPhonesModel, { as: 'phones' })
 
 TopUpsModel.belongsTo(UsersModel)
-UsersModel.hasMany(TopUpsModel)
+UsersModel.hasMany(TopUpsModel, { as: 'topups' })
 
 TopUpsModel.belongsTo(TopUpCompanyModel, { foreignKey: 'companyId', targetKey: 'id', as: 'company' })
 TopUpCompanyModel.hasMany(TopUpsModel, { as: 'topups', foreignKey: 'companyId' })

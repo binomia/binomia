@@ -96,6 +96,7 @@ export class TopUpController {
                 limit,
                 offset,
                 attributes: [...fields['topUpPhones'], "phone"],
+                order: [['updatedAt', 'DESC']],
                 where: {
                     userId: session.userId
                 },
@@ -157,6 +158,64 @@ export class TopUpController {
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
+        }
+    }
+
+    static searchTopUps = async (_: unknown, { page, pageSize, search }: { page: number, pageSize: number, search: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            const { user } = await checkForProtectedRequests(context.req);
+            const fields = getQueryResponseFields(fieldNodes, 'topups')
+
+            const _pageSize = pageSize > 50 ? 50 : pageSize
+            const limit = _pageSize;
+            const offset = (page - 1) * _pageSize;
+
+            const topups = await TopUpPhonesModel.findAll({
+                limit,
+                offset,
+                order: [['createdAt', 'DESC']],
+                // attributes: ["id", "fullName", "phone", "createdAt", "userId"],
+                where: {
+                    [Op.and]: [
+                        {
+                            [Op.or]: [
+                                {
+                                    fullName: { [Op.iLike]: `%${search}%` },
+                                },
+                                {
+                                    phone: { [Op.iLike]: `%${search}%` },
+                                }
+                            ]
+                        },
+                        {
+                            userId: 5
+                        }
+                    ]
+                },
+                include: [
+                    {
+                        model: TopUpsModel,
+                        as: 'topups',
+                        include: [
+                            {
+                                model: TopUpCompanyModel,
+                                as: 'company',
+                                attributes: fields['company']
+                            }
+                        ]
+                    }
+                ]
+            })
+
+            if (!topups)
+                throw new GraphQLError('No transactions found');
+
+            console.log(JSON.stringify({ topups }, null, 2));
+
+            return topups
+
+        } catch (error: any) {
+            throw new GraphQLError(error);
         }
     }
 }

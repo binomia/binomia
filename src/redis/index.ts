@@ -4,6 +4,11 @@ import Redis from "ioredis";
 import Keyv from "keyv";
 
 
+export const connection = {
+    host: "redis",
+    port: 6379
+}
+
 
 export default new Redis({
     host: REDIS_HOST,

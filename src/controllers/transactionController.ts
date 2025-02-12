@@ -1,15 +1,32 @@
-import { AccountModel, kycModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, SessionModel, QueuesModel } from '@/models'
+import { AccountModel, kycModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, QueuesModel } from '@/models'
 import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
 import { Cryptography } from '@/helpers/cryptography';
-import { QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
+import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL, QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
 import { queueServer } from '@/rpc/queueRPC';
 import redis from '@/redis';
 import shortUUID from 'short-uuid';
 
 export class TransactionsController {
+    static transaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            await checkForProtectedRequests(context.req);
+            const fields = getQueryResponseFields(fieldNodes, 'transaction')
+
+            const transaction = await TransactionsModel.findOne({
+                attributes: fields['transaction'],
+                where: { transactionId: transactionId }
+            })
+
+            return transaction
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
     static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
         try {
             const session = await checkForProtectedRequests(context.req);
@@ -17,25 +34,33 @@ export class TransactionsController {
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
             const { user } = session
 
+            const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
             await redis.publish(QUEUE_JOBS_NAME.QUEUE_TRANSACTION, JSON.stringify({
-                jobId: `queueTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
+                jobId: `queueTransaction@${transactionId}`,
                 jobName: "queueTransaction",
                 jobTime: "queueTransaction",
                 userId: session.userId,
                 amount: validatedData.amount,
                 data: JSON.stringify({
+                    transactionId,
                     senderUsername: user.username,
                     receiverUsername: validatedData.receiver,
+                    amount: validatedData.amount,
                     recurrenceData,
                     senderFullName: user.fullName,
-                    amount: validatedData.amount,
                     location: validatedData.location,
                     currency: validatedData.currency,
                     transactionType: validatedData.transactionType
                 })
             }))
 
-            return null
+            return {
+                transactionId,
+                status: "queued",
+                jobId: `queueRequestTransaction@${transactionId}`,
+                jobName: "queueRequestTransaction",
+                jobTime: "queueRequestTransaction"
+            }
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -44,128 +69,41 @@ export class TransactionsController {
 
     static createRequestTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
         try {
-            const session = await checkForProtectedRequests(context.req);
+            const { user, userId } = await checkForProtectedRequests(context.req);
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
-            const { user: sender } = session
-            const senderAccount = await AccountModel.findOne({
-                where: { username: sender.username },
-                include: [
-                    {
-                        model: UsersModel,
-                        as: 'user',
-                        include: [
-                            {
-                                model: kycModel,
-                                as: 'kyc',
-                                attributes: ['id', 'dniNumber', 'dob', 'status', 'expiration']
-                            }
-                        ]
-                    }
-                ]
-            })
-
-            if (!senderAccount)
-                throw new GraphQLError("sender account not found");
-
-            const receiverAccount = await AccountModel.findOne({
-                where: {
-                    [Op.and]: [
-                        { username: validatedData.receiver },
-                        { allowRequestMe: true }
-                    ]
-                },
-                include: [
-                    {
-                        model: UsersModel,
-                        as: 'user',
-                        attributes: { exclude: ['createdAt', 'dniNumber', 'updatedAt', 'faceVideoUrl', 'idBackUrl', 'idFrontUrl', 'profileImageUrl', 'password'] },
-                        include: [
-                            {
-                                model: kycModel,
-                                as: 'kyc',
-                                attributes: ['id', 'dniNumber', 'dob', 'status', 'expiration']
-                            }
-                        ]
-                    }
-                ]
-            })
-
-            if (!receiverAccount)
-                throw new GraphQLError("receiver account not found");
-
-
-            if (!senderAccount.toJSON().allowRequestMe)
-                throw new GraphQLError(`${receiverAccount.toJSON().username} account does not receive request payment`);
-
-            const message = `${receiverAccount.toJSON().username}&${senderAccount.toJSON().username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
+            const message = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
             const signature = await Cryptography.sign(message, ZERO_SIGN_PRIVATE_KEY)
 
-            // Authorization NOT IMPLEMENTED
-
-            const transaction = await TransactionsModel.create({
-                senderFullName: senderAccount.toJSON().user.fullName,
-                receiverFullName: receiverAccount.toJSON().user.fullName,
-                fromAccount: senderAccount.toJSON().id,
-                toAccount: receiverAccount.toJSON().id,
+            const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
+            await redis.publish(QUEUE_JOBS_NAME.QUEUE_REQUEST_TRANSACTION, JSON.stringify({
+                jobId: `queueRequestTransaction@${transactionId}`,
+                jobName: "queueRequestTransaction",
+                jobTime: "queueRequestTransaction",
+                userId: userId,
                 amount: validatedData.amount,
-                deliveredAmount: validatedData.amount,
-                transactionType: validatedData.transactionType,
-                currency: validatedData.currency,
-                location: validatedData.location,
-                status: "requested",
-                signature
-            })
-
-            const transactionData = await transaction.reload({
-                include: [
-                    {
-                        model: AccountModel,
-                        as: 'from',
-                        include: [{
-                            model: UsersModel,
-                            as: 'user',
-                        }]
-                    },
-                    {
-                        model: AccountModel,
-                        as: 'to',
-                        include: [{
-                            model: UsersModel,
-                            as: 'user',
-                        }]
-                    }
-                ]
-            })
-
-            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
-                data: transactionData.toJSON(),
-                senderSocketRoom: senderAccount.toJSON().user.username,
-                recipientSocketRoom: receiverAccount.toJSON().user.username,
-
+                data: JSON.stringify({
+                    senderUsername: user.username,
+                    receiverUsername: validatedData.receiver,
+                    amount: validatedData.amount,
+                    transactionType: validatedData.transactionType,
+                    senderFullName: user.fullName,
+                    recurrenceData,
+                    transactionId,
+                    location: validatedData.location,
+                    currency: validatedData.currency,
+                    signature
+                })
             }))
 
-            if (recurrenceData.time !== "oneTime") {
-                const recurrenceQueueData = await TransactionJoiSchema.recurrenceQueueTransaction.parseAsync(Object.assign(transactionData.toJSON(), {
-                    amount: validatedData.amount,
-                    receiver: validatedData.receiver,
-                    sender: senderAccount.toJSON().username
-                }))
-
-                await redis.publish(QUEUE_JOBS_NAME.CREATE_TRANSACTION, JSON.stringify({
-                    jobId: `${recurrenceData.title}@${shortUUID.generate()}${shortUUID.generate()}`,
-                    jobName: recurrenceData.title,
-                    jobTime: recurrenceData.time,
-                    senderId: senderAccount.toJSON().id,
-                    receiverId: receiverAccount.toJSON().id,
-                    amount: validatedData.amount,
-                    data: recurrenceQueueData,
-
-                }))
+            return {
+                transactionId,
+                status: "queued",
+                jobId: `queueRequestTransaction@${transactionId}`,
+                jobName: "queueRequestTransaction",
+                jobTime: "queueRequestTransaction"
             }
-
-            return transactionData.toJSON()
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -180,19 +118,10 @@ export class TransactionsController {
                 where: {
                     [Op.and]: [
                         { transactionId },
-                        { status: "requested" },
                         { transactionType: "request" },
                         { fromAccount: user.account.id }
                     ]
-                }
-            })
-
-            if (!transaction)
-                throw new GraphQLError("transaction not found");
-
-            await transaction.update({ status: "cancelled" })
-
-            const transactionData = await transaction.reload({
+                },
                 include: [
                     {
                         model: AccountModel,
@@ -213,15 +142,27 @@ export class TransactionsController {
                 ]
             })
 
+            if (!transaction)
+                throw new GraphQLError("transaction not found");
+
+            if (transaction.toJSON().status === "cancelled") {
+                await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_CANCELED, JSON.stringify({
+                    data: transaction.toJSON(),
+                    senderSocketRoom: user.username,
+                    recipientSocketRoom: transaction.toJSON().to.user.username,
+                }))
+
+                return transaction.toJSON()
+            }
+
+            await transaction.update({ status: "cancelled" })
             await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_CANCELED, JSON.stringify({
                 data: transaction.toJSON(),
                 senderSocketRoom: user.username,
-                recipientSocketRoom: transactionData.toJSON().to.user.username,
-
+                recipientSocketRoom: transaction.toJSON().to.user.username,
             }))
 
-
-            return transactionData.toJSON()
+            return transaction.toJSON()
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -285,6 +226,8 @@ export class TransactionsController {
                 throw new GraphQLError("sender account not found");
 
 
+            if (senderAccount.toJSON().balance < transaction.toJSON().amount)
+                throw new GraphQLError("no tiene suficiente saldo para realizar esta transacción");
 
             const receiverAccount = await AccountModel.findOne({
                 where: {
@@ -314,7 +257,7 @@ export class TransactionsController {
                     status: "cancelled"
                 })
 
-                await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_CANCELED, JSON.stringify({
+                await redis.publish(NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_CANCELED, JSON.stringify({
                     data: transaction.toJSON(),
                     senderSocketRoom: senderAccount.toJSON().user.username,
                     recipientSocketRoom: receiverAccount.toJSON().user.username,
@@ -673,8 +616,16 @@ export class TransactionsController {
                         { status: "active" },
                         { jobName: { [Op.notIn]: ["pendingTopUp", "pendingTransaction"] } }
                     ]
-                }
+                },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user',
+                        attributes: fields['user']
+                    }
+                ]
             })
+
 
             if (!transactions)
                 throw new GraphQLError('No transactions found');

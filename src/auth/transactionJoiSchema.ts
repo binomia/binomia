@@ -54,4 +54,35 @@ export class TransactionJoiSchema {
             longitude: z.number()
         })
     })
+
+    static monthlyQueueTitle = z.enum([
+        'everyFirst',
+        'everySecond',
+        'everyThird',
+        'everyFourth',
+        'everyFifth',
+        'everySixth',
+        'everySeventh',
+        'everyEighth',
+        'everyNinth',
+        'everyTenth',
+        'everyEleventh',
+        'everyTwelfth',
+        'everyThirteenth',
+        'everyFourteenth',
+        'everyFifteenth',
+        'everySixteenth',
+        'everySeventeenth',
+        'everyEighteenth',
+        'everyNineteenth',
+        'everyTwentieth',
+        'everyTwentyFirst',
+        'everyTwentySecond',
+        'everyTwentyThird',
+        'everyTwentyFourth',
+        'everyTwentyFifth',
+        'everyTwentySixth',
+        'everyTwentySeventh',
+        'everyTwentyEighth',
+    ])
 }
