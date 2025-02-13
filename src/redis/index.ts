@@ -20,31 +20,31 @@ export const initRedisEventSubcription = (io: Server) => {
     process.on("message", async ({ channel, payload }: any) => {
         switch (channel) {
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED: {
-                const { data, recipientSocketRoom, expoNotificationTokens } = JSON.parse(payload)
+                const { data, senderSocketRoom, recipientSocketRoom, expoNotificationTokens } = JSON.parse(payload)
 
-                io.to(recipientSocketRoom).emit(channel, data)
+                io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
                 await sendNotification(expoNotificationTokens)
 
                 break;
             }
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_PAIED: {
-                const { data, recipientSocketRoom } = JSON.parse(payload)
-                io.to(recipientSocketRoom).emit(channel, data)
+                const { data, senderSocketRoom, recipientSocketRoom } = JSON.parse(payload)
+                io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
                 break;
             }
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_QUEUE_TRANSACTION_CREATED: {
-                const { data, recipientSocketRoom } = JSON.parse(payload)
-                io.to(recipientSocketRoom).emit(channel, data)
+                const { data, senderSocketRoom, recipientSocketRoom } = JSON.parse(payload)
+                io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
                 break;
             }
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED_FROM_QUEUE: {
-                const { data, senderSocketRoom } = JSON.parse(payload)
-                io.to(senderSocketRoom).emit(channel, data)
+                const { data,recipientSocketRoom, senderSocketRoom } = JSON.parse(payload)
+                io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
                 break;
             }
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_CANCELED: {
-                const { data, senderSocketRoom } = JSON.parse(payload)
-                io.to(senderSocketRoom).emit(channel, data)
+                const { data, senderSocketRoom, recipientSocketRoom } = JSON.parse(payload)
+                io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
                 break;
             }
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_LOGIN_VERIFICATION_CODE: {
