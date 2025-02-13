@@ -63,6 +63,12 @@ const type = () => {
             createdAt: String
             updatedAt: String            
         }
+
+        type SearchTopUpsType {
+            type: String
+            timestamp: String            
+            data: TopUpsType
+        }
     `
 }
 
@@ -70,7 +76,7 @@ const type = () => {
 const query = () => {
     return `
         topUps(phoneId: Int!, page: Int!, pageSize: Int!): [OnlyTopUpsType]
-        searchTopUps(page: Int!, pageSize: Int!, search: String!): [OnlyTopUpsType]
+        searchTopUps(page: Int!, pageSize: Int!, search: String!): [SearchTopUpsType]
         recentTopUps(page: Int!, pageSize: Int!): [TopUpsType]
         topUpPhones(page: Int!, pageSize: Int!): [PhoneWithCompanyTopUpType]
         topUpCompanies: [TopUpCompany]

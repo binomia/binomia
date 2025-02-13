@@ -66,8 +66,7 @@ export class TopUpController {
                         },
                         {
                             model: TopUpPhonesModel,
-                            as: 'phone',
-                            attributes: fields['card']
+                            as: 'phone'
                         }
                     ]
                 })
@@ -164,19 +163,22 @@ export class TopUpController {
     static searchTopUps = async (_: unknown, { page, pageSize, search }: { page: number, pageSize: number, search: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const { user } = await checkForProtectedRequests(context.req);
-            const fields = getQueryResponseFields(fieldNodes, 'topups')
+            const fields = getQueryResponseFields(fieldNodes, 'phones')
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
             const limit = _pageSize;
             const offset = (page - 1) * _pageSize;
 
-            const topups = await TopUpPhonesModel.findAll({
+            const phones = await TopUpPhonesModel.findAll({
                 limit,
                 offset,
                 order: [['createdAt', 'DESC']],
-                // attributes: ["id", "fullName", "phone", "createdAt", "userId"],
+                attributes: ["id", "fullName", "phone", "createdAt", "userId"],
                 where: {
                     [Op.and]: [
+                        {
+                            userId: user.id
+                        },
                         {
                             [Op.or]: [
                                 {
@@ -186,9 +188,6 @@ export class TopUpController {
                                     phone: { [Op.iLike]: `%${search}%` },
                                 }
                             ]
-                        },
-                        {
-                            userId: 5
                         }
                     ]
                 },
@@ -201,18 +200,28 @@ export class TopUpController {
                                 model: TopUpCompanyModel,
                                 as: 'company',
                                 attributes: fields['company']
+                            },
+                            {
+                                model: TopUpPhonesModel,
+                                as: 'phone',
+                                attributes: fields['phone']
                             }
                         ]
                     }
                 ]
             })
 
-            if (!topups)
+            if (!phones)
                 throw new GraphQLError('No transactions found');
 
-            console.log(JSON.stringify({ topups }, null, 2));
 
-            return topups
+            const filteredTopups = phones.map((phone) => phone.toJSON()?.topups?.map((topup: any) => ({
+                type: "topups",
+                timestamp: topup?.createdAt,
+                data: topup
+            }))).flat()
+
+            return filteredTopups
 
         } catch (error: any) {
             throw new GraphQLError(error);
