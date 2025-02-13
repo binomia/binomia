@@ -197,9 +197,9 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 					</Pressable>
 				</HStack>
 				<VStack>
-					<VStack mt={"20px"} alignItems={"center"}>
-						<Heading textTransform={"capitalize"} fontSize={scale(38)} color={colors.white}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
-						<Text mb={"10px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
+					<VStack mt={"10px"} alignItems={"center"}>
+						<Heading textTransform={"capitalize"} fontSize={scale(34)} color={colors.white}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
+						<Text color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
 						{transaction.isFromMe ? <VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
 							<StatuIcon status={transaction?.status || ""} />
 							<VStack w={"80%"}>
@@ -256,7 +256,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 							alt='fine-location-image-alt'
 							resizeMode="cover"
 							w={"100%"}
-							h={height / 4}
+							h={height / 3.7}
 							source={{
 								uri: getMapLocationImage({ latitude: transaction?.location?.latitude, longitude: transaction?.location?.longitude })
 							}}

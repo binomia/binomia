@@ -12,7 +12,7 @@ import { z } from 'zod'
 import { StyleSheet, Keyboard, Dimensions, TouchableWithoutFeedback, RefreshControl } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
-import { UserApolloQueries } from '@/apollo/query'
+import { TopUpApolloQueries, UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
 import { FORMAT_CURRENCY, FORMAT_FULL_NAME, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -34,6 +34,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 	const { transactions } = useSelector((state: any) => state.transactionReducer)
 
 	const [searchAccountTransactions] = useLazyQuery(TransactionApolloQueries.searchAccountTransactions())
+	const [searchTopUps] = useLazyQuery(TopUpApolloQueries.searchTopUps())
 	const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
 
 	const [singleTransactionTitle, setSingleTransactionTitle] = useState<string>("Ver Detalles");
@@ -46,6 +47,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 	const [needRefresh, setNeedRefresh] = useState<boolean>(false);
 	const [showPayButton, setShowPayButton] = useState<boolean>(false);
 	const [openBottomSheet, setOpenBottomSheet] = useState(false);
+	const [bottomSheetHeught, setBottomSheetHeught] = useState<number>(height * 0.9);
 
 
 	const handleSearch = async (value: string) => {
@@ -54,7 +56,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 				setFilteredTransactions(transactions)
 
 			} else {
-				const { data } = await searchAccountTransactions({
+				const { data: transactionsData } = await searchAccountTransactions({
 					variables: {
 						"page": 1,
 						"pageSize": 5,
@@ -62,7 +64,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 					}
 				})
 
-				const transactionsMapped = data.searchAccountTransactions?.map((transaction: any) => {
+				const transactionsMapped = transactionsData.searchAccountTransactions?.map((transaction: any) => {
 					return {
 						type: "transaction",
 						timestamp: transaction.createdAt,
@@ -70,7 +72,23 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 					}
 				})
 
-				setFilteredTransactions(transactionsMapped)
+				const { data: topUpsData } = await searchTopUps({
+					variables: {
+						"page": 1,
+						"pageSize": 5,
+						"search": value.toLowerCase()
+					}
+				})
+
+
+				const combinedTransactions = [...transactionsMapped, ...topUpsData.searchTopUps].sort((a: any, b: any) => {
+					return new Date(Number(b.timestamp)).getTime() - new Date(Number(a.timestamp)).getTime()
+				});
+
+				console.log(JSON.stringify(combinedTransactions, null, 2));
+
+
+				setFilteredTransactions(combinedTransactions)
 			}
 
 		} catch (error) {
@@ -125,11 +143,15 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 	}
 
 	const onSelectTransaction = async (transaction: any) => {
-		await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...formatTransaction(transaction) })))
+		const formatedTransaction = formatTransaction(transaction)
+		setBottomSheetHeught(!formatedTransaction.isFromMe ? height * 0.55 : height * 0.9)
 
-		setShowPayButton(formatTransaction(transaction).showPayButton)
+		await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...formatedTransaction })))
+
+
+		setShowPayButton(formatedTransaction.showPayButton)
 		setShowSingleTransaction(true)
-		setSingleTransactionTitle(formatTransaction(transaction).showPayButton ? "Pagar" : "Ver Detalles")
+		setSingleTransactionTitle(formatedTransaction.showPayButton ? "Pagar" : "Ver Detalles")
 	}
 
 	const onCloseFinishSingleTransaction = async () => {
@@ -271,7 +293,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 												</VStack>
 											</HStack>
 											<VStack ml={"10px"} justifyContent={"center"}>
-												<Heading opacity={data?.status === "cancelled" ? 0.5 : 1} textDecorationLine={data?.status === "cancelled" ? "line-through" : "none"} fontWeight={"bold"} textTransform={"capitalize"} fontSize={scale(14)} color={colors.mainGreen}>{FORMAT_CURRENCY(data?.amount)}</Heading>
+												<Heading opacity={data?.status === "cancelled" ? 0.5 : 1} textDecorationLine={data?.status === "cancelled" ? "line-through" : "none"} fontWeight={"bold"} textTransform={"capitalize"} fontSize={scale(14)} color={colors.red}>{FORMAT_CURRENCY(data?.amount)}</Heading>
 											</VStack>
 										</HStack>
 									</Pressable>
@@ -290,7 +312,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 					)
 				}
 			</ScrollView>
-			<BottomSheet height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
+			<BottomSheet height={bottomSheetHeught} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
 				<SingleSentTransaction iconImage={pendingClock} showPayButton={showPayButton} goNext={goNext} onClose={onCloseFinishSingleTransaction} title={singleTransactionTitle} />
 			</BottomSheet>
 			<SendTransaction open={showSendTransaction} onCloseFinish={onSendCloseFinish} onSendFinish={onSendCloseFinish} />

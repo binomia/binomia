@@ -22,7 +22,7 @@ import { TopUpApolloQueries } from '@/apollo/query';
 import { TopUpAuthSchema } from '@/auth/topUpAuth';
 import { topupActions } from '@/redux/slices/topupSlice';
 import { z } from 'zod';
-import { fetchRecentTransactions } from '@/redux/fetchHelper';
+import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
 
 
@@ -69,6 +69,7 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
             await dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance - Number(newTopUp.amount) })))
             await dispatch(topupActions.setHasNewTransaction(true))
             await dispatch(fetchRecentTransactions())
+            await dispatch(fetchAllTransactions({ page: 1, pageSize: 5 }))
 
             onClose()
 

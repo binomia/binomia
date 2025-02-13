@@ -115,8 +115,8 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", sh
                         <Pressable onPress={() => onCardPress(payFromCard)} _pressed={{ opacity: 0.5 }} flexDirection={"row"} alignItems={"center"}>
                             <RenderCardLogo brand={payFromCard.brand} />
                             <VStack justifyContent={"center"}>
-                                <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{payFromCard?.alias}</Heading>
-                                <Text fontSize={scale(13)} color={colors.pureGray}>xxxx...{payFromCard?.last4Number}</Text>
+                                <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{payFromCard?.alias} {payFromCard?.last4Number}</Heading>
+                                <Text textTransform={"capitalize"}  fontSize={scale(13)} color={colors.pureGray}>{payFromCard?.brand?.replaceAll("-", " ")}</Text>
                             </VStack>
                                 <Ionicons style={{ }} name="chevron-forward" size={25} color={colors.gray} />
                         </Pressable>

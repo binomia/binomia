@@ -115,20 +115,49 @@ export const GENERATE_RAMDOM_COLOR_BASE_ON_TEXT = (test: string): string => {
 }
 
 export const MAKE_FULL_NAME_SHORTEN = (fullName: string) => {
-    const nameParts = fullName.trim().split(" ");
+    const nameParts = fullName.trim().split(/\s+/);
 
     if (nameParts.length === 1) {
         return fullName; // Return full name if there's only one part
     }
 
     const firstName = nameParts[0];
-    const middleNameInitial = nameParts.length > 2 ? nameParts[1].charAt(0).toUpperCase() + '.' : '';
-    const lastNameInitial = nameParts[nameParts.length - 1];
+    let middleNameInitial = '';
+    let lastName = '';
+
+    if (nameParts.length === 2) {
+        // If only two parts, assume it's "First Last"
+        lastName = nameParts[1];
+    } else {
+        // Identify the position of the last name dynamically
+        let lastNameIndex = 1; // Default: last name is the last word
+
+        for (let i = nameParts.length - 2; i > 0; i--) {
+            // If we detect a lowercase or very short word (≤3 letters), we assume it's part of the last name
+            if (nameParts[i].length <= 3 || /^[a-z]/.test(nameParts[i])) {
+                lastNameIndex = i;
+            } else {
+                break; // Stop when we find a non-compound part
+            }
+        }
+
+        // Middle name initial (if any)
+        if (lastNameIndex > 1) {
+            middleNameInitial = nameParts[1].charAt(0).toUpperCase() + '.';
+        }
+
+        // Extract last name correctly
+        lastName = nameParts.slice(lastNameIndex).join(" ")
+
+        if (lastName.split(" ").length > 2)
+            lastName = lastName.split(" ").slice(0, -1).join(" ")
+    }
 
     return middleNameInitial
-        ? `${firstName} ${middleNameInitial} ${lastNameInitial}`
-        : `${firstName} ${lastNameInitial}`;
-}
+        ? `${firstName} ${middleNameInitial} ${lastName}`
+        : `${firstName} ${lastName}`;
+};
+
 
 export const CAPITALIZE_WORDS = (text: string) => {
     return text

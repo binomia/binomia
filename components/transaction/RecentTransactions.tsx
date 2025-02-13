@@ -32,7 +32,7 @@ const RecentTransactions: React.FC = () => {
 	const [showPayButton, setShowPayButton] = useState<boolean>(false);
 	const [openBottomSheet, setOpenBottomSheet] = useState(false);
 	const [transaction, setTransaction] = useState<any>({})
-
+	const [bottomSheetHeught, setBottomSheetHeught] = useState<number>(height * 0.9);
 
 
 	const formatTransaction = (transaction: any) => {
@@ -70,11 +70,14 @@ const RecentTransactions: React.FC = () => {
 	}
 
 	const onSelectTransaction = async (transaction: any) => {
-		await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...formatTransaction(transaction) })))
+		const formatedTransaction = formatTransaction(transaction)
+		setBottomSheetHeught(!formatedTransaction.isFromMe ? height * 0.55 : height * 0.9)
 
-		setShowPayButton(formatTransaction(transaction).showPayButton)
+		await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...formatedTransaction })))
+
+		setShowPayButton(formatedTransaction.showPayButton)
 		setShowSingleTransaction(true)
-		setSingleTransactionTitle(formatTransaction(transaction).showPayButton ? "Pagar" : "Ver Detalles")
+		setSingleTransactionTitle(formatedTransaction.showPayButton ? "Pagar" : "Ver Detalles")
 	}
 
 	const onCloseFinishSingleTransaction = async () => {
@@ -190,7 +193,7 @@ const RecentTransactions: React.FC = () => {
 							)
 						)}
 					/>
-					<BottomSheet height={height * 0.9} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
+					<BottomSheet height={bottomSheetHeught} onCloseFinish={onCloseFinishSingleTransaction} open={showSingleTransaction}>
 						<SingleSentTransaction iconImage={pendingClock} showPayButton={showPayButton} goNext={goNext} onClose={onCloseFinishSingleTransaction} title={singleTransactionTitle} />
 					</BottomSheet>
 					<SingleTopTup open={openBottomSheet} onClose={onCloseFinish} topup={transaction} />

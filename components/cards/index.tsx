@@ -119,8 +119,8 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
                                         <Pressable onPress={() => onPressCard(item)} w={"100%"} key={`card-${index}-${item.last4Number}`} _pressed={{ opacity: 0.5 }} flexDirection={"row"} p={"15px"} borderRadius={10} bg={colors.lightGray} mt={"15px"} mr={"10px"} alignItems={"center"}>
                                             <RenderCardLogo brand={item.brand} />
                                             <VStack ml={"10px"}>
-                                                <Heading textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.brand} {item.last4Number}</Heading>
-                                                <Text fontSize={scale(15)} color={colors.pureGray}>{item.alias}</Text>
+                                                <Heading textTransform={"capitalize"} fontSize={scale(15)} color={colors.white}>{item.alias} {item.last4Number}</Heading>
+                                                <Text textTransform={"capitalize"} fontSize={scale(15)} color={colors.pureGray}>{item.brand?.replaceAll("-", " ")}</Text>
                                             </VStack>
                                         </Pressable>
                                     )}

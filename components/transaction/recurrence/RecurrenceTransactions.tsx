@@ -283,7 +283,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                 return "Cada 1 y 16 de cada mes";
         }
     }
-    
+
     const formatTransactionNextDate = (jobName: string, jobTime: string) => {
         switch (jobName) {
             case "weekly":
@@ -326,7 +326,12 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                         {transactions.length > 0 ? (
                             <ScrollView px={"20px"} w={"100%"} h={"100%"} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                                 <VStack>
-                                    <Heading fontSize={scale(20)} mt={"30px"} fontWeight={"500"} color={"white"}>Recurrentes</Heading>
+                                    <HStack w={"100%"} justifyContent={"space-between"}>
+                                        <Heading fontSize={scale(20)} mt={"30px"} fontWeight={"500"} color={"white"}>Recurrentes</Heading>
+                                        <Pressable onPress={onPressNewTransaction} mt={"20px"} _pressed={{ opacity: 0.5 }} justifyContent={"center"} alignItems={"center"} >
+                                            <Ionicons name="add-circle" style={{ fontSize: scale(35) }} color={colors.mainGreen} />
+                                        </Pressable>
+                                    </HStack>
                                     <FlatList
                                         scrollEnabled={false}
                                         data={transactions}

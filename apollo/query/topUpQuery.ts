@@ -95,4 +95,36 @@ export class TopUpApolloQueries {
             }
         `
     }
+
+    static searchTopUps = () => {
+        return gql`
+            query SearchTopUps($page: Int!, $pageSize: Int!, $search: String!) {
+                searchTopUps(page: $page, pageSize: $pageSize, search: $search) {
+                    type
+                    timestamp
+                    data {
+                        id
+                        status
+                        amount
+                        referenceId
+                        createdAt
+                        updatedAt
+                        phone {
+                            fullName    
+                            phone    
+                        }
+                        company {
+                            id
+                            uuid
+                            status
+                            name
+                            logo
+                            createdAt
+                            updatedAt
+                        }
+                    }
+                }
+            }
+        `
+    }
 }
