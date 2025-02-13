@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import colors from '@/colors'
-import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet } from 'react-native'
-import { Heading, Image, Text, VStack, HStack } from 'native-base'
-import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { Heading, Image, Text, VStack, HStack, Avatar } from 'native-base'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import Button from '@/components/global/Button';
 import { useDispatch, useSelector } from 'react-redux';
@@ -68,11 +67,11 @@ const CreateTransaction: React.FC<Props> = ({ input, title = "Siguiente", showBa
                         {receiver.profileImageUrl ?
                             <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: receiver.profileImageUrl }} />
                             :
-                            <DefaultIcon
-                                value={receiver?.fullName || ""}
-                                contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(receiver?.fullName || "") }]}
-                                textStyle={styles.textStyle}
-                            />
+                            <Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(receiver?.fullName || "")}>
+                                <Heading size={"sm"} color={colors.white}>
+                                    {EXTRACT_FIRST_LAST_INITIALS(receiver?.fullName || "0")}
+                                </Heading>
+                            </Avatar>
                         }
                         <VStack justifyContent={"center"}>
                             <Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(receiver?.fullName || "")}</Heading>

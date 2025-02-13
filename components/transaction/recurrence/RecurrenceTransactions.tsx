@@ -1,18 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import colors from '@/colors'
-import DefaultIcon from 'react-native-default-icon';
 import moment from 'moment';
 import BottomSheet from '@/components/global/BottomSheet';
 import PagerView from 'react-native-pager-view';
 import Button from '@/components/global/Button';
 import { StyleSheet, Dimensions, RefreshControl } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Pressable, Spinner, ScrollView, FlatList } from 'native-base'
+import { Heading, Image, Text, VStack, HStack, Pressable, Spinner, ScrollView, FlatList, Avatar } from 'native-base'
 import { scale } from 'react-native-size-matters';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { deleteIcon, editIcon, noTransactions } from '@/assets';
 import { Entypo } from '@expo/vector-icons';
-import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getNextBiWeeklyDate, getNextDay, getSpecificDayOfMonth, MAKE_FULL_NAME_SHORTEN } from '@/helpers';
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getNextBiWeeklyDate, getNextDay, getSpecificDayOfMonth, MAKE_FULL_NAME_SHORTEN } from '@/helpers';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { recurenceMonthlyData, recurenceWeeklyData, getTitleById } from '@/mocks';
@@ -342,11 +341,11 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                                                     {item?.referenceData?.logo ?
                                                         <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: item?.referenceData?.logo }} />
                                                         :
-                                                        <DefaultIcon
-                                                            value={item?.referenceData?.fullName}
-                                                            contentContainerStyle={[styles.contentContainerStyle, { width: scale(45), height: scale(45), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item?.referenceData?.fullName ?? "") }]}
-                                                            textStyle={styles.textStyle}
-                                                        />
+                                                        <Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item?.referenceData?.fullName || "")}>
+                                                            <Heading size={"sm"} color={colors.white}>
+                                                                {EXTRACT_FIRST_LAST_INITIALS(item?.referenceData?.fullName || "0")}
+                                                            </Heading>
+                                                        </Avatar>
                                                     }
                                                     <VStack ml={"10px"} justifyContent={"center"}>
                                                         <Heading textTransform={"capitalize"} fontSize={scale(14)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item?.referenceData?.fullName || "")}</Heading>
@@ -388,11 +387,11 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                                     {transaction.profileImageUrl ?
                                         <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: transaction.profileImageUrl }} />
                                         :
-                                        <DefaultIcon
-                                            value={transaction.fullName ?? ""}
-                                            contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction.fullName ?? "") }]}
-                                            textStyle={styles.textStyle}
-                                        />
+                                        <Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction.fullName || "")}>
+                                            <Heading size={"sm"} color={colors.white}>
+                                                {EXTRACT_FIRST_LAST_INITIALS(transaction.fullName || "0")}
+                                            </Heading>
+                                        </Avatar>
                                     }
                                     <VStack ml={"10px"} justifyContent={"center"}>
                                         <Heading textTransform={"capitalize"} fontSize={scale(16)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction.fullName ?? "")}</Heading>
@@ -455,11 +454,11 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                                 {transaction.profileImageUrl ?
                                     <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: transaction.profileImageUrl }} />
                                     :
-                                    <DefaultIcon
-                                        value={transaction.fullName}
-                                        contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction.fullName ?? "") }]}
-                                        textStyle={styles.textStyle}
-                                    />
+                                    <Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction.fullName || "")}>
+                                        <Heading size={"sm"} color={colors.white}>
+                                            {EXTRACT_FIRST_LAST_INITIALS(transaction.fullName || "0")}
+                                        </Heading>
+                                    </Avatar>
                                 }
                                 <VStack ml={"10px"} justifyContent={"center"}>
                                     <Heading textTransform={"capitalize"} fontSize={scale(16)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction.fullName ?? "")}</Heading>

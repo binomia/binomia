@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import colors from '@/colors'
-import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, FlatList } from 'native-base'
 import { FORMAT_CURRENCY, FORMAT_PHONE_NUMBER, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'

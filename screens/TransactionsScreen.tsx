@@ -1,14 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
-import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, SafeAreaView, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity, RefreshControl } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView } from 'native-base'
+import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView, Avatar } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
-import { FORMAT_CURRENCY, FORMAT_FULL_NAME, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, FORMAT_FULL_NAME, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
 import { useDispatch, useSelector } from 'react-redux';
@@ -176,11 +175,11 @@ const TransactionsScreen: React.FC = () => {
 													{item.profileImageUrl ?
 														<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(55)} h={scale(55)} source={{ uri: item.profileImageUrl }} />
 														:
-														<DefaultIcon
-															value={item.fullName}
-															contentContainerStyle={[styles.contentContainerStyle, { width: 70, height: 70, backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.fullName) }]}
-															textStyle={styles.textStyle}
-														/>
+														<Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item?.fullName || "")}>
+															<Heading size={"sm"} color={colors.white}>
+																{EXTRACT_FIRST_LAST_INITIALS(item?.fullName || "0")}
+															</Heading>
+														</Avatar>
 													}
 													<VStack mt={"5px"} justifyContent={"center"}>
 														<Heading textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>{FORMAT_FULL_NAME(item.fullName)}</Heading>
@@ -207,11 +206,11 @@ const TransactionsScreen: React.FC = () => {
 													{formatTransaction(item).profileImageUrl ?
 														<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(item).profileImageUrl }} />
 														:
-														<DefaultIcon
-															value={formatTransaction(item).fullName || ""}
-															contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "") }]}
-															textStyle={styles.textStyle}
-														/>
+														<Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "")}>
+															<Heading size={"sm"} color={colors.white}>
+																{EXTRACT_FIRST_LAST_INITIALS(formatTransaction(item).fullName || "0")}
+															</Heading>
+														</Avatar>
 													}
 													<VStack ml={"10px"} justifyContent={"center"}>
 														<Heading textTransform={"capitalize"} fontSize={scale(16)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
@@ -227,7 +226,7 @@ const TransactionsScreen: React.FC = () => {
 								/>
 							</VStack>
 							: (
-								<VStack key={"transations-screen-no-transactions"+ Date.now()} w={"100%"} h={"50%"} mt={"20px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
+								<VStack key={"transations-screen-no-transactions" + Date.now()} w={"100%"} h={"50%"} mt={"20px"} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
 									<Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
 									<VStack justifyContent={"center"} alignItems={"center"}>
 										<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>

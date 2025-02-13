@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react'
 import colors from '@/colors'
-import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, Dimensions, ScrollView } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Pressable, ZStack } from 'native-base'
-import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { Heading, Avatar, Image, Text, VStack, HStack, Pressable, ZStack } from 'native-base'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import BottomSheet from '@/components/global/BottomSheet';
 import Button from '@/components/global/Button';
@@ -155,11 +154,9 @@ const Transaction: React.FC<Props> = ({ title = "Ver Detalles", iconImage, showP
                             {transaction?.profileImageUrl ?
                                 <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(50)} h={scale(50)} source={{ uri: transaction?.profileImageUrl }} />
                                 :
-                                <DefaultIcon
-                                    value={transaction?.fullName || ""}
-                                    contentContainerStyle={[styles.contentContainerStyle, { width: scale(width / 4), height: scale(width / 4), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "") }]}
-                                    textStyle={styles.textStyle}
-                                />
+                                <Avatar borderRadius={100} w={scale(width / 4)} h={scale(width / 4)} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "")}>
+                                    {EXTRACT_FIRST_LAST_INITIALS(transaction?.fullName || "0")}
+                                </Avatar>                             
                             }
                             <VStack ml={"10px"} >
                                 <Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>

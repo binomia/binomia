@@ -1,9 +1,8 @@
 import { StyleSheet, } from 'react-native'
 import React, { useContext, useEffect, useState } from 'react'
-import { Heading, Image, VStack, Text, HStack, Divider, FlatList, Pressable, ZStack, Spinner, ScrollView } from 'native-base'
-import DefaultIcon from 'react-native-default-icon'
+import { Heading, Image, VStack, Text, HStack, Divider, FlatList, Pressable, ZStack, Spinner, ScrollView, Avatar } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
-import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
 import Feather from '@expo/vector-icons/Feather';
@@ -84,11 +83,11 @@ const ProfileScreen: React.FC = () => {
                                     <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={{ uri: profileImage }} />
                                 </Pressable>
                                 :
-                                <DefaultIcon
-                                    value={user?.fullName}
-                                    contentContainerStyle={[styles.contentContainerStyle, { width: scale(90), height: scale(90), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user?.fullName || "") }]}
-                                    textStyle={styles.textStyle}
-                                />
+                                <Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user?.fullName || "")}>
+                                    <Heading size={"sm"} color={colors.white}>
+                                        {EXTRACT_FIRST_LAST_INITIALS(user?.fullName || "0")}
+                                    </Heading>
+                                </Avatar>
                             }
                             {isLoading ?
                                 <HStack pl={"10px"} pt={"10px"} justifyContent={"center"} alignItems={"center"} w={scale(90)} h={scale(90)}>

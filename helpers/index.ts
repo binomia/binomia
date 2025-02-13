@@ -158,6 +158,39 @@ export const MAKE_FULL_NAME_SHORTEN = (fullName: string) => {
         : `${firstName} ${lastName}`;
 };
 
+export const EXTRACT_FIRST_LAST_INITIALS = (fullName: string): string => {
+    const nameParts = fullName.trim().split(/\s+/);
+    
+    // If there's only one part, just return its first letter
+    if (nameParts.length === 1) {
+        return nameParts[0].charAt(0).toUpperCase();
+    }
+    
+    // Initially assume the last part of the array is the last name
+    let lastNameIndex = nameParts.length - 1;
+    
+    // Walk backward to detect if short (≤3 letters) or all-lowercase words
+    // should be part of the last name
+    for (let i = nameParts.length - 2; i > 0; i--) {
+        if (nameParts[i].length <= 3 || /^[a-z]/.test(nameParts[i])) {
+            lastNameIndex = i;
+        } else {
+            break;
+        }
+    }
+    
+    // Get first name’s initial
+    const firstInitial = nameParts[0].charAt(0).toUpperCase();
+    
+    // Join all parts from lastNameIndex onward for the "last name"
+    const lastName = nameParts.slice(lastNameIndex).join(" ");
+    // Get last name’s initial
+    const lastInitial = lastName.charAt(0).toUpperCase();
+    
+    // Return something like "J.D." (you can adjust the format as you prefer)
+    return `${firstInitial}${lastInitial}`;
+};
+
 
 export const CAPITALIZE_WORDS = (text: string) => {
     return text

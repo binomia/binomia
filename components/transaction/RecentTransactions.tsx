@@ -1,13 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react'
 import colors from '@/colors'
-import DefaultIcon from 'react-native-default-icon';
 import BottomSheet from '@/components/global/BottomSheet';
 import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
 import { StyleSheet, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Pressable } from 'native-base'
-import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, Avatar } from 'native-base'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
@@ -141,14 +140,14 @@ const RecentTransactions: React.FC = () => {
 								<Pressable bg={colors.lightGray} my={"5px"} borderRadius={10} px={"15px"} py={"10px"} key={`transactions(tgrtgnrhbfhrbgr)-${data.transactionId}-${index}-${data.transactionId}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(data)}>
 									<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
 										<HStack>
-											{formatTransaction(data).profileImageUrl ?
+											{!formatTransaction(data).profileImageUrl ?
 												<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(data).profileImageUrl }} />
 												:
-												<DefaultIcon
-													value={formatTransaction(data).fullName || ""}
-													contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(data).fullName || "") }]}
-													textStyle={styles.textStyle}
-												/>
+												<Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(data).fullName  || "")}>
+													<Heading size={"sm"} color={colors.white}>
+														{EXTRACT_FIRST_LAST_INITIALS(formatTransaction(data).fullName  || "0")}
+													</Heading>
+												</Avatar>												
 											}
 											<VStack ml={"10px"} justifyContent={"center"}>
 												<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(data).fullName || "")}</Heading>
@@ -174,11 +173,11 @@ const RecentTransactions: React.FC = () => {
 											{data.company.logo ?
 												<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: data.company.logo }} />
 												:
-												<DefaultIcon
-													value={data.phone.fullName || ""}
-													contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(data.phone.fullName || "") }]}
-													textStyle={styles.textStyle}
-												/>
+												<Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(data.phone.fullName || "")}>
+													<Heading size={"sm"} color={colors.white}>
+														{EXTRACT_FIRST_LAST_INITIALS(data.phone.fullName || "0")}
+													</Heading>
+												</Avatar>												
 											}
 											<VStack ml={"10px"} justifyContent={"center"}>
 												<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(data.phone.fullName || "")}</Heading>

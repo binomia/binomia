@@ -1,5 +1,4 @@
 import React, { useContext, useEffect, useState } from 'react'
-import DefaultIcon from 'react-native-default-icon'
 import colors from '@/colors'
 import Feather from '@expo/vector-icons/Feather';
 import Button from '@/components/global/Button'
@@ -7,10 +6,10 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 import ImageView from "react-native-image-viewing";
 import QRScanner from '@/components/global/QRScanner'
 import * as ImagePicker from 'expo-image-picker';
-import { StyleSheet, } from 'react-native'
-import { Heading, Image, VStack, Text, HStack, Pressable, ZStack, Spinner, ScrollView } from 'native-base'
+import { Dimensions, StyleSheet, } from 'react-native'
+import { Heading, Image, VStack, Text, HStack, Pressable, ZStack, Spinner, ScrollView, Avatar } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
-import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters'
 import { SessionContext } from '@/contexts/sessionContext'
 import { useCloudinary } from '@/hooks/useCloudinary'
@@ -22,6 +21,7 @@ import { qrIcon } from '@/assets'
 import { accountActions } from '@/redux/slices/accountSlice'
 
 
+const { width } = Dimensions.get('window');
 const ProfileScreen: React.FC = () => {
 	const { onLogout } = useContext(SessionContext)
 
@@ -90,11 +90,11 @@ const ProfileScreen: React.FC = () => {
 										</Pressable>
 										:
 										<Pressable onPress={() => pickImage()} _pressed={{ opacity: 0.5 }}>
-											<DefaultIcon
-												value={user?.fullName}
-												contentContainerStyle={[styles.contentContainerStyle, { width: scale(65), height: scale(65), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user?.fullName || "") }]}
-												textStyle={styles.textStyle}
-											/>
+											<Avatar borderRadius={100} w={"70px"} h={"70px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user?.fullName || "")}>
+												<Heading color={colors.white}>
+													{EXTRACT_FIRST_LAST_INITIALS(user?.fullName || "0")}
+												</Heading>
+											</Avatar>
 										</Pressable>
 									}
 									<HStack w={"90%"} justifyContent={"flex-end"} bottom={0}>

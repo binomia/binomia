@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
-import DefaultIcon from 'react-native-default-icon';
 import { StyleSheet, SafeAreaView, Keyboard, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack } from 'native-base'
+import { Heading, Image, Text, VStack, FlatList, HStack, Avatar } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
-import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import SendTransaction from '@/components/transaction/SendTransaction';
 import { useDispatch } from 'react-redux';
@@ -87,11 +86,11 @@ const SearchUserScreen: React.FC = () => {
 									{item.profileImageUrl ?
 										<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={"50px"} h={"50px"} source={{ uri: item.profileImageUrl }} />
 										:
-										<DefaultIcon
-											value={item.fullName}
-											contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.fullName) }]}
-											textStyle={styles.textStyle}
-										/>
+										<Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.fullName || "")}>
+											<Heading size={"sm"} color={colors.white}>
+												{EXTRACT_FIRST_LAST_INITIALS(item.fullName || "0")}
+											</Heading>
+										</Avatar>
 									}
 									<VStack ml={"10px"} justifyContent={"center"}>
 										<Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item.fullName)}</Heading>

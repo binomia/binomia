@@ -1,13 +1,12 @@
 import React, { useRef, useState } from 'react'
 import colors from '@/colors'
-import DefaultIcon from 'react-native-default-icon';
 import Button from '@/components/global/Button';
 import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import * as Sharing from 'expo-sharing';
 import { StyleSheet, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Pressable, ZStack } from 'native-base'
-import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { Heading, Image, Text, VStack, HStack, Pressable, ZStack, Avatar } from 'native-base'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMutation } from '@apollo/client';
@@ -176,11 +175,11 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 						{receiver?.profileImageUrl ?
 							<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(50)} h={scale(50)} source={{ uri: receiver?.profileImageUrl }} />
 							:
-							<DefaultIcon
-								value={receiver?.fullName || ""}
-								contentContainerStyle={[styles.contentContainerStyle, { width: scale(50), height: scale(50), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(receiver?.fullName || "") }]}
-								textStyle={styles.textStyle}
-							/>
+							<Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(receiver?.fullName || "")}>
+								<Heading size={"sm"} color={colors.white}>
+									{EXTRACT_FIRST_LAST_INITIALS(receiver?.fullName || "0")}
+								</Heading>
+							</Avatar>							
 						}
 						<VStack ml={"10px"} >
 							<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(receiver?.fullName || "")}</Heading>

@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import colors from '@/colors'
-import DefaultIcon from 'react-native-default-icon';
-import moment from 'moment';
-import BottomSheet from '@/components/global/BottomSheet';
+
 import PagerView from 'react-native-pager-view';
 import Button from '@/components/global/Button';
 import { StyleSheet, Dimensions, RefreshControl } from 'react-native'

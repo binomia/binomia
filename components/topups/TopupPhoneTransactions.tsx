@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
-import DefaultIcon from 'react-native-default-icon';
 import BottomSheet from '@/components/global/BottomSheet';
 import moment from 'moment';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -10,12 +9,12 @@ import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
 import PagerView from 'react-native-pager-view';
 import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
 import { StyleSheet, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Spinner, Pressable, ScrollView } from 'native-base'
+import { Heading, Image, Text, VStack, FlatList, HStack, Spinner, Pressable, ScrollView, Avatar } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
-import { FORMAT_CURRENCY, FORMAT_FULL_NAME, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, FORMAT_FULL_NAME, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
@@ -212,11 +211,11 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                                                 {formatTransaction(item).profileImageUrl ?
                                                     <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(item).profileImageUrl }} />
                                                     :
-                                                    <DefaultIcon
-                                                        value={formatTransaction(item).fullName || ""}
-                                                        contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "") }]}
-                                                        textStyle={styles.textStyle}
-                                                    />
+                                                    <Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "")}>
+                                                        <Heading size={"sm"} color={colors.white}>
+                                                            {EXTRACT_FIRST_LAST_INITIALS(formatTransaction(item).fullName || "0")}
+                                                        </Heading>
+                                                    </Avatar>                                                    
                                                 }
                                                 <VStack ml={"10px"} justifyContent={"center"}>
                                                     <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>

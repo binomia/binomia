@@ -9,7 +9,6 @@ import { useLazyQuery, useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { deleteIcon, editIcon, noTransactions } from '@/assets';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import DefaultIcon from 'react-native-default-icon';
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getNextDay, MAKE_FULL_NAME_SHORTEN } from '@/helpers';
 import moment from 'moment';
 import BottomSheet from '@/components/global/BottomSheet';
@@ -157,11 +156,11 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ onCloseFinish = () => {
                             renderItem={({ item, index }) => (
                                 <Pressable key={`${item.repeatJobKey}-${index}`} onPress={() => onSelectTransaction(item)} my={"10px"} _pressed={{ opacity: 0.5 }} flexDirection={"row"} justifyContent={"space-between"}>
                                     <HStack>
-                                        <DefaultIcon
+                                        {/* <DefaultIcon
                                             value={item.receiver.user.fullName}
                                             contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item.receiver.user.fullName) }]}
                                             textStyle={styles.textStyle}
-                                        />
+                                        /> */}
                                         <VStack ml={"10px"} justifyContent={"center"}>
                                             <Heading textTransform={"capitalize"} fontSize={scale(16)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item.receiver.user.fullName)}</Heading>
                                             <Text fontSize={scale(12)} color={colors.lightSkyGray}>Proximo: {moment(getNextDay(item.jobName)).format("ll")}</Text>
@@ -191,11 +190,11 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ onCloseFinish = () => {
             <BottomSheet onCloseFinish={onBottomSheetCloseFinish} height={bottomSheetHeight} open={visible}>
                 <HStack p={"20px"} justifyContent={"space-between"}>
                     <HStack>
-                        <DefaultIcon
+                        {/* <DefaultIcon
                             value={transaction.fullName}
                             contentContainerStyle={[styles.contentContainerStyle, { backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction.fullName ?? "") }]}
                             textStyle={styles.textStyle}
-                        />
+                        /> */}
                         <VStack ml={"10px"} justifyContent={"center"}>
                             <Heading textTransform={"capitalize"} fontSize={scale(16)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction.fullName ?? "")}</Heading>
                             <Text fontSize={scale(12)} color={colors.lightSkyGray}>Proximo: {moment(getNextDay(transaction.jobName)).format("ll")}</Text>

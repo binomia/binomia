@@ -1,11 +1,10 @@
 import QRScanner from "../global/QRScanner"
 import Cards from "../cards"
 import RecurrenceTransactions from "../transaction/recurrence/RecurrenceTransactions"
-import DefaultIcon from "react-native-default-icon"
 import NewTopUp from "../topups/NewTopUp"
 import colors from "@/colors"
 import { creditCard, logo, qrIcon, recurrenceIcon } from "@/assets"
-import { VStack, Image, Pressable, HStack, Text, Stack, Heading } from "native-base"
+import { VStack, Image, Pressable, HStack, Text, Stack, Heading, Avatar } from "native-base"
 import { StyleSheet } from "react-native"
 import { useState } from "react"
 import { router } from "expo-router"
@@ -13,7 +12,7 @@ import { AntDesign, Entypo, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { scale } from "react-native-size-matters"
 import { Dimensions, Platform } from "react-native"
 import { useSelector } from "react-redux"
-import { GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
+import { EXTRACT_FIRST_LAST_INITIALS, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
 
 
 const { width } = Dimensions.get('window')
@@ -78,11 +77,11 @@ export const TransactionCenter: React.FC<{ p?: string }> = ({ p = "0" }) => {
             {transaction?.profileImageUrl ?
                 <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(35)} h={scale(35)} source={{ uri: transaction?.profileImageUrl }} />
                 :
-                <DefaultIcon
-                    value={transaction?.fullName || ""}
-                    contentContainerStyle={[styles.contentContainerStyle, { width: scale(width / 4), height: scale(width / 4), backgroundColor: GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "") }]}
-                    textStyle={styles.textStyle}
-                />
+                <Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(transaction?.fullName || "")}>
+                    <Heading size={"sm"} color={colors.white}>
+                        {EXTRACT_FIRST_LAST_INITIALS(transaction?.fullName || "0")}
+                    </Heading>
+                </Avatar>               
             }
             <VStack ml={"10px"} alignItems={"center"} >
                 <Heading textTransform={"capitalize"} fontSize={scale(18)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
