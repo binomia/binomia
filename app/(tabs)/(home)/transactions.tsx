@@ -48,10 +48,12 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 	const [showPayButton, setShowPayButton] = useState<boolean>(false);
 	const [openBottomSheet, setOpenBottomSheet] = useState(false);
 	const [bottomSheetHeught, setBottomSheetHeught] = useState<number>(height * 0.9);
+	const [searchValue, setSearchValue] = useState<string>("");
 
 
 	const handleSearch = async (value: string) => {
 		try {
+			setSearchValue(value)
 			if (value === "") {
 				setFilteredTransactions(transactions)
 
@@ -189,19 +191,34 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 		setTransaction({})
 	}
 
+	const onClearInput = async (value: string) => {
+		setSearchValue("")
+		await handleSearch("")
+	}
+
 	useEffect(() => {
 		(async () => {
 			await fetchSearchedUser()
 		})()
 	}, [])
 
-
 	return (
 
 		<VStack flex={1} pt={"20px"} bg={colors.darkGray}>
 			<VStack px={"20px"} w={"100%"} alignItems={"center"}>
 				<TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-					<Input h={"50px"} w={"100%"} placeholder='Buscar...' onChangeText={(value) => handleSearch(value.toLowerCase())} />
+					<Input
+						h={"50px"}
+						w={"100%"}
+						value={searchValue}
+						placeholder='Buscar...'
+						onChangeText={(value) => handleSearch(value.toLowerCase())}
+						rightElement={!!searchValue ? (
+							<Pressable onPress={() => onClearInput("")} _pressed={{ opacity: 0.5 }} w={"30px"} h={"30px"} justifyContent={"center"} alignItems={"center"} borderRadius={100} bg={colors.darkGray} mr={"10px"}>
+								<AntDesign name="close" size={15} color={colors.red} />
+							</Pressable>
+						) : undefined}
+					/>
 				</TouchableWithoutFeedback >
 			</VStack>
 			<ScrollView flex={1} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} contentContainerStyle={{ paddingBottom: 80 }}>
