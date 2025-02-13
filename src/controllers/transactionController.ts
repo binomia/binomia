@@ -291,9 +291,8 @@ export class TransactionsController {
                 })
 
                 const transactionData = await transaction.reload()
-
                 await Promise.all([
-                    redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_REQUEST_PAIED, JSON.stringify({
+                    redis.publish(NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_PAIED, JSON.stringify({
                         data: transactionData.toJSON(),
                         senderSocketRoom: senderAccount.toJSON().user.username,
                         recipientSocketRoom: receiverAccount.toJSON().user.username
@@ -306,8 +305,7 @@ export class TransactionsController {
                         senderId: senderAccount.toJSON().id,
                         receiverId: receiverAccount.toJSON().id,
                         amount: transactionData.toJSON().amount,
-                        data: { transactionId: transactionData.toJSON().transactionId },
-
+                        data: { transactionId: transactionData.toJSON().transactionId }
                     }))
                 ])
 
