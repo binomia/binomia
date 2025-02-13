@@ -11,7 +11,7 @@ import { scale } from 'react-native-size-matters';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { deleteIcon, editIcon, noTransactions } from '@/assets';
-import { Ionicons } from '@expo/vector-icons';
+import { Entypo } from '@expo/vector-icons';
 import { FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getNextBiWeeklyDate, getNextDay, getSpecificDayOfMonth, MAKE_FULL_NAME_SHORTEN } from '@/helpers';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -328,8 +328,8 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                                 <VStack>
                                     <HStack w={"100%"} justifyContent={"space-between"}>
                                         <Heading fontSize={scale(20)} mt={"30px"} fontWeight={"500"} color={"white"}>Recurrentes</Heading>
-                                        <Pressable onPress={onPressNewTransaction} mt={"20px"} _pressed={{ opacity: 0.5 }} justifyContent={"center"} alignItems={"center"} >
-                                            <Ionicons name="add-circle" style={{ fontSize: scale(35) }} color={colors.mainGreen} />
+                                        <Pressable onPress={onPressNewTransaction} mt={"20px"} w={scale(35)} h={scale(35)} borderRadius={100} bg={colors.lightGray} _pressed={{ opacity: 0.5 }} justifyContent={"center"} alignItems={"center"} >
+                                            <Entypo name="plus" size={scale(20)} color={colors.mainGreen} />
                                         </Pressable>
                                     </HStack>
                                     <FlatList
@@ -372,9 +372,11 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                                         <Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
                                         <Text textAlign={"center"} fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>
                                     </VStack>
-                                    <Pressable onPress={onPressNewTransaction} mt={"20px"} _pressed={{ opacity: 0.5 }} justifyContent={"center"} alignItems={"center"} >
-                                        <Ionicons name="add-circle" style={{ fontSize: scale(50) }} color={colors.mainGreen} />
-                                    </Pressable>
+                                    <HStack w={"100%"} justifyContent={"center"}>
+                                        <Pressable onPress={onPressNewTransaction} bg={colors.lightGray} w={scale(50)} h={scale(50)} borderRadius={100} mt={"20px"} _pressed={{ opacity: 0.5 }} justifyContent={"center"} alignItems={"center"} >
+                                            <Entypo name="plus" size={scale(30)} color={colors.mainGreen} />
+                                        </Pressable>
+                                    </HStack>
                                 </VStack>
                             </VStack>
                         )}
