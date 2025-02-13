@@ -244,7 +244,7 @@ export default class TransactionController {
                     {
                         model: UsersModel,
                         as: 'user',
-                        attributes: { exclude: ['createdAt', 'dniNumber', 'updatedAt', 'faceVideoUrl', 'idBackUrl', 'idFrontUrl', 'profileImageUrl', 'password'] }
+                        attributes: { exclude: ['createdAt', 'dniNumber', 'updatedAt', 'faceVideoUrl', 'idBackUrl', 'idFrontUrl', 'password'] }
                     }
                 ]
             })
@@ -438,10 +438,10 @@ export default class TransactionController {
             const message = `${receiverAccount.toJSON().username}&${senderAccount.toJSON().username}@${amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
             const verify = await Cryptography.verify(message, signature, ZERO_SIGN_PRIVATE_KEY)
 
-            
+
             if (!verify)
                 throw "Transaction signature verification failed"
-            
+
             // TODO: Authorization NOT IMPLEMENTED
 
             const transaction = await TransactionsModel.create({
@@ -485,7 +485,7 @@ export default class TransactionController {
                 senderSocketRoom: senderAccount.toJSON().user.username,
                 recipientSocketRoom: receiverAccount.toJSON().user.username,
             }))
-           
+
             return transactionData.toJSON().transactionId
 
         } catch (error: any) {
@@ -525,7 +525,7 @@ export default class TransactionController {
                 });
                 break;
             }
-        
+
             default: {
                 break;
             }
