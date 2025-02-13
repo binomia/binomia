@@ -7,10 +7,12 @@ import { PushNotificationType } from '@/types';
 
 export const useNotifications = (): PushNotificationType => {
     Notifications.setNotificationHandler({
+
         handleNotification: async () => ({
             shouldShowAlert: true,
-            shouldPlaySound: false,
-            shouldSetBadge: false,
+            shouldPlaySound: true,
+            shouldSetBadge: true,
+
         }),
     });
 
@@ -26,13 +28,14 @@ export const useNotifications = (): PushNotificationType => {
 
         if (Device.isDevice) {
             console.log('Platform.OS', Platform.OS);
-            
+
             if (Platform.OS === 'android') {
                 await Notifications.setNotificationChannelAsync('myNotificationChannel', {
                     name: 'A channel is needed for the permissions prompt to appear',
                     importance: Notifications.AndroidImportance.MAX,
                     vibrationPattern: [0, 250, 250, 250],
                     lightColor: '#FF231F7C',
+                    sound: "money.wav"
                 });
             }
 
@@ -77,8 +80,8 @@ export const useNotifications = (): PushNotificationType => {
                 setNotification(notification);
             });
 
-            responseListener.current = Notifications.addNotificationResponseReceivedListener(response => {
-                // console.log(response);
+            responseListener.current = Notifications.addNotificationResponseReceivedListener(async response => {
+                // console.log(response); 
             });
 
             return () => {

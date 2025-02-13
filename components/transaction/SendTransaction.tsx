@@ -50,8 +50,6 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
     }
 
     const onPageSelected = async () => {
-        console.log({ receiver });
-
         const { data } = await fetchSingleUser({
             variables: {
                 username: receiver.username
