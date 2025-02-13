@@ -132,9 +132,9 @@ const HomeScreen: React.FC = () => {
 					<Heading fontSize={scale(18)} color={"white"}>Servicios</Heading>
 					<HStack mt={"10px"} mb={"30px"} justifyContent={"space-between"}>
 						{services.map((item, index) => (
-							<VStack key={`service-${item.name}-${index}`} alignItems={"center"}>
-								<Pressable onPress={item.onPress} _pressed={{ opacity: 0.5 }} borderRadius={"15px"} bg={colors.lightGray} w={width * 0.2} h={width * 0.2} justifyContent={"center"} alignItems={"center"}>
-									<Image resizeMode='contain' alt='send-image-icon' w={scale(40)} h={scale(40)} source={item.image} />
+							<VStack key={`service-${item.name}-${index}`} space={1} alignItems={"center"}>
+								<Pressable onPress={item.onPress} _pressed={{ opacity: 0.5 }} borderRadius={"15px"} bg={colors.lightGray} w={scale(width / 5.5)} h={scale(width / 5.5)} justifyContent={"center"} alignItems={"center"}>
+									<Image resizeMode='contain' alt='send-image-icon' w={"70%"} h={"70%"} source={item.image} />
 								</Pressable>
 								<Text fontWeight={"bold"} color={"white"}>{item.name}</Text>
 							</VStack>

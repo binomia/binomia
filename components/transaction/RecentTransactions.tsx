@@ -21,7 +21,6 @@ const RecentTransactions: React.FC = () => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { user } = useSelector((state: any) => state.accountReducer)
-	const { recentTopUps } = useSelector((state: any) => state.topupReducer)
 	const { hasNewTransaction, recentTransactions } = useSelector((state: any) => state.transactionReducer)
 	const isFocused = useNavigation().isFocused()
 
@@ -140,7 +139,7 @@ const RecentTransactions: React.FC = () => {
 								<Pressable bg={colors.lightGray} my={"5px"} borderRadius={10} px={"15px"} py={"10px"} key={`transactions(tgrtgnrhbfhrbgr)-${data.transactionId}-${index}-${data.transactionId}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(data)}>
 									<HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
 										<HStack>
-											{!formatTransaction(data).profileImageUrl ?
+											{formatTransaction(data).profileImageUrl ?
 												<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(data).profileImageUrl }} />
 												:
 												<Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(data).fullName  || "")}>
