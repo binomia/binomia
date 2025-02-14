@@ -71,7 +71,6 @@ export const useCloudinary = (): UseCloudinaryType => {
                 data.append("cloud_name", CLOUDINARY_CLOUD_NAME)
                 data.append("public_id", `${Date.now()}`)
 
-
                 const response = await axios.post(CLOUDINARY_API_URL, data)
                 setUploadedData(response.data)
 
@@ -79,7 +78,6 @@ export const useCloudinary = (): UseCloudinaryType => {
             }
 
         } catch (error: any) {
-            // console.log({ error }, "uploadAudio");
             throw error
         }
     }

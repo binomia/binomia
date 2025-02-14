@@ -7,7 +7,6 @@ import { PushNotificationType } from '@/types';
 
 export const useNotifications = (): PushNotificationType => {
     Notifications.setNotificationHandler({
-
         handleNotification: async () => ({
             shouldShowAlert: true,
             shouldPlaySound: true,
@@ -76,12 +75,11 @@ export const useNotifications = (): PushNotificationType => {
 
         if (Device.isDevice && Platform.OS !== 'android') {
             registerForPushNotificationsAsync()
-            notificationListener.current = Notifications.addNotificationReceivedListener(notification => {
+            notificationListener.current = Notifications.addNotificationReceivedListener(async notification => {
                 setNotification(notification);
             });
 
             responseListener.current = Notifications.addNotificationResponseReceivedListener(async response => {
-                // console.log(response); 
             });
 
             return () => {

@@ -12,7 +12,6 @@ import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '
 import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType } from '@/types';
 import { WebView } from 'react-native-webview';
-import { authServer } from '@/rpc/authRPC';
 import DatePicker from 'react-native-date-picker'
 import moment from 'moment';
 import { registerActions } from '@/redux/slices/registerSlice';
@@ -31,24 +30,21 @@ const { width, height } = Dimensions.get("window");
 
 const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const dispatch = useDispatch()
-    const { } = useContext<GlobalContextType>(GlobalContext);
+
     const [showDNIError, setShowDNIError] = useState<boolean>(false);
     const [showDNIErroreMessage, setShowDNErrorMessage] = useState<string>("");
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const [openBottomSheetUrl, setOpenBottomSheetUrl] = useState<string>("");
     const [isInvalid, setIsInvalid] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
-
     const [exp, setExp] = useState<string>("");
     const [dob, setDob] = useState<string>("");
     const [id, setId] = useState<string>("");
-
     const [date, setDate] = useState(new Date())
     const [open, setOpen] = useState(false)
     const [hasExpError, setHasExpError] = useState(false)
     const [openedDateTitle, setOpenedDateTitle] = useState("")
     const [isInvalidDate, setIsInvalidDate] = useState<string>("")
-
 
 
     const validateCedula = async () => {
@@ -66,13 +62,7 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
 
     const checkIfDNIExists = async () => {
         try {
-            const dniExists = await authServer("fetchUser", { key: "dni", value: id.toLowerCase() })
-            setShowDNIError(dniExists)
-
-            if (dniExists) {
-                setShowDNErrorMessage("Ya existe una cuenta con este numero de cédula")
-            }
-
+          
         } catch (error) {
             setShowDNIError(false)
             setShowDNErrorMessage("Error Al Validar La Cedula")
@@ -111,8 +101,6 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
         setId(value)
         dispatch(registerActions.setDni(value))
     }
-
-
 
     useEffect(() => {
         setIsInvalid(false)

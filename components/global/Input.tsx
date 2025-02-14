@@ -12,6 +12,7 @@ interface Props extends IInputProps {
     isInvalid?: boolean
     errorMessage?: string
     bColor?: string
+    searchValue?: string
 }
 
 

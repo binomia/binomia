@@ -15,12 +15,14 @@ import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
+import { useLocation } from '@/hooks/useLocation';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
 	const { account } = useSelector((state: any) => state.accountReducer)
 	const dispatch = useDispatch()
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
+	const { getLocationAddress } = useLocation()
 
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const [refreshing, setRefreshing] = useState(false);
@@ -76,7 +78,10 @@ const HomeScreen: React.FC = () => {
 			id: 1,
 			name: "Seguros",
 			image: cars,
-			onPress: () => { }
+			onPress: () => getLocationAddress({
+				latitude: 18.536286,
+				longitude: -69.932761
+			})
 		},
 		{
 			id: 2,
@@ -133,8 +138,8 @@ const HomeScreen: React.FC = () => {
 					<HStack mt={"10px"} mb={"30px"} justifyContent={"space-between"}>
 						{services.map((item, index) => (
 							<VStack key={`service-${item.name}-${index}`} space={1} alignItems={"center"}>
-								<Pressable onPress={item.onPress} _pressed={{ opacity: 0.5 }} borderRadius={"15px"} bg={colors.lightGray} w={scale(width / 5.5)} h={scale(width / 5.5)} justifyContent={"center"} alignItems={"center"}>
-									<Image resizeMode='contain' alt='send-image-icon' w={"70%"} h={"70%"} source={item.image} />
+								<Pressable onPress={item.onPress} _pressed={{ opacity: 0.5 }} borderRadius={"15px"} bg={colors.lightGray} w={scale(width / 7)} h={scale(width / 7)} justifyContent={"center"} alignItems={"center"}>
+									<Image resizeMode='contain' alt='send-image-icon' w={"65%"} h={"65%"} source={item.image} />
 								</Pressable>
 								<Text fontWeight={"bold"} color={"white"}>{item.name}</Text>
 							</VStack>

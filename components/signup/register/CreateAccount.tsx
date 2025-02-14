@@ -14,7 +14,6 @@ import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '
 import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType } from '@/types';
 import { WebView } from 'react-native-webview';
-import { authServer } from '@/rpc/authRPC';
 import { useSelector, useDispatch } from 'react-redux';
 import { registerActions } from '@/redux/slices/registerSlice';
 
@@ -61,8 +60,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
         setShowEmailError(false)
         if (VALIDATE_EMAIL(email)) {
             try {
-                const emailExists = await authServer("fetchUser", { key: "email", value: email.toLowerCase() })
-                setShowEmailError(emailExists)
+                
 
             } catch (error) {
                 setShowEmailError(false)

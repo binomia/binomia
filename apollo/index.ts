@@ -3,8 +3,6 @@ import useAsyncStorage from '@/hooks/useAsyncStorage';
 import { ApolloClient, from, createHttpLink, InMemoryCache, DefaultOptions } from '@apollo/client';
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
-import * as SecureStore from 'expo-secure-store';
-import * as Updates from 'expo-updates';
 import { Alert } from 'react-native';
 
 

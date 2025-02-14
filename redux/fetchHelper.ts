@@ -95,6 +95,30 @@ export const fetchAllTransactions = createAsyncThunk('fetchAllTransactions', asy
     }
 })
 
+export const searchAccountTransactions = createAsyncThunk('searchAccountTransactions', async ({ page, pageSize, search }: { page: number, pageSize: number, search: string }): Promise<any> => {
+    try {
+        const { data: transactionsData } = await apolloClient.query({ query: TransactionApolloQueries.searchAccountTransactions(), variables: { page, pageSize, fullName: search } })
+        const { data: topUpsData } = await apolloClient.query({ query: TopUpApolloQueries.searchTopUps(), variables: { page, pageSize, search } })
+
+        const transactionsMapped = transactionsData.searchAccountTransactions?.map((transaction: any) => {
+            return {
+                type: "transaction",
+                timestamp: transaction.createdAt,
+                data: transaction
+            }
+        })
+
+        const combinedTransactions = [...transactionsMapped, ...topUpsData.searchTopUps].sort((a: any, b: any) => {
+            return new Date(Number(b.timestamp)).getTime() - new Date(Number(a.timestamp)).getTime()
+        });
+
+        return combinedTransactions
+
+    } catch (error) {
+        console.log(error)
+    }
+})
+
 export const fetchAccountBankingTransactions = createAsyncThunk('fetchAccountBankingTransactions', async ({ page = 1, pageSize = 10 }: { page: number, pageSize: number }) => {
     try {
         const { data } = await apolloClient.query({ query: TransactionApolloQueries.accountBankingTransactions(), variables: { page, pageSize } })

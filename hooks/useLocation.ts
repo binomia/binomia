@@ -1,28 +1,25 @@
-import { useState, useEffect } from 'react';
-import { StyleSheet } from 'react-native';
 import * as Location from 'expo-location';
-import axios from 'axios';
+import { useState, useEffect } from 'react';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { useDispatch } from 'react-redux';
-
+import { Client } from "@googlemaps/google-maps-services-js";
+import { GOOGLE_MAPS_API_KEY } from '@/constants';
+import axios from 'axios';
 
 export const useLocation = () => {
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
     const dispatch = useDispatch();
+    const client = new Client();
 
     const requestPermissions = async () => {
         const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
         if (foregroundStatus === 'granted') {
             const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
 
-            if (backgroundStatus === 'granted') {
-
-
-            } else {
+            if (backgroundStatus !== 'granted') {
                 console.log('Permission to access background location was denied');
                 await Location.requestBackgroundPermissionsAsync();
             }
-
         }
         await Location.requestBackgroundPermissionsAsync();
     };
@@ -30,10 +27,45 @@ export const useLocation = () => {
 
     const getLocationAddress = async ({ latitude, longitude }: { latitude: number, longitude: number }) => {
         try {
-            const { data } = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
-            return data.address
-        } catch (error) {
-            console.error(error);
+            const response = await client.reverseGeocode({
+                adapter: 'fetch',
+                httpAgent: axios.defaults.httpAgent,
+                params: {
+                    latlng: [latitude, longitude],
+                    key: GOOGLE_MAPS_API_KEY
+                }
+            });
+
+            const results = response.data.results;
+            const found = results.reduce<any>((acc, result) => {
+                if (acc) return acc;
+
+                const sublocalityComp = result.address_components.find((comp) => comp.types.includes("sublocality" as any));
+                const neighborhoodComp = result.address_components.find((comp) => comp.types.includes("neighborhood" as any));
+                const admAreaLevel2Comp = result.address_components.find((comp) => comp.types.includes("administrative_area_level_2" as any));
+
+                if (sublocalityComp && neighborhoodComp && admAreaLevel2Comp)
+                    return {
+                        neighborhood: neighborhoodComp.long_name,
+                        sublocality: sublocalityComp.long_name,
+                        municipality: admAreaLevel2Comp.long_name,
+                        fullArea: `${neighborhoodComp.long_name}, ${sublocalityComp.long_name}, ${admAreaLevel2Comp.long_name}`,
+                    }
+
+                return acc;
+
+            }, null);
+
+            const address = {
+                ...found,
+                latitude,
+                longitude
+            }
+
+            return address
+
+        } catch (error: any) {
+            console.error("Reverse geocoding error:", error);
         }
     }
 
@@ -49,7 +81,7 @@ export const useLocation = () => {
             }));
         });
     }
-    
+
     const getLocation = async () => {
         try {
             await requestPermissions();
@@ -74,7 +106,6 @@ export const useLocation = () => {
     }
 
 
-
     useEffect(() => {
         // getLocation();
         watchPositionAsync();
@@ -83,6 +114,7 @@ export const useLocation = () => {
 
     return {
         location,
+        getLocationAddress,
         getLocation
     }
 }

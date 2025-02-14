@@ -2,8 +2,6 @@ import { createContext, useEffect, useState } from "react";
 import { CreateUserDataType, SessionContextType, SessionPropsType, SessionVerificationDataType, VerificationDataType } from "@/types";
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { SessionApolloQueries, UserApolloQueries } from "@/apollo/query";
-import { notificationServer } from "@/rpc/notificationRPC";
-import { GENERATE_SIX_DIGIT_TOKEN } from "@/helpers";
 import useAsyncStorage from "@/hooks/useAsyncStorage";
 import { useSelector, useDispatch } from "react-redux";
 import { globalActions } from "@/redux/slices/globalSlice";
@@ -90,18 +88,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
     const sendVerificationCode = async (to: string) => {
         try {
-            const code = GENERATE_SIX_DIGIT_TOKEN()
-
-            const message = await notificationServer("sendEmail", {
-                to,
-                code,
-                subject: `Codigo De Verificación`,
-                text: `Su Codigo De Verificación Es: ${code}`,
-                html: `<b>Su Codigo De Verificación Es: ${code}</b>`
-            })
-
-            setVerificationCode(code)
-            return message
+            
 
         } catch (error: any) {
             console.log({ error });

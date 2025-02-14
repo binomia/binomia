@@ -105,7 +105,7 @@ export const HeaderBankingRight: React.FC = () => {
 export const WelcomeLeft: React.FC = () => {
     return (
         <HStack>
-            <Image alt='logo-image' resizeMode="contain" w={"108px"} h={"34px"} source={logo} />
+            <Image alt='logo-image' resizeMode="contain" w={"130px"} h={"35px"} source={logo} />
         </HStack>
     )
 }

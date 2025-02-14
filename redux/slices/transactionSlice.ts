@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { fetchAccountBankingTransactions, fetchAllTransactions, fetchRecentTransactions } from '../fetchHelper'
+import { fetchAccountBankingTransactions, fetchAllTransactions, fetchRecentTransactions, searchAccountTransactions } from '../fetchHelper'
 
 
 const initialState = {
@@ -54,9 +54,17 @@ const transactionSlice = createSlice({
             state.recentTransactions = []
         })
 
+        // searchAccountTransactions
+        builder.addCase(searchAccountTransactions.fulfilled, (state, action) => {
+            state.transactions = action.payload
+        })
+        builder.addCase(searchAccountTransactions.rejected, (state) => {
+            state.transactions = []
+        })
+
         // fetchAllTransactions
         builder.addCase(fetchAllTransactions.fulfilled, (state, action) => {
-            state.transactions = action.payload
+            state.transactions = action.payload            
         })
         builder.addCase(fetchAllTransactions.rejected, (state) => {
             state.transactions = []

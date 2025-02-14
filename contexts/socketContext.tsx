@@ -5,7 +5,6 @@ import { useDispatch } from "react-redux";
 import { io } from "socket.io-client";
 import { jwtDecode } from "jwt-decode";
 import { AccountAuthSchema } from "@/auth/accountAuth";
-import { globalActions } from "@/redux/slices/globalSlice";
 import { transactionActions } from "@/redux/slices/transactionSlice";
 import { useLazyQuery } from "@apollo/client";
 import { AccountApolloQueries } from "@/apollo/query";
@@ -40,8 +39,8 @@ export const SocketContextProvider = ({ children }: { children: JSX.Element }) =
                 dispatch(transactionActions.setHasNewTransaction(true)),
                 dispatch(fetchRecentTransactions()),
                 dispatch(fetchRecentTopUps()),
+                dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
                 dispatch(fetchAccountLimit())
-
             ])
         else
             await Promise.all([

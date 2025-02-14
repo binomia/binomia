@@ -11,16 +11,15 @@ import { z } from 'zod'
 import { StyleSheet, Keyboard, Dimensions, TouchableWithoutFeedback, RefreshControl } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView, Avatar } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
-import { TopUpApolloQueries, UserApolloQueries } from '@/apollo/query'
+import { UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
-import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, FORMAT_FULL_NAME, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
-import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { noTransactions, pendingClock } from '@/assets';
 import { router } from 'expo-router';
-import { fetchAllTransactions } from '@/redux/fetchHelper';
+import { fetchAllTransactions, searchAccountTransactions } from '@/redux/fetchHelper';
 import SingleTopTup from '@/components/topups/SingleTopTup';
 
 type Props = {}
@@ -32,15 +31,12 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 	const { user } = useSelector((state: any) => state.accountReducer)
 	const { transactions } = useSelector((state: any) => state.transactionReducer)
 
-	const [searchAccountTransactions] = useLazyQuery(TransactionApolloQueries.searchAccountTransactions())
-	const [searchTopUps] = useLazyQuery(TopUpApolloQueries.searchTopUps())
 	const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
 
 	const [singleTransactionTitle, setSingleTransactionTitle] = useState<string>("Ver Detalles");
 	const [refreshing, setRefreshing] = useState(false);
 	const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
 	const [transaction, setTransaction] = useState<any>({})
-	const [filteredTransactions, setFilteredTransactions] = useState<any[]>(transactions)
 	const [showSingleTransaction, setShowSingleTransaction] = useState<boolean>(false);
 	const [showSendTransaction, setShowSendTransaction] = useState<boolean>(false);
 	const [needRefresh, setNeedRefresh] = useState<boolean>(false);
@@ -54,42 +50,10 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 		try {
 			setSearchValue(value)
 			if (value === "") {
-				setFilteredTransactions(transactions)
+				await dispatch(fetchAllTransactions({ page: 1, pageSize: 10 }))
 
 			} else {
-				const { data: transactionsData } = await searchAccountTransactions({
-					variables: {
-						"page": 1,
-						"pageSize": 5,
-						"fullName": value.toLowerCase()
-					}
-				})
-
-				const transactionsMapped = transactionsData.searchAccountTransactions?.map((transaction: any) => {
-					return {
-						type: "transaction",
-						timestamp: transaction.createdAt,
-						data: transaction
-					}
-				})
-
-				const { data: topUpsData } = await searchTopUps({
-					variables: {
-						"page": 1,
-						"pageSize": 5,
-						"search": value.toLowerCase()
-					}
-				})
-
-
-				const combinedTransactions = [...transactionsMapped, ...topUpsData.searchTopUps].sort((a: any, b: any) => {
-					return new Date(Number(b.timestamp)).getTime() - new Date(Number(a.timestamp)).getTime()
-				});
-
-				console.log(JSON.stringify(combinedTransactions, null, 2));
-
-
-				setFilteredTransactions(combinedTransactions)
+				await dispatch(searchAccountTransactions({ page: 1, pageSize: 10, search: value.toLowerCase() }))
 			}
 
 		} catch (error) {
@@ -170,7 +134,14 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
-		await dispatch(fetchAllTransactions({ page: 1, pageSize: 10 }))
+
+		if (searchValue === "")
+			await dispatch(fetchAllTransactions({ page: 1, pageSize: 10 }))
+
+		else
+			await dispatch(searchAccountTransactions({ page: 1, pageSize: 10, search: searchValue.toLowerCase() }))
+
+		await onClearInput()
 		setRefreshing(false);
 	}, []);
 
@@ -190,7 +161,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 		setTransaction({})
 	}
 
-	const onClearInput = async (value: string) => {
+	const onClearInput = async () => {
 		setSearchValue("")
 		await handleSearch("")
 	}
@@ -200,6 +171,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 			await fetchSearchedUser()
 		})()
 	}, [])
+
 
 	return (
 
@@ -213,7 +185,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 						placeholder='Buscar...'
 						onChangeText={(value) => handleSearch(value.toLowerCase())}
 						rightElement={!!searchValue ? (
-							<Pressable onPress={() => onClearInput("")} _pressed={{ opacity: 0.5 }} w={"30px"} h={"30px"} justifyContent={"center"} alignItems={"center"} borderRadius={100} bg={colors.darkGray} mr={"10px"}>
+							<Pressable onPress={() => onClearInput()} _pressed={{ opacity: 0.5 }} w={"30px"} h={"30px"} justifyContent={"center"} alignItems={"center"} borderRadius={100} bg={colors.darkGray} mr={"10px"}>
 								<AntDesign name="close" size={15} color={colors.red} />
 							</Pressable>
 						) : undefined}
@@ -249,7 +221,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 						))}
 					</ScrollView>
 				</HStack>
-				{filteredTransactions?.length > 0 ?
+				{transactions?.length > 0 ?
 					<VStack w={"100%"} >
 						<HStack w={"100%"} justifyContent={"space-between"}>
 							<Heading px={"20px"} fontSize={scale(18)} color={"white"}>{"Transacciones"}</Heading>
@@ -258,7 +230,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 							mt={"10px"}
 							px={"20px"}
 							scrollEnabled={false}
-							data={filteredTransactions}
+							data={transactions}
 							renderItem={({ item: { data, type }, index }: any) => (
 								type === "transaction" ? (
 									Object.keys(data).length > 0 ? <Pressable bg={colors.lightGray} my={"5px"} borderRadius={10} px={"15px"} py={"10px"} key={`transactions(tgrtgnrhbfhrbgr)-${data?.transactionId}-${index}-${data?.transactionId}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(data)}>
@@ -301,7 +273,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 														<Heading size={"sm"} color={colors.white}>
 															{EXTRACT_FIRST_LAST_INITIALS(data?.phone?.fullName || "0")}
 														</Heading>
-													</Avatar>													
+													</Avatar>
 												}
 												<VStack ml={"10px"} justifyContent={"center"}>
 													<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(data?.phone?.fullName || "")}</Heading>
