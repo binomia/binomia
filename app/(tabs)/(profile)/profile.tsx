@@ -138,7 +138,7 @@ const ProfileScreen: React.FC = () => {
 					</HStack>
 				</VStack>
 				{previewImage ?
-					<ImageView
+					<ImageView									
 						images={[{ uri: previewImage }]}
 						imageIndex={0}
 						visible={visible}
@@ -146,7 +146,6 @@ const ProfileScreen: React.FC = () => {
 					/>
 					: null
 				}
-
 			</ScrollView>
 			<QRScanner open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />
 		</>
@@ -154,26 +153,3 @@ const ProfileScreen: React.FC = () => {
 }
 
 export default ProfileScreen
-
-
-const styles = StyleSheet.create({
-	contentContainerStyle: {
-		width: 55,
-		height: 55,
-		borderRadius: 100
-	},
-	textStyle: {
-		fontSize: 50,
-		color: 'white',
-		marginBottom: 2,
-		textTransform: 'capitalize',
-		fontWeight: 'bold',
-		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-	}
-})

@@ -242,7 +242,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 										</Avatar>
 									}
 									<VStack mt={"5px"} justifyContent={"center"}>
-										<Heading textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>{FORMAT_FULL_NAME(user.fullName)}</Heading>
+										<Heading textTransform={"capitalize"} fontSize={scale(12)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(user.fullName)}</Heading>
 									</VStack>
 								</VStack>
 							</Pressable>
