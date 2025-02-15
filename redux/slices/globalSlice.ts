@@ -21,6 +21,7 @@ const globalSlice = createSlice({
             ip: ""
         },
         location: {},
+        geoLocation: {},
         device: {
             isDevice: Device.isDevice,
             deviceBrand: Device.brand,
@@ -57,6 +58,9 @@ const globalSlice = createSlice({
         },
         setLocation: (state, action) => {
             state.location = action.payload
+        },
+        setGeoLocation: (state, action) => {
+            state.geoLocation = action.payload
         },
         setJwt: (state, action) => {
             state.jwt = action.payload

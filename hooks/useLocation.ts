@@ -5,9 +5,10 @@ import { useDispatch } from 'react-redux';
 import { Client } from "@googlemaps/google-maps-services-js";
 import { GOOGLE_MAPS_API_KEY } from '@/constants';
 import axios from 'axios';
+import { z } from 'zod';
+import { TransactionAuthSchema } from '@/auth/transactionAuth';
 
 export const useLocation = () => {
-    const [location, setLocation] = useState<Location.LocationObject | null>(null);
     const dispatch = useDispatch();
     const client = new Client();
 
@@ -25,7 +26,7 @@ export const useLocation = () => {
     };
 
 
-    const getLocationAddress = async ({ latitude, longitude }: { latitude: number, longitude: number }) => {
+    const fetchGeoLocation = async ({ latitude, longitude }: { latitude: number, longitude: number }) => {
         try {
             const response = await client.reverseGeocode({
                 adapter: 'fetch',
@@ -46,7 +47,7 @@ export const useLocation = () => {
 
                 if (sublocalityComp && neighborhoodComp && admAreaLevel2Comp)
                     return {
-                        neighborhood: neighborhoodComp.long_name,
+                        neighbourhood: neighborhoodComp.long_name,
                         sublocality: sublocalityComp.long_name,
                         municipality: admAreaLevel2Comp.long_name,
                         fullArea: `${neighborhoodComp.long_name}, ${sublocalityComp.long_name}, ${admAreaLevel2Comp.long_name}`,
@@ -62,18 +63,19 @@ export const useLocation = () => {
                 longitude
             }
 
+            await dispatch(globalActions.setGeoLocation(address));
+
             return address
 
         } catch (error: any) {
             console.error("Reverse geocoding error:", error);
+            return {}
         }
     }
 
     const watchPositionAsync = async () => {
         await Location.watchPositionAsync({ accuracy: Location.Accuracy.Highest }, async (location) => {
-            const address = await getLocationAddress({ latitude: location.coords.latitude, longitude: location.coords.longitude })
             await dispatch(globalActions.setLocation({
-                ...address,
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
                 latitudeDelta: 0.0922,
@@ -89,11 +91,7 @@ export const useLocation = () => {
                 accuracy: Location.Accuracy.Highest
             });
 
-            const address = await getLocationAddress({ latitude: location.coords.latitude, longitude: location.coords.longitude })
-            setLocation(Object.assign({}, location, address));
-
             return {
-                ...address,
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
                 latitudeDelta: 0.0922,
@@ -107,14 +105,12 @@ export const useLocation = () => {
 
 
     useEffect(() => {
-        // getLocation();
         watchPositionAsync();
     }, []);
 
 
-    return {
-        location,
-        getLocationAddress,
+    return {       
+        fetchGeoLocation,
         getLocation
     }
 }

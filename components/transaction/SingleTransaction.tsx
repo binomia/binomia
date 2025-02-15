@@ -20,6 +20,7 @@ import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
+import { useLocation } from '@/hooks/useLocation';
 
 
 type Props = {
@@ -35,9 +36,10 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { authenticate } = useLocalAuthentication()
-	const { location } = useSelector((state: any) => state.globalReducer)
+	const { location, geoLocation } = useSelector((state: any) => state.globalReducer)
 	const { transaction, recentTransactions, transactionDeytails, receiver } = useSelector((state: any) => state.transactionReducer)
 	const { account, user }: { account: any, user: any, location: z.infer<typeof TransactionAuthSchema.transactionLocation> } = useSelector((state: any) => state.accountReducer)
+
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [isCancelLoading, setIsCancelLoading] = useState<boolean>(false)
 	const [payRequestTransaction] = useMutation(TransactionApolloQueries.payRequestTransaction());
@@ -159,14 +161,6 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 		}
 	}
 
-	const transactionLocation = (location: z.infer<typeof TransactionAuthSchema.transactionLocation>) => {
-		const neighbourhood = location?.neighbourhood ? location.neighbourhood : ""
-		const town = location?.town ? location.town : ""
-		const county = location.county ? location.county : ""
-
-		return `${neighbourhood}${town ? ", " : ""}${town}${county ? ", " : ""}${county}`
-	}
-
 	return (
 		<VStack h={"90%"} px={"20px"} justifyContent={"space-between"}>
 			<VStack pt={"20px"}>
@@ -179,7 +173,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 								<Heading size={"sm"} color={colors.white}>
 									{EXTRACT_FIRST_LAST_INITIALS(receiver?.fullName || "0")}
 								</Heading>
-							</Avatar>							
+							</Avatar>
 						}
 						<VStack ml={"10px"} >
 							<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(receiver?.fullName || "")}</Heading>
@@ -237,7 +231,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				: transaction.isFromMe ?
 					<VStack w={"100%"} justifyContent={"center"}>
 						<HStack w={"85%"} mb={"5px"}>
-							<Heading fontSize={scale(16)} textTransform={"capitalize"} color={"white"}>{transactionLocation(location ?? {}) || "Ubicación"}</Heading>
+							<Heading fontSize={scale(16)} textTransform={"capitalize"} color={"white"}>{geoLocation?.fullArea || "Ubicación"}</Heading>
 						</HStack>
 						<Image
 							alt='fine-location-image-alt'

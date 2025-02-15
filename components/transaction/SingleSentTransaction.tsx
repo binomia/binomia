@@ -5,7 +5,7 @@ import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import * as Sharing from 'expo-sharing';
 import { StyleSheet, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Pressable, ZStack, ScrollView, Avatar } from 'native-base'
+import { Heading, Image, Text, VStack, HStack, Pressable, ZStack, Avatar } from 'native-base'
 import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
@@ -164,14 +164,6 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 		}
 	}
 
-	const transactionLocation = (location: z.infer<typeof TransactionAuthSchema.transactionLocation>) => {
-		const neighbourhood = location?.neighbourhood ? location.neighbourhood : ""
-		const town = location?.town ? location.town : ""
-		const county = location.county ? location.county : ""
-
-		return `${neighbourhood}${town ? ", " : ""}${town}${county ? ", " : ""}${county}`
-	}
-
 	return (
 		<VStack h={"90%"} px={"20px"} justifyContent={"space-between"}>
 			<VStack pt={"20px"}>
@@ -249,7 +241,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				: transaction.isFromMe ?
 					<VStack w={"100%"} justifyContent={"center"}>
 						<HStack w={"85%"} mb={"5px"}>
-							<Heading fontSize={scale(16)} textTransform={"capitalize"} color={"white"}>{transactionLocation(transaction.location ?? {}) || "Ubicación"}</Heading>
+							<Heading fontSize={scale(16)} textTransform={"capitalize"} color={"white"}>{transaction?.location?.fullArea || "Ubicación"}</Heading>
 						</HStack>
 						<Image
 							alt='fine-location-image-alt'

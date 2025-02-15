@@ -16,6 +16,7 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAccountLimit, fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
+import { useLocation } from '@/hooks/useLocation'
 
 
 
@@ -32,6 +33,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
+    const { fetchGeoLocation } = useLocation();
     const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
@@ -51,10 +53,11 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
         try {
             setLoading(true)
 
+            const geoLocation = await fetchGeoLocation({ latitude: location.latitude, longitude: location.longitude }).then((res) => res).catch(() => { return {} })
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
-                location: location ?? {},
+                location: geoLocation ?? {},
             })
 
             const { data: transaction } = await createTransaction({

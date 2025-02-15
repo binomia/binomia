@@ -114,12 +114,9 @@ export class UserApolloQueries {
                                 latitude
                                 longitude
                                 neighbourhood
-                                road
-                                town
-                                county
-                                state
-                                postcode
-                                country
+                                sublocality
+                                municipality
+                                fullArea
                             }                            
                         }
                     }

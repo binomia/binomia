@@ -34,12 +34,9 @@ export class TransactionApolloQueries {
                         latitude
                         longitude
                         neighbourhood
-                        road
-                        town
-                        county
-                        state
-                        postcode
-                        country
+                        sublocality
+                        municipality
+                        fullArea
                     }
                 }
             }
@@ -76,12 +73,9 @@ export class TransactionApolloQueries {
                         latitude
                         longitude
                         neighbourhood
-                        road
-                        town
-                        county
-                        state
-                        postcode
-                        country
+                        sublocality
+                        municipality
+                        fullArea
                     }
                     createdAt
                     updatedAt                    
@@ -107,12 +101,9 @@ export class TransactionApolloQueries {
                         latitude
                         longitude
                         neighbourhood
-                        road
-                        town
-                        county
-                        state
-                        postcode
-                        country
+                        sublocality
+                        municipality
+                        fullArea
                     }                    
                     from {
                         id
@@ -206,12 +197,9 @@ export class TransactionApolloQueries {
                         latitude
                         longitude
                         neighbourhood
-                        road
-                        town
-                        county
-                        state
-                        postcode
-                        country
+                        sublocality
+                        municipality
+                        fullArea
                     }
                     createdAt
                     updatedAt
@@ -307,12 +295,9 @@ export class TransactionApolloQueries {
                         latitude
                         longitude
                         neighbourhood
-                        road
-                        town
-                        county
-                        state
-                        postcode
-                        country
+                        sublocality
+                        municipality
+                        fullArea
                     }
                     createdAt
                     updatedAt                    
@@ -419,12 +404,9 @@ export class TransactionApolloQueries {
                         latitude
                         longitude
                         neighbourhood
-                        road
-                        town
-                        county
-                        state
-                        postcode
-                        country
+                        sublocality
+                        municipality
+                        fullArea
                     }                    
                     from {
                         id
@@ -518,12 +500,9 @@ export class TransactionApolloQueries {
                         latitude
                         longitude
                         neighbourhood
-                        road
-                        town
-                        county
-                        state
-                        postcode
-                        country
+                        sublocality
+                        municipality
+                        fullArea
                     }
                     createdAt
                     updatedAt
