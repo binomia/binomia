@@ -7,12 +7,10 @@ const type = () => {
             latitude: Float
             longitude: Float
             neighbourhood: String
-            road: String
-            town: String
-            county: String
-            state: String
-            postcode: String
-            country: String
+            sublocality: String
+            municipality: String
+            fullArea: String
+            
         }  
 
         input TransactionInput {
@@ -61,12 +59,9 @@ const type = () => {
             latitude: Float
             longitude: Float
             neighbourhood: String
-            road: String
-            town: String
-            county: String
-            state: String
-            postcode: String
-            country: String
+            sublocality: String
+            municipality: String
+            fullArea: String
         } 
 
         type TransactionCreatedType {

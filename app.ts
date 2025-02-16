@@ -1,4 +1,3 @@
-// import "@/open-telemetry"
 import "dotenv/config"
 import cluster from "cluster";
 import os from "os";
@@ -10,18 +9,15 @@ import { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import { typeDefs } from './src/gql'
 import { resolvers } from './src/gql'
 import { db } from './src/config';
-import redis, { keyvRedis } from "@/redis";
-import { formatError, toSnakeCase } from "@/helpers";
-import { PORT, REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
+import { keyvRedis } from "@/redis";
+import { formatError } from "@/helpers";
+import { PORT } from "@/constants";
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { collectDefaultMetrics, register } from 'prom-client';
 import { initTracing } from "@/tracing";
-// import { trace } from "@opentelemetry/api";
-// import { UsersController } from "@/controllers";
-// import UserMetrics from "@/metrics/userMetrics";
-// import EventEmitter from "events";
 import { metrics, trace, Context, Counter } from '@opentelemetry/api';
+
 
 
 const app = express();

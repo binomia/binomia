@@ -1,6 +1,6 @@
 import { JSONRPCClient, JSONRPCParams } from "json-rpc-2.0";
-import axios from "axios";
 import { NOTIFICATION_SERVER_URL } from "@/constants";
+import axios from "axios";
 
 const notificationClient = new JSONRPCClient(async (jsonRPCRequest) => {
     if (NOTIFICATION_SERVER_URL === undefined) {
