@@ -1,5 +1,5 @@
 import { askingForMoneyIcon, withdrawIcon, depositIcon, idIcon, limitIcon, mailIcon, mastercardLogo, notificacionIcon, phoneIcon, privacyIcon, receiveIcon, sendMoneyIcon, soportIcon, userIcon, visaLogo, whatsappIcon, claroLogo, articeLogo } from "@/assets";
-import { SUPPORT_EMAIL, SUPPORT_PHONE_NUMBER } from "@/constants";
+import { SUPPORT_EMAIL } from "@/constants";
 import { FORMAT_CURRENCY, FORMAT_LIMIT, FORMAT_PHONE_NUMBER } from "@/helpers";
 import { AccountLimitsType, AccountType, GlobalContextType } from "@/types";
 import { cancelIcon, checked, pendingClock } from '@/assets';
@@ -233,21 +233,22 @@ export const supportScreenData = ({ openEmail, openPhone, openWhatsApp }: any) =
 
 export const recurenceWeeklyData = [
     [
-        { title: "Cada Domingo", id: "everySunday" },
         { title: "Cada Lunes", id: "everyMonday" },
-    ],
-    [
         { title: "Cada Martes", id: "everyTuesday" },
+    ],
+    [
         { title: "Cada Miercoles", id: "everyWednesday" },
-    ],
-    [
         { title: "Cada Jueves", id: "everyThursday" },
-        { title: "Cada Viernes", id: "everyFriday" },
     ],
     [
+        { title: "Cada Viernes", id: "everyFriday" },
         { title: "Cada Sabado", id: "everySaturday" }
+    ],
+    [
+        { title: "Cada Domingo", id: "everySunday" },
     ]
 ]
+
 
 export const getTitleById = (id: string, arr: any[]) => {
     // Iterate through each sub-array in recurenceWeeklyData
