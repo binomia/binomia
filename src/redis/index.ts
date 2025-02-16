@@ -20,11 +20,8 @@ export const initRedisEventSubcription = (io: Server) => {
     process.on("message", async ({ channel, payload }: any) => {
         switch (channel) {
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED: {
-                const { data, senderSocketRoom, recipientSocketRoom, expoNotificationTokens } = JSON.parse(payload)
-
+                const { data, senderSocketRoom, recipientSocketRoom } = JSON.parse(payload)
                 io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
-                await sendNotification(expoNotificationTokens)
-
                 break;
             }
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_PAIED: {
@@ -38,15 +35,15 @@ export const initRedisEventSubcription = (io: Server) => {
                 break;
             }
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED_FROM_QUEUE: {
-                const { data,recipientSocketRoom, senderSocketRoom } = JSON.parse(payload)
+                const { data, recipientSocketRoom, senderSocketRoom } = JSON.parse(payload)
                 io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
                 break;
             }
-            case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_CANCELED: {
-                const { data, senderSocketRoom, recipientSocketRoom } = JSON.parse(payload)
-                io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
-                break;
-            }
+            // case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_CANCELED: {
+            //     const { data, senderSocketRoom, recipientSocketRoom } = JSON.parse(payload)
+            //     io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
+            //     break;
+            // }
             case NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_LOGIN_VERIFICATION_CODE: {
                 const { data: { user, code } } = JSON.parse(payload)
 

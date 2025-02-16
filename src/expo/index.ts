@@ -1,20 +1,20 @@
 import { evironmentVariables } from '@/constants';
-import { Expo, ExpoPushMessage, ExpoPushToken } from 'expo-server-sdk';
+import { Expo, ExpoPushMessage } from 'expo-server-sdk';
 
 const expo = new Expo({
     accessToken: evironmentVariables.EXPO_ACCESS_TOKEN,
     useFcmV1: true,
 });
 
-export const sendNotification = async (tokens: ExpoPushToken[]) => {
+export const sendNotification = async (tokens: { token: string, message: string }[]) => {
     try {
-        const messages: ExpoPushMessage[] = tokens.map(token => {
+        const messages: ExpoPushMessage[] = tokens.map(({ token, message }) => {
             return {
                 to: token,
-                sound: 'assets/audio/money.wav',
-                body: 'This is a test notification',
+                sound: 'money.wav',
+                body: message,
                 data: {
-                    withSome: 'data'
+                    withSome: 'data',
                 }
             }
         });

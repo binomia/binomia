@@ -9,7 +9,15 @@ import { setupMaster, setupWorker } from "@socket.io/sticky";
 import { createAdapter, setupPrimary } from "@socket.io/cluster-adapter";
 import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
 import { ip } from "address"
+import { initMethods } from "@/rpc";
+import { JSONRPCServer } from "json-rpc-2.0";
+import express, { Express, Request, Response } from 'express';
+
+
 const PORT = process.env.PORT || 8001;
+const app: Express = express();
+const server = new JSONRPCServer();
+const httpServer = http.createServer(app);
 
 if (cluster.isPrimary) {
     console.log(`Master ${process.pid} started on http://localhost:${PORT}`);
@@ -52,13 +60,35 @@ if (cluster.isPrimary) {
     });
 
 } else {
-    console.log(`[Notification-Server]: worker ${process.pid} is running on http://${ip()}:${PORT}`);
-
-    const httpServer = http.createServer();
     const io = new Server(httpServer);
+
+    app.use(express.json());
+
+    app.post("/", async (req: Request, res: Response) => {
+        try {
+            const jsonRPCResponse = await server.receive(req.body);
+
+            if (jsonRPCResponse?.error)
+                res.status(400).json(jsonRPCResponse);
+
+            else
+                res.status(200).json(jsonRPCResponse);
+
+        } catch (error) {
+            res.status(400).json({
+                jsonrpc: "2.0",
+                error,
+                test: false
+            });
+        }
+    });
+
 
     io.adapter(createAdapter());
     setupWorker(io);
     initSocket(io);
+    initMethods(server, io);
     initRedisEventSubcription(io);
+
+    console.log(`[Notification-Server]: worker ${process.pid} is running on http://${ip()}:${PORT}`);
 }
