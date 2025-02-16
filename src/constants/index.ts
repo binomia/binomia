@@ -5,7 +5,7 @@ export const ZERO_SIGN_PRIVATE_KEY: string = process.env.ZERO_SIGN_PRIVATE_KEY |
 export const AUTH_SERVER_URL: string = process.env.AUTH_SERVER_URL || "";
 export const SENDGRID_API_KEY: string = process.env.SENDGRID_API_KEY || "";
 
-
+export const NOTIFICATION_SERVER_URL = "http://notification-server:8001"
 export const DASHBOARD_LOGO_URL: string = "https://res.cloudinary.com/brayhandeaza/image/upload/v1734925393/gwxyuqagrvxxwq2xps6f.png";
 export const DASHBOARD_FAVICON_URL: string = 'https://res.cloudinary.com/brayhandeaza/image/upload/v1731649234/yphdze0x2k2unxwoj6vy.png';
 
@@ -14,6 +14,7 @@ export const REDIS_SUBSCRIPTION_CHANNEL = {
     TRANSACTION_CREATED_FROM_QUEUE: "TRANSACTION_CREATED_FROM_QUEUE",
     LOGIN_VERIFICATION_CODE: "LOGIN_VERIFICATION_CODE",
     TRANSACTION_REQUEST_PAIED: "TRANSACTION_REQUEST_PAIED",
+    TRANSACTION_REQUEST_CANCELED: "TRANSACTION_REQUEST_CANCELED",
 }
 
 export const QUEUE_JOBS_NAME = {

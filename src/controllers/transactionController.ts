@@ -1,9 +1,11 @@
 import { TransactionJoiSchema } from "@/auth/transactionJoiSchema"
 import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL, QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants"
+import { FORMAT_CURRENCY, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
 import { Cryptography } from "@/helpers/cryptography"
 import { AccountModel, QueuesModel, SessionModel, TransactionsModel, UsersModel } from "@/models"
 import { transactionsQueue } from "@/queues"
 import { redis } from "@/redis"
+import { notificationServer } from "@/rpc/clients/notificationRPC"
 import { CreateTransactionType } from "@/types"
 import { Job, JobJson } from "bullmq"
 import { Op } from "sequelize"
@@ -324,35 +326,14 @@ export default class TransactionController {
                 ]
             })
 
-            const receiverSession = await SessionModel.findAll({
-                attributes: ["expoNotificationToken"],
-                where: {
-                    [Op.and]: [
-                        { userId: receiverAccount.toJSON().user.id },
-                        { verified: true },
-                        {
-                            expires: {
-                                [Op.gt]: Date.now()
-                            }
-                        },
-                        {
-                            expoNotificationToken: {
-                                [Op.not]: null
-                            }
-                        }
-                    ]
-                }
-            })
-
-            const expoNotificationTokens: string[] = receiverSession.map(obj => obj.dataValues.expoNotificationToken);
             const encryptedData = await Cryptography.encrypt(JSON.stringify({ transactionId: transactionData.toJSON().transactionId }));
             await Promise.all([
                 redis.publish(NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED, JSON.stringify({
                     data: transactionData.toJSON(),
                     senderSocketRoom: senderAccount.toJSON().user.username,
-                    recipientSocketRoom: receiverAccount.toJSON().user.username,
-                    expoNotificationTokens,
+                    recipientSocketRoom: receiverAccount.toJSON().user.username
                 })),
+
                 transactionsQueue.createJobs({
                     jobId: `pendingTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
                     jobName: "pendingTransaction",
@@ -384,9 +365,32 @@ export default class TransactionController {
                         logo: receiverAccount.toJSON().user.profileImageUrl,
                     }
                 })
-
             }
 
+            const receiverSession = await SessionModel.findAll({
+                attributes: ["expoNotificationToken"],
+                where: {
+                    [Op.and]: [
+                        { userId: receiverAccount.toJSON().user.id },
+                        { verified: true },
+                        {
+                            expires: {
+                                [Op.gt]: Date.now()
+                            }
+                        },
+                        {
+                            expoNotificationToken: {
+                                [Op.not]: null
+                            }
+                        }
+                    ]
+                }
+            })
+
+            const expoNotificationTokens: { token: string, message: string }[] = receiverSession.map(obj => ({ token: obj.dataValues.expoNotificationToken, message: `${MAKE_FULL_NAME_SHORTEN(receiverAccount.toJSON().user.fullName)} te ha enviado ${FORMAT_CURRENCY(amount)} pesos` }));
+            await notificationServer("newTransactionNotification", {
+                data: expoNotificationTokens
+            })
 
             return transaction.toJSON();
 
@@ -480,6 +484,31 @@ export default class TransactionController {
                 ]
             })
 
+            const receiverSession = await SessionModel.findAll({
+                attributes: ["expoNotificationToken"],
+                where: {
+                    [Op.and]: [
+                        { userId: receiverAccount.toJSON().user.id },
+                        { verified: true },
+                        {
+                            expires: {
+                                [Op.gt]: Date.now()
+                            }
+                        },
+                        {
+                            expoNotificationToken: {
+                                [Op.not]: null
+                            }
+                        }
+                    ]
+                }
+            })
+
+            const expoNotificationTokens: { token: string, message: string }[] = receiverSession.map(obj => ({ token: obj.dataValues.expoNotificationToken, message: `${MAKE_FULL_NAME_SHORTEN(receiverAccount.toJSON().user.fullName)} te ha solicitado ${FORMAT_CURRENCY(amount)} pesos` }));
+            await notificationServer("newTransactionNotification", {
+                data: expoNotificationTokens
+            })
+
             await redis.publish(NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_QUEUE_TRANSACTION_CREATED, JSON.stringify({
                 data: transactionData.toJSON(),
                 senderSocketRoom: senderAccount.toJSON().user.username,
@@ -487,6 +516,200 @@ export default class TransactionController {
             }))
 
             return transactionData.toJSON().transactionId
+
+        } catch (error: any) {
+            throw error.message
+        }
+    }
+
+    static cancelRequestedTransaction = async ({ transactionId, fromAccount, senderUsername }: { transactionId: string, fromAccount: number, senderUsername: string }) => {
+        try {
+
+            const transaction = await TransactionsModel.findOne({
+                where: {
+                    [Op.and]: [
+                        { transactionId },
+                        { transactionType: "request" },
+                        { fromAccount }
+                    ]
+                },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'from',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'to',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    }
+                ]
+            })
+
+            if (!transaction)
+                throw "transaction not found"
+
+            if (transaction.toJSON().status === "cancelled") {
+                await notificationServer("requestNotificationConfirmation", {
+                    data: transaction.toJSON(),
+                    channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_CANCELED,
+                    senderSocketRoom: senderUsername,
+                    recipientSocketRoom: transaction.toJSON().to.user.username,
+                })
+
+                return transaction.toJSON()
+            }
+
+            await transaction.update({ status: "cancelled" })
+            await notificationServer("requestNotificationConfirmation", {
+                data: (await transaction.reload()).toJSON(),
+                channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_CANCELED,
+                senderSocketRoom: senderUsername,
+                recipientSocketRoom: transaction.toJSON().to.user.username,
+            })
+
+            return transaction.toJSON()
+
+        } catch (error: any) {
+            throw error.message
+        }
+    }
+
+    static payRequestTransaction = async ({ transactionId, toAccount, paymentApproved }: { transactionId: string, toAccount: number, paymentApproved: boolean }) => {
+        try {
+
+            const transaction = await TransactionsModel.findOne({
+                where: {
+                    [Op.and]: [
+                        { transactionId },
+                        { status: "requested" },
+                        { transactionType: "request" },
+                        { toAccount }
+                    ]
+                },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'from',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'to',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    }
+                ]
+            })
+
+            if (!transaction)
+                throw "transaction not found"
+
+
+            const senderAccount = await AccountModel.findOne({
+                where: { id: transaction.toJSON().toAccount },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user'
+                    }
+                ]
+            })
+
+            if (!senderAccount)
+                throw "sender account not found";
+
+
+            if (senderAccount.toJSON().balance < transaction.toJSON().amount)
+                throw "no tiene suficiente saldo para realizar esta transacción";
+
+            const receiverAccount = await AccountModel.findOne({
+                where: {
+                    id: transaction.toJSON().fromAccount
+                },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user'
+                    }
+                ]
+            })
+
+            if (!receiverAccount)
+                throw "receiver account not found";
+
+
+            if (!paymentApproved) {
+                await transaction.update({
+                    status: "cancelled"
+                })
+
+                await notificationServer("requestNotificationConfirmation", {
+                    data: transaction.toJSON(),
+                    channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_CANCELED,
+                    senderSocketRoom: senderAccount.toJSON().user.username,
+                    recipientSocketRoom: receiverAccount.toJSON().user.username
+                })
+
+                const transactionData = await transaction.reload()
+                return transactionData.toJSON()
+
+            } else {
+                const message = `${senderAccount.toJSON().username}&${receiverAccount.toJSON().username}@${transaction.toJSON().amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
+
+                // [TODO] Verify signature
+                const verify = await Cryptography.verify(message, transaction.toJSON().signature, ZERO_SIGN_PRIVATE_KEY)
+                if (!verify)
+                    throw "error verificando transacción"
+
+
+                const newSenderBalance = Number(senderAccount.toJSON().balance) - Number(transaction.toJSON().amount)
+                await senderAccount.update({
+                    balance: Number(newSenderBalance.toFixed(4))
+                })
+
+                const newReceiverBalance = Number(receiverAccount.toJSON().balance) + Number(transaction.toJSON().amount)
+                await receiverAccount.update({
+                    balance: Number(newReceiverBalance.toFixed(4))
+                })
+
+                await transaction.update({
+                    status: "pending",
+                })
+
+                const transactionData = await transaction.reload()
+                await Promise.all([
+                    notificationServer("requestNotificationConfirmation", {
+                        data: transaction.toJSON(),
+                        channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_PAIED,
+                        senderSocketRoom: senderAccount.toJSON().user.username,
+                        recipientSocketRoom: receiverAccount.toJSON().user.username
+                    }),
+                    transactionsQueue.createJobs({
+                        jobId: `pendingTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
+                        referenceData: null,
+                        jobName: "pendingTransaction",
+                        jobTime: "everyThirtyMinutes",
+                        amount: transactionData.toJSON().amount,
+                        userId: senderAccount.toJSON().id,
+                        data: { transactionId: transactionData.toJSON().transactionId }
+                    })                  
+                ])
+
+                return transactionData.toJSON()
+            }
 
         } catch (error: any) {
             throw error.message

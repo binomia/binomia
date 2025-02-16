@@ -4,10 +4,12 @@ import { JSONRPCServer } from "json-rpc-2.0";
 import { redis } from "@/redis";
 import { QUEUE_JOBS_NAME } from "@/constants";
 import { Job, Queue } from "bullmq";
+import { transactionMethods } from "./transactionRPC";
 
 
 
 export const initMethods = (server: JSONRPCServer) => {
+    transactionMethods(server)
     // gloabal methods
     server.addMethod("test", async ({ queueName, jobId, jobKey }: { queueName: string, jobId: string, jobKey: string }) => {
         const job = await transactionsQueue.queue.getJobScheduler(jobKey)
@@ -93,7 +95,7 @@ export const initMethods = (server: JSONRPCServer) => {
             if (queueType === "topup") {
                 const job = await topUpQueue.removeJob(jobKey)
                 return job
-            } 
+            }
 
             const job = await transactionsQueue.removeJob(jobKey)
             return job

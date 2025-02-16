@@ -103,12 +103,32 @@ export default class TransactionsQueue {
             }
             case "pendingTransaction": {
                 const time = 1000 * 60 * 30 // 30 minutes
-                await this.queue.add(jobId, data, { jobId, delay: time, repeat: { every: time } });
+                await this.queue.add(jobId, data, {
+                    jobId,
+                    repeatJobKey: jobId,
+                    delay: time,
+                    repeat: { every: time, },
+                    removeOnComplete: {
+                        age: 1000 * 60 * 30 // 30 minutes
+                    },
+                    removeOnFail: {
+                        age: 1000 * 60 * 60 * 24 // 24 hours
+                    },
+                });
                 break;
             }
             case "queueTransaction":
             case "queueRequestTransaction": {
-                const job = await this.queue.add(jobId, data, { jobId, removeOnComplete: true, removeOnFail: true });
+                const job = await this.queue.add(jobId, data, {
+                    jobId,
+                    removeOnComplete: {
+                        age: 1000 * 60 * 30 // 30 minutes
+                    },
+                    removeOnFail: {
+                        age: 1000 * 60 * 60 * 24 // 24 hours
+                    },
+
+                });
                 return job.asJSON()
             }
             default: {
@@ -119,6 +139,8 @@ export default class TransactionsQueue {
 
     addJob = async (jobName: string, data: string, pattern: string) => {
         const job = await this.queue.upsertJobScheduler(jobName, { tz: "EST", pattern }, { data });
+        job.opts.removeOnComplete = { age: 1000 * 60 * 30 }
+        job.opts.removeOnFail = { age: 1000 * 60 * 60 * 24 }
         return job
     }
 
