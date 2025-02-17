@@ -1,13 +1,12 @@
-import { AccountModel, kycModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, QueuesModel } from '@/models'
+import shortUUID from 'short-uuid';
+import { AccountModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, QueuesModel } from '@/models'
 import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
 import { Cryptography } from '@/helpers/cryptography';
-import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL, QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
+import {  ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
 import { queueServer } from '@/rpc/queueRPC';
-import redis from '@/redis';
-import shortUUID from 'short-uuid';
 
 export class TransactionsController {
     static transaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -139,79 +138,17 @@ export class TransactionsController {
 
     static createBankingTransaction = async (_: unknown, { cardId, data }: { cardId: number, data: any }, context: any) => {
         try {
-            const session = await checkForProtectedRequests(context.req);
+            const { user } = await checkForProtectedRequests(context.req);
             const validatedData = await TransactionJoiSchema.bankingCreateTransaction.parseAsync(data)
 
-            const card = await CardsModel.findOne({
-                where: {
-                    [Op.and]: [
-                        { userId: session.user.id },
-                        { id: cardId }
-                    ]
-                }
+            const transaction = await queueServer("createBankingTransaction", {
+                cardId,
+                accountId: user.account.id,
+                userId: user.id,
+                data: validatedData
             })
 
-            if (!card)
-                throw new GraphQLError('The given card is not linked to the user account');
-
-
-            const decryptedCardData = await Cryptography.decrypt(card.toJSON().data)
-            const cardData = Object.assign({}, card.toJSON(), JSON.parse(decryptedCardData))
-
-            // Need Payment Gateway Integration
-            console.error("createBankingTransaction: Need Payment Gateway Integration");
-
-
-            const hash = await Cryptography.hash(JSON.stringify({
-                data: {
-                    ...validatedData,
-                    deliveredAmount: validatedData.amount,
-                    accountId: session.user.account.id,
-                    data: {}
-                },
-                ZERO_ENCRYPTION_KEY,
-                ZERO_SIGN_PRIVATE_KEY,
-            }))
-
-            const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
-            const transaction = await BankingTransactionsModel.create({
-                ...validatedData,
-                deliveredAmount: validatedData.amount,
-                accountId: session.user.account.id,
-                cardId: cardData.id,
-                signature,
-                data: {}
-            })
-
-
-            const newBalance = {
-                deposit: session.user.account.balance + validatedData.amount,
-                withdraw: session.user.account.balance - validatedData.amount
-            }
-
-            const account = await AccountModel.findOne({
-                where: {
-                    id: session.user.account.id
-                }
-            })
-
-            if (!account)
-                throw new GraphQLError("account not found");
-
-            if (!account.toJSON().allowDeposit)
-                throw new GraphQLError("account is not allowed to deposit");
-
-
-            await account.update({
-                balance: newBalance[validatedData.transactionType]
-            })
-
-            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.BANKING_TRANSACTION_CREATED, JSON.stringify({
-                ...transaction.toJSON(),
-
-            }))
-
-            return Object.assign({}, transaction.toJSON(), { card: cardData })
+            return transaction
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -457,7 +394,7 @@ export class TransactionsController {
     static deleteRecurrentTransactions = async (_: unknown, { repeatJobKey, queueType }: { repeatJobKey: string, queueType: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             await checkForProtectedRequests(context.req);
-            const job = await queueServer("removeJob", { jobKey: repeatJobKey, queueType })
+            const job = await queueServer("deleteRecurrentTransactions", { jobKey: repeatJobKey, queueType })
             return job
 
         } catch (error: any) {
@@ -468,7 +405,7 @@ export class TransactionsController {
     static updateRecurrentTransactions = async (_: unknown, { data: { repeatJobKey, queueType, jobName, jobTime } }: { data: { repeatJobKey: string, queueType: string, jobName: string, jobTime: string } }, context: any) => {
         try {
             await checkForProtectedRequests(context.req);
-            const job = await queueServer("updateJob", {
+            const job = await queueServer("updateRecurrentTransactions", {
                 jobKey: repeatJobKey,
                 jobName,
                 queueType,
@@ -480,5 +417,4 @@ export class TransactionsController {
             throw new GraphQLError(error);
         }
     }
-
 }
