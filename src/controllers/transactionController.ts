@@ -2,9 +2,8 @@ import { TransactionJoiSchema } from "@/auth/transactionJoiSchema"
 import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL, QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants"
 import { FORMAT_CURRENCY, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
 import { Cryptography } from "@/helpers/cryptography"
-import { AccountModel, QueuesModel, SessionModel, TransactionsModel, UsersModel } from "@/models"
+import { AccountModel, BankingTransactionsModel, CardsModel, QueuesModel, SessionModel, TransactionsModel, UsersModel } from "@/models"
 import { transactionsQueue } from "@/queues"
-import { redis } from "@/redis"
 import { notificationServer } from "@/rpc/clients/notificationRPC"
 import { CreateTransactionType } from "@/types"
 import { Job, JobJson } from "bullmq"
@@ -100,16 +99,18 @@ export default class TransactionController {
             })
 
             await Promise.all([
-                redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED, JSON.stringify({
+                notificationServer("socketEventEmitter", {
                     data: transactionData.toJSON(),
+                    channel: REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED,
                     senderSocketRoom: senderAccount.toJSON().username,
                     recipientSocketRoom: receiverAccount.toJSON().username
-                })),
-                redis.publish(REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED_FROM_QUEUE, JSON.stringify({
+                }),
+                notificationServer("socketEventEmitter", {
                     data: transactionData.toJSON(),
+                    channel: REDIS_SUBSCRIPTION_CHANNEL.TRANSACTION_CREATED_FROM_QUEUE,
                     senderSocketRoom: senderAccount.toJSON().username,
-                    recipientSocketRoom: receiverAccount.toJSON().username,
-                }))
+                    recipientSocketRoom: receiverAccount.toJSON().username
+                })
             ])
 
             return transactionData.toJSON()
@@ -328,12 +329,12 @@ export default class TransactionController {
 
             const encryptedData = await Cryptography.encrypt(JSON.stringify({ transactionId: transactionData.toJSON().transactionId }));
             await Promise.all([
-                redis.publish(NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED, JSON.stringify({
+                notificationServer("socketEventEmitter", {
                     data: transactionData.toJSON(),
+                    channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED,
                     senderSocketRoom: senderAccount.toJSON().user.username,
                     recipientSocketRoom: receiverAccount.toJSON().user.username
-                })),
-
+                }),
                 transactionsQueue.createJobs({
                     jobId: `pendingTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
                     jobName: "pendingTransaction",
@@ -402,7 +403,6 @@ export default class TransactionController {
     static createRequestQueueedTransaction = async (job: JobJson) => {
         try {
             const { senderUsername, signature, transactionId, receiverUsername, amount, transactionType, currency, location } = JSON.parse(job.data)
-
             const senderAccount = await AccountModel.findOne({
                 where: { username: senderUsername },
                 include: [
@@ -505,15 +505,18 @@ export default class TransactionController {
             })
 
             const expoNotificationTokens: { token: string, message: string }[] = receiverSession.map(obj => ({ token: obj.dataValues.expoNotificationToken, message: `${MAKE_FULL_NAME_SHORTEN(receiverAccount.toJSON().user.fullName)} te ha solicitado ${FORMAT_CURRENCY(amount)} pesos` }));
-            await notificationServer("newTransactionNotification", {
-                data: expoNotificationTokens
-            })
 
-            await redis.publish(NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_QUEUE_TRANSACTION_CREATED, JSON.stringify({
-                data: transactionData.toJSON(),
-                senderSocketRoom: senderAccount.toJSON().user.username,
-                recipientSocketRoom: receiverAccount.toJSON().user.username,
-            }))
+            await Promise.all([
+                notificationServer("newTransactionNotification", {
+                    data: expoNotificationTokens
+                }),
+                notificationServer("socketEventEmitter", {
+                    data: transactionData.toJSON(),
+                    channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_QUEUE_TRANSACTION_CREATED,
+                    senderSocketRoom: senderUsername,
+                    recipientSocketRoom: transaction.toJSON().to.user.username,
+                })
+            ])
 
             return transactionData.toJSON().transactionId
 
@@ -557,7 +560,7 @@ export default class TransactionController {
                 throw "transaction not found"
 
             if (transaction.toJSON().status === "cancelled") {
-                await notificationServer("requestNotificationConfirmation", {
+                await notificationServer("socketEventEmitter", {
                     data: transaction.toJSON(),
                     channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_CANCELED,
                     senderSocketRoom: senderUsername,
@@ -568,7 +571,7 @@ export default class TransactionController {
             }
 
             await transaction.update({ status: "cancelled" })
-            await notificationServer("requestNotificationConfirmation", {
+            await notificationServer("socketEventEmitter", {
                 data: (await transaction.reload()).toJSON(),
                 channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_CANCELED,
                 senderSocketRoom: senderUsername,
@@ -656,7 +659,7 @@ export default class TransactionController {
                     status: "cancelled"
                 })
 
-                await notificationServer("requestNotificationConfirmation", {
+                await notificationServer("socketEventEmitter", {
                     data: transaction.toJSON(),
                     channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_CANCELED,
                     senderSocketRoom: senderAccount.toJSON().user.username,
@@ -691,7 +694,7 @@ export default class TransactionController {
 
                 const transactionData = await transaction.reload()
                 await Promise.all([
-                    notificationServer("requestNotificationConfirmation", {
+                    notificationServer("socketEventEmitter", {
                         data: transaction.toJSON(),
                         channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_PAIED,
                         senderSocketRoom: senderAccount.toJSON().user.username,
@@ -705,7 +708,7 @@ export default class TransactionController {
                         amount: transactionData.toJSON().amount,
                         userId: senderAccount.toJSON().id,
                         data: { transactionId: transactionData.toJSON().transactionId }
-                    })                  
+                    })
                 ])
 
                 return transactionData.toJSON()
@@ -716,7 +719,74 @@ export default class TransactionController {
         }
     }
 
+    static createBankingTransaction = async ({ cardId, accountId, userId, data }: { accountId: number, cardId: number, userId: number, data: any }) => {
+        try {
+            const validatedData = await TransactionJoiSchema.bankingCreateTransaction.parseAsync(data)
+            const account = await AccountModel.findOne({
+                where: {
+                    id: accountId
+                }
+            })
 
+            if (!account)
+                throw "account not found"
+
+            const card = await CardsModel.findOne({
+                where: {
+                    [Op.and]: [
+                        { userId },
+                        { id: cardId }
+                    ]
+                }
+            })
+
+            if (!card)
+                throw 'The given card is not linked to the user account'
+
+            const decryptedCardData = await Cryptography.decrypt(card.toJSON().data)
+            const cardData = Object.assign({}, card.toJSON(), JSON.parse(decryptedCardData))
+
+            //[TODO]: Need Payment Gateway Integration
+            console.error("createBankingTransaction: Need Payment Gateway Integration");
+
+            const hash = await Cryptography.hash(JSON.stringify({
+                data: {
+                    ...validatedData,
+                    deliveredAmount: validatedData.amount,
+                    accountId,
+                },
+                ZERO_ENCRYPTION_KEY,
+                ZERO_SIGN_PRIVATE_KEY,
+            }))
+
+            const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+            const transaction = await BankingTransactionsModel.create({
+                ...validatedData,
+                deliveredAmount: validatedData.amount,
+                accountId,
+                cardId: cardData.id,
+                signature,
+                data: {}
+            })
+
+            const accountData = account.toJSON()
+            const newBalance: number = validatedData.transactionType === "deposit" ? accountData.balance + validatedData.amount : accountData.balance - validatedData.amount
+           
+            if (!account.toJSON().allowDeposit)
+                throw "account is not allowed to deposit"
+
+            await account.update({
+                balance: newBalance
+            })
+
+            return Object.assign({}, transaction.toJSON(), { card: cardData })
+
+        } catch (error: any) {
+            throw error.message
+        }
+    }
+
+    
     static listenToRedisEvent = async ({ channel, payload }: { channel: string, payload: string }) => {
         switch (channel) {
             case QUEUE_JOBS_NAME.CREATE_TRANSACTION:

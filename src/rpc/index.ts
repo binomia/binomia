@@ -90,7 +90,7 @@ export const initMethods = (server: JSONRPCServer) => {
         }
     });
 
-    server.addMethod("removeJob", async ({ jobKey, queueType }: { jobKey: string, queueType: string }) => {
+    server.addMethod("deleteRecurrentTransactions", async ({ jobKey, queueType }: { jobKey: string, queueType: string }) => {
         try {
             if (queueType === "topup") {
                 const job = await topUpQueue.removeJob(jobKey)
@@ -105,7 +105,7 @@ export const initMethods = (server: JSONRPCServer) => {
         }
     });
 
-    server.addMethod("updateJob", async ({ jobKey, jobName, jobTime, queueType }: { jobKey: string, queueType: string, jobName: string, jobTime: WeeklyQueueTitleType }) => {
+    server.addMethod("updateRecurrentTransactions", async ({ jobKey, jobName, jobTime, queueType }: { jobKey: string, queueType: string, jobName: string, jobTime: WeeklyQueueTitleType }) => {
         try {
             if (queueType === "topup") {
                 const job = await topUpQueue.updateTopUpJob(jobKey, jobName, jobTime)
@@ -114,7 +114,6 @@ export const initMethods = (server: JSONRPCServer) => {
 
             const job = await transactionsQueue.updateTransactionJob(jobKey, jobName, jobTime)
             return job
-
 
         } catch (error: any) {
             throw new Error(error.toString());
