@@ -38,21 +38,13 @@ export const initMethods = (server: JSONRPCServer, io: Server) => {
         }
     });
 
-    server.addMethod("requestNotificationConfirmation", async ({ data, channel, senderSocketRoom, recipientSocketRoom }: {data: any, channel: string, senderSocketRoom: string, recipientSocketRoom: string}) => {
+    server.addMethod("socketEventEmitter", async ({ data, channel, senderSocketRoom, recipientSocketRoom }: {data: any, channel: string, senderSocketRoom: string, recipientSocketRoom: string}) => {
         try {
-            console.log("requestNotificationConfirmation");                    
             io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)    
             return true
 
         } catch (error) {
             console.log(error);
         }
-    });
-
-
-
-    // Another example method
-    server.addMethod("echo", (data) => {
-        return data;
     });
 }
