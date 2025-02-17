@@ -19,6 +19,9 @@
       "infoPlist": {
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
         "NSMicrophoneUsageDescription": "$(PRODUCT_NAME) needs access to your Microphone."
+      },
+      "entitlements": {
+        "com.apple.developer.networking.wifi-info": true
       }
     },
     "android": {
@@ -59,7 +62,7 @@
           "defaultChannel": "default",
           "sounds": [
             "./assets/money.wav"
-          ]      
+          ]
         }
       ],
       [

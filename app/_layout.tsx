@@ -17,6 +17,7 @@ import { LogBox, View } from 'react-native';
 import { useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
 import { SocketContextProvider } from '@/contexts/socketContext';
 import { TopUpContextProvider } from '@/contexts/topUpContext';
+import ExpoVpnChecker from "expo-vpn-checker";
 
 LogBox.ignoreAllLogs(true);
 LogBox.ignoreLogs(['In React 18']);
@@ -50,6 +51,11 @@ export default () => {
 		}
 
 	}, []);
+
+	useEffect(() => {
+		const result = ExpoVpnChecker.checkVpn();
+		console.log({ result });
+	}, [])
 
 
 	useEffect(() => {
