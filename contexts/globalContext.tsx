@@ -47,9 +47,8 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
         setDisabledButton(true)
     }
 
-
     useEffect(() => {
-        const subscription = AppState.addEventListener('change', async (nextAppState) => {
+        const subscription = AppState.addEventListener("change", async (nextAppState) => {
             if (nextAppState === 'background') {
                 const now = Date.now();
 

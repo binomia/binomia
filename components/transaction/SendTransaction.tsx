@@ -7,11 +7,12 @@ import SingleTransaction from './SingleTransaction';
 import { Dimensions, SafeAreaView, Alert } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { pendingClock } from '@/assets';
 import { fetchRecentTransactions } from '@/redux/fetchHelper';
 import { useLazyQuery } from '@apollo/client';
 import { UserApolloQueries } from '@/apollo/query';
+import ExpoVpnChecker from "expo-vpn-checker";
 
 type Props = {
     open?: boolean
@@ -29,6 +30,7 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
 
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const [fetchSingleUser] = useLazyQuery(UserApolloQueries.singleUser())
+    const navigation = useNavigation()
 
 
     const handleOnClose = async () => {
@@ -93,6 +95,13 @@ const SendTransactionScreen: React.FC<Props> = ({ open = false, onCloseFinish = 
         ref.current?.setPage(currentPage + 1)
         setCurrentPage(currentPage + 1)
     }
+
+    // useEffect(() => {
+    //     const isUsingVpn = ExpoVpnChecker.checkVpn();
+
+    //     console.log({ isUsingVpn });
+
+    // }, [currentPage, visible])
 
     useEffect(() => {
         setVisible(open)

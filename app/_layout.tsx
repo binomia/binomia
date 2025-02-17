@@ -1,6 +1,6 @@
 import 'react-native-reanimated';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useNavigation } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useCallback, useEffect } from 'react';
 import { NativeBaseProvider } from 'native-base';
@@ -17,7 +17,10 @@ import { LogBox, View } from 'react-native';
 import { useCameraPermission, useMicrophonePermission } from 'react-native-vision-camera';
 import { SocketContextProvider } from '@/contexts/socketContext';
 import { TopUpContextProvider } from '@/contexts/topUpContext';
-import ExpoVpnChecker from "expo-vpn-checker";
+import { RouterContextProvider } from '@/contexts/RouterContext';
+// import * as Network from "expo-network";
+// import NetInfo from '@react-native-community/netinfo';
+
 
 LogBox.ignoreAllLogs(true);
 LogBox.ignoreLogs(['In React 18']);
@@ -53,12 +56,6 @@ export default () => {
 	}, []);
 
 	useEffect(() => {
-		const result = ExpoVpnChecker.checkVpn();
-		console.log({ result });
-	}, [])
-
-
-	useEffect(() => {
 		if (loaded) {
 			SplashScreen.hideAsync();
 		}
@@ -77,13 +74,8 @@ export default () => {
 						<GlobalContextProvider>
 							<SocketContextProvider>
 								<TopUpContextProvider>
-									<View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-										<Stack>
-											<Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-											<Stack.Screen name="(signup)" options={{ headerShown: false }} />
-											<Stack.Screen name="(modals)" options={{ headerShown: false, headerBackVisible: false, gestureEnabled: true, presentation: "card" }} />
-											<Stack.Screen name="+not-found" />
-										</Stack>
+									<View onLayout={onLayoutRootView} style={{ flex: 1 }}>										
+										<RouterContextProvider/>
 									</View>
 								</TopUpContextProvider>
 							</SocketContextProvider>

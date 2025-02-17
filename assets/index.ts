@@ -31,6 +31,7 @@ import mastercardLogo from './mastercard.png';
 import visaLogo from './visa.png';
 import americanExpressLogo from './american-express.png';
 import jcbLogo from './jcb.png';
+import vpnIcon from './vpn.png';
 
 // icons
 import plusIconGreen from './icons/plus.png';
@@ -71,6 +72,7 @@ import cashIn from './icons/cash-in.png';
 
 
 export {
+    vpnIcon,
     plusIconGreen,
     americanExpressLogo,
     jcbLogo,
