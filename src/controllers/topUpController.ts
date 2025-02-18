@@ -4,9 +4,33 @@ import { TopUpsModel, UsersModel, TopUpCompanyModel, TopUpPhonesModel } from '@/
 import { Op } from 'sequelize';
 import { TopUpSchema } from '@/auth';
 import { queueServer } from '@/rpc/queueRPC';
+import shortUUID from 'short-uuid';
 
 
 export class TopUpController {
+    static topUp = async (_: unknown, { referenceId }: { referenceId: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
+        try {
+            const session = await checkForProtectedRequests(context.req);
+            const fields = getQueryResponseFields(fieldNodes, 'topup')
+
+            const tupup = await TopUpsModel.findOne({          
+                order: [['createdAt', 'DESC']],
+                attributes: fields['topup'],
+                where: {
+                    [Op.and]: [
+                        { userId: session.userId },
+                        { referenceId }
+                    ]
+                }
+            })
+
+            return tupup
+
+        } catch (error: any) {
+            throw new GraphQLError(error.message);
+        }
+    }
+
     static topUps = async (_: unknown, { phoneId, page, pageSize }: { phoneId: string, page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(context.req);
@@ -120,10 +144,12 @@ export class TopUpController {
             const topUpData = await TopUpSchema.createTopUp.parseAsync(data)
             const recurrenceData = await TopUpSchema.recurrenceTopUp.parseAsync(recurrence)
 
+            const referenceId = `${shortUUID.generate()}${shortUUID.generate()}`
             await queueServer("createTopUp", {
                 amount: topUpData.amount,
                 userId: session.userId,
                 data: {
+                    referenceId,
                     ...topUpData,
                     phoneNumber: topUpData.phone,
                     senderUsername: session.user.username,
@@ -132,7 +158,7 @@ export class TopUpController {
                 }
             })
 
-            return null
+            return { referenceId }
 
         } catch (error: any) {
             throw new GraphQLError(error.message);

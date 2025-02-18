@@ -96,6 +96,7 @@ const type = () => {
 
 const query = () => {
     return `
+        topUp(referenceId: String!): OnlyTopUpsType
         topUps(phoneId: Int!, page: Int!, pageSize: Int!): [OnlyTopUpsType]
         searchTopUps(page: Int!, pageSize: Int!, search: String!): [SearchTopUpsType]
         recentTopUps(page: Int!, pageSize: Int!): [TopUpsType]
@@ -106,7 +107,7 @@ const query = () => {
 
 const mutation = () => {
     return `
-        createTopUp(data: TopUpInput!, recurrence: TopUpRecurrenceInput!): TopUpsType
+        createTopUp(data: TopUpInput!, recurrence: TopUpRecurrenceInput!): JSON
     `
 }
 
@@ -114,9 +115,10 @@ const subscription = () => {
     return ``
 }
 
-const { topUps, searchTopUps, recentTopUps, topUpPhones, createTopUp, topUpCompanies } = TopUpController
+const { topUps, topUp, searchTopUps, recentTopUps, topUpPhones, createTopUp, topUpCompanies } = TopUpController
 const resolvers = {
     query: {
+        topUp,
         topUps,
         recentTopUps,
         topUpPhones,
