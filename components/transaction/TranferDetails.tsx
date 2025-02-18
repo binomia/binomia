@@ -78,7 +78,7 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
                     if (res.data.transaction)
                         onNext(res.data.transaction)
                     else
-                        startPolling(1000);
+                        startPolling(1500);
 
                 }).catch((error) => {
                     console.error("Fetch transaction error:", error);

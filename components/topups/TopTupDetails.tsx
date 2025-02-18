@@ -1,29 +1,23 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import colors from '@/colors'
+import Button from '@/components/global/Button';
+import BottomSheet from '../global/BottomSheet';
 import { StyleSheet, Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, FlatList } from 'native-base'
-import { FORMAT_CURRENCY, FORMAT_PHONE_NUMBER, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { FORMAT_CURRENCY, FORMAT_PHONE_NUMBER, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
-import Button from '@/components/global/Button';
 import { useDispatch, useSelector } from 'react-redux';
-import BottomSheet from '../global/BottomSheet';
 import { recurenceMonthlyData, recurenceWeeklyData } from '@/mocks';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
-import { TransactionAuthSchema } from '@/auth/transactionAuth';
-import { useMutation } from '@apollo/client';
-import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { globalActions } from '@/redux/slices/globalSlice';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocation } from '@/hooks/useLocation';
-import { router } from 'expo-router';
 import { TopUpApolloQueries } from '@/apollo/query';
 import { TopUpAuthSchema } from '@/auth/topUpAuth';
 import { topupActions } from '@/redux/slices/topupSlice';
-import { z } from 'zod';
 import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
-
 
 
 type Props = {
@@ -35,14 +29,25 @@ type Props = {
 const { width } = Dimensions.get("screen")
 const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }, onClose = (_?: any) => { } }) => {
     const [createTopUp] = useMutation(TopUpApolloQueries.createTopUp())
-    const { newTopUp, topup } = useSelector((state: any) => state.topupReducer)
+    const [getTopUp, { startPolling, stopPolling }] = useLazyQuery(TopUpApolloQueries.topUp(), {
+        fetchPolicy: "network-only",
+        notifyOnNetworkStatusChange: true,
+        onCompleted: async (data) => {
+            const topUpSent = data?.topUp
+            if (topUpSent) {
+                stopPolling()
+                await onNext()
+            }
+        }
+    })
+
+    const { newTopUp } = useSelector((state: any) => state.topupReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
     const { account } = useSelector((state: any) => state.accountReducer)
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
     const { fetchGeoLocation } = useLocation();
-
 
     const [recurrence, setRecurrence] = useState<string>("oneTime");
     const [recurrenceSelected, setRecurrenceSelected] = useState<string>("");
@@ -66,22 +71,37 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
                 location: geoLocation ?? {},
             })
 
-            await createTopUp({
-                variables: { data, recurrence }
-            })
+            const { data: createdTopUp } = await createTopUp({ variables: { data, recurrence } })
 
-            await dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance - Number(newTopUp.amount) })))
-            await dispatch(topupActions.setHasNewTransaction(true))
-            await dispatch(fetchRecentTransactions())
-            await dispatch(fetchAllTransactions({ page: 1, pageSize: 5 }))
+            const referenceId = createdTopUp?.createTopUp?.referenceId
+            if (referenceId)
+                await getTopUp({ variables: { referenceId } }).then(async(res) => {
+                    if (res.data?.topUp)
+                        await onNext()
 
-            onClose()
+                    else
+                        startPolling(1500);
+
+                }).catch((error) => {
+                    console.error("Fetch transaction error:", error);
+                });
+
+            else
+                startPolling(1500);
 
         } catch (error: any) {
             console.error(error.message);
         }
     }
 
+    const onNext = async () => {
+        await dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance - Number(newTopUp.amount) })))
+        await dispatch(topupActions.setHasNewTransaction(true))
+        await dispatch(fetchRecentTransactions())
+        await dispatch(fetchAllTransactions({ page: 1, pageSize: 5 }))
+
+        onClose()
+    }
 
     const onRecurrenceChange = (value: string) => {
         if (value === "biweekly")
@@ -116,7 +136,6 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
     const onCloseFinished = () => {
         setOpenOptions("")
     }
-
 
     const RenderWeeklyOption: React.FC = () => {
         const onSelecteOption = async (id: string, title: string) => {

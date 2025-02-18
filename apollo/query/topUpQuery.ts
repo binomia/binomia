@@ -1,6 +1,29 @@
 import { gql } from "@apollo/client"
 
 export class TopUpApolloQueries {
+    static topUp = () => {
+        return gql`
+            query TopUp($referenceId: String!) {
+                topUp(referenceId: $referenceId) {
+                    id
+                    status
+                    amount
+                    referenceId
+                    createdAt
+                    updatedAt
+                    location {
+                        latitude
+                        longitude
+                        neighbourhood
+                        sublocality
+                        municipality
+                        fullArea
+                    }
+                }
+            }
+        `
+    }
+
     static topUps = () => {
         return gql`
             query UserTopUps($page: Int!, $pageSize: Int!, $phoneId: Int!) {
@@ -61,23 +84,7 @@ export class TopUpApolloQueries {
     static createTopUp = () => {
         return gql`
             mutation CreateTopUp($data: TopUpInput!, $recurrence: TopUpRecurrenceInput!) {
-                createTopUp(data: $data, recurrence: $recurrence) {
-                    id
-                    status
-                    amount
-                    referenceId
-                    createdAt
-                    updatedAt
-                    company {
-                        id
-                        uuid
-                        status
-                        name
-                        logo
-                        createdAt
-                        updatedAt
-                    }
-                }
+                createTopUp(data: $data, recurrence: $recurrence)
             }
         `
     }
