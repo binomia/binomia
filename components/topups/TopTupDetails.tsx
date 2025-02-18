@@ -36,10 +36,13 @@ const { width } = Dimensions.get("screen")
 const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }, onClose = (_?: any) => { } }) => {
     const [createTopUp] = useMutation(TopUpApolloQueries.createTopUp())
     const { newTopUp, topup } = useSelector((state: any) => state.topupReducer)
+    const { location } = useSelector((state: any) => state.globalReducer)
     const { account } = useSelector((state: any) => state.accountReducer)
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
+    const { fetchGeoLocation } = useLocation();
+
 
     const [recurrence, setRecurrence] = useState<string>("oneTime");
     const [recurrenceSelected, setRecurrenceSelected] = useState<string>("");
@@ -54,11 +57,13 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
+            const geoLocation = await fetchGeoLocation({ latitude: location.latitude, longitude: location.longitude }).then((res) => res).catch(() => { return {} })
             const data = await TopUpAuthSchema.createTopUp.parseAsync({
                 phone: newTopUp.phone,
                 amount: newTopUp.amount,
                 fullName: newTopUp.fullName?.trim(),
-                companyId: Number(newTopUp.company.id)
+                companyId: Number(newTopUp.company.id),
+                location: geoLocation ?? {},
             })
 
             await createTopUp({
