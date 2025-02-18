@@ -221,9 +221,39 @@ export default class TransactionController {
         }
     }
 
+    static pendingTransaction = async ({ data }: JobJson): Promise<string> => {
+        try {
+            // [TODO]: implement pending transaction
+            const newStatus = "completed"
+            const decryptedData = await Cryptography.decrypt(JSON.parse(data))
+            const { transactionId } = JSON.parse(decryptedData)
+
+            const transaction = await TransactionsModel.findOne({
+                where: {
+                    transactionId
+                }
+            })
+
+            if (!transaction)
+                throw "transaction not found";
+
+            if (newStatus !== transaction.toJSON().status) {
+                await transaction.update({
+                    status: "completed"
+                })
+            }
+
+            return newStatus
+
+        } catch (error) {
+            console.log({ prosessTransaction: error });
+            throw error
+        }
+    }
+
     static createQueuedTransaction = async (job: JobJson) => {
         try {
-            const { senderUsername,transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location } = JSON.parse(job.data)
+            const { senderUsername, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location } = JSON.parse(job.data)
             const senderAccount = await AccountModel.findOne({
                 where: { username: senderUsername },
                 include: [
@@ -772,7 +802,7 @@ export default class TransactionController {
 
             const accountData = account.toJSON()
             const newBalance: number = validatedData.transactionType === "deposit" ? accountData.balance + validatedData.amount : accountData.balance - validatedData.amount
-           
+
             if (!account.toJSON().allowDeposit)
                 throw "account is not allowed to deposit"
 

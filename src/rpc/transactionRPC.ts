@@ -37,10 +37,10 @@ export const transactionMethods = (server: JSONRPCServer) => {
             }, {
                 jobId,
                 removeOnComplete: {
-                    age: 1000 * 60 * 30 // 30 minutes
+                    age: 20 // 30 minutes
                 },
                 removeOnFail: {
-                    age: 1000 * 60 * 60 * 24 // 24 hours
+                    age: 60 * 30 // 24 hours
                 }
             })
 

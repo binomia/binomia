@@ -30,11 +30,14 @@ export default class TransactionsQueue {
 
                     break;
                 }
-                default: {
-                    const prosessTransaction = await TransactionController.prosessTransaction(job)
-                    if (prosessTransaction === "transactionStatusCompleted")
+                case "pendingTransaction": {
+                    const status = await TransactionController.pendingTransaction(job)
+                    if (status === "completed")
                         if (job.repeatJobKey)
                             this.removeJob(job.repeatJobKey, "completed")
+                    break;
+                }
+                default: {
                     break;
                 }
             }
@@ -47,13 +50,20 @@ export default class TransactionsQueue {
     private workers = async () => {
         const worker = new Worker('transactions', async (job) => this.executeJob(job.asJSON()), {
             connection: { host: "redis", port: 6379 },
+            removeOnComplete: {
+                age: 20
+            },
             settings: {
                 backoffStrategy: (attemptsMade: number) => attemptsMade * 1000
             }
         });
 
         worker.on('completed', (job: Job) => {
-            console.log('Job completed', job.repeatJobKey);
+            const name = job.name.split("@")[0]
+            console.log('Job completed', name);
+            if (name === "queueTransaction" || name === "queueRequestTransaction") {
+                job.remove()
+            }
         })
     }
 
@@ -102,17 +112,17 @@ export default class TransactionsQueue {
                 return transaction
             }
             case "pendingTransaction": {
-                const time = 1000 * 60 * 30 // 30 minutes
+                const time = 1000 * 60 * 30
                 await this.queue.add(jobId, data, {
                     jobId,
                     repeatJobKey: jobId,
                     delay: time,
                     repeat: { every: time, },
                     removeOnComplete: {
-                        age: 1000 * 60 * 30 // 30 minutes
+                        age: 60 * 30
                     },
                     removeOnFail: {
-                        age: 1000 * 60 * 60 * 24 // 24 hours
+                        age: 60 * 30
                     },
                 });
                 break;
@@ -122,10 +132,10 @@ export default class TransactionsQueue {
                 const job = await this.queue.add(jobId, data, {
                     jobId,
                     removeOnComplete: {
-                        age: 1000 * 60 * 30 // 30 minutes
+                        age: 30
                     },
                     removeOnFail: {
-                        age: 1000 * 60 * 60 * 24 // 24 hours
+                        age: 60 * 10
                     },
 
                 });
