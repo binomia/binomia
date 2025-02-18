@@ -1,5 +1,5 @@
 import shortUUID from "short-uuid";
-import { QUEUE_JOBS_NAME, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants";
+import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants";
 import { Cryptography } from "@/helpers/cryptography";
 import { AccountModel, QueuesModel, TopUpCompanyModel, TopUpPhonesModel, TopUpsModel, UsersModel } from "@/models";
 import { JobJson } from "bullmq";
@@ -93,8 +93,7 @@ export default class TopUpController {
 
     static createTopUp = async (job: JobJson) => {
         try {
-            const { fullName, amount, companyId, phoneNumber, location, senderUsername, recurrenceData, userId } = JSON.parse(job.data)
-            console.log(location);
+            const { fullName, amount, companyId, phoneNumber, location, senderUsername, recurrenceData, userId, referenceId } = JSON.parse(job.data)
 
             const [phone] = await TopUpPhonesModel.findOrCreate({
                 limit: 1,
@@ -149,7 +148,7 @@ export default class TopUpController {
                 phoneId: phone.toJSON().id,
                 amount: amount,
                 status: 'pending',
-                referenceId: `${shortUUID().uuid()}`, // [TODO]: Implement topup externally 
+                referenceId, // [TODO]: Implement topup externally 
             })
 
             const newSenderBalance = Number(senderAccount.toJSON().balance - amount).toFixed(4)
@@ -219,7 +218,7 @@ export default class TopUpController {
                 });
             }
 
-            return null
+            return topUp.toJSON()
 
         } catch (error: any) {
             throw error
