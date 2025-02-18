@@ -19,7 +19,7 @@ export class TransactionApolloQueries {
 
     static transaction = () => {
         return gql`
-            query Query($transactionId: String!) {
+            query Transaction($transactionId: String!) {
                 transaction(transactionId: $transactionId) {
                     transactionId
                     amount
@@ -28,8 +28,6 @@ export class TransactionApolloQueries {
                     transactionType
                     currency
                     status
-                    createdAt
-                    updatedAt
                     location {
                         latitude
                         longitude
@@ -37,6 +35,80 @@ export class TransactionApolloQueries {
                         sublocality
                         municipality
                         fullArea
+                    }
+                    createdAt
+                    updatedAt
+                    from {
+                        id
+                        balance
+                        allowReceive
+                        allowWithdraw
+                        allowSend
+                        allowRequestMe
+                        allowDeposit
+                        status
+                        sendLimit
+                        receiveLimit
+                        withdrawLimit
+                        depositLimit
+                        hash
+                        currency
+                        createdAt
+                        updatedAt
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            dniNumber
+                            password
+                            profileImageUrl
+                            userAgreementSigned
+                            idFrontUrl
+                            status
+                            idBackUrl
+                            faceVideoUrl
+                            address
+                            createdAt
+                            updatedAt
+                        }
+                    }
+                    to {
+                        id
+                        balance
+                        allowReceive
+                        allowWithdraw
+                        allowSend
+                        allowRequestMe
+                        allowDeposit
+                        status
+                        sendLimit
+                        receiveLimit
+                        withdrawLimit
+                        depositLimit
+                        hash
+                        currency
+                        createdAt
+                        updatedAt
+                        user {
+                            id
+                            fullName
+                            username
+                            phone
+                            email
+                            dniNumber
+                            password
+                            profileImageUrl
+                            userAgreementSigned
+                            idFrontUrl
+                            status
+                            idBackUrl
+                            faceVideoUrl
+                            address
+                            createdAt
+                            updatedAt
+                        }
                     }
                 }
             }

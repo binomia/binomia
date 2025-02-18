@@ -10,15 +10,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { recurenceMonthlyData, recurenceWeeklyData } from '@/mocks';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
-import { useMutation } from '@apollo/client';
+import { useLazyQuery, useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAccountLimit, fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { useLocation } from '@/hooks/useLocation'
-
-
 
 type Props = {
     goBack?: () => void
@@ -35,6 +33,17 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
     const { authenticate } = useLocalAuthentication();
     const { fetchGeoLocation } = useLocation();
     const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
+    const [fetchTransaction, { startPolling, stopPolling }] = useLazyQuery(TransactionApolloQueries.transaction(), {
+        fetchPolicy: "network-only",
+        notifyOnNetworkStatusChange: true,
+        onCompleted: async (data) => {
+            const transactionSent = data?.transaction
+            if (transactionSent) {
+                stopPolling()
+                await onNext(transactionSent)
+            }
+        }
+    })
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
     const [recurrence, setRecurrence] = useState<string>("oneTime");
@@ -47,7 +56,6 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
     const [openOptions, setOpenOptions] = useState<string>("")
 
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
-
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
@@ -64,38 +72,50 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
                 variables: { data, recurrence }
             })
 
-            const transactionSent = {
-                ...transaction.createTransaction,
-                to: receiver,
-                from: user
+            const transactionId = transaction?.createTransaction?.transactionId
+            if (transactionId) {
+                await fetchTransaction({ variables: { transactionId } }).then((res) => {
+                    if (res.data.transaction)
+                        onNext(res.data.transaction)
+                    else
+                        startPolling(1000);
+
+                }).catch((error) => {
+                    console.error("Fetch transaction error:", error);
+                });
             }
 
-            await Promise.all([
-                dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionDeytails.amount }))),
-                dispatch(accountActions.setHaveAccountChanged(false)),
-                dispatch(transactionActions.setHasNewTransaction(true)),
-                dispatch(fetchRecentTransactions()),
-                dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
-                dispatch(fetchAccountLimit()),
-                dispatch(transactionActions.setTransaction({
-                    ...transactionSent,
-                    amountColor: colors.red,
-                    fullName: formatTransaction(transactionSent).fullName,
-                    profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
-                    username: formatTransaction(transactionSent).username,
-                    isFromMe: formatTransaction(transactionSent).isFromMe,
-                }))
-            ])
-
-            goNext()
-
-            await delay(1500)
-            setLoading(false)
         } catch (error: any) {
             setLoading(false)
             console.error(error.message);
         }
     }
+
+
+    const onNext = async (transactionSent: any) => {
+        await Promise.all([
+            dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionDeytails.amount }))),
+            dispatch(accountActions.setHaveAccountChanged(false)),
+            dispatch(transactionActions.setHasNewTransaction(true)),
+            dispatch(fetchRecentTransactions()),
+            dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
+            dispatch(fetchAccountLimit()),
+            dispatch(transactionActions.setTransaction({
+                ...transactionSent,
+                amountColor: colors.red,
+                fullName: formatTransaction(transactionSent).fullName,
+                profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
+                username: formatTransaction(transactionSent).username,
+                isFromMe: true,
+            }))
+        ])
+
+        goNext()
+
+        await delay(1500)
+        setLoading(false)
+    }
+
 
     const formatTransaction = (transaction: any) => {
         const isFromMe = transaction.from?.id === user.id
