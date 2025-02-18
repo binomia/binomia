@@ -130,22 +130,7 @@ export class TopUpController {
                     userId: session.userId
                 }
             })
-
-            // await redis.publish(QUEUE_JOBS_NAME.QUEUE_TOPUP, JSON.stringify({
-            //     jobId: `queueTopUp@${shortUUID.generate()}${shortUUID.generate()}`,
-            //     jobName: "queueTopUp",
-            //     jobTime: "queueTopUp",
-            //     userId: session.userId,
-            //     amount: topUpData.amount,
-            //     data: {
-            //         ...topUpData,
-            //         phoneNumber: topUpData.phone,
-            //         senderUsername: session.user.username,
-            //         recurrenceData,
-            //         userId: session.userId
-            //     }
-            // }))
-
+            
             return null
 
         } catch (error: any) {
