@@ -7,7 +7,7 @@ const notificationClient = new JSONRPCClient(async (jsonRPCRequest) => {
         throw new Error("AUTH_SERVER_URL is not defined");
     }
 
-    return axios.post(NOTIFICATION_SERVER_URL, jsonRPCRequest).then((response) => {
+    return axios.post("http://notification-server:8001", jsonRPCRequest).then((response) => {
         if (response.status === 200) {
             notificationClient.receive(response.data);
 
@@ -23,6 +23,7 @@ export const notificationServer = async (method: string, params: JSONRPCParams) 
         return response
 
     } catch (error: any) {
+        console.log({ error });
         throw new Error(error);
     }
 }

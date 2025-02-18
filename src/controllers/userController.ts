@@ -1,7 +1,11 @@
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import KYCModel from '@/models/kycModel';
+import UserMetrics from '@/metrics/userMetrics';
 import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel, SessionModel } from '@/models'
 import { Op } from 'sequelize'
 import { getQueryResponseFields, checkForProtectedRequests, GENERATE_SIX_DIGIT_TOKEN } from '@/helpers'
-import { REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
+import {ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
 import { GlobalZodSchema, UserJoiSchema } from '@/auth';
 import { UserModelType, VerificationDataType } from '@/types';
@@ -9,13 +13,8 @@ import { Cryptography } from '@/helpers/cryptography';
 import { authServer } from '@/rpc';
 import { generate } from 'short-uuid';
 import { z } from 'zod'
-import redis from '@/redis';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-import KYCModel from '@/models/kycModel';
 import { Counter } from 'prom-client';
-import cluster from 'cluster';
-import UserMetrics from '@/metrics/userMetrics';
+import { notificationServer } from '@/rpc/notificationRPC';
 
 
 export class UsersController {
@@ -525,16 +524,12 @@ export class UsersController {
             }))
 
             const signature = Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
-            await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.LOGIN_VERIFICATION_CODE, JSON.stringify({
-                data: {
-                    user: user.toJSON(),
-                    sid: sessionCreated.toJSON().sid,
-                    code,
-                }
-            }))
+            await notificationServer('sendVerificationCode', {
+                email,
+                code
+            })
 
             console.log({ code });
-
 
             return {
                 sid: sessionCreated.toJSON().sid,

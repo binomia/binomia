@@ -3,9 +3,7 @@ import { GraphQLError } from 'graphql';
 import { TopUpsModel, UsersModel, TopUpCompanyModel, TopUpPhonesModel, AccountModel, kycModel } from '@/models';
 import { Op } from 'sequelize';
 import { TopUpSchema } from '@/auth';
-import shortUUID from 'short-uuid';
-import redis from '@/redis';
-import { QUEUE_JOBS_NAME } from '@/constants';
+import { queueServer } from '@/rpc/queueRPC';
 
 
 export class TopUpController {
@@ -121,20 +119,32 @@ export class TopUpController {
             const topUpData = await TopUpSchema.createTopUp.parseAsync(data)
             const recurrenceData = await TopUpSchema.recurrenceTopUp.parseAsync(recurrence)
 
-            await redis.publish(QUEUE_JOBS_NAME.QUEUE_TOPUP, JSON.stringify({
-                jobId: `queueTopUp@${shortUUID.generate()}${shortUUID.generate()}`,
-                jobName: "queueTopUp",
-                jobTime: "queueTopUp",
-                userId: session.userId,
+            await queueServer("createTopUp", {
                 amount: topUpData.amount,
-                data: JSON.stringify({
+                userId: session.userId,
+                data: {
                     ...topUpData,
                     phoneNumber: topUpData.phone,
                     senderUsername: session.user.username,
                     recurrenceData,
                     userId: session.userId
-                })
-            }))
+                }
+            })
+
+            // await redis.publish(QUEUE_JOBS_NAME.QUEUE_TOPUP, JSON.stringify({
+            //     jobId: `queueTopUp@${shortUUID.generate()}${shortUUID.generate()}`,
+            //     jobName: "queueTopUp",
+            //     jobTime: "queueTopUp",
+            //     userId: session.userId,
+            //     amount: topUpData.amount,
+            //     data: {
+            //         ...topUpData,
+            //         phoneNumber: topUpData.phone,
+            //         senderUsername: session.user.username,
+            //         recurrenceData,
+            //         userId: session.userId
+            //     }
+            // }))
 
             return null
 

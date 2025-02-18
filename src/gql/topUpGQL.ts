@@ -3,17 +3,36 @@ import { TopUpController } from '@/controllers'
 
 const type = () => {
     return `
+        input TopUpLocationInput {
+            latitude: Float
+            longitude: Float
+            neighbourhood: String
+            sublocality: String
+            municipality: String
+            fullArea: String
+            
+        }
         input TopUpInput {
             fullName: String
             phone: String
             amount: Float
             companyId: Int
+            location: TopUpLocationInput
         }
 
         input TopUpRecurrenceInput {
             title: String
             time: String
         }
+
+        type TopUpLocationType {
+            latitude: Float
+            longitude: Float
+            neighbourhood: String
+            sublocality: String
+            municipality: String
+            fullArea: String
+        } 
 
 
         type TopUpCompany {
@@ -53,6 +72,7 @@ const type = () => {
             phone: PhoneTopUpType
             user: OnlyUserType
             company: TopUpCompany
+            location: TopUpLocationType
         }
 
         type OnlyTopUpsType {
@@ -61,7 +81,8 @@ const type = () => {
             amount: Float
             referenceId: String
             createdAt: String
-            updatedAt: String            
+            updatedAt: String  
+            location: TopUpLocationType         
         }
 
         type SearchTopUpsType {
