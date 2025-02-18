@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import colors from '@/colors'
 import Button from '@/components/global/Button';
 import BottomSheet from '../global/BottomSheet';
-import { StyleSheet, Dimensions } from 'react-native'
+import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, FlatList, Avatar } from 'native-base'
 import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -281,26 +281,3 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
 }
 
 export default TransactionDetails
-
-
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: 55,
-        height: 55,
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 30,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    }
-})
