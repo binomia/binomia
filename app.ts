@@ -16,7 +16,7 @@ import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { collectDefaultMetrics, register } from 'prom-client';
 import { initTracing } from "@/tracing";
-import { metrics, trace, Context, Counter } from '@opentelemetry/api';
+import { metrics } from '@opentelemetry/api';
 
 
 

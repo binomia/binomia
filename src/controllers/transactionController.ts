@@ -4,19 +4,55 @@ import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
 import { Cryptography } from '@/helpers/cryptography';
-import {  ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
+import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
 import { queueServer } from '@/rpc/queueRPC';
 
 export class TransactionsController {
     static transaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            await checkForProtectedRequests(context.req);
+            const { user } = await checkForProtectedRequests(context.req);
             const fields = getQueryResponseFields(fieldNodes, 'transaction')
-
+            
             const transaction = await TransactionsModel.findOne({
                 attributes: fields['transaction'],
-                where: { transactionId: transactionId }
+                where: {
+                    [Op.and]: [
+                        { transactionId },
+                        {
+                            [Op.or]: [
+                                {
+                                    fromAccount: user.account.id
+                                },
+                                {
+                                    toAccount: user.account.id,
+                                }
+                            ]
+                        }
+                    ]
+                },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'from',
+                        attributes: fields['from'],
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                            attributes: fields['user']
+                        }]
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'to',
+                        attributes: fields['to'],
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                            attributes: fields['user']
+                        }]
+                    }
+                ]
             })
 
             return transaction

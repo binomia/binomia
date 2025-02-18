@@ -182,7 +182,7 @@ const type = () => {
 
 const query = () => {
     return `
-        transaction(transactionId: String!): OnlyTransactionType
+        transaction(transactionId: String!): TransactionType
         accountTransactions(page: Int!, pageSize: Int!): [TransactionType]
         searchAccountTransactions(page: Int!, pageSize: Int!, fullName: String!): [TransactionType]
         accountRecurrentTransactions(page: Int!, pageSize: Int!): [OnlyRecurrentTransactionType]

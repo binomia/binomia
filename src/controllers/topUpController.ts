@@ -1,6 +1,6 @@
 import { checkForProtectedRequests, getQueryResponseFields } from '@/helpers'
 import { GraphQLError } from 'graphql';
-import { TopUpsModel, UsersModel, TopUpCompanyModel, TopUpPhonesModel, AccountModel, kycModel } from '@/models';
+import { TopUpsModel, UsersModel, TopUpCompanyModel, TopUpPhonesModel } from '@/models';
 import { Op } from 'sequelize';
 import { TopUpSchema } from '@/auth';
 import { queueServer } from '@/rpc/queueRPC';
@@ -35,6 +35,7 @@ export class TopUpController {
             throw new GraphQLError(error.message);
         }
     }
+
     static recentTopUps = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             try {
@@ -130,7 +131,7 @@ export class TopUpController {
                     userId: session.userId
                 }
             })
-            
+
             return null
 
         } catch (error: any) {
