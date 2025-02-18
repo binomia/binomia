@@ -28,6 +28,18 @@ export const initMethods = (server: JSONRPCServer, io: Server) => {
         }
     });
 
+    server.addMethod("sendVerificationCode", async ({ email, code }: { email: string, code: string }) => {
+        try {
+            console.log({ email, code });
+            
+            const sentMessageInfo = await Email.sendVerificationCode(email, code);
+            return sentMessageInfo
+
+        } catch (error) {
+
+        }
+    });
+
     server.addMethod("newTransactionNotification", async ({ data }: { data: { token: string, message: string }[] }) => {
         try {
             await sendNotification(data)
@@ -38,9 +50,9 @@ export const initMethods = (server: JSONRPCServer, io: Server) => {
         }
     });
 
-    server.addMethod("socketEventEmitter", async ({ data, channel, senderSocketRoom, recipientSocketRoom }: {data: any, channel: string, senderSocketRoom: string, recipientSocketRoom: string}) => {
+    server.addMethod("socketEventEmitter", async ({ data, channel, senderSocketRoom, recipientSocketRoom }: { data: any, channel: string, senderSocketRoom: string, recipientSocketRoom: string }) => {
         try {
-            io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)    
+            io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
             return true
 
         } catch (error) {

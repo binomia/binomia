@@ -1,17 +1,17 @@
 import "dotenv/config"
+import express, { Express, Request, Response } from 'express';
 import cluster from "cluster";
 import os from "os";
 import http from "http";
 import { initSocket } from "@/sockets";
 import { Server } from "socket.io";
-import { initRedisEventSubcription, subscriber } from "@/redis";
+import { subscriber } from "@/redis";
 import { setupMaster, setupWorker } from "@socket.io/sticky";
 import { createAdapter, setupPrimary } from "@socket.io/cluster-adapter";
 import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
 import { ip } from "address"
 import { initMethods } from "@/rpc";
 import { JSONRPCServer } from "json-rpc-2.0";
-import express, { Express, Request, Response } from 'express';
 
 
 const PORT = process.env.PORT || 8001;
@@ -88,7 +88,6 @@ if (cluster.isPrimary) {
     setupWorker(io);
     initSocket(io);
     initMethods(server, io);
-    initRedisEventSubcription(io);
 
     console.log(`[Notification-Server]: worker ${process.pid} is running on http://${ip()}:${PORT}`);
 }
