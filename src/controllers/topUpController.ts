@@ -93,7 +93,9 @@ export default class TopUpController {
 
     static createTopUp = async (job: JobJson) => {
         try {
-            const { fullName, amount, companyId, phoneNumber, senderUsername, recurrenceData, userId } = JSON.parse(job.data)
+            const { fullName, amount, companyId, phoneNumber, location, senderUsername, recurrenceData, userId } = JSON.parse(job.data)
+            console.log(location);
+
             const [phone] = await TopUpPhonesModel.findOrCreate({
                 limit: 1,
                 where: {
@@ -143,6 +145,7 @@ export default class TopUpController {
             const topUp = await TopUpsModel.create({
                 companyId: companyId,
                 userId,
+                location,
                 phoneId: phone.toJSON().id,
                 amount: amount,
                 status: 'pending',
@@ -200,7 +203,7 @@ export default class TopUpController {
                 data: encryptedData
             });
 
-            if (recurrenceData.time !== "oneTime") {                
+            if (recurrenceData.time !== "oneTime") {
                 await topUpQueue.createJobs({
                     jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
                     jobName: recurrenceData.title,

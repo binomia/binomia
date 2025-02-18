@@ -102,7 +102,15 @@ export default class TopUpQueue {
                 break;
             }
             case "queueTopUp": {
-                const job = await this.queue.add(`${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`, data, { removeOnComplete: true, removeOnFail: true });
+                const job = await this.queue.add(`${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`, data, {
+                    jobId,
+                    removeOnComplete: {
+                        age: 1000 * 60 * 30 // 30 minutes
+                    },
+                    removeOnFail: {
+                        age: 1000 * 60 * 60 * 24 // 24 hours
+                    }
+                });
                 return job.asJSON()
             }
             default: {

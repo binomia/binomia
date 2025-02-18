@@ -5,11 +5,14 @@ import { redis } from "@/redis";
 import { QUEUE_JOBS_NAME } from "@/constants";
 import { Job, Queue } from "bullmq";
 import { transactionMethods } from "./transactionRPC";
+import { topUpMethods } from "./topupRPC";
 
 
 
 export const initMethods = (server: JSONRPCServer) => {
     transactionMethods(server)
+    topUpMethods(server)
+    
     // gloabal methods
     server.addMethod("test", async ({ queueName, jobId, jobKey }: { queueName: string, jobId: string, jobKey: string }) => {
         const job = await transactionsQueue.queue.getJobScheduler(jobKey)
