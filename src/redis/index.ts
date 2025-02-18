@@ -19,7 +19,5 @@ export const redis = new Redis({
 export const initRedisEventSubcription = async (bullDashboard: ReturnType<typeof createBullBoard>) => {
     process.on("message", async ({ channel, payload }: { channel: string, payload: string }) => {
         await MainController.listenToRedisEvent({ channel, payload, bullDashboard })
-        await TransactionController.listenToRedisEvent({ channel, payload })
-        await TopUpController.listenToRedisEvent({ channel, payload })
     })
 }

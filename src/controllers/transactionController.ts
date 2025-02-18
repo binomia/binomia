@@ -223,7 +223,7 @@ export default class TransactionController {
 
     static createQueuedTransaction = async (job: JobJson) => {
         try {
-            const { senderUsername, receiverUsername, recurrenceData, amount, transactionType, currency, location } = JSON.parse(job.data)
+            const { senderUsername,transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location } = JSON.parse(job.data)
             const senderAccount = await AccountModel.findOne({
                 where: { username: senderUsername },
                 include: [
@@ -283,6 +283,7 @@ export default class TransactionController {
 
             const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
             const transaction = await TransactionsModel.create({
+                transactionId,
                 fromAccount: senderAccountJSON.id,
                 toAccount: receiverAccount.toJSON().id,
                 senderFullName: senderAccountJSON.user.fullName,
@@ -786,42 +787,4 @@ export default class TransactionController {
         }
     }
 
-    
-    static listenToRedisEvent = async ({ channel, payload }: { channel: string, payload: string }) => {
-        switch (channel) {
-            case QUEUE_JOBS_NAME.CREATE_TRANSACTION:
-            case QUEUE_JOBS_NAME.PENDING_TRANSACTION: {
-                const { jobName, jobTime, jobId, referenceData, amount, userId, data } = JSON.parse(payload);
-
-                await transactionsQueue.createJobs({ jobId, referenceData, jobName, jobTime, amount, userId, data });
-                break;
-            }
-            case QUEUE_JOBS_NAME.REMOVE_TRANSACTION_FROM_QUEUE: {
-                const { jobId } = JSON.parse(payload);
-                console.log("REMOVE_TRANSACTION_FROM_QUEUE:", jobId);
-
-                await transactionsQueue.removeJob(jobId);
-                break;
-            }
-            case QUEUE_JOBS_NAME.QUEUE_REQUEST_TRANSACTION:
-            case QUEUE_JOBS_NAME.QUEUE_TRANSACTION: {
-                const { jobId, jobName, userId, jobTime, data, amount } = JSON.parse(payload);
-
-                await transactionsQueue.createJobs({
-                    jobId,
-                    jobName,
-                    jobTime,
-                    referenceData: null,
-                    amount,
-                    userId,
-                    data: JSON.parse(data)
-                });
-                break;
-            }
-
-            default: {
-                break;
-            }
-        }
-    }
 }

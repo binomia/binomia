@@ -225,40 +225,4 @@ export default class TopUpController {
             throw error
         }
     }
-
-    static listenToRedisEvent = async ({ channel, payload }: { channel: string, payload: string }) => {
-        switch (channel) {
-            case QUEUE_JOBS_NAME.PENDING_TOPUP: {
-                const { jobName, jobTime, referenceData, jobId, amount, userId, data } = JSON.parse(payload);
-                const encryptedData = await Cryptography.encrypt(JSON.stringify(data));
-
-                await topUpQueue.createJobs({ jobId, referenceData, jobName, jobTime, amount, userId, data: encryptedData });
-                break;
-            }
-            case QUEUE_JOBS_NAME.CREATE_TOPUP: {
-                const { jobName, jobTime, jobId, referenceData, amount, userId, data } = JSON.parse(payload);
-                const encryptedData = await Cryptography.encrypt(JSON.stringify(data));
-
-                await topUpQueue.createJobs({ jobId, referenceData, jobName, jobTime, amount, userId, data: encryptedData });
-                break;
-            }
-            case QUEUE_JOBS_NAME.QUEUE_TOPUP: {
-                const { jobName, jobTime, jobId, amount, userId, data } = JSON.parse(payload);
-                await topUpQueue.createJobs({
-                    jobId,
-                    jobName,
-                    jobTime,
-                    referenceData: null,
-                    amount,
-                    userId,
-                    data: JSON.parse(data)
-                });
-                break;
-            }
-
-            default: {
-                break;
-            }
-        }
-    }
 } 
