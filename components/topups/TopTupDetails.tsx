@@ -75,7 +75,7 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
 
             const referenceId = createdTopUp?.createTopUp?.referenceId
             if (referenceId)
-                await getTopUp({ variables: { referenceId } }).then(async(res) => {
+                await getTopUp({ variables: { referenceId } }).then(async (res) => {
                     if (res.data?.topUp)
                         await onNext()
 
