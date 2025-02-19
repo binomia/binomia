@@ -20,6 +20,15 @@ export class TransactionJoiSchema {
         location: TransactionJoiSchema.transactionLocation
     })
 
+    static createFromRecurrenceTransaction = TransactionJoiSchema.createTransaction.extend({
+        transactionId: z.string(),
+        fromAccount: z.number(),
+        toAccount: z.number(),
+        senderFullName: z.string(),
+        receiverFullName: z.string(),
+        signature: z.string()
+    })
+
     static recurrenceTransaction = z.object({
         title: z.string(),
         time: z.string()

@@ -9,6 +9,7 @@ import { CreateTransactionType } from "@/types"
 import { Job, JobJson } from "bullmq"
 import { Op } from "sequelize"
 import shortUUID from "short-uuid"
+import { z } from "zod"
 
 
 export default class TransactionController {
@@ -144,7 +145,7 @@ export default class TransactionController {
         }
     }
 
-    static prosessTransaction = async ({ repeatJobKey }: JobJson): Promise<string> => {
+    static prosessQueuedTransaction = async ({ repeatJobKey }: JobJson): Promise<string> => {
         try {
             const queueTransaction = await QueuesModel.findOne({
                 where: {
@@ -158,62 +159,41 @@ export default class TransactionController {
             if (!queueTransaction)
                 throw "transaction not found";
 
-            if (queueTransaction.toJSON().jobName === "pendingTransaction") {
-                // [TODO]: implement pending transaction
-                const isTrue = true
-                if (isTrue) {
-                    const decryptedData = await Cryptography.decrypt(queueTransaction.toJSON().data)
-                    const { transactionId } = JSON.parse(decryptedData)
+            const { jobName, jobTime, amount, signature, data } = queueTransaction.toJSON()
+            const hash = await Cryptography.hash(JSON.stringify({
+                jobTime,
+                jobName,
+                amount,
+                repeatJobKey,
+                ZERO_ENCRYPTION_KEY
+            }))
 
-                    const transaction = await TransactionsModel.findOne({
-                        where: {
-                            transactionId
-                        }
-                    })
+            const verify = await Cryptography.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
+            if (verify) {
+                const decryptedData = await Cryptography.decrypt(data)
+                const { sender: senderUsername, receiver: receiverUsername, transactionId, amount, transactionType, currency } = await TransactionJoiSchema.createFromRecurrenceTransaction.parseAsync(JSON.parse(decryptedData))
+                const queueLocation = await TransactionJoiSchema.transactionLocation.parseAsync({})
 
-                    if (!transaction)
-                        throw "transaction not found";
-
-                    await transaction.update({
-                        status: "completed"
-                    })
-
-                    return "transactionStatusCompleted"
-                }
-
+                await TransactionController.createQueuedTransaction({
+                    senderUsername,
+                    receiverUsername,
+                    transactionId,
+                    amount,
+                    transactionType,
+                    currency,
+                    location: queueLocation,
+                    recurrenceData: {
+                        time: "oneTime",
+                        title: "oneTime"
+                    }
+                })
                 await queueTransaction.update({
                     repeatedCount: queueTransaction.toJSON().repeatedCount + 1
                 })
-
-                return queueTransaction.toJSON().jobName
-
-            } else {
-                const { jobId, jobName, jobTime, receiverId, senderId, amount, signature, data } = queueTransaction.toJSON()
-                const hash = await Cryptography.hash(JSON.stringify({
-                    jobId,
-                    receiverId,
-                    senderId,
-                    amount,
-                    repeatJobKey,
-                    jobTime,
-                    jobName,
-                    ZERO_ENCRYPTION_KEY
-                }))
-
-
-                const verify = await Cryptography.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
-                if (verify) {
-                    const decryptedData = await Cryptography.decrypt(data)
-                    const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(JSON.parse(decryptedData))
-
-                    await TransactionController.createTransaction(validatedData)
-                    await queueTransaction.update({
-                        repeatedCount: queueTransaction.toJSON().repeatedCount + 1
-                    })
-                }
-
-                return "createTransaction"
             }
+
+            return "pending"
+
 
         } catch (error) {
             console.log({ prosessTransaction: error });
@@ -239,7 +219,7 @@ export default class TransactionController {
 
             if (newStatus !== transaction.toJSON().status) {
                 await transaction.update({
-                    status: "completed"
+                    status: newStatus
                 })
             }
 
@@ -251,9 +231,8 @@ export default class TransactionController {
         }
     }
 
-    static createQueuedTransaction = async (job: JobJson) => {
+    static createQueuedTransaction = async ({ senderUsername, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location }: { senderUsername: string, transactionId: string, receiverUsername: string, recurrenceData: any, amount: number, transactionType: string, currency: string, location: z.infer<typeof TransactionJoiSchema.transactionLocation> }) => {
         try {
-            const { senderUsername, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location } = JSON.parse(job.data)
             const senderAccount = await AccountModel.findOne({
                 where: { username: senderUsername },
                 include: [
@@ -381,7 +360,14 @@ export default class TransactionController {
                 const recurrenceQueueData = Object.assign(transactionData.toJSON(), {
                     amount,
                     receiver: receiverUsername,
-                    sender: senderAccount.toJSON().username
+                    sender: senderAccount.toJSON().username,
+                    senderUsername,
+                    transactionId,
+                    receiverUsername,
+                    recurrenceData,
+                    transactionType,
+                    currency,
+                    location
                 })
 
                 const encryptedData = await Cryptography.encrypt(JSON.stringify(recurrenceQueueData));

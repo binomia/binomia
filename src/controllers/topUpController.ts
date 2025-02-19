@@ -23,67 +23,82 @@ export default class TopUpController {
             if (!queue)
                 throw "queue not found";
 
-            if (queue.toJSON().jobName === "pendingTopUp") {
-                const decryptedData = await Cryptography.decrypt(queue.toJSON().data)
-                const { id, referenceId } = JSON.parse(decryptedData)
+            const { jobName, jobTime, amount, signature, data } = queue.toJSON()
 
-                // [TODO]: implement pending transaction
-                const isTrue = true
-                if (isTrue) {
-                    const toptup = await TopUpsModel.findOne({
-                        where: {
-                            id
-                        }
-                    })
+            const hash = await Cryptography.hash(JSON.stringify({
+                jobTime,
+                jobName,
+                amount,
+                repeatJobKey,
+                ZERO_ENCRYPTION_KEY
+            }))
 
-                    if (!toptup)
-                        throw "toptup not found";
 
-                    await toptup.update({
-                        status: "completed"
-                    })
+            const verify = await Cryptography.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
+            if (verify) {
+                const decryptedData = await Cryptography.decrypt(data)
+                const topUpData = await TopUpSchema.createFromQueueTopUp.parseAsync(decryptedData)
 
-                    return "toptupStatusCompleted"
-                }
+                await TopUpsModel.create({
+                    ...topUpData,
+                    status: "pending",
+                    referenceId: `${shortUUID().uuid()}`, // [TODO]: Implement topup externally 
+                })
 
                 await queue.update({
                     repeatedCount: queue.toJSON().repeatedCount + 1
                 })
-
-                return queue.toJSON().jobName
-
-            } else {
-                const { jobId, jobName, jobTime, receiverId, senderId, amount, signature, data } = queue.toJSON()
-                const hash = await Cryptography.hash(JSON.stringify({
-                    jobId,
-                    receiverId,
-                    senderId,
-                    amount,
-                    repeatJobKey,
-                    jobTime,
-                    jobName,
-                    ZERO_ENCRYPTION_KEY
-                }))
-
-
-                const verify = await Cryptography.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
-                if (verify) {
-                    const decryptedData = await Cryptography.decrypt(data)
-                    const topUpData = await TopUpSchema.createFromQueueTopUp.parseAsync(decryptedData)
-
-                    await TopUpsModel.create({
-                        ...topUpData,
-                        status: "pending",
-                        referenceId: `${shortUUID().uuid()}`, // [TODO]: Implement topup externally 
-                    })
-
-                    await queue.update({
-                        repeatedCount: queue.toJSON().repeatedCount + 1
-                    })
-                }
-
-                return "createTopUp"
             }
+
+            return "pending"
+
+
+        } catch (error) {
+            console.log({ prosessTransaction: error });
+            throw error
+        }
+    }
+
+    static pendingTopUp = async ({ repeatJobKey }: JobJson): Promise<string> => {
+        try {
+            const queue = await QueuesModel.findOne({
+                where: {
+                    [Op.and]: [
+                        { repeatJobKey },
+                        { status: "active" }
+                    ]
+                }
+            })
+
+            if (!queue)
+                throw "queue not found";
+
+            // [TODO]: implement pending transaction
+            const newStatus = "completed"
+            const decryptedData = await Cryptography.decrypt(queue.toJSON().data)
+            const { id, referenceId } = JSON.parse(decryptedData)
+
+
+            const toptup = await TopUpsModel.findOne({
+                where: {
+                    id
+                }
+            })
+
+            if (!toptup)
+                throw "toptup not found";
+
+            if (newStatus !== toptup.toJSON().status) {
+                await toptup.update({
+                    status: newStatus
+                })
+            }
+
+            await toptup.update({
+                status: "completed"
+            })
+
+            return newStatus
 
         } catch (error) {
             console.log({ prosessTransaction: error });
@@ -207,7 +222,6 @@ export default class TopUpController {
                     jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
                     jobName: recurrenceData.title,
                     jobTime: recurrenceData.time,
-
                     referenceData: {
                         fullName,
                         logo: topUp.toJSON().company.logo,

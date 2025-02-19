@@ -19,7 +19,8 @@ export default class TransactionsQueue {
             const name = job.name.split("@")[0]
             switch (name) {
                 case "queueTransaction": {
-                    await TransactionController.createQueuedTransaction(job)
+                    const { senderUsername, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location } = JSON.parse(job.data)
+                    await TransactionController.createQueuedTransaction({ senderUsername, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location })
                     console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
 
                     break;
@@ -38,7 +39,9 @@ export default class TransactionsQueue {
                     break;
                 }
                 default: {
+                    await TransactionController.prosessQueuedTransaction(job)
                     break;
+
                 }
             }
 
@@ -61,9 +64,9 @@ export default class TransactionsQueue {
         worker.on('completed', (job: Job) => {
             const name = job.name.split("@")[0]
             console.log('Job completed', name);
-            if (name === "queueTransaction" || name === "queueRequestTransaction") {
+            if (name === "queueTransaction" || name === "queueRequestTransaction")
                 job.remove()
-            }
+
         })
     }
 
@@ -149,8 +152,6 @@ export default class TransactionsQueue {
 
     addJob = async (jobName: string, data: string, pattern: string) => {
         const job = await this.queue.upsertJobScheduler(jobName, { tz: "EST", pattern }, { data });
-        job.opts.removeOnComplete = { age: 1000 * 60 * 30 }
-        job.opts.removeOnFail = { age: 1000 * 60 * 60 * 24 }
         return job
     }
 

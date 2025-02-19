@@ -29,13 +29,10 @@ export default class MainController {
             if (queue) return
 
             const hash = await Cryptography.hash(JSON.stringify({
-                jobId: id,
-                userId,
-                amount,
-                repeatJobKey,
-                queueType,
                 jobTime,
                 jobName,
+                amount,
+                repeatJobKey,
                 ZERO_ENCRYPTION_KEY
             }))
 
@@ -74,10 +71,12 @@ export default class MainController {
             if (!queue)
                 throw "queue not found";
 
-            await queue.update({
+            const filter = {
                 status,
                 repeatedCount: queue.toJSON().repeatedCount + 1
-            })
+            }
+
+            await queue.update(status !== "cancelled" ? filter : { status })
 
             return (await queue.reload()).toJSON()
 
@@ -85,7 +84,7 @@ export default class MainController {
             throw error
         }
     }
-    
+
     static updateQueue = async (repeatJobKey: string, newData: any) => {
         try {
             const queue = await QueuesModel.findOne({
@@ -123,5 +122,4 @@ export default class MainController {
             }
         }
     }
-
 }

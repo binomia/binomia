@@ -21,15 +21,17 @@ export default class TopUpQueue {
                 case "queueTopUp": {
                     await TopUpController.createTopUp(job)
                     console.log(`Job ${job.id} completed:`);
-
+                    break;
+                }
+                case "pendingTopUp": {
+                    const status = await TopUpController.pendingTopUp(job)
+                    if (status === "completed")
+                        if (job.repeatJobKey)
+                            this.removeJob(job.repeatJobKey, "completed")
                     break;
                 }
                 default: {
-                    const prosessTransaction = await TopUpController.prosessTopUp(job)
-                    if (prosessTransaction === "toptupStatusCompleted")
-                        if (job.repeatJobKey)
-                            this.removeJob(job.repeatJobKey, "completed")
-
+                    await TopUpController.prosessTopUp(job)
                     break;
                 }
             }
@@ -48,7 +50,10 @@ export default class TopUpQueue {
         });
 
         worker.on('completed', (job: Job) => {
+            const name = job.name.split("@")[0]
             console.log('Job completed', job.id);
+            if (name === "queueTopUp")
+                job.remove()
         })
     }
 

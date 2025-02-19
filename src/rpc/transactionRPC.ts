@@ -118,5 +118,4 @@ export const transactionMethods = (server: JSONRPCServer) => {
             throw error
         }
     });
-
 }
