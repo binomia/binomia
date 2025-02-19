@@ -1,4 +1,5 @@
 import useAsyncStorage from "@/hooks/useAsyncStorage";
+import { useLocalAuthentication } from "@/hooks/useLocalAuthentication";
 import { globalContextInitialState } from "@/mocks";
 import { GlobalContextType } from "@/types";
 import { createContext, useEffect, useState } from "react";
@@ -24,7 +25,10 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [showCloseButton, setShowCloseButton] = useState<boolean>(globalContextInitialState.showCloseButton);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
+    const [canAuthenticate, setCanAuthenticate] = useState<boolean>(true);
+
     const { getItem, setItem } = useAsyncStorage();
+    const { authenticate } = useLocalAuthentication();
 
     const resetAllStates = () => {
         setEmail("")
@@ -58,12 +62,13 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
                 const now = Date.now();
                 const appInBackgroundTime = await getItem("appInBackgroundTime");
 
-                if (appInBackgroundTime) {
+                if (appInBackgroundTime && canAuthenticate) {
                     const duration = (now - Number(appInBackgroundTime)) / 1000;
                     console.log('App has come back to the foreground: ', duration);
+                    if (duration > 5)
+                        setCanAuthenticate(false);
                 }
             }
-          
         });
 
 
@@ -71,6 +76,17 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
             subscription.remove();
         };
     }, []);
+
+    useEffect(() => {
+        if (!canAuthenticate) {
+            authenticate().then(async () => {
+                setCanAuthenticate(true);
+                const now = Date.now();
+                await setItem("appInBackgroundTime", now.toString());
+            })
+        }
+
+    }, [canAuthenticate]);
 
 
 

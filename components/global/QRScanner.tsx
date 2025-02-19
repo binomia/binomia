@@ -6,7 +6,7 @@ import PagerView from 'react-native-pager-view';
 import Button from '@/components/global/Button'
 import BottomSheet from '@/components/global/BottomSheet'
 import QRCodeStyled from 'react-native-qrcode-styled';
-import { icon, logo } from '@/assets'
+import { icon } from '@/assets'
 import { useDispatch, useSelector } from 'react-redux'
 import { scale } from 'react-native-size-matters'
 import { MAKE_FULL_NAME_SHORTEN } from '@/helpers'
