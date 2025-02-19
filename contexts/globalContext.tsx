@@ -65,7 +65,7 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
                 if (appInBackgroundTime && canAuthenticate) {
                     const duration = (now - Number(appInBackgroundTime)) / 1000;
                     console.log('App has come back to the foreground: ', duration);
-                    if (duration > 5)
+                    if (duration > 60)
                         setCanAuthenticate(false);
                 }
             }
