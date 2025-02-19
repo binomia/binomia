@@ -62,8 +62,8 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
 
                 if (appInBackgroundTime && canAuthenticate) {
                     const duration = (now - Number(appInBackgroundTime)) / 1000;
-                    
-                    if (duration > 3)
+
+                    if (duration > 60)
                         await authenticate().then(async () => {
                             setCanAuthenticate(true);
                             const now = Date.now();
