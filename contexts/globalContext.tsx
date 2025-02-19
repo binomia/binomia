@@ -53,9 +53,7 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
         const subscription = AppState.addEventListener("change", async (nextAppState) => {
             if (nextAppState === 'background') {
                 const now = Date.now();
-
                 await setItem("appInBackgroundTime", now.toString());
-                console.log('App has gone to the background', now);
             }
 
             if (nextAppState === 'active') {
@@ -64,9 +62,13 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
 
                 if (appInBackgroundTime && canAuthenticate) {
                     const duration = (now - Number(appInBackgroundTime)) / 1000;
-                    console.log('App has come back to the foreground: ', duration);
-                    if (duration > 60)
-                        setCanAuthenticate(false);
+                    
+                    if (duration > 3)
+                        await authenticate().then(async () => {
+                            setCanAuthenticate(true);
+                            const now = Date.now();
+                            await setItem("appInBackgroundTime", now.toString());
+                        })
                 }
             }
         });
@@ -76,19 +78,6 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
             subscription.remove();
         };
     }, []);
-
-    useEffect(() => {
-        if (!canAuthenticate) {
-            authenticate().then(async () => {
-                setCanAuthenticate(true);
-                const now = Date.now();
-                await setItem("appInBackgroundTime", now.toString());
-            })
-        }
-
-    }, [canAuthenticate]);
-
-
 
     const data = {
         email,
