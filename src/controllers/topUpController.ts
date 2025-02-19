@@ -59,24 +59,13 @@ export default class TopUpController {
         }
     }
 
-    static pendingTopUp = async ({ repeatJobKey }: JobJson): Promise<string> => {
+    static pendingTopUp = async ({ data }: JobJson): Promise<string> => {
         try {
-            const queue = await QueuesModel.findOne({
-                where: {
-                    [Op.and]: [
-                        { repeatJobKey },
-                        { status: "active" }
-                    ]
-                }
-            })
-
-            if (!queue)
-                throw "queue not found";
+            const decryptedData = await Cryptography.decrypt(JSON.parse(data))
 
             // [TODO]: implement pending transaction
             const newStatus = "completed"
-            const decryptedData = await Cryptography.decrypt(queue.toJSON().data)
-            const { id, referenceId } = JSON.parse(decryptedData)
+            const { id } = JSON.parse(decryptedData)
 
 
             const toptup = await TopUpsModel.findOne({

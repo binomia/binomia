@@ -1,4 +1,4 @@
-import { Job, JobJson, Queue, Worker } from "bullmq";
+import { Job, Queue, Worker } from "bullmq";
 import { MonthlyQueueTitleType, WeeklyQueueTitleType } from "@/types";
 import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN } from "@/constants";
 import shortUUID from "short-uuid";
@@ -14,24 +14,20 @@ export default class TopUpQueue {
         this.workers()
     }
 
-    private executeJob = async (job: JobJson) => {
+    private executeJob = async (job: Job) => {
         try {
             const name = job.name.split("@")[0]
             switch (name) {
                 case "queueTopUp": {
-                    await TopUpController.createTopUp(job)
-                    console.log(`Job ${job.id} completed:`);
+                    await TopUpController.createTopUp(job.asJSON())
                     break;
                 }
                 case "pendingTopUp": {
-                    const status = await TopUpController.pendingTopUp(job)
-                    if (status === "completed")
-                        if (job.repeatJobKey)
-                            this.removeJob(job.repeatJobKey, "completed")
+                    await TopUpController.pendingTopUp(job.asJSON())
                     break;
                 }
                 default: {
-                    await TopUpController.prosessTopUp(job)
+                    await TopUpController.prosessTopUp(job.asJSON())
                     break;
                 }
             }
@@ -42,18 +38,25 @@ export default class TopUpQueue {
     }
 
     private workers = async () => {
-        const worker = new Worker('topups', async (job) => this.executeJob(job.asJSON()), {
+        const worker = new Worker('topups', async (job) => this.executeJob(job), {
             connection: { host: "redis", port: 6379 },
             settings: {
                 backoffStrategy: (attemptsMade: number) => attemptsMade * 1000
             }
         });
 
-        worker.on('completed', (job: Job) => {
-            const name = job.name.split("@")[0]
-            console.log('Job completed', job.id);
-            if (name === "queueTopUp")
-                job.remove()
+        worker.on('completed', async (job: Job) => {
+            try {
+                const name = job.name.split("@")[0]
+                if (name === "pendingTopUp" && job.repeatJobKey)
+                    await this.removeJob(job?.repeatJobKey)
+                
+                console.log(`Job ${job.id} completed:`);
+
+            } catch (error: any) {
+                console.log({ queueTopUp: error });
+
+            }
         })
     }
 
@@ -103,20 +106,15 @@ export default class TopUpQueue {
             }
             case "pendingTopUp": {
                 const time = 1000 * 60 * 30 // 30 minutes
-                await this.queue.add(jobId, data, { delay: time, repeat: { every: time }, jobId });
+                await this.queue.add(jobId, data, { delay: time, repeat: { every: time }, jobId, removeOnComplete: true });
                 break;
             }
             case "queueTopUp": {
-                const job = await this.queue.add(`${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`, data, {
+                await this.queue.add(`${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`, data, {
                     jobId,
-                    removeOnComplete: {
-                        age: 1000 * 60 * 30 // 30 minutes
-                    },
-                    removeOnFail: {
-                        age: 1000 * 60 * 60 * 24 // 24 hours
-                    }
+                    removeOnComplete: true
                 });
-                return job.asJSON()
+                break
             }
             default: {
                 return
