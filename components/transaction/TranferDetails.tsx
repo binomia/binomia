@@ -40,6 +40,16 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             const transactionSent = data?.transaction
             if (transactionSent) {
                 stopPolling()
+                await dispatch(transactionActions.setTransaction({
+                    ...transactionSent,
+                    amountColor: colors.red,
+                    fullName: formatTransaction(transactionSent).fullName,
+                    profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
+                    username: formatTransaction(transactionSent).username,
+                    isFromMe: true,
+                }))
+
+                goNext()
                 await onNext(transactionSent)
             }
         }
@@ -74,11 +84,22 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
 
             const transactionId = transaction?.createTransaction?.transactionId
             if (transactionId) {
-                await fetchTransaction({ variables: { transactionId } }).then((res) => {
-                    if (res.data.transaction)
-                        onNext(res.data.transaction)
+                await fetchTransaction({ variables: { transactionId } }).then(async (res) => {
+                    if (!!res.data.transaction) {
+                        await dispatch(transactionActions.setTransaction({
+                            ...res.data.transaction,
+                            amountColor: colors.red,
+                            fullName: formatTransaction(res.data.transaction).fullName,
+                            profileImageUrl: formatTransaction(res.data.transaction).profileImageUrl,
+                            username: formatTransaction(res.data.transaction).username,
+                            isFromMe: true,
+                        }))
+
+                        goNext()
+                        await onNext(res.data.transaction)
+                    }
                     else
-                        startPolling(1500);
+                        startPolling(1000);
 
                 }).catch((error) => {
                     console.error("Fetch transaction error:", error);
@@ -100,19 +121,17 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
             dispatch(fetchRecentTransactions()),
             dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
             dispatch(fetchAccountLimit()),
-            dispatch(transactionActions.setTransaction({
-                ...transactionSent,
-                amountColor: colors.red,
-                fullName: formatTransaction(transactionSent).fullName,
-                profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
-                username: formatTransaction(transactionSent).username,
-                isFromMe: true,
-            }))
+            // dispatch(transactionActions.setTransaction({
+            //     ...transactionSent,
+            //     amountColor: colors.red,
+            //     fullName: formatTransaction(transactionSent).fullName,
+            //     profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
+            //     username: formatTransaction(transactionSent).username,
+            //     isFromMe: true,
+            // }))
         ])
 
         goNext()
-
-        await delay(1500)
         setLoading(false)
     }
 

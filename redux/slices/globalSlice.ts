@@ -15,6 +15,7 @@ const globalSlice = createSlice({
         smsNotifications: true,
         pushNotifications: true,
         isVPNConnected: true,
+        contacts: [],
         network: {
             isConnected: false,
             type: "unknown",
@@ -33,6 +34,9 @@ const globalSlice = createSlice({
         }
     },
     reducers: {
+        setContacts: (state, action) => {
+            state.contacts = action.payload
+        },
         setIsVPNConnected: (state, action) => {
             state.isVPNConnected = action.payload
         },

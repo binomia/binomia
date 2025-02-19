@@ -10,7 +10,6 @@ import { router } from "expo-router";
 import * as Crypto from 'expo-crypto';
 import * as Network from 'expo-network';
 import { useLocation } from "@/hooks/useLocation";
-import { TransactionApolloQueries } from "@/apollo/query/transactionQuery";
 import { AccountAuthSchema } from "@/auth/accountAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import { fetchAccountBankingTransactions, fetchAccountLimit, fetchAllTransactions, fetchRecentTopUps, fetchRecentTransactions } from "@/redux/fetchHelper";
@@ -18,6 +17,7 @@ import { accountActions } from "@/redux/slices/accountSlice";
 import { registerActions } from "@/redux/slices/registerSlice";
 import { topupActions } from "@/redux/slices/topupSlice";
 import { transactionActions } from "@/redux/slices/transactionSlice";
+import { useContacts } from "@/hooks/useContacts";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -52,6 +52,8 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const [login] = useMutation(SessionApolloQueries.login());
     const [createUser] = useMutation(UserApolloQueries.createUser());
     const [getSessionUser] = useLazyQuery(UserApolloQueries.sessionUser());
+    const { getContacts } = useContacts();
+    
 
     const { registerForPushNotificationsAsync } = useNotifications()
 
@@ -59,19 +61,23 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const fetchSessionUser = async () => {
         try {
             const user = await getSessionUser()
-
+            
             const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user.data.sessionUser)
             const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
             const accountsData = await AccountAuthSchema.account.parseAsync(user.data.sessionUser.account)
             const cardsData = await UserAuthSchema.cardsData.parseAsync(user.data.sessionUser.cards)
             const primaryCard = cardsData.find((card: any) => card.isPrimary === true)
 
+            const contacts = await getContacts()
+           
             await Promise.all([
                 dispatch(accountActions.setUser(userProfileData ?? {})),
                 dispatch(accountActions.setKyc(kycData ?? {})),
                 dispatch(accountActions.setAccount(accountsData ?? {})),
                 dispatch(accountActions.setCards(cardsData ?? {})),
                 dispatch(accountActions.setCard(primaryCard ?? {})),
+                
+                dispatch(globalActions.setContacts(contacts)),
 
                 dispatch(fetchRecentTransactions()),
                 dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),

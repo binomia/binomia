@@ -10,7 +10,6 @@ export const useContacts = () => {
                 fields: [Contacts.Fields.PhoneNumbers]
             });
 
-
             const contacts = data.reduce((validContacts, contact: Contacts.Contact) => {
                 const validPhoneNumbers = contact.phoneNumbers?.filter((phoneNumber: Contacts.PhoneNumber) => {
                     if (!phoneNumber.number) return false

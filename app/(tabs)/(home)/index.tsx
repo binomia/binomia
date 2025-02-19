@@ -16,13 +16,15 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { useLocation } from '@/hooks/useLocation';
+import { useContacts } from '@/hooks/useContacts';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
 	const { account } = useSelector((state: any) => state.accountReducer)
+	const { contacts } = useSelector((state: any) => state.globalReducer)
 	const dispatch = useDispatch()
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
-	const { getLocationAddress } = useLocation()
+
 
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const [refreshing, setRefreshing] = useState(false);
@@ -67,6 +69,11 @@ const HomeScreen: React.FC = () => {
 		])
 	}
 
+	function getSizeInMB(arr: string[]): number {
+		const totalBytes = arr.reduce((acc, str) => acc + new TextEncoder().encode(str).length, 0);
+		return totalBytes / (1024 * 1024); // Convert bytes to MB
+	}
+
 	const services = [
 		{
 			id: 0,
@@ -78,16 +85,24 @@ const HomeScreen: React.FC = () => {
 			id: 1,
 			name: "Seguros",
 			image: cars,
-			onPress: () => getLocationAddress({
-				latitude: 18.536286,
-				longitude: -69.932761
-			})
+			onPress: () => { }
 		},
 		{
 			id: 2,
 			name: "Electricidad",
 			image: house,
-			onPress: () => { }
+			onPress: async () => {
+				const arrContacts = contacts.map((contact: any) => {
+					return contact.phoneNumbers[0].id
+				})
+
+				console.log(getSizeInMB(contacts));
+				
+
+				// console.log(JSON.stringify(arrContacts.sort(), null, 2));
+
+				// console.log(JSON.stringify(contacts, null, 2), );
+			}
 		},
 		{
 			id: 3,

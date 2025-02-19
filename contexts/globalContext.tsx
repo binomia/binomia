@@ -3,7 +3,6 @@ import { globalContextInitialState } from "@/mocks";
 import { GlobalContextType } from "@/types";
 import { createContext, useEffect, useState } from "react";
 import { AppState } from "react-native";
-import { useContacts } from "@/hooks/useContacts";
 
 
 export const GlobalContext = createContext<GlobalContextType>(globalContextInitialState);
@@ -26,7 +25,6 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     const [showCloseButton, setShowCloseButton] = useState<boolean>(globalContextInitialState.showCloseButton);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
     const { getItem, setItem } = useAsyncStorage();
-    const { getContacts, getContact } = useContacts();
 
     const resetAllStates = () => {
         setEmail("")
@@ -65,12 +63,15 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
                     console.log('App has come back to the foreground: ', duration);
                 }
             }
+          
         });
+
 
         return () => {
             subscription.remove();
         };
     }, []);
+
 
 
     const data = {
