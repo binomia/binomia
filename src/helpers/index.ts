@@ -156,7 +156,7 @@ export const IS_VALID_CARD_LENGTH = (cardNumber: string): boolean => {
 
 export const checkForProtectedRequests = async (req: any) => {
     try {
-        const sessionAuthIdentifier = await z.string().length(64).transform((val) => val.trim()).parseAsync(req.headers["session-auth-identifier"]);
+        const deviceid = await z.string().length(64).transform((val) => val.trim()).parseAsync(req.headers["deviceid"]);
         const token = await z.string().min(1).transform((val) => val.trim()).parseAsync(req.headers["authorization"]);
         const jwtToken = token.split(' ')[1];
 
@@ -205,7 +205,7 @@ export const checkForProtectedRequests = async (req: any) => {
             if (!session)
                 throw new GraphQLError("INVALID_SESSION: No session found")
 
-            if (jwtToken !== session.toJSON().jwt || sessionAuthIdentifier !== session.dataValues.deviceId)
+            if (jwtToken !== session.toJSON().jwt || deviceid !== session.dataValues.deviceId)
                 throw new Error("INVALID_SESSION: Invalid token data")
 
             else

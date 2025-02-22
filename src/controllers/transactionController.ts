@@ -13,7 +13,7 @@ export class TransactionsController {
         try {
             const { user } = await checkForProtectedRequests(context.req);
             const fields = getQueryResponseFields(fieldNodes, 'transaction')
-            
+
             const transaction = await TransactionsModel.findOne({
                 attributes: fields['transaction'],
                 where: {
@@ -72,6 +72,8 @@ export class TransactionsController {
             const message = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
             const signature = await Cryptography.sign(message, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
+            const { deviceid, ipaddress, platform } = context.req.headers
+
             await queueServer("createTransaction", {
                 transactionId,
                 senderUsername: user.username,
@@ -85,7 +87,13 @@ export class TransactionsController {
                 userId: session.userId,
                 signature,
                 jobTime: "queueTransaction",
-                jobName: "queueTransaction"
+                jobName: "queueTransaction",
+
+                deviceId: deviceid,
+                sessionId: session.sid,
+                ipAddress: ipaddress,
+                isRecurring: recurrenceData.time !== "oneTime",
+                platform,
             })
 
             return {
@@ -103,13 +111,16 @@ export class TransactionsController {
 
     static createRequestTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
         try {
-            const { user, userId } = await checkForProtectedRequests(context.req);
+            const { user, userId, sid: sessionId } = await checkForProtectedRequests(context.req);
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
             const message = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
             const signature = await Cryptography.sign(message, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
+
+            const { deviceid, ipaddress, platform } = context.req.headers
+
 
             await queueServer("createRequestTransaction", {
                 transactionId,
@@ -124,7 +135,13 @@ export class TransactionsController {
                 userId,
                 signature,
                 jobTime: "queueRequestTransaction",
-                jobName: "queueRequestTransaction"
+                jobName: "queueRequestTransaction",
+
+                deviceId: deviceid,
+                sessionId,
+                ipAddress: ipaddress,
+                isRecurring: recurrenceData.time !== "oneTime",
+                platform,
             })
 
             return {
@@ -254,6 +271,7 @@ export class TransactionsController {
                 order: [['createdAt', 'DESC']],
                 attributes: [...fields['transactions'], "fromAccount", "toAccount"],
                 where: {
+
                     [Op.or]: [
                         {
                             fromAccount: user.account.id

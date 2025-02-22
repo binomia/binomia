@@ -123,8 +123,8 @@ const type = () => {
 
 const query = () => {
     return `
-        accounts(page: Int!, pageSize: Int!): [AccountType]
         account: OnlyAccountType
+        accounts(page: Int!, pageSize: Int!): [AccountType]
         accountPermissions: AccountPermissionsType
         searchAccounts(search: AccountInput!, limit: Int): [AccountType]
         accountLimit: AccountLimitsType

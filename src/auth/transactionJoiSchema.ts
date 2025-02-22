@@ -1,6 +1,27 @@
 import { z } from 'zod'
 
 export class TransactionJoiSchema {
+    static transaction = z.object({
+        transactionId: z.string(),
+        amount: z.number(),
+        deliveredAmount: z.number(),
+        voidedAmount: z.number(),
+        transactionType: z.string(),
+        currency: z.string(),
+        status: z.string(),
+        location: z.object({}).passthrough(),
+        senderFullName: z.string(),
+        receiverFullName: z.string(),
+        signature: z.string(),
+        deviceId: z.string(),
+        ipAddress: z.string(),
+        previousBalance: z.number(),
+        isRecurring: z.boolean(),
+        fraudScore: z.number(),
+        platform: z.string(),
+        speed: z.number()
+    })
+
     static transactionLocation = z.object({
         latitude: z.number().default(0).transform(v => v ?? 0),
         longitude: z.number().default(0).transform(v => v ?? 0),

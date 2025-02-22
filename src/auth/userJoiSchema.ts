@@ -1,6 +1,23 @@
 import { z } from 'zod'
 
 export class UserJoiSchema {
+    static user = z.object({
+        id: z.number(),
+        fullName: z.string(),
+        username: z.string(),
+        dniNumber: z.string(),
+        phone: z.string().length(10),
+        email: z.string().email(),
+        profileImageUrl: z.string().nullish().transform(v => v ?? ""),
+        userAgreementSigned: z.boolean().default(false),
+        idFrontUrl: z.string().url(),
+        idBackUrl: z.string().url(),
+        faceVideoUrl: z.string().url(),
+        address: z.string(),
+        createdAt: z.string(),
+        updatedAt: z.string()
+    }).partial().nullable().default(null)
+
     static createUser = z.object({
         fullName: z.string(),
         username: z.string(),

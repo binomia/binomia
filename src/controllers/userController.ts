@@ -449,7 +449,7 @@ export class UsersController {
     static login = async (_: unknown, { email, password }: { email: string, password: string }, { res, req }: { res: any, req: any }) => {
         try {
             const validatedData = await UserJoiSchema.login.parseAsync({ email, password })
-            const deviceId = await z.string().length(64).transform((val) => val.trim()).parseAsync(req.headers["session-auth-identifier"]);
+            const deviceId = await z.string().length(64).transform((val) => val.trim()).parseAsync(req.headers["deviceid"]);
 
             const user = await UsersModel.findOne({
                 where: { email },
