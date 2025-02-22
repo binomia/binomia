@@ -24,6 +24,8 @@ const HomeScreen: React.FC = () => {
 	const { contacts } = useSelector((state: any) => state.globalReducer)
 	const dispatch = useDispatch()
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
+	const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
+
 
 
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
@@ -97,7 +99,7 @@ const HomeScreen: React.FC = () => {
 				})
 
 				console.log(getSizeInMB(contacts));
-				
+
 
 				// console.log(JSON.stringify(arrContacts.sort(), null, 2));
 
@@ -111,6 +113,27 @@ const HomeScreen: React.FC = () => {
 			onPress: () => { }
 		}
 	]
+
+
+	const onPress = async (route: string) => {
+		const { data } = await accountStatus()
+		if (data.account.status === "flagged")
+			router.navigate(`/flagged`)
+		else {
+			if (route === "/user") {
+				if (account?.allowSend)
+					router.navigate(route)
+				else
+					handleAlert()
+			} else
+				if (account?.allowReceive)
+					router.navigate(route)
+				else
+					handleAlert()
+		}
+	}
+
+
 
 	useEffect(() => {
 		dispatch(fetchRecentTransactions())
@@ -134,7 +157,7 @@ const HomeScreen: React.FC = () => {
 								mt={"20px"}
 								borderRadius={"10px"}
 								title="Enviar"
-								onPress={() => account?.allowSend ? router.navigate("/user") : handleAlert()}
+								onPress={() => onPress("/user")}
 								leftRender={<Image resizeMode='contain' tintColor={colors.white} alt='send-image-icon' w={"25px"} h={"25px"} source={sendIcon} />}
 							/>
 							<Button
@@ -143,7 +166,7 @@ const HomeScreen: React.FC = () => {
 								bg={"darkGray"}
 								mt={"20px"}
 								borderRadius={"10px"}
-								title="Solicitar" onPress={() => router.navigate("/request")}
+								title="Solicitar" onPress={() => onPress("/request")}
 							/>
 						</HStack>
 					</VStack>
