@@ -28,10 +28,10 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
     const dispatch = useDispatch();
 
     const { authenticate } = useLocalAuthentication();
+    const { fetchGeoLocation } = useLocation();
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
     const { user } = useSelector((state: any) => state.accountReducer)
-    const { fetchGeoLocation } = useLocation();
 
 
     const [createRequestTransaction] = useMutation(TransactionApolloQueries.createRequestTransaction())

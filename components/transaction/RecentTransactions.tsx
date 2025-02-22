@@ -72,7 +72,11 @@ const RecentTransactions: React.FC = () => {
 
 	const onSelectTransaction = async (transaction: any) => {
 		const formatedTransaction = formatTransaction(transaction)
-		setBottomSheetHeught(!formatedTransaction.isFromMe ? height * 0.7 : height * 0.9)
+
+		if (transaction?.status === "suspicious")
+			setBottomSheetHeught(!formatedTransaction.isFromMe ? height * 0.7 : height * 0.9)
+		else
+			setBottomSheetHeught(!formatedTransaction.isFromMe ? height * 0.5 : height * 0.9)
 
 		await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...formatedTransaction })))
 

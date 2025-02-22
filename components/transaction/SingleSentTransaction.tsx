@@ -279,7 +279,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 							<VStack w={"80%"}>
 								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status)}</Text>
 							</VStack>
-							<HStack mt={"20px"}>
+							{transaction?.status === "suspicious" ? <HStack mt={"20px"}>
 								<Button
 									title='Contactanos'
 									w={"80%"}
@@ -287,7 +287,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 									bg={colors.mainGreen}
 									leftRender={<MaterialIcons name="phone" size={24} color="white" />}
 								/>
-							</HStack>
+							</HStack> : null}
 						</VStack>
 					</VStack>
 			}

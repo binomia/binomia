@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SessionContext } from '@/contexts/sessionContext';
 import { accountActions } from '@/redux/slices/accountSlice';
+import { router } from 'expo-router';
 
 
 const SearchUserScreen: React.FC = () => {
@@ -63,21 +64,14 @@ const SearchUserScreen: React.FC = () => {
 
 
     const onSelectUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>) => {
-        // const { data } = await accountStatus()
+        const { data } = await accountStatus()
+        if (data.account.status === "active") {
+            await dispatch(transactionActions.setReceiver(user))
+            setShowSendTransaction(true)
 
-        // await dispatch(accountActions.setAccount(Object.assign({}, data.account, {
-        //     status: data.account.status
-        // })))
-
-        // if (data.account.status !== "active") {
-        //     await dispatch(transactionActions.setReceiver(user))
-        //     setShowSendTransaction(true)
-            
-        // } else {
-            
-        // }
-        await dispatch(transactionActions.setReceiver(user))
-        setShowSendTransaction(true)
+        } else {
+            router.navigate(`/flagged`)
+        }
     }
 
     useEffect(() => {
