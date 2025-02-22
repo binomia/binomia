@@ -12,6 +12,4 @@ declare module '*.jpg' {
     export default content;
 }
 
-// react-native-qrcode-styled
-
 declare module 'react-native-qrcode-styled'

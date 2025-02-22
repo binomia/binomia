@@ -13,29 +13,30 @@ import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { transactionStatus } from '@/mocks';
-import { Ionicons, Entypo, AntDesign } from '@expo/vector-icons';
-import { cancelIcon, checked, pendingClock } from '@/assets';
+import { Ionicons, Entypo, AntDesign, MaterialIcons } from '@expo/vector-icons';
+import { cancelIcon, checked, pendingClock, suspicious } from '@/assets';
 import { z } from 'zod';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
+import { router } from 'expo-router';
 
 
 type Props = {
 	title?: string
 	goNext?: (_?: number) => void,
-	onClose?: () => Promise<void>,
+	onClose?: (_?: boolean) => Promise<void>,
 	showPayButton?: boolean
 	iconImage?: any
 }
 
 const { height, width } = Dimensions.get('window')
-const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClose = () => { }, showPayButton = false, goNext = (_?: number) => { } }) => {
+const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClose = async (_?: boolean) => { }, showPayButton = false, goNext = (_?: number) => { } }) => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { authenticate } = useLocalAuthentication()
-	const { transaction, recentTransactions } = useSelector((state: any) => state.transactionReducer)
+	const { transaction } = useSelector((state: any) => state.transactionReducer)
 	const { account, user }: { account: any, user: any, location: z.infer<typeof TransactionAuthSchema.transactionLocation> } = useSelector((state: any) => state.accountReducer)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [isCancelLoading, setIsCancelLoading] = useState<boolean>(false)
@@ -161,6 +162,12 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 					<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
 				</ZStack>
 			)
+		} else if (status === "suspicious") {
+			return (
+				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+					<Image resizeMethod="resize" tintColor={colors.goldenYellow} borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={suspicious} />
+				</ZStack>
+			)
 		}
 	}
 
@@ -191,10 +198,10 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 					<VStack mt={"10px"} alignItems={"center"}>
 						<Heading textTransform={"capitalize"} fontSize={scale(34)} color={colors.white}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
 						<Text color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-						{transaction.isFromMe ? <VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
+						{transaction.isFromMe ? <VStack my={"15px"} textAlign={"center"} space={1} alignItems={"center"}>
 							<StatuIcon status={transaction?.status || ""} />
 							<VStack w={"80%"}>
-								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status)}</Text>
+								<Text textAlign={"center"} fontSize={scale(14)} color={colors.white}>{transactionStatus(transaction.status)}</Text>
 							</VStack>
 						</VStack> : null}
 					</VStack>
@@ -272,6 +279,15 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 							<VStack w={"80%"}>
 								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status)}</Text>
 							</VStack>
+							<HStack mt={"20px"}>
+								<Button
+									title='Contactanos'
+									w={"80%"}
+									onPress={async () => await onClose(true)}
+									bg={colors.mainGreen}
+									leftRender={<MaterialIcons name="phone" size={24} color="white" />}
+								/>
+							</HStack>
 						</VStack>
 					</VStack>
 			}

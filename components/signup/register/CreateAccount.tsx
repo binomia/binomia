@@ -13,9 +13,10 @@ import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-s
 import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType } from '@/types';
-import { WebView } from 'react-native-webview';
 import { useSelector, useDispatch } from 'react-redux';
 import { registerActions } from '@/redux/slices/registerSlice';
+import * as WebBrowser from 'expo-web-browser';
+
 
 
 type Props = {
@@ -43,12 +44,12 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
 
-    const openTermsAndConditions = (url: string) => {
+    const openTermsAndConditions = async (url: string) => {
         const urls: { [key: string]: string } = {
             "userAgreement": "https://www.google.com",
             "privacyPolicy": "https://www.google.com",
         }
-        setOpenBottomSheetUrl(urls[url])
+       
     }
 
     const isAValidPhoneNumber = (value: string) => {
@@ -60,7 +61,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
         setShowEmailError(false)
         if (VALIDATE_EMAIL(email)) {
             try {
-                
+
 
             } catch (error) {
                 setShowEmailError(false)
@@ -213,13 +214,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                         />
                     </VStack>
                 </View>
-            </TouchableWithoutFeedback>
-            <BottomSheet onCloseFinish={() => setOpenBottomSheetUrl("")} open={!!openBottomSheetUrl} height={height * 0.9}>
-                <WebView
-                    style={{ flex: 1 }}
-                    source={{ uri: openBottomSheetUrl }}
-                />
-            </BottomSheet>
+            </TouchableWithoutFeedback>           
         </KeyboardAvoidingScrollView>
     );
 }

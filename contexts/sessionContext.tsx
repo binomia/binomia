@@ -301,6 +301,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
         setVerificationData,
         setInvalidCredentials,
         setSessionVerificationData,
+        fetchSessionUser,
         sessionVerificationData,
         invalidCredentials,
         verificationData,

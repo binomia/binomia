@@ -64,6 +64,17 @@ export class AccountApolloQueries {
             }
         `
     }
+
+    static accountStatus = () => {
+        return gql`
+            query Account {
+                account {                   
+                    status                    
+                }
+            }
+        `
+    }
+
     static accountLimit = () => {
         return gql`
             query AccountLimit {

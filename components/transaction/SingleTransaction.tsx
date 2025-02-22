@@ -14,13 +14,13 @@ import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { transactionStatus } from '@/mocks';
 import { Ionicons, Entypo } from '@expo/vector-icons';
-import { cancelIcon, checked, pendingClock } from '@/assets';
+import { cancelIcon, checked, pendingClock, suspicious } from '@/assets';
 import { z } from 'zod';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
-import { useLocation } from '@/hooks/useLocation';
+import { fetchRecentTransactions } from '@/redux/fetchHelper';
+
 
 
 type Props = {
@@ -31,7 +31,7 @@ type Props = {
 	iconImage?: any
 }
 
-const { height, width } = Dimensions.get('window')
+const { height } = Dimensions.get('window')
 const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClose = () => { }, showPayButton = false, goNext = (_?: number) => { } }) => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
@@ -158,6 +158,12 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 					<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
 				</ZStack>
 			)
+		} else if (status === "suspicious") {
+			return (
+				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+					<Image borderRadius={100} tintColor={colors.goldenYellow} alt='logo-image' w={"100%"} h={"100%"} source={suspicious} />
+				</ZStack>
+			)
 		}
 	}
 
@@ -189,9 +195,9 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 						<Heading textTransform={"capitalize"} fontSize={scale(38)} color={colors.white}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
 						<Text mb={"10px"} color={colors.lightSkyGray}>{moment(Date.now()).format("lll")}</Text>
 						{transaction.isFromMe ? <VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
-							<StatuIcon status={"pending"} />
+							<StatuIcon status={transaction?.status || ""} />
 							<VStack w={"80%"}>
-								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus("")}</Text>
+								<Text textAlign={"center"} fontSize={scale(14)} color={colors.white}>{transactionStatus(transaction.status || "")}</Text>
 							</VStack>
 						</VStack> : null}
 					</VStack>
@@ -260,7 +266,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 						<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
 							<StatuIcon status={transaction?.status || ""} />
 							<VStack w={"80%"}>
-								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status)}</Text>
+								<Text textAlign={"center"} fontSize={scale(14)} color={colors.white}>{transactionStatus(transaction.status || "")}</Text>
 							</VStack>
 						</VStack>
 					</VStack>

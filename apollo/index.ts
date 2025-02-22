@@ -3,10 +3,8 @@ import useAsyncStorage from '@/hooks/useAsyncStorage';
 import { ApolloClient, from, createHttpLink, InMemoryCache, DefaultOptions } from '@apollo/client';
 import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
-import { Alert } from 'react-native';
-
-
-
+import { Alert, Platform } from 'react-native';
+import * as Network from 'expo-network';
 
 const httpLink = createHttpLink({
     uri: MAIN_SERVER_URL,
@@ -39,9 +37,13 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 const setAuthorizationLink = setContext(async (_, previousContext) => {
     const jwt = await useAsyncStorage().getItem("jwt");
     const applicationId = await useAsyncStorage().getItem("applicationId");
+    const ipAddress = await Network.getIpAddressAsync();
+
     return {
         headers: {
-            "session-auth-identifier": applicationId,
+            ipAddress,
+            platform: Platform.OS,
+            "deviceId": applicationId,
             "authorization": `Bearer ${jwt}`,
             ...previousContext.headers
         },

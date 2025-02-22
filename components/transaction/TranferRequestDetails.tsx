@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios';
 import colors from '@/colors'
 import Button from '@/components/global/Button';
 import BottomSheet from '../global/BottomSheet';
-import { StyleSheet, Dimensions, Alert } from 'react-native'
+import { Dimensions, Alert } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, FlatList, Avatar } from 'native-base'
 import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -14,9 +13,9 @@ import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { z } from 'zod';
 import { UserApolloQueries } from '@/apollo/query';
 import { transactionActions } from '@/redux/slices/transactionSlice';
+import { useLocation } from '@/hooks/useLocation';
 
 type Props = {
     goBack?: () => void
@@ -32,6 +31,8 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
     const { user } = useSelector((state: any) => state.accountReducer)
+    const { fetchGeoLocation } = useLocation();
+
 
     const [createRequestTransaction] = useMutation(TransactionApolloQueries.createRequestTransaction())
     const [singleTransaction] = useLazyQuery(TransactionApolloQueries.transaction())
@@ -46,17 +47,6 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 
 
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
-
-    const getLocationInfo = async ({ latitude, longitude }: { latitude: number, longitude: number }) => {
-        try {
-            const { data } = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
-            setLocationInfo(data.address)
-            return data
-        } catch (error) {
-            console.error(error);
-            setLocationInfo({})
-        }
-    }
 
     const validateIfCanSend = async () => {
         try {
@@ -101,7 +91,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                 transactionType: "request",
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
-                location: Object.assign({}, location, locationInfo)
+                location: locationInfo
             })
 
             const { data: transaction } = await createRequestTransaction({
@@ -252,18 +242,13 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
         )
     }
 
-    const transactionLocation = (location: z.infer<typeof TransactionAuthSchema.transactionLocation>) => {
-        const neighbourhood = location?.neighbourhood ? location.neighbourhood : ""
-        const town = location?.town ? location.town : ""
-        const county = location.county ? location.county : ""
-
-        return `${neighbourhood}${town ? ", " : ""}${town}${county ? ", " : ""}${county}`
-    }
-
-
     useEffect(() => {
-        getLocationInfo(location)
+        (async () => {
+            const geoLocation = await fetchGeoLocation({ latitude: location.latitude, longitude: location.longitude }).then((res) => res).catch(() => { return {} })
+            setLocationInfo(geoLocation)
+        })()
     }, [])
+
 
     return (
         <SafeAreaView style={{ flex: 0.95, backgroundColor: colors.darkGray }}>
@@ -287,7 +272,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                     </VStack>
                     <VStack px={"20px"} mt={"20px"} w={"100%"} justifyContent={"center"}>
                         <HStack w={"85%"} mb={"5px"}>
-                            <Heading fontSize={scale(15)} textTransform={"capitalize"} color={"white"}>{transactionLocation(location ?? {}) || "Ubicación"}</Heading>
+                            <Heading fontSize={scale(15)} textTransform={"capitalize"} color={"white"}>{locationInfo?.fullArea || "Ubicación"}</Heading>
                         </HStack>
                         <Image
                             alt='fine-location-image-alt'
@@ -320,26 +305,3 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 }
 
 export default TranferRequestDetails
-
-
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: 55,
-        height: 55,
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 30,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    }
-})

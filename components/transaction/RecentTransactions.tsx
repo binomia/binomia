@@ -32,6 +32,8 @@ const RecentTransactions: React.FC = () => {
 	const [transaction, setTransaction] = useState<any>({})
 	const [bottomSheetHeught, setBottomSheetHeught] = useState<number>(height * 0.9);
 
+	const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
+
 
 	const formatTransaction = (transaction: any) => {
 		const { transactionType, status } = transaction
@@ -57,6 +59,7 @@ const RecentTransactions: React.FC = () => {
 
 		return {
 			isFromMe,
+			isSuspicious: transaction.status === "suspicious",
 			showMap,
 			amountColor,
 			profileImageUrl: profileImageUrl || "",
@@ -69,7 +72,7 @@ const RecentTransactions: React.FC = () => {
 
 	const onSelectTransaction = async (transaction: any) => {
 		const formatedTransaction = formatTransaction(transaction)
-		setBottomSheetHeught(!formatedTransaction.isFromMe ? height * 0.55 : height * 0.9)
+		setBottomSheetHeught(!formatedTransaction.isFromMe ? height * 0.7 : height * 0.9)
 
 		await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, { ...formatedTransaction })))
 
@@ -78,15 +81,19 @@ const RecentTransactions: React.FC = () => {
 		setSingleTransactionTitle(formatedTransaction.showPayButton ? "Pagar" : "Ver Detalles")
 	}
 
-	const onCloseFinishSingleTransaction = async () => {
+	const onCloseFinishSingleTransaction = async (goToSupport: boolean = false) => {
 		setShowSingleTransaction(false)
 
 		await dispatch(fetchRecentTransactions())
 		await dispatch(fetchRecentTopUps())
 
 		if (needRefresh)
-
 			setNeedRefresh(false)
+
+		if (goToSupport) {
+			await delay(1500)
+			router.navigate("/support")
+		}
 	}
 
 	const goNext = (next: number = 1) => {
@@ -104,12 +111,6 @@ const RecentTransactions: React.FC = () => {
 		setTransaction(transaction)
 		setOpenBottomSheet(true)
 	}
-
-	const onPressVerMas = async () => {
-		await dispatch(fetchAllTransactions({ page: 1, pageSize: 10 }))
-		router.navigate("/transactions")
-	}
-
 
 	useEffect(() => {
 		(async () => {
@@ -142,11 +143,11 @@ const RecentTransactions: React.FC = () => {
 											{formatTransaction(data).profileImageUrl ?
 												<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(data).profileImageUrl }} />
 												:
-												<Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(data).fullName  || "")}>
+												<Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(data).fullName || "")}>
 													<Heading size={"sm"} color={colors.white}>
-														{EXTRACT_FIRST_LAST_INITIALS(formatTransaction(data).fullName  || "0")}
+														{EXTRACT_FIRST_LAST_INITIALS(formatTransaction(data).fullName || "0")}
 													</Heading>
-												</Avatar>												
+												</Avatar>
 											}
 											<VStack ml={"10px"} justifyContent={"center"}>
 												<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(data).fullName || "")}</Heading>
@@ -176,7 +177,7 @@ const RecentTransactions: React.FC = () => {
 													<Heading size={"sm"} color={colors.white}>
 														{EXTRACT_FIRST_LAST_INITIALS(data.phone.fullName || "0")}
 													</Heading>
-												</Avatar>												
+												</Avatar>
 											}
 											<VStack ml={"10px"} justifyContent={"center"}>
 												<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(data.phone.fullName || "")}</Heading>

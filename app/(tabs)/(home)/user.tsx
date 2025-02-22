@@ -1,23 +1,28 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
 import SendTransaction from '@/components/transaction/SendTransaction';
 import { StyleSheet, SafeAreaView, Keyboard, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Avatar } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
-import { UserApolloQueries } from '@/apollo/query'
+import { AccountApolloQueries, UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
 import { EXTRACT_FIRST_LAST_INITIALS, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
+import { SessionContext } from '@/contexts/sessionContext';
+import { accountActions } from '@/redux/slices/accountSlice';
 
 
 const SearchUserScreen: React.FC = () => {
     const dispatch = useDispatch()
+    const { fetchSessionUser } = useContext<any>(SessionContext)
+
     const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
     const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
+    const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
 
     const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
     const [sugestedUsers, setSugestedUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
@@ -58,6 +63,19 @@ const SearchUserScreen: React.FC = () => {
 
 
     const onSelectUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>) => {
+        // const { data } = await accountStatus()
+
+        // await dispatch(accountActions.setAccount(Object.assign({}, data.account, {
+        //     status: data.account.status
+        // })))
+
+        // if (data.account.status !== "active") {
+        //     await dispatch(transactionActions.setReceiver(user))
+        //     setShowSendTransaction(true)
+            
+        // } else {
+            
+        // }
         await dispatch(transactionActions.setReceiver(user))
         setShowSendTransaction(true)
     }
@@ -88,7 +106,7 @@ const SearchUserScreen: React.FC = () => {
                                             <Heading size={"sm"} color={colors.white}>
                                                 {EXTRACT_FIRST_LAST_INITIALS(item.fullName || "0")}
                                             </Heading>
-                                        </Avatar>                                       
+                                        </Avatar>
                                     }
                                     <VStack ml={"10px"} justifyContent={"center"}>
                                         <Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item.fullName)}</Heading>

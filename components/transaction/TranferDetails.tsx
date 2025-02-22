@@ -17,6 +17,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAccountLimit, fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { useLocation } from '@/hooks/useLocation'
+import { AccountAuthSchema } from '@/auth/accountAuth';
 
 type Props = {
     goBack?: () => void
@@ -114,22 +115,16 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
 
 
     const onNext = async (transactionSent: any) => {
-        await Promise.all([
-            dispatch(accountActions.setAccount(Object.assign({}, account, { balance: account.balance - transactionDeytails.amount }))),
-            dispatch(accountActions.setHaveAccountChanged(false)),
-            dispatch(transactionActions.setHasNewTransaction(true)),
-            dispatch(fetchRecentTransactions()),
-            dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
-            dispatch(fetchAccountLimit()),
-            // dispatch(transactionActions.setTransaction({
-            //     ...transactionSent,
-            //     amountColor: colors.red,
-            //     fullName: formatTransaction(transactionSent).fullName,
-            //     profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
-            //     username: formatTransaction(transactionSent).username,
-            //     isFromMe: true,
-            // }))
-        ])
+        const accountsData = await AccountAuthSchema.account.parseAsync(transactionSent.from)
+        if (transactionSent.status !== "suspicious")
+            await Promise.all([
+                dispatch(accountActions.setAccount(accountsData ?? {})),
+                dispatch(accountActions.setHaveAccountChanged(false)),
+                dispatch(transactionActions.setHasNewTransaction(true)),
+                dispatch(fetchRecentTransactions()),
+                dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
+                dispatch(fetchAccountLimit()),
+            ])
 
         goNext()
         setLoading(false)

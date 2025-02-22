@@ -25,7 +25,7 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [showCloseButton, setShowCloseButton] = useState<boolean>(globalContextInitialState.showCloseButton);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
-    const [canAuthenticate, setCanAuthenticate] = useState<boolean>(true);
+
 
     const { getItem, setItem } = useAsyncStorage();
     const { authenticate } = useLocalAuthentication();
@@ -60,15 +60,15 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
                 const now = Date.now();
                 const appInBackgroundTime = await getItem("appInBackgroundTime");
 
-                if (appInBackgroundTime && canAuthenticate) {
+                if (appInBackgroundTime) {
                     const duration = (now - Number(appInBackgroundTime)) / 1000;
 
-                    if (duration > 60)
-                        await authenticate().then(async () => {
-                            setCanAuthenticate(true);
-                            const now = Date.now();
-                            await setItem("appInBackgroundTime", now.toString());
-                        })
+                    if (duration > 60) {
+                        // await authenticate().then(async () => {
+                        //     const now = Date.now();
+                        //     await setItem("appInBackgroundTime", now.toString());
+                        // })
+                    }
                 }
             }
         });

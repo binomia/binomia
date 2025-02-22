@@ -1,17 +1,13 @@
 import colors from '@/colors';
 import Input from '@/components/global/Input';
 import Button from '@/components/global/Button';
-import BottomSheet from '@/components/global/BottomSheet';
 import axios from 'axios';
-import { useContext, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack, Pressable } from 'native-base';
 import { Keyboard, StyleSheet, TouchableWithoutFeedback, Dimensions, View } from 'react-native';
 import { FORMAT_CEDULA } from '@/helpers';
 import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-sticky-footer-avoiding-scroll-view';
 import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
-import { GlobalContext } from '@/contexts/globalContext';
-import { GlobalContextType } from '@/types';
-import { WebView } from 'react-native-webview';
 import DatePicker from 'react-native-date-picker'
 import moment from 'moment';
 import { registerActions } from '@/redux/slices/registerSlice';
@@ -183,13 +179,7 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                         />
                     </HStack>
                 </View>
-            </TouchableWithoutFeedback>
-            <BottomSheet onCloseFinish={() => setOpenBottomSheetUrl("")} open={!!openBottomSheetUrl} height={height * 0.9}>
-                <WebView
-                    style={{ flex: 1 }}
-                    source={{ uri: openBottomSheetUrl }}
-                />
-            </BottomSheet>
+            </TouchableWithoutFeedback>           
             <DatePicker
                 locale='es'
                 confirmText='Confirmar'

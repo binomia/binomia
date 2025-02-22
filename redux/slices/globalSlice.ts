@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { not } from 'drizzle-orm';
 import * as Device from 'expo-device';
 
 const globalSlice = createSlice({
