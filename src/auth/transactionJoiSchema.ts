@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { AccountZodSchema } from './accountZodSchema'
 
 
 export class TransactionJoiSchema {
@@ -86,4 +87,30 @@ export class TransactionJoiSchema {
         'everyTwentySeventh',
         'everyTwentyEighth',
     ])
+
+    static transaction = z.object({
+        id: z.number(),
+        transactionId: z.string(),
+        amount: z.number(),
+        deliveredAmount: z.number(),
+        voidedAmount: z.number(),
+        transactionType: z.string(),
+        currency: z.string(),
+        status: z.string(),
+        location: TransactionJoiSchema.transactionLocation,
+        createdAt: z.date(),
+        updatedAt: z.date(),
+        from: AccountZodSchema.account,
+        to: AccountZodSchema.account,
+    })
+
+    static transactionFeatures = z.object({
+        speed: z.number(),
+        distance: z.number(),
+        amount: z.number(),
+        id: z.number(),
+        transactionType: z.number(),
+        platform: z.number(),
+        isRecurring: z.number(),
+    });
 }

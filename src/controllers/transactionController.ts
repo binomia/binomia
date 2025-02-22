@@ -1,15 +1,16 @@
 import { TransactionJoiSchema } from "@/auth/transactionJoiSchema"
-import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL, QUEUE_JOBS_NAME, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants"
-import { FORMAT_CURRENCY, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
+import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants"
+import { calculateDistance, calculateSpeed, FORMAT_CURRENCY, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
 import { Cryptography } from "@/helpers/cryptography"
 import { AccountModel, BankingTransactionsModel, CardsModel, QueuesModel, SessionModel, TransactionsModel, UsersModel } from "@/models"
 import { transactionsQueue } from "@/queues"
+import { anomalyRpcClient } from "@/rpc/clients/anomalyRPC"
 import { notificationServer } from "@/rpc/clients/notificationRPC"
-import { CreateTransactionType } from "@/types"
+import { CreateTransactionRPCParamsType, CreateTransactionType, FraudulentTransactionType } from "@/types"
 import { Job, JobJson } from "bullmq"
 import { Op } from "sequelize"
-import shortUUID from "short-uuid"
 import { z } from "zod"
+import shortUUID from "short-uuid"
 
 
 export default class TransactionController {
@@ -171,22 +172,8 @@ export default class TransactionController {
             const verify = await Cryptography.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
             if (verify) {
                 const decryptedData = await Cryptography.decrypt(data)
-                const { sender: senderUsername, receiver: receiverUsername, transactionId, amount, transactionType, currency } = await TransactionJoiSchema.createFromRecurrenceTransaction.parseAsync(JSON.parse(decryptedData))
-                const queueLocation = await TransactionJoiSchema.transactionLocation.parseAsync({})
+                await TransactionController.createQueuedTransaction(JSON.parse(decryptedData))
 
-                await TransactionController.createQueuedTransaction({
-                    senderUsername,
-                    receiverUsername,
-                    transactionId,
-                    amount,
-                    transactionType,
-                    currency,
-                    location: queueLocation,
-                    recurrenceData: {
-                        time: "oneTime",
-                        title: "oneTime"
-                    }
-                })
                 await queueTransaction.update({
                     repeatedCount: queueTransaction.toJSON().repeatedCount + 1
                 })
@@ -231,8 +218,9 @@ export default class TransactionController {
         }
     }
 
-    static createQueuedTransaction = async ({ senderUsername, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location }: { senderUsername: string, transactionId: string, receiverUsername: string, recurrenceData: any, amount: number, transactionType: string, currency: string, location: z.infer<typeof TransactionJoiSchema.transactionLocation> }) => {
+    static createQueuedTransaction = async (data: CreateTransactionRPCParamsType) => {
         try {
+            const { senderUsername, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location } = data
             const senderAccount = await AccountModel.findOne({
                 where: { username: senderUsername },
                 include: [
@@ -290,8 +278,48 @@ export default class TransactionController {
                 throw "receiver account is not allowed to receive money";
 
 
+            const transactionHistory = await TransactionsModel.findAll({
+                limit: 100,
+                where: {
+                    [Op.and]: [
+                        { createdAt: { [Op.gte]: new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30)) } },
+                        { fromAccount: senderAccountJSON.id }
+                    ]
+                },
+                include: [
+                    {
+                        model: AccountModel,
+                        as: 'from',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    },
+                    {
+                        model: AccountModel,
+                        as: 'to',
+                        include: [{
+                            model: UsersModel,
+                            as: 'user',
+                        }]
+                    }
+                ]
+            })
+
+            const lastTransaction = transactionHistory[transactionHistory.length - 1]?.toJSON() || null
+
+            const distance = !lastTransaction ? 0 : calculateDistance(
+                lastTransaction.location.latitude,
+                lastTransaction.location.longitude,
+                location.latitude,
+                location.longitude
+            );
+
+            const timeDifference = !lastTransaction ? 0 : new Date().getTime() - new Date(lastTransaction.createdAt).getTime()
+            const speed = calculateSpeed(distance, timeDifference)
             const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
-            const transaction = await TransactionsModel.create({
+
+            const newTransactionData = {
                 transactionId,
                 fromAccount: senderAccountJSON.id,
                 toAccount: receiverAccount.toJSON().id,
@@ -302,20 +330,20 @@ export default class TransactionController {
                 transactionType,
                 currency,
                 location,
-                signature
-            })
 
+                signature,
+                deviceId: data.deviceId,
+                ipAddress: data.ipAddress,
+                isRecurring: data.isRecurring,
+                platform: data.platform,
+                sessionId: data.sessionId,
+                previousBalance: senderAccount.toJSON().balance,
+                fraudScore: 0,
+                speed,
+                distance
+            }
 
-            const newSenderBalance = Number(senderAccount.toJSON().balance - amount).toFixed(4)
-            await senderAccount.update({
-                balance: Number(newSenderBalance)
-            })
-
-            const newReceiverBalance = Number(receiverAccount.toJSON().balance + amount).toFixed(4)
-            await receiverAccount.update({
-                balance: Number(newReceiverBalance)
-            })
-
+            const transaction = await TransactionsModel.create(newTransactionData)
             const transactionData = await transaction.reload({
                 include: [
                     {
@@ -337,89 +365,161 @@ export default class TransactionController {
                 ]
             })
 
-            const encryptedData = await Cryptography.encrypt(JSON.stringify({ transactionId: transactionData.toJSON().transactionId }));
-            await Promise.all([
-                notificationServer("socketEventEmitter", {
-                    data: transactionData.toJSON(),
-                    channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED,
-                    senderSocketRoom: senderAccount.toJSON().user.username,
-                    recipientSocketRoom: receiverAccount.toJSON().user.username
-                }),
-                transactionsQueue.createJobs({
-                    jobId: `pendingTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
-                    jobName: "pendingTransaction",
-                    jobTime: "everyThirtyMinutes",
+            const features = await TransactionJoiSchema.transactionFeatures.parseAsync({
+                speed: +Number(speed).toFixed(2),
+                distance: +Number(distance).toFixed(2),
+                amount: +Number(amount).toFixed(2),
+                id: +transactionData.toJSON().id,
+                transactionType: ["transfer"].indexOf(transactionData.toJSON().transactionType.toLowerCase()),
+                platform: ["ios", "android", "web"].indexOf(transactionData.toJSON().platform.toLowerCase()),
+                isRecurring: data.isRecurring ? 1 : 0,
+            })
+
+            const isSuspicious = await TransactionController.checkForFraudulentTransaction(transactionData.toJSON(), transactionHistory)
+            const detectedFraudulentTransaction = await anomalyRpcClient("detect_fraudulent_transaction", {
+                features: Object.values(features)
+            })
+
+
+            if (detectedFraudulentTransaction.last_transaction_features)
+                await transactionsQueue.createJobs({
+                    jobId: `trainTransactionFraudDetectionModel@${shortUUID.generate()}${shortUUID.generate()}`,
+                    jobName: "trainTransactionFraudDetectionModel",
+                    jobTime: "trainTransactionFraudDetectionModel",
                     referenceData: null,
                     userId: senderAccount.toJSON().user.id,
-                    amount: amount,
-                    data: encryptedData,
-                })
-            ])
-
-            if (recurrenceData.time !== "oneTime") {
-                const recurrenceQueueData = Object.assign(transactionData.toJSON(), {
-                    amount,
-                    receiver: receiverUsername,
-                    sender: senderAccount.toJSON().username,
-                    senderUsername,
-                    transactionId,
-                    receiverUsername,
-                    recurrenceData,
-                    transactionType,
-                    currency,
-                    location
-                })
-
-                const encryptedData = await Cryptography.encrypt(JSON.stringify(recurrenceQueueData));
-                transactionsQueue.createJobs({
-                    jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
-                    userId: senderAccount.toJSON().user.id,
-                    jobName: recurrenceData.title,
-                    jobTime: recurrenceData.time,
-                    amount: amount,
-                    data: encryptedData,
-                    referenceData: {
-                        fullName: receiverAccount.toJSON().user.fullName,
-                        logo: receiverAccount.toJSON().user.profileImageUrl,
+                    amount: +Number(amount).toFixed(4),
+                    data: {
+                        last_transaction_features: detectedFraudulentTransaction.last_transaction_features
                     }
                 })
-            }
 
-            const receiverSession = await SessionModel.findAll({
-                attributes: ["expoNotificationToken"],
+            const flaggedTransactionsCount = await TransactionsModel.count({
                 where: {
                     [Op.and]: [
-                        { userId: receiverAccount.toJSON().user.id },
-                        { verified: true },
-                        {
-                            expires: {
-                                [Op.gt]: Date.now()
-                            }
-                        },
-                        {
-                            expoNotificationToken: {
-                                [Op.not]: null
-                            }
-                        }
+                        { fromAccount: senderAccount.toJSON().id },
+                        { status: "suspicious" },
+                        { createdAt: { [Op.gte]: new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30)) } } // 30 days
                     ]
                 }
             })
+            console.log({ detectedFraudulentTransaction, isSuspicious, flaggedTransactionsCount });
+            if (isSuspicious || detectedFraudulentTransaction.is_fraud) {
+                await Promise.all([
+                    senderAccount.update({
+                        status: "flagged",
+                        blacklisted: flaggedTransactionsCount >= 5
+                    }),
+                    transaction.update({
+                        status: "suspicious",
+                        features: detectedFraudulentTransaction.features,
+                        fraudScore: detectedFraudulentTransaction.fraud_score
+                    })
+                ])
 
-            const expoNotificationTokens: { token: string, message: string }[] = receiverSession.map(obj => ({ token: obj.dataValues.expoNotificationToken, message: `${MAKE_FULL_NAME_SHORTEN(receiverAccount.toJSON().user.fullName)} te ha enviado ${FORMAT_CURRENCY(amount)} pesos` }));
-            await notificationServer("newTransactionNotification", {
-                data: expoNotificationTokens
-            })
+                return Object.assign({}, transactionData.toJSON(), {
+                    status: "suspicious",
+                    features: detectedFraudulentTransaction.features,
+                    fraudScore: detectedFraudulentTransaction.fraud_score
+                })
 
-            return transaction.toJSON();
+            } else {
+                await transaction.update({
+                    features: detectedFraudulentTransaction.features,
+                    fraudScore: detectedFraudulentTransaction.fraud_score
+                })
+
+
+                const newSenderBalance = Number(senderAccount.toJSON().balance - amount).toFixed(4)
+                await senderAccount.update({
+                    balance: +Number(newSenderBalance).toFixed(4)
+                })
+
+                const newReceiverBalance = Number(receiverAccount.toJSON().balance + amount).toFixed(4)
+                await receiverAccount.update({
+                    balance: +Number(newReceiverBalance).toFixed(4)
+                })
+
+                const encryptedData = await Cryptography.encrypt(JSON.stringify({ transactionId: transactionData.toJSON().transactionId }));
+                await Promise.all([
+                    notificationServer("socketEventEmitter", {
+                        data: transactionData.toJSON(),
+                        channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED,
+                        senderSocketRoom: senderAccount.toJSON().user.username,
+                        recipientSocketRoom: receiverAccount.toJSON().user.username
+                    }),
+                    transactionsQueue.createJobs({
+                        jobId: `pendingTransaction@${shortUUID.generate()}${shortUUID.generate()}`,
+                        jobName: "pendingTransaction",
+                        jobTime: "everyThirtyMinutes",
+                        referenceData: null,
+                        userId: senderAccount.toJSON().user.id,
+                        amount: amount,
+                        data: encryptedData,
+                    })
+                ])
+
+                if (recurrenceData.time !== "oneTime") {
+                    const recurrenceQueueData = Object.assign(newTransactionData, {
+                        transactionId: `${shortUUID.generate()}${shortUUID.generate()}`,
+                        recurrenceData: {
+                            time: "oneTime",
+                            title: "oneTime"
+                        },
+                        location: {}
+                    })
+
+                    const encryptedData = await Cryptography.encrypt(JSON.stringify(recurrenceQueueData));
+                    transactionsQueue.createJobs({
+                        jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
+                        userId: senderAccount.toJSON().user.id,
+                        jobName: recurrenceData.title,
+                        jobTime: recurrenceData.time,
+                        amount: amount,
+                        data: encryptedData,
+                        referenceData: {
+                            fullName: receiverAccount.toJSON().user.fullName,
+                            logo: receiverAccount.toJSON().user.profileImageUrl,
+                        }
+                    })
+                }
+
+                const receiverSession = await SessionModel.findAll({
+                    attributes: ["expoNotificationToken"],
+                    where: {
+                        [Op.and]: [
+                            { userId: receiverAccount.toJSON().user.id },
+                            { verified: true },
+                            {
+                                expires: {
+                                    [Op.gt]: Date.now()
+                                }
+                            },
+                            {
+                                expoNotificationToken: {
+                                    [Op.not]: null
+                                }
+                            }
+                        ]
+                    }
+                })
+
+                const expoNotificationTokens: { token: string, message: string }[] = receiverSession.map(obj => ({ token: obj.dataValues.expoNotificationToken, message: `${MAKE_FULL_NAME_SHORTEN(receiverAccount.toJSON().user.fullName)} te ha enviado ${FORMAT_CURRENCY(amount)} pesos` }));
+                await notificationServer("newTransactionNotification", {
+                    data: expoNotificationTokens
+                })
+
+                return transaction.toJSON();
+            }
 
         } catch (error: any) {
             throw error.toString()
         }
     }
 
-    static createRequestQueueedTransaction = async (job: JobJson) => {
+    static createRequestQueueedTransaction = async (data: CreateTransactionRPCParamsType) => {
         try {
-            const { senderUsername, signature, transactionId, receiverUsername, amount, transactionType, currency, location } = JSON.parse(job.data)
+            const { senderUsername, signature, transactionId, receiverUsername, amount, transactionType, currency, location } = data
             const senderAccount = await AccountModel.findOne({
                 where: { username: senderUsername },
                 include: [
@@ -463,8 +563,7 @@ export default class TransactionController {
             if (!verify)
                 throw "Transaction signature verification failed"
 
-            // TODO: Authorization NOT IMPLEMENTED
-
+            const features = `[[0.0, 0.0, ${Number(amount).toFixed(1)}, ${Number(Date.now()).toFixed(1)}, 0.0, 1.0, 0.0]]`
             const transaction = await TransactionsModel.create({
                 transactionId,
                 senderFullName: senderAccount.toJSON().user.fullName,
@@ -477,7 +576,18 @@ export default class TransactionController {
                 currency: currency,
                 location: location,
                 status: "requested",
-                signature
+                signature,
+
+                deviceId: data.deviceId,
+                ipAddress: data.ipAddress,
+                isRecurring: data.isRecurring,
+                platform: data.platform,
+                sessionId: data.sessionId,
+                previousBalance: senderAccount.toJSON().balance,
+                fraudScore: 0,
+                speed: 0,
+                distance: 0,
+                features
             })
 
             const transactionData = await transaction.reload({
@@ -803,4 +913,107 @@ export default class TransactionController {
         }
     }
 
+    static checkForFraudulentTransaction = async (transaction: FraudulentTransactionType, transactionHistory: any[]) => {
+        try {
+            const RAPID_TRANSACTION_TIMEFRAME = 10000; // 10 seconds
+            const MAX_RAPID_TRANSACTIONS = 5;
+            const MAX_SPEED_THRESHOLD_KMH = 1000;
+            const { to, from } = transaction
+
+            // Blacklisted Account Check for receiver account
+            if (from.blacklisted || from.status !== 'flagged') {
+                console.log(`Fraud Alert: Account ${to.id} is flagged or blacklisted.`);
+                return true;
+            }
+
+            // Rapid Transactions Check for receiver account
+            if (transactionHistory.length > 0) {
+                const recentTransactionsFiltered = transactionHistory?.filter((trx) => {
+                    const tx: z.infer<typeof TransactionJoiSchema.transaction> = trx.toJSON()
+
+                    return new Date(Number(transaction.createdAt)).getTime() - new Date(Number(tx.createdAt)).getTime() <= RAPID_TRANSACTION_TIMEFRAME
+
+                }) || [];
+
+                if (recentTransactionsFiltered.length >= MAX_RAPID_TRANSACTIONS) {
+                    console.log(`Fraud Alert: Too many rapid transactions for account ${to.user.username}.`);
+                    return true;
+                }
+            }
+
+
+            // Geolocation Mismatch Check
+            const suspiciousTravel = transactionHistory?.some((trx) => {
+                const tx: z.infer<typeof TransactionJoiSchema.transaction> = trx.toJSON()
+                const distanceKm = calculateDistance(
+                    tx.location.latitude, tx.location.longitude,
+                    transaction.location.latitude, transaction.location.longitude
+                );
+
+                const timeDiffMs = new Date(Number(transaction.createdAt)).getTime() - new Date(Number(tx.createdAt)).getTime();
+                const speedKmH = calculateSpeed(distanceKm, timeDiffMs);
+
+                return speedKmH > MAX_SPEED_THRESHOLD_KMH;
+            });
+
+            if (suspiciousTravel) {
+                console.log(`Fraud Alert: Suspicious travel detected for account ${to.user.username}.`);
+                return true;
+            }
+
+            return false
+
+        } catch (error) {
+            return true
+        }
+    }
+
+    static trainTransactionFraudDetectionModel = async (job: JobJson) => {
+        try {
+            const data = JSON.parse(job.data)
+            const transaction = await TransactionsModel.findOne({
+                attributes: ["id", 'features', 'createdAt'],
+                where: {
+                    features: data.last_transaction_features
+                }
+            })
+
+            if (!transaction) {
+                console.log("Transaction not found");
+                return
+            }
+
+            const transactions = await TransactionsModel.findAndCountAll({
+                attributes: ["id", 'features', "status"],
+                order: [["id", "ASC"]],
+                where: {
+                    [Op.and]: [
+                        {
+                            createdAt: {
+                                [Op.gt]: transaction.toJSON().createdAt
+                            }
+                        },
+                        {
+                            status: { [Op.or]: ["completed", "suspicious"] }
+                        }
+                    ]
+                }
+            })
+
+            if (transactions.count > 20) {
+                const transactionsFeatures = transactions.rows.map((trx) => {
+                    if (trx.toJSON().features)
+                        return JSON.parse(trx.toJSON().features)
+                })
+
+                await anomalyRpcClient("retrain_model", {
+                    features: transactionsFeatures
+                })
+            }
+
+        } catch (error) {
+            console.log({ trainTransactionFraudDetectionModel: error });
+            throw error
+        }
+    }
 }

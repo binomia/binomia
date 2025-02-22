@@ -88,6 +88,11 @@ const AccountModel = db.define('accounts', {
         type: BOOLEAN,
         allowNull: false,
         defaultValue: true
+    },
+    blacklisted: {
+        type: BOOLEAN,
+        allowNull: false,
+        defaultValue: true
     }
 })
 

@@ -1,40 +1,16 @@
+import { TransactionJoiSchema } from "@/auth/transactionJoiSchema";
 import TransactionController from "@/controllers/transactionController";
 import { transactionsQueue } from "@/queues";
+import { CreateTransactionRPCParamsType } from "@/types";
 import { JSONRPCServer } from "json-rpc-2.0";
+import { z } from "zod";
 
-type CreateTransactionRPCParamsType = {
-    transactionId: string
-    senderUsername: string
-    receiverUsername: string
-    amount: number
-    recurrenceData: any
-    senderFullName: string
-    location: string
-    currency: string
-    transactionType: string
-    userId: number
-    jobTime: string
-    jobName: string
-    signature: string
-}
 
 export const transactionMethods = (server: JSONRPCServer) => {
     server.addMethod("createTransaction", async (data: CreateTransactionRPCParamsType) => {
         try {
-            const { senderUsername, senderFullName, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location } = data
-            const jobId = `queueTransaction@${transactionId}`
-
-            const job = await transactionsQueue.queue.add(jobId, {
-                transactionId,
-                senderUsername,
-                receiverUsername,
-                amount,
-                recurrenceData,
-                senderFullName,
-                location,
-                currency,
-                transactionType
-            }, {
+            const jobId = `queueTransaction@${data.transactionId}`
+            const job = await transactionsQueue.queue.add(jobId, data, {
                 jobId,
                 removeOnComplete: {
                     age: 20 // 30 minutes
@@ -54,21 +30,8 @@ export const transactionMethods = (server: JSONRPCServer) => {
 
     server.addMethod("createRequestTransaction", async (data: CreateTransactionRPCParamsType) => {
         try {
-            const { senderUsername, senderFullName, signature, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location } = data
-            const jobId = `queueRequestTransaction@${transactionId}`
-
-            const job = await transactionsQueue.queue.add(jobId, {
-                transactionId,
-                senderUsername,
-                receiverUsername,
-                amount,
-                recurrenceData,
-                senderFullName,
-                location,
-                currency,
-                transactionType,
-                signature
-            }, {
+            const jobId = `queueRequestTransaction@${data.transactionId}`
+            const job = await transactionsQueue.queue.add(jobId, data, {
                 jobId,
                 removeOnComplete: {
                     age: 1000 * 60 * 30 // 30 minutes

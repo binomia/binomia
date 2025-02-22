@@ -55,4 +55,21 @@ export class UserJoiSchema {
         email: z.string().email(),
         password: z.string().min(6)
     })
+
+    static user = z.object({
+        id: z.string(),
+        fullName: z.string(),
+        username: z.string(),
+        phone: z.string().length(10),
+        email: z.string().email(),
+        dniNumber: z.string().regex(/^[0-9]{3}-[0-9]{7}-[0-9]{1}$/),
+        profileImageUrl: z.string().url().optional().nullable().default(null),
+        userAgreementSigned: z.boolean().default(false),
+        idFrontUrl: z.string().url(),
+        idBackUrl: z.string().url(),
+        faceVideoUrl: z.string().url(),
+        address: z.string(),
+        createdAt: z.number(),
+        updatedAt: z.number()
+    })
 }

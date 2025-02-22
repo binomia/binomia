@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { nextFriday, nextMonday, nextSaturday, nextSunday, nextThursday, nextTuesday, nextWednesday } from "date-fns";
 import { WeeklyQueueTitleType } from '@/types';
+import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
+import { z } from 'zod';
 
 export const unAuthorizedResponse = (req: Request, res: Response) => {
     res.status(401).json({
@@ -143,3 +145,25 @@ export const getSpecificDayOfMonth = (dayString: string): Date => {
         throw new Error('Invalid day string. Please provide a valid option.');
     }
 }
+
+export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371;
+    const toRadians = (degree: number) => (degree * Math.PI) / 180;
+
+    const dLat = toRadians(lat2 - lat1);
+    const dLon = toRadians(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return +Number(R * c).toFixed(2);
+}
+
+export const calculateSpeed = (distanceKm: number, timeDiffMs: number): number => {
+    const timeDiffHours = timeDiffMs / (1000 * 60 * 60); // Convert milliseconds to hours
+    return +Number(timeDiffHours > 0 ? distanceKm / timeDiffHours : 0).toFixed(2);
+}
+
+
