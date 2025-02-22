@@ -21,6 +21,7 @@ import { TransactionAuthSchema } from '@/auth/transactionAuth'
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication'
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAccountBankingTransactions } from '@/redux/fetchHelper';
+import { AccountApolloQueries } from '@/apollo/query';
 
 
 const { height, width } = Dimensions.get('window')
@@ -33,7 +34,10 @@ const BankingScreen: React.FC = () => {
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
     const [transactions, setTransactions] = useState<any[]>(bankingTransactions)
+
     const [createBankingTransaction] = useMutation(TransactionApolloQueries.createBankingTransaction())
+    const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
+
     const [refreshing, setRefreshing] = useState(false);
     const [showDeposit, setShowDeposit] = useState(false);
     const [showWithdraw, setShowWithdraw] = useState(false);
@@ -81,6 +85,12 @@ const BankingScreen: React.FC = () => {
     }
 
     const handleMakeTransaction = async (title: string) => {
+        const { data } = await accountStatus()
+        if (data.account.status === "flagged") {
+            router.navigate(`/flagged`)
+            return
+        }
+
         if (title === "Deposito" && enableDeposit) {
             Alert.alert(
                 'Limite Alcanzado',

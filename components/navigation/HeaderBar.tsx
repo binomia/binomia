@@ -13,6 +13,8 @@ import { scale } from "react-native-size-matters"
 import { Dimensions, Platform } from "react-native"
 import { useSelector } from "react-redux"
 import { EXTRACT_FIRST_LAST_INITIALS, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
+import { useLazyQuery } from "@apollo/client"
+import { AccountApolloQueries } from "@/apollo/query"
 
 
 const { width } = Dimensions.get('window')
@@ -81,7 +83,7 @@ export const TransactionCenter: React.FC<{ p?: string }> = ({ p = "0" }) => {
                     <Heading size={"sm"} color={colors.white}>
                         {EXTRACT_FIRST_LAST_INITIALS(transaction?.fullName || "0")}
                     </Heading>
-                </Avatar>               
+                </Avatar>
             }
             <VStack ml={"10px"} alignItems={"center"} >
                 <Heading textTransform={"capitalize"} fontSize={scale(18)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transaction?.fullName || "")}</Heading>
@@ -132,9 +134,19 @@ export const CardsRight: React.FC = () => {
 }
 export const TopupsRight: React.FC = () => {
     const [openBottomSheet, setOpenBottomSheet] = useState(false)
+    const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
+
+
+    const onPress = async () => {
+        const { data } = await accountStatus()
+        if (data.account.status === "flagged")
+            router.navigate(`/flagged`)
+        else
+            setOpenBottomSheet(true)
+    }
 
     return (
-        <Pressable w={"35px"} h={"35px"} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} onPress={() => setOpenBottomSheet(true)}>
+        <Pressable w={"35px"} h={"35px"} alignItems={"center"} justifyContent={"center"} _pressed={{ opacity: 0.5 }} bg={colors.lightGray} borderRadius={100} onPress={onPress}>
             <Entypo name="plus" size={scale(20)} color={colors.mainGreen} />
             <NewTopUp onClose={() => setOpenBottomSheet(false)} open={openBottomSheet} />
         </Pressable>

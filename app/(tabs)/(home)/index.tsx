@@ -15,18 +15,13 @@ import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { useLocation } from '@/hooks/useLocation';
-import { useContacts } from '@/hooks/useContacts';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
 	const { account } = useSelector((state: any) => state.accountReducer)
-	const { contacts } = useSelector((state: any) => state.globalReducer)
 	const dispatch = useDispatch()
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
 	const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
-
-
 
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const [refreshing, setRefreshing] = useState(false);
@@ -82,6 +77,7 @@ const HomeScreen: React.FC = () => {
 			name: "Recargas",
 			image: phone,
 			onPress: () => router.navigate("/topups")
+
 		},
 		{
 			id: 1,
@@ -93,18 +89,7 @@ const HomeScreen: React.FC = () => {
 			id: 2,
 			name: "Electricidad",
 			image: house,
-			onPress: async () => {
-				const arrContacts = contacts.map((contact: any) => {
-					return contact.phoneNumbers[0].id
-				})
-
-				console.log(getSizeInMB(contacts));
-
-
-				// console.log(JSON.stringify(arrContacts.sort(), null, 2));
-
-				// console.log(JSON.stringify(contacts, null, 2), );
-			}
+			onPress: async () => { }
 		},
 		{
 			id: 3,
