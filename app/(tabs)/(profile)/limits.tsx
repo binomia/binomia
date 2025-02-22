@@ -22,7 +22,6 @@ const LimitsScreen: React.FC = () => {
     const onRefresh = useCallback(async () => {
         try {
             setRefreshing(true);
-
             await dispatch(fetchAccountLimit())
 
             setTimeout(() => {
@@ -49,22 +48,22 @@ const LimitsScreen: React.FC = () => {
             <ScrollView borderRadius={10} w={"100%"} h={"100%"} flex={1} mt={"50px"} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
                 <VStack bg={"lightGray"} borderRadius={10} px={"10px"}>
                     {limitsScreenData(limits, account).map((item, index) => (
-                        <HStack key={`limits-creen-data-${index}`} bg={"lightGray"} w={"100%"} space={2} pl={"10px"} py={"18px"} >
+                        <HStack key={`limits-creen-data-${index}`}  w={"100%"} space={2} pl={"10px"} py={"18px"} >
                             <HStack bg={"gray"} w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"}>
                                 <CircularProgress
-                                    radius={25}
+                                    radius={28}
                                     showProgressValue={false}
                                     value={Number(item.percentage)}
                                     title={`${item.percentage}%`}
                                     titleStyle={{ color: colors.white, fontSize: 10, fontWeight: "bold" }}
-                                    circleBackgroundColor={colors.lightGray}
+                                    circleBackgroundColor={colors.darkGray}
                                     inActiveStrokeColor={colors.mainGreen}
                                     inActiveStrokeOpacity={0.2}
                                     activeStrokeWidth={5}
                                 />
                             </HStack>
-                            <VStack flex={1} h={"35px"} px={"10px"}>
-                                <HStack h={"30px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
+                            <VStack h={"30px"} flex={1} px={"10px"}>
+                                <HStack h={"20px"} borderRadius={10} alignItems={"center"} justifyContent={"space-between"}>
                                     <Heading fontSize={scale(11)} textTransform={"capitalize"} color={colors.white}>{item.title}</Heading>
                                 </HStack>
                                 <ZStack w={"100%"} h={"7px"} bg={colors.darkGray} borderRadius={10}>

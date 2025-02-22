@@ -32,7 +32,6 @@ export default () => {
 			<Stack.Screen name="deposit" options={{ headerShown: false }} />
 			<Stack.Screen name='flagged' options={{ headerShown: false}} />
 			<Stack.Screen name='recurrences' options={{ headerShown: false }} />
-			<Stack.Screen name='cards' options={{ headerShown: false, presentation: "formSheet" }} />
 			<Stack.Screen name='transaction' options={{ headerShown: false, presentation: "formSheet" }} />
 		</Stack>
 	);

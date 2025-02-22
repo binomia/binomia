@@ -27,10 +27,20 @@ export const HomeHeaderLeft: React.FC = () => {
 
 export const HomeHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
     const [showBottomSheet, setShowBottomSheet] = useState(false)
+    const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
+
+
+    const onPress = async () => {
+        const { data } = await accountStatus()
+        if (data.account.status === "flagged")
+            router.navigate(`/flagged`)
+        else
+            setShowBottomSheet(true)
+    }
 
     return (
         <VStack p={p}>
-            <Pressable bg={colors.lightGray} w={"40px"} h={"40px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} _pressed={{ opacity: 0.5 }} onPress={() => setShowBottomSheet(true)}>
+            <Pressable bg={colors.lightGray} w={"40px"} h={"40px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} _pressed={{ opacity: 0.5 }} onPress={onPress}>
                 <Image alt='logo-image' w={"20px"} tintColor={colors.mainGreen} h={"20px"} source={qrIcon} />
             </Pressable>
             <QRScanner open={showBottomSheet} onCloseFinish={() => setShowBottomSheet(false)} />

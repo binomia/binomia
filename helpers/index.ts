@@ -202,9 +202,9 @@ export const CAPITALIZE_WORDS = (text: string) => {
 
 export const FORMAT_LIMIT = (amount: number, limit: number) => {
     if (amount === 0)
-        return String(0)
+        return String(0)    
 
-    return parseFloat(String((amount / limit) * 100)).toFixed(0)
+    return Number(String((amount / limit) * 100)).toFixed(1)
 }
 
 export const FORMAT_FULL_NAME = (fullName: string, length: number = 15) => {

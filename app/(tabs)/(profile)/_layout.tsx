@@ -24,7 +24,7 @@ export default () => {
 
 	return (
 		<Stack screenOptions={{ headerShadowVisible: false }}>
-			<Stack.Screen name='profile' options={{ ...defaultscreenOptions, title: "" }} />
+			<Stack.Screen name='profile' options={{ ...defaultscreenOptions, title: "", headerRight: () => <HomeHeaderRight />  }} />
 			<Stack.Screen name='personal' options={{ ...defaultscreenOptions, title: "Información Personal", headerRight: () => <HomeHeaderRight /> }} />
 			<Stack.Screen name='privacy' options={{ ...defaultscreenOptions, title: "Privacidad & Seguridad", headerRight: () => <HomeHeaderRight /> }} />
 			<Stack.Screen name='limits' options={{ ...defaultscreenOptions, title: "Limites De Cuenta", headerRight: () => <HomeHeaderRight /> }} />
