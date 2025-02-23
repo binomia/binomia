@@ -55,9 +55,9 @@ export const RouterContextProvider = () => {
     return (isVPNConnected ? <VPNScreen /> :
         <RouterContext.Provider value={{}}>
             <Stack>
+                <Stack.Screen name="(main)" options={{ ...defaultscreenOptions, headerShadowVisible: false, title: "Auditoría" }} />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="(signup)" options={{ headerShown: false }} />
-                <Stack.Screen name="(modals)" options={{ ...defaultscreenOptions, headerShadowVisible: false, title: "Auditoría" }} />
             </Stack>
         </RouterContext.Provider>
     )

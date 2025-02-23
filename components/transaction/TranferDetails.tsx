@@ -22,17 +22,18 @@ import { AccountAuthSchema } from '@/auth/accountAuth';
 type Props = {
     goBack?: () => void
     goNext?: () => void
+    onClose?: () => void
 }
 
 const { width } = Dimensions.get("screen")
-const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { } }) => {
+const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () => { }, goBack = () => { } }) => {
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
     const { account, user } = useSelector((state: any) => state.accountReducer)
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
-    const { fetchGeoLocation } = useLocation();
+    const { fetchGeoLocation, getLocation } = useLocation();
     const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
     const [fetchTransaction, { startPolling, stopPolling }] = useLazyQuery(TransactionApolloQueries.transaction(), {
         fetchPolicy: "network-only",
@@ -160,13 +161,18 @@ const TransactionDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () =
 
     const handleOnPress = async () => {
         try {
-            const authenticated = await authenticate()
+            const newLocation = await getLocation()
+            if (!newLocation)
+                onClose()
 
-            if (authenticated.success)
-                await handleOnSend({
-                    title: recurrence,
-                    time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
-                })
+            else {
+                const authenticated = await authenticate()
+                if (authenticated.success)
+                    await handleOnSend({
+                        title: recurrence,
+                        time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
+                    })
+            }
 
         } catch (error) {
             setLoading(false)

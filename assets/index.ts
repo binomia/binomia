@@ -71,9 +71,11 @@ import cashout from './icons/cashout.png';
 import cashIn from './icons/cash-in.png';
 import suspicious from './icons/suspicous.png';
 import flagged from './icons/flagged.png';
+import location from './icons/location.png';
 
 
 export {
+    location,
     flagged,
     suspicious,
     vpnIcon,

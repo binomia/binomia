@@ -7,6 +7,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import SendTransaction from '@/components/transaction/SendTransaction';
 import PagerView from 'react-native-pager-view';
 import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
+import SingleTopTup from '@/components/topups/SingleTopTup';
 import { z } from 'zod'
 import { StyleSheet, Keyboard, Dimensions, TouchableWithoutFeedback, RefreshControl } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView, Avatar } from 'native-base'
@@ -20,7 +21,6 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { noTransactions, pendingClock } from '@/assets';
 import { router } from 'expo-router';
 import { fetchAllTransactions, searchAccountTransactions } from '@/redux/fetchHelper';
-import SingleTopTup from '@/components/topups/SingleTopTup';
 
 type Props = {}
 

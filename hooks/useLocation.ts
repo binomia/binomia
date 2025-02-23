@@ -7,6 +7,7 @@ import { GOOGLE_MAPS_API_KEY } from '@/constants';
 import axios from 'axios';
 import { z } from 'zod';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
+import { router } from 'expo-router';
 
 export const useLocation = () => {
     const dispatch = useDispatch();
@@ -100,6 +101,7 @@ export const useLocation = () => {
 
         } catch (error) {
             console.error("Error getting location:", error);
+            router.navigate("/location")
         }
     }
 
@@ -109,7 +111,7 @@ export const useLocation = () => {
     }, []);
 
 
-    return {       
+    return {
         fetchGeoLocation,
         getLocation
     }
