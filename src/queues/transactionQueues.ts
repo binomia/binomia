@@ -8,7 +8,6 @@ import MainController from "@/controllers/mainController";
 
 export default class TransactionsQueue {
     queue: Queue;
-
     constructor() {
         this.queue = new Queue("transactions", { connection: { host: "redis", port: 6379 } });
         this.workers()
@@ -20,14 +19,10 @@ export default class TransactionsQueue {
             switch (name) {
                 case "queueTransaction": {
                     await TransactionController.createQueuedTransaction(JSON.parse(job.data))
-                    // console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
-
                     break;
                 }
                 case "queueRequestTransaction": {
                     await TransactionController.createRequestQueueedTransaction(JSON.parse(job.data))
-                    // console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
-
                     break;
                 }
                 case "pendingTransaction": {
@@ -39,8 +34,6 @@ export default class TransactionsQueue {
                 }
                 case "trainTransactionFraudDetectionModel": {
                     await TransactionController.trainTransactionFraudDetectionModel(job)
-                    // console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
-
                     break;
                 }
                 default: {
@@ -68,8 +61,7 @@ export default class TransactionsQueue {
 
         worker.on('completed', (job: Job) => {
             const name = job.name.split("@")[0]
-            console.log('Job completed', name);
-            if (name === "queueTransaction" || name === "queueRequestTransaction")
+            if (name === "queueTransaction" || name === "queueRequestTransaction" || name === "trainTransactionFraudDetectionModel")
                 job.remove()
 
         })
@@ -137,19 +129,8 @@ export default class TransactionsQueue {
                     break;
                 }
                 case "queueTransaction":
-                case "queueRequestTransaction": {                    
-                    const job = await this.queue.add(jobId, data, {
-                        jobId,
-                        removeOnComplete: {
-                            age: 30
-                        },
-                        removeOnFail: {
-                            age: 60 * 10
-                        }
-                    });
-                    return job.asJSON()
-                }
-                case "trainTransactionFraudDetectionModel": {
+                case "trainTransactionFraudDetectionModel":
+                case "queueRequestTransaction": {
                     const job = await this.queue.add(jobId, data, {
                         jobId,
                         removeOnComplete: {
@@ -192,7 +173,6 @@ export default class TransactionsQueue {
     updateTransactionJob = async (repeatJobKey: string, jobName: string, jobTime: WeeklyQueueTitleType): Promise<any> => {
         try {
             const job = await this.queue.removeJobScheduler(repeatJobKey)
-
             if (!job)
                 throw "error removing job"
 

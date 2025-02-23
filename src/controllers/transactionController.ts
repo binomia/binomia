@@ -278,8 +278,9 @@ export default class TransactionController {
                 throw "receiver account is not allowed to receive money";
 
 
-            const transactionHistory = await TransactionsModel.findAll({
+            const lastTransaction = await TransactionsModel.findOne({
                 limit: 100,
+                order: [['createdAt', 'DESC']], // get the last transaction
                 where: {
                     [Op.and]: [
                         { createdAt: { [Op.gte]: new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30)) } },
@@ -306,16 +307,16 @@ export default class TransactionController {
                 ]
             })
 
-            const lastTransaction = transactionHistory[transactionHistory.length - 1]?.toJSON() || null
+            const lastTransactionJSON = lastTransaction?.toJSON() || null
 
-            const distance = !lastTransaction ? 0 : calculateDistance(
-                lastTransaction.location.latitude,
-                lastTransaction.location.longitude,
+            const distance = !lastTransactionJSON ? 0 : calculateDistance(
+                lastTransactionJSON.location.latitude,
+                lastTransactionJSON.location.longitude,
                 location.latitude,
                 location.longitude
             );
 
-            const timeDifference = !lastTransaction ? 0 : new Date().getTime() - new Date(lastTransaction.createdAt).getTime()
+            const timeDifference = !lastTransactionJSON ? 0 : new Date().getTime() - new Date(lastTransactionJSON.createdAt).getTime()
             const speed = calculateSpeed(distance, timeDifference)
             const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
 
@@ -366,20 +367,18 @@ export default class TransactionController {
             })
 
             const features = await TransactionJoiSchema.transactionFeatures.parseAsync({
-                speed: +Number(speed).toFixed(2),
-                distance: +Number(distance).toFixed(2),
+                speed: lastTransactionJSON.status === "audited" ? 0 : +Number(speed).toFixed(2),
+                distance: lastTransactionJSON.status === "audited" ? 0 : +Number(distance).toFixed(2),
                 amount: +Number(amount).toFixed(2),
-                id: +transactionData.toJSON().id,
+                currency: ["dop"].indexOf(transactionData.toJSON().currency.toLowerCase()),
                 transactionType: ["transfer"].indexOf(transactionData.toJSON().transactionType.toLowerCase()),
                 platform: ["ios", "android", "web"].indexOf(transactionData.toJSON().platform.toLowerCase()),
                 isRecurring: data.isRecurring ? 1 : 0,
             })
 
-            const isSuspicious = await TransactionController.checkForFraudulentTransaction(transactionData.toJSON(), transactionHistory)
             const detectedFraudulentTransaction = await anomalyRpcClient("detect_fraudulent_transaction", {
                 features: Object.values(features)
             })
-
 
             if (detectedFraudulentTransaction.last_transaction_features)
                 await transactionsQueue.createJobs({
@@ -390,9 +389,10 @@ export default class TransactionController {
                     userId: senderAccount.toJSON().user.id,
                     amount: +Number(amount).toFixed(4),
                     data: {
-                        last_transaction_features: detectedFraudulentTransaction.last_transaction_features
+                        last_transaction_features: JSON.stringify(detectedFraudulentTransaction.last_transaction_features)
                     }
                 })
+
 
             const flaggedTransactionsCount = await TransactionsModel.count({
                 where: {
@@ -403,29 +403,31 @@ export default class TransactionController {
                     ]
                 }
             })
-            console.log({ detectedFraudulentTransaction, isSuspicious, flaggedTransactionsCount });
-            if (isSuspicious || detectedFraudulentTransaction.is_fraud) {
+
+            console.log({ detectedFraudulentTransaction, flaggedTransactionsCount });
+
+            if (detectedFraudulentTransaction.is_fraud) {
                 await Promise.all([
                     senderAccount.update({
                         status: "flagged",
-                        blacklisted: flaggedTransactionsCount >= 5
+                        blacklisted: flaggedTransactionsCount >= 1
                     }),
                     transaction.update({
                         status: "suspicious",
-                        features: detectedFraudulentTransaction.features,
+                        features: JSON.stringify(detectedFraudulentTransaction.features),
                         fraudScore: detectedFraudulentTransaction.fraud_score
                     })
                 ])
 
                 return Object.assign({}, transactionData.toJSON(), {
                     status: "suspicious",
-                    features: detectedFraudulentTransaction.features,
+                    features: JSON.stringify(detectedFraudulentTransaction.features),
                     fraudScore: detectedFraudulentTransaction.fraud_score
                 })
 
             } else {
                 await transaction.update({
-                    features: detectedFraudulentTransaction.features,
+                    features: JSON.stringify(detectedFraudulentTransaction.features),
                     fraudScore: detectedFraudulentTransaction.fraud_score
                 })
 
@@ -563,7 +565,12 @@ export default class TransactionController {
             if (!verify)
                 throw "Transaction signature verification failed"
 
-            const features = `[[0.0, 0.0, ${Number(amount).toFixed(1)}, ${Number(Date.now()).toFixed(1)}, 0.0, 1.0, 0.0]]`
+            const lastTransaction = await TransactionsModel.findOne({
+                order: [['createdAt', 'DESC']],
+                attributes: ['id']
+            });
+
+            const features = `[[0.0, 0.0, ${Number(amount).toFixed(1)}, ${Number(0).toFixed(1)}, 0.0, 1.0, 0.0]]`
             const transaction = await TransactionsModel.create({
                 transactionId,
                 senderFullName: senderAccount.toJSON().user.fullName,
@@ -913,95 +920,28 @@ export default class TransactionController {
         }
     }
 
-    static checkForFraudulentTransaction = async (transaction: FraudulentTransactionType, transactionHistory: any[]) => {
-        try {
-            const RAPID_TRANSACTION_TIMEFRAME = 10000; // 10 seconds
-            const MAX_RAPID_TRANSACTIONS = 5;
-            const MAX_SPEED_THRESHOLD_KMH = 1000;
-            const { to, from } = transaction
-
-            // Blacklisted Account Check for receiver account
-            if (from.blacklisted || from.status !== 'flagged') {
-                console.log(`Fraud Alert: Account ${to.id} is flagged or blacklisted.`);
-                return true;
-            }
-
-            // Rapid Transactions Check for receiver account
-            if (transactionHistory.length > 0) {
-                const recentTransactionsFiltered = transactionHistory?.filter((trx) => {
-                    const tx: z.infer<typeof TransactionJoiSchema.transaction> = trx.toJSON()
-
-                    return new Date(Number(transaction.createdAt)).getTime() - new Date(Number(tx.createdAt)).getTime() <= RAPID_TRANSACTION_TIMEFRAME
-
-                }) || [];
-
-                if (recentTransactionsFiltered.length >= MAX_RAPID_TRANSACTIONS) {
-                    console.log(`Fraud Alert: Too many rapid transactions for account ${to.user.username}.`);
-                    return true;
-                }
-            }
-
-
-            // Geolocation Mismatch Check
-            const suspiciousTravel = transactionHistory?.some((trx) => {
-                const tx: z.infer<typeof TransactionJoiSchema.transaction> = trx.toJSON()
-                const distanceKm = calculateDistance(
-                    tx.location.latitude, tx.location.longitude,
-                    transaction.location.latitude, transaction.location.longitude
-                );
-
-                const timeDiffMs = new Date(Number(transaction.createdAt)).getTime() - new Date(Number(tx.createdAt)).getTime();
-                const speedKmH = calculateSpeed(distanceKm, timeDiffMs);
-
-                return speedKmH > MAX_SPEED_THRESHOLD_KMH;
-            });
-
-            if (suspiciousTravel) {
-                console.log(`Fraud Alert: Suspicious travel detected for account ${to.user.username}.`);
-                return true;
-            }
-
-            return false
-
-        } catch (error) {
-            return true
-        }
-    }
-
     static trainTransactionFraudDetectionModel = async (job: JobJson) => {
         try {
             const data = JSON.parse(job.data)
             const transaction = await TransactionsModel.findOne({
                 attributes: ["id", 'features', 'createdAt'],
+                order: [["id", "ASC"]],
                 where: {
                     features: data.last_transaction_features
                 }
             })
 
             if (!transaction) {
-                console.log("Transaction not found");
-                return
-            }
+                const transactions = await TransactionsModel.findAll({
+                    attributes: ["id", 'features', "status"],
+                    limit: 1000,
+                    order: [["id", "ASC"]],
+                    where: {
+                        status: { [Op.or]: ["completed", "suspicious"] }
+                    }
+                })
 
-            const transactions = await TransactionsModel.findAndCountAll({
-                attributes: ["id", 'features', "status"],
-                order: [["id", "ASC"]],
-                where: {
-                    [Op.and]: [
-                        {
-                            createdAt: {
-                                [Op.gt]: transaction.toJSON().createdAt
-                            }
-                        },
-                        {
-                            status: { [Op.or]: ["completed", "suspicious"] }
-                        }
-                    ]
-                }
-            })
-
-            if (transactions.count > 20) {
-                const transactionsFeatures = transactions.rows.map((trx) => {
+                const transactionsFeatures = transactions.map((trx) => {
                     if (trx.toJSON().features)
                         return JSON.parse(trx.toJSON().features)
                 })
@@ -1009,7 +949,37 @@ export default class TransactionController {
                 await anomalyRpcClient("retrain_model", {
                     features: transactionsFeatures
                 })
+
+            } else {
+                const transactions = await TransactionsModel.findAndCountAll({
+                    attributes: ["id", 'features', "status"],
+                    order: [["id", "ASC"]],
+                    where: {
+                        [Op.and]: [
+                            {
+                                createdAt: {
+                                    [Op.gt]: transaction.toJSON().createdAt
+                                }
+                            },
+                            {
+                                status: { [Op.or]: ["completed", "suspicious"] }
+                            }
+                        ]
+                    }
+                })
+
+                if (transactions.count > 1000) {
+                    const transactionsFeatures = transactions.rows.map((trx) => {
+                        if (trx.toJSON().features)
+                            return JSON.parse(trx.toJSON().features)
+                    })
+
+                    await anomalyRpcClient("retrain_model", {
+                        features: transactionsFeatures
+                    })
+                }
             }
+
 
         } catch (error) {
             console.log({ trainTransactionFraudDetectionModel: error });

@@ -108,7 +108,7 @@ export class TransactionJoiSchema {
         speed: z.number(),
         distance: z.number(),
         amount: z.number(),
-        id: z.number(),
+        currency: z.number(),
         transactionType: z.number(),
         platform: z.number(),
         isRecurring: z.number(),
