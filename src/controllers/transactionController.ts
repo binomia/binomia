@@ -265,19 +265,74 @@ export class TransactionsController {
             const limit = _pageSize;
             const offset = (page - 1) * _pageSize;
 
+            // const transactions = await TransactionsModel.findAll({
+            //     limit,
+            //     offset,
+            //     order: [['createdAt', 'DESC']],
+            //     attributes: [...fields['transactions'], "fromAccount", "toAccount"],
+            //     where: {
+            //         [Op.and]: [
+            //             {
+            //                 [Op.or]: [
+            //                     {
+            //                         fromAccount: user.account.id
+            //                     },
+            //                     {
+            //                         toAccount: user.account.id,
+            //                     }
+            //                 ]
+            //             },
+            //             {
+            //                 [Op.and]: [
+            //                     {
+            //                         fromAccount: user.account.id
+            //                     },
+            //                     {
+            //                         status: { [Op.ne]: "suspicious" }
+            //                     }
+            //                 ]
+            //             }
+            //         ]
+
+            //     },
+            //     include: [
+            //         {
+            //             model: AccountModel,
+            //             as: 'from',
+            //             attributes: fields['from'],
+            //             include: [{
+            //                 model: UsersModel,
+            //                 as: 'user',
+            //                 attributes: fields['user']
+            //             }]
+            //         },
+            //         {
+            //             model: AccountModel,
+            //             as: 'to',
+            //             attributes: fields['to'],
+            //             include: [{
+            //                 model: UsersModel,
+            //                 as: 'user',
+            //                 attributes: fields['user']
+            //             }]
+            //         }
+            //     ]
+            // })
+
             const transactions = await TransactionsModel.findAll({
                 limit,
                 offset,
                 order: [['createdAt', 'DESC']],
                 attributes: [...fields['transactions'], "fromAccount", "toAccount"],
                 where: {
-
                     [Op.or]: [
                         {
-                            fromAccount: user.account.id
+                            fromAccount: user.account.id,
+                            
                         },
                         {
                             toAccount: user.account.id,
+                            status: { [Op.ne]: "suspicious" }
                         }
                     ]
                 },
@@ -303,7 +358,8 @@ export class TransactionsController {
                         }]
                     }
                 ]
-            })
+            });
+
 
             if (!transactions)
                 throw new GraphQLError('No transactions found');
