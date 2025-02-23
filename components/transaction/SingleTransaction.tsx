@@ -237,7 +237,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				: transaction.isFromMe ?
 					<VStack w={"100%"} justifyContent={"center"}>
 						<HStack w={"85%"} mb={"5px"}>
-							<Heading fontSize={scale(16)} textTransform={"capitalize"} color={"white"}>{geoLocation?.fullArea || "Ubicación"}</Heading>
+							<Heading fontSize={scale(16)} textTransform={"capitalize"} color={"white"}>{transaction.location?.fullArea || "Ubicación"}</Heading>
 						</HStack>
 						<Image
 							alt='fine-location-image-alt'

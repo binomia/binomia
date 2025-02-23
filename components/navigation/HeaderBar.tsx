@@ -17,8 +17,6 @@ import { useLazyQuery } from "@apollo/client"
 import { AccountApolloQueries } from "@/apollo/query"
 
 
-const { width } = Dimensions.get('window')
-
 export const HomeHeaderLeft: React.FC = () => {
     return (
         <Image alt='logo-image' resizeMode="contain" w={scale(120)} h={"40px"} source={logo} />

@@ -11,7 +11,7 @@ import { z } from 'zod'
 import { StyleSheet, Keyboard, Dimensions, TouchableWithoutFeedback, RefreshControl } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView, Avatar } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
-import { UserApolloQueries } from '@/apollo/query'
+import { AccountApolloQueries, UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
 import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -32,6 +32,8 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 	const { transactions } = useSelector((state: any) => state.transactionReducer)
 
 	const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
+	const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
+
 
 	const [singleTransactionTitle, setSingleTransactionTitle] = useState<string>("Ver Detalles");
 	const [refreshing, setRefreshing] = useState(false);
@@ -101,10 +103,15 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 		setUsers(_users)
 	}
 
-
 	const onSelectUser = async (user: z.infer<typeof UserAuthSchema.singleSearchUserData>) => {
-		await dispatch(transactionActions.setReceiver(user))
-		setShowSendTransaction(true)
+		const { data } = await accountStatus()
+		if (data.account.status === "flagged")
+			router.navigate(`/flagged`)
+
+		else {
+			await dispatch(transactionActions.setReceiver(user))
+			setShowSendTransaction(true)
+		}
 	}
 
 	const onSelectTransaction = async (transaction: any) => {
