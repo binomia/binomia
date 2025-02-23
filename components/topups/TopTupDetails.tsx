@@ -47,7 +47,7 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
-    const { fetchGeoLocation } = useLocation();
+    const { fetchGeoLocation, getLocation } = useLocation();
 
     const [recurrence, setRecurrence] = useState<string>("oneTime");
     const [recurrenceSelected, setRecurrenceSelected] = useState<string>("");
@@ -113,21 +113,27 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
 
     const handleOnPress = async () => {
         try {
-            const authenticated = await authenticate()
+            const newLocation = await getLocation()
+            if (!newLocation)
+                onClose()
 
-            setLoading(true)
-            if (authenticated.success) {
-                await handleOnSend({
-                    title: recurrence,
-                    time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
-                })
+            else {
+                const authenticated = await authenticate()
+                setLoading(true)
+                if (authenticated.success) {
+                    await handleOnSend({
+                        title: recurrence,
+                        time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
+                    })
 
+                }
+
+                await dispatch(fetchRecentTransactions())
+                await dispatch(transactionActions.setHasNewTransaction(true))
+
+                setLoading(false)
             }
 
-            await dispatch(fetchRecentTransactions())
-            await dispatch(transactionActions.setHasNewTransaction(true))
-
-            setLoading(false)
         } catch (error) {
             console.log({ handleOnSend: error });
         }
