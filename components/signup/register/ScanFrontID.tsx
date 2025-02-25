@@ -58,9 +58,8 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
             }
 
 
-        } catch (error) {
-
-        }
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) { }
     }
 
 
@@ -79,6 +78,7 @@ const ScanID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                     dispatch(registerActions.setIdFrontUrl(_imageUrl))
                     setLoading(false)
 
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 } catch (error) {
                     setLoading(false)
                 }

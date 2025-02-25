@@ -2,11 +2,10 @@ import React, { useRef, useState } from 'react'
 import colors from '@/colors'
 import BottomSheet from '../global/BottomSheet'
 import CardModification from './CardModification'
-import AntDesign from '@expo/vector-icons/AntDesign';
 import Button from '../global/Button'
 import PagerView from 'react-native-pager-view';
 import CreateCard from './CreateCard';
-import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, ZStack } from 'native-base'
+import { VStack, Text, HStack, FlatList, Heading, Image, Pressable } from 'native-base'
 import { scale } from 'react-native-size-matters'
 import { Dimensions, SafeAreaView } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
@@ -32,7 +31,6 @@ const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justS
     const pagerRef = useRef<PagerView>(null);
     const dispatch = useDispatch()
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
-    const [setShowAddCard] = useState<boolean>(false)
     const { cards }: { cards: CardType[] } = useSelector((state: any) => state.accountReducer)
     const [createCard] = useMutation(CardApolloQueries.createCard())
 

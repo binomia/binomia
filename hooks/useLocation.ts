@@ -1,12 +1,10 @@
 import * as Location from 'expo-location';
-import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useEffect } from 'react';
 import { globalActions } from '@/redux/slices/globalSlice';
 import { useDispatch } from 'react-redux';
 import { Client } from "@googlemaps/google-maps-services-js";
 import { GOOGLE_MAPS_API_KEY } from '@/constants';
-import axios from 'axios';
-import { z } from 'zod';
-import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { router } from 'expo-router';
 
 export const useLocation = () => {

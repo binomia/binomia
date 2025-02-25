@@ -16,6 +16,7 @@ const accountSlice = createSlice({
     initialState,
     reducers: {
         reSetAllState: (state) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             state = initialState
         },
         setCard: (state, action) => {

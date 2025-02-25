@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import colors from '@/colors'
 import Button from '@/components/global/Button';
 import BottomSheet from '../global/BottomSheet';
-import { StyleSheet, Dimensions } from 'react-native'
+import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, FlatList } from 'native-base'
 import { FORMAT_CURRENCY, FORMAT_PHONE_NUMBER, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -27,7 +27,7 @@ type Props = {
 }
 
 const { width } = Dimensions.get("screen")
-const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }, onClose = (_?: any) => { } }) => {
+const TopTupDetails: React.FC<Props> = ({ goBack = () => { }, onClose = (_?: any) => { } }) => {
     const [createTopUp] = useMutation(TopUpApolloQueries.createTopUp())
     const [getTopUp, { startPolling, stopPolling }] = useLazyQuery(TopUpApolloQueries.topUp(), {
         fetchPolicy: "network-only",
@@ -185,7 +185,7 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
                 <FlatList
                     scrollEnabled={false}
                     data={recurenceMonthlyData}
-                    renderItem={({ item, index }) => (
+                    renderItem={({ item }) => (
                         <HStack w={"100%"}>
                             {item.map(({ title, id, day }) => (
                                 <Pressable _pressed={{ opacity: 0.5 }} key={title} m={"5px"} flexWrap={"nowrap"} onPress={() => onSelecteOption(id, title)} w={width / 6} h={width / 6} bg={recurrenceDaySelected === id ? colors.mainGreen : colors.lightGray} justifyContent={"center"} alignItems={"center"} borderRadius={10}>
@@ -251,26 +251,3 @@ const TopTupDetails: React.FC<Props> = ({ goNext = () => { }, goBack = () => { }
 }
 
 export default TopTupDetails
-
-
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: 55,
-        height: 55,
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 30,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    }
-})

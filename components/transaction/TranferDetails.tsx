@@ -29,7 +29,7 @@ const { width } = Dimensions.get("screen")
 const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () => { }, goBack = () => { } }) => {
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
-    const { account, user } = useSelector((state: any) => state.accountReducer)
+    const {  user } = useSelector((state: any) => state.accountReducer)
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
@@ -227,7 +227,7 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                 <FlatList
                     scrollEnabled={false}
                     data={recurenceMonthlyData}
-                    renderItem={({ item, index }) => (
+                    renderItem={({ item }) => (
                         <HStack w={"100%"}>
                             {item.map(({ title, id, day }) => (
                                 <Pressable _pressed={{ opacity: 0.5 }} key={title} m={"5px"} flexWrap={"nowrap"} onPress={() => onSelecteOption(id, title)} w={width / 6} h={width / 6} bg={recurrenceDaySelected === id ? colors.mainGreen : colors.lightGray} justifyContent={"center"} alignItems={"center"} borderRadius={10}>

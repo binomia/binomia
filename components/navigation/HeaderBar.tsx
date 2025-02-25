@@ -5,17 +5,15 @@ import NewTopUp from "../topups/NewTopUp"
 import colors from "@/colors"
 import { creditCard, logo, qrIcon, recurrenceIcon } from "@/assets"
 import { VStack, Image, Pressable, HStack, Text, Stack, Heading, Avatar } from "native-base"
-import { StyleSheet } from "react-native"
 import { useState } from "react"
 import { router } from "expo-router"
 import { AntDesign, Entypo, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { scale } from "react-native-size-matters"
-import { Dimensions, Platform } from "react-native"
+import { Platform } from "react-native"
 import { useSelector } from "react-redux"
 import { EXTRACT_FIRST_LAST_INITIALS, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
 import { useLazyQuery } from "@apollo/client"
 import { AccountApolloQueries } from "@/apollo/query"
-
 
 export const HomeHeaderLeft: React.FC = () => {
     return (
@@ -23,7 +21,7 @@ export const HomeHeaderLeft: React.FC = () => {
     )
 }
 
-export const HomeHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
+export const HomeHeaderRight: React.FC = () => {
     const [showBottomSheet, setShowBottomSheet] = useState(false)
     const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
 
@@ -37,7 +35,7 @@ export const HomeHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
     }
 
     return (
-        <VStack p={p}>
+        <VStack>
             <Pressable bg={colors.lightGray} w={"40px"} h={"40px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} _pressed={{ opacity: 0.5 }} onPress={onPress}>
                 <Image alt='logo-image' w={"20px"} tintColor={colors.mainGreen} h={"20px"} source={qrIcon} />
             </Pressable>
@@ -46,11 +44,11 @@ export const HomeHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
     )
 }
 
-export const TransactionsHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
+export const TransactionsHeaderRight: React.FC = () => {
     const [showBottomSheet, setShowBottomSheet] = useState(false)
 
     return (
-        <VStack p={p}>
+        <VStack >
             <Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} w={"40px"} h={"40px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} onPress={() => setShowBottomSheet(true)}>
                 <Image alt='logo-image' w={"22px"} h={"22px"} source={recurrenceIcon} />
             </Pressable>
@@ -58,10 +56,10 @@ export const TransactionsHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) =
         </VStack>
     )
 }
-export const BankingHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
+export const BankingHeaderRight: React.FC = () => {
     const [showBottomSheet, setShowBottomSheet] = useState(false)
     return (
-        <VStack p={p}>
+        <VStack >
             <Pressable _pressed={{ opacity: 0.5 }} bg={colors.lightGray} w={"40px"} h={"40px"} alignItems={"center"} justifyContent={"center"} borderRadius={100} onPress={() => setShowBottomSheet(true)}>
                 <Image alt='logo-image' w={"22px"} h={"22px"} source={creditCard} />
             </Pressable>
@@ -70,16 +68,16 @@ export const BankingHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
     )
 }
 
-export const RecurrencesHeaderRight: React.FC<{ p?: string }> = ({ p = "0" }) => {
+export const RecurrencesHeaderRight: React.FC = () => {
     return (
-        <VStack p={p}>
+        <VStack >
             <Pressable _pressed={{ opacity: 0.5 }} onPress={() => router.navigate("recurrences")}>
                 <Image alt='logo-image' tintColor={"white"} w={"25px"} h={"25px"} source={recurrenceIcon} />
             </Pressable>
         </VStack>
     )
 }
-export const TransactionCenter: React.FC<{ p?: string }> = ({ p = "0" }) => {
+export const TransactionCenter: React.FC = () => {
     const { transaction } = useSelector((state: any) => state.transactionReducer)
 
     return (
@@ -193,25 +191,3 @@ export const BackHeaderIcon: React.FC = () => {
         </HStack>
     )
 }
-
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: 55,
-        height: 55,
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 30,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    }
-})

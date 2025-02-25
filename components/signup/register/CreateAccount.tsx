@@ -3,7 +3,6 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Input from '@/components/global/Input';
 import Button from '@/components/global/Button';
-import BottomSheet from '@/components/global/BottomSheet';
 import { useContext, useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack, Box } from 'native-base';
 import { Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Dimensions, View } from 'react-native';
@@ -13,9 +12,8 @@ import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-s
 import { INPUT_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { GlobalContext } from '@/contexts/globalContext';
 import { GlobalContextType } from '@/types';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { registerActions } from '@/redux/slices/registerSlice';
-import * as WebBrowser from 'expo-web-browser';
 
 
 
@@ -27,12 +25,9 @@ type Props = {
 const { width, height } = Dimensions.get("window");
 const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     const dispatch = useDispatch()
-    const state = useSelector((state: any) => state)
     const { } = useContext<GlobalContextType>(GlobalContext);
 
     const [showEmailError, setShowEmailError] = useState<boolean>(false);
-    const [openBottomSheetUrl, setOpenBottomSheetUrl] = useState<string>("");
-    const [isInvalid, setIsInvalid] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
 
     const [email, setEmailAddress] = useState<string>("");
@@ -44,13 +39,6 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
 
-    const openTermsAndConditions = async (url: string) => {
-        const urls: { [key: string]: string } = {
-            "userAgreement": "https://www.google.com",
-            "privacyPolicy": "https://www.google.com",
-        }
-       
-    }
 
     const isAValidPhoneNumber = (value: string) => {
         const { isValid } = phone(value, { country: "DO" });
@@ -63,7 +51,8 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
             try {
 
 
-            } catch (error) {
+            } catch (error: any) {
+                console.error(error);            
                 setShowEmailError(false)
             }
 
@@ -109,12 +98,12 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
     useEffect(() => {
         setDisabledButton(true)
 
-        if (names.length >= 2 && lastNames.length >= 2 && phoneNumber && email && password && userAgreement && !isInvalid) {
+        if (names.length >= 2 && lastNames.length >= 2 && phoneNumber && email && password && userAgreement) {
             if (isAValidPhoneNumber(phoneNumber) && VALIDATE_EMAIL(email) && password.length >= 6 && !showEmailError)
                 setDisabledButton(false)
         }
 
-    }, [names, lastNames, phoneNumber, email, password, userAgreement, isInvalid, showEmailError])
+    }, [names, lastNames, phoneNumber, email, password, userAgreement, showEmailError])
 
 
     return (
@@ -192,7 +181,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                                 <MaterialIcons style={{ marginTop: 3 }} name={userAgreement ? "check-box" : "check-box-outline-blank"} size={28} color={colors.mainGreen} />
                             </TouchableOpacity>
                             <Text mx={"5px"} fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"90%"} color={"white"}>
-                                Certifico que tengo más de 18 años de edad y acepto el <Text onPress={() => openTermsAndConditions("userAgreement")} color={"mainGreen"} underline>Acuerdo de Usuario</Text> y la <Text onPress={() => openTermsAndConditions("privacyPolicy")} color={"mainGreen"} underline>Política de Privacidad</Text>.
+                                Certifico que tengo más de 18 años de edad y acepto el <Text onPress={() => { }} color={"mainGreen"} underline>Acuerdo de Usuario</Text> y la <Text onPress={() => { }} color={"mainGreen"} underline>Política de Privacidad</Text>.
                             </Text>
 
                         </HStack>
@@ -214,7 +203,7 @@ const CreateAccount: React.FC<Props> = ({ nextPage }: Props): JSX.Element => {
                         />
                     </VStack>
                 </View>
-            </TouchableWithoutFeedback>           
+            </TouchableWithoutFeedback>
         </KeyboardAvoidingScrollView>
     );
 }

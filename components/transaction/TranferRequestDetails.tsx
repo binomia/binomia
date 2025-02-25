@@ -189,7 +189,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
     }
 
     const RenderWeeklyOption: React.FC = () => {
-        const onSelecteOption = async (id: string, title: string) => {
+        const onSelecteOption = async (id: string) => {
             setRecurrenceSelected(id)
 
             await delay(300)
@@ -204,7 +204,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                     renderItem={({ item }) => (
                         <HStack my={"10px"} w={"100%"} justifyContent={"space-between"}>
                             {item.map(({ title, id }) => (
-                                <Pressable w={width * 0.46} key={id} borderRadius={"5px"} justifyContent={"center"} alignItems={"center"} h={scale(45)} bg={recurrenceSelected === id ? colors.mainGreen : colors.lightGray} _pressed={{ opacity: 0.5 }} onPress={() => onSelecteOption(id, title)} borderColor={colors.mainGreen}>
+                                <Pressable w={width * 0.46} key={id} borderRadius={"5px"} justifyContent={"center"} alignItems={"center"} h={scale(45)} bg={recurrenceSelected === id ? colors.mainGreen : colors.lightGray} _pressed={{ opacity: 0.5 }} onPress={() => onSelecteOption(id)} borderColor={colors.mainGreen}>
                                     <Heading fontSize={scale(12)} fontWeight={"500"} color={recurrenceSelected === id ? colors.white : colors.mainGreen}>{title}</Heading>
                                 </Pressable>
                             ))}
@@ -215,7 +215,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
     }
 
     const RenderMonthlyOption: React.FC = () => {
-        const onSelecteOption = async (id: string, title: string) => {
+        const onSelecteOption = async (id: string) => {
             setRecurrenceDaySelected(id)
 
             await delay(300)
@@ -232,7 +232,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                     renderItem={({ item }) => (
                         <HStack w={"100%"} >
                             {item.map(({ title, id, day }) => (
-                                <Pressable _pressed={{ opacity: 0.5 }} key={title} m={"5px"} flexWrap={"nowrap"} onPress={() => onSelecteOption(id, title)} w={width / 6} h={width / 6} bg={recurrenceDaySelected === id ? colors.mainGreen : colors.lightGray} justifyContent={"center"} alignItems={"center"} borderRadius={10}>
+                                <Pressable _pressed={{ opacity: 0.5 }} key={title} m={"5px"} flexWrap={"nowrap"} onPress={() => onSelecteOption(id)} w={width / 6} h={width / 6} bg={recurrenceDaySelected === id ? colors.mainGreen : colors.lightGray} justifyContent={"center"} alignItems={"center"} borderRadius={10}>
                                     <Heading fontSize={scale(15)} fontWeight={"500"} color={recurrenceDaySelected === id ? colors.white : colors.mainGreen}>{day}</Heading>
                                 </Pressable>
                             ))}

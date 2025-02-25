@@ -1,6 +1,4 @@
 import * as SecureStore from 'expo-secure-store';
-import { useEffect } from 'react';
-
 
 const useAsyncStorage = () => {
     const setItem = async (key: string, value: string): Promise<void> => {

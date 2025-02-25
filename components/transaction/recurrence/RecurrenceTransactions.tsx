@@ -4,7 +4,7 @@ import moment from 'moment';
 import BottomSheet from '@/components/global/BottomSheet';
 import PagerView from 'react-native-pager-view';
 import Button from '@/components/global/Button';
-import { StyleSheet, Dimensions, RefreshControl } from 'react-native'
+import { Dimensions, RefreshControl } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, Spinner, ScrollView, FlatList, Avatar } from 'native-base'
 import { scale } from 'react-native-size-matters';
 import { useLazyQuery, useMutation } from '@apollo/client';
@@ -61,6 +61,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
 
             setTransactions(data.accountRecurrentTransactions)
 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
 
         }
@@ -108,6 +109,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                 setTransaction({})
             }
 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             setVisible(false)
             setSpin(false)
@@ -491,33 +493,6 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
     )
 }
 
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: scale(50),
-        height: scale(50),
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 30,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    },
-    ScrollView: {
-        flexDirection: "row",
-        alignItems: "center",
-        // height: 100,
-        marginTop: 15,
-        marginBottom: 40
-    }
-})
+
 
 export default RecurrenceTransactions

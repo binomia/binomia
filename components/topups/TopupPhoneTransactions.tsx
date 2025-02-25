@@ -1,27 +1,18 @@
-import React, { useCallback, useEffect, useState, useRef } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
-import BottomSheet from '@/components/global/BottomSheet';
 import moment from 'moment';
-import AntDesign from '@expo/vector-icons/AntDesign';
-import SendTransaction from '@/components/transaction/SendTransaction';
 import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
-import PagerView from 'react-native-pager-view';
-import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
-import { StyleSheet, Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
+import { Keyboard, Dimensions, TouchableWithoutFeedback, TouchableOpacity, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Spinner, Pressable, ScrollView, Avatar } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
-import { UserApolloQueries } from '@/apollo/query'
-import { UserAuthSchema } from '@/auth/userAuth'
-import { z } from 'zod'
-import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, FORMAT_FULL_NAME, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { noTransactions, pendingClock } from '@/assets';
+import { noTransactions } from '@/assets';
 import { router, useNavigation } from 'expo-router';
-import { set } from 'date-fns';
 
 type Props = {
     showNewTransaction?: boolean;
@@ -37,10 +28,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
     const [accountTransactions, { refetch: refetchAccountTransactions }] = useLazyQuery(TransactionApolloQueries.accountTransactions())
     const [searchAccountTransactions] = useLazyQuery(TransactionApolloQueries.searchAccountTransactions())
 
-    const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
-
     const [refreshing, setRefreshing] = useState(false);
-    const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
     const [transactions, setTransactions] = useState<any[]>([])
     const [filteredTransactions, setFilteredTransactions] = useState<any[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -71,7 +59,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
     }
 
     const formatTransaction = (transaction: any) => {
-        const { transactionType, status, amount } = transaction
+        const { transactionType, status } = transaction
         const isFromMe = transaction.from.user?.id === user.id
 
         const profileImageUrl = isFromMe ? transaction.to.user?.profileImageUrl : transaction.from.user?.profileImageUrl
@@ -102,12 +90,6 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
             fullName: fullName || "",
             username: username || ""
         }
-    }
-
-    const fetchSearchedUser = async () => {
-        const sugestedUsers = await getSugestedUsers()
-        const _users = await UserAuthSchema.searchUserData.parseAsync(sugestedUsers.data.sugestedUsers)
-        setUsers(_users)
     }
 
     const fetchAccountTransactions = async (page: number = 1, pageSize: number = showNewTransaction ? 20 : 10) => {
@@ -155,7 +137,6 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
 
     useEffect(() => {
         setIsLoading(true)
-        fetchSearchedUser()
         fetchAccountTransactions()
     }, [])
 
@@ -215,7 +196,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                                                         <Heading size={"sm"} color={colors.white}>
                                                             {EXTRACT_FIRST_LAST_INITIALS(formatTransaction(item).fullName || "0")}
                                                         </Heading>
-                                                    </Avatar>                                                    
+                                                    </Avatar>
                                                 }
                                                 <VStack ml={"10px"} justifyContent={"center"}>
                                                     <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(item).fullName || "")}</Heading>
@@ -256,32 +237,3 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
 }
 
 export default TopupPhoneTransactions
-
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: 50,
-        height: 50,
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 20,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    },
-    ScrollView: {
-        flexDirection: "row",
-        alignItems: "center",
-        // height: 100,
-        marginTop: 15,
-        marginBottom: 40
-    }
-}) 

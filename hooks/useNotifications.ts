@@ -79,7 +79,7 @@ export const useNotifications = (): PushNotificationType => {
                 setNotification(notification);
             });
 
-            responseListener.current = Notifications.addNotificationResponseReceivedListener(async response => {
+            responseListener.current = Notifications.addNotificationResponseReceivedListener(async (_) => {
             });
 
             return () => {

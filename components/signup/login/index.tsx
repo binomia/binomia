@@ -15,8 +15,6 @@ import BottomSheet from '@/components/global/BottomSheet';
 import ForgotPassword from './ForgotPassword';
 import VerifyCode from './VerifyCode';
 import ChangePassword from './ChangePassword';
-import * as Updates from 'expo-updates';
-
 
 const LoginComponent: React.FC = (): JSX.Element => {
 

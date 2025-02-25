@@ -1,10 +1,10 @@
 import 'react-native-reanimated';
 import { Stack } from 'expo-router';
-import {  LoginRight, WelcomeLeft, WelcomeRight } from '@/components/navigation/HeaderBar';
+import { LoginRight, WelcomeLeft, WelcomeRight } from '@/components/navigation/HeaderBar';
 import colors from '@/colors';
 
 
-export default () => {
+const Signup = () => {
 	const defaultHeaderStyles = {
 		backgroundColor: colors.darkGray,
 		shadowOpacity: 0,
@@ -30,3 +30,5 @@ export default () => {
 		</Stack>
 	)
 }
+
+export default Signup

@@ -1,6 +1,6 @@
 import { GOOGLE_MAPS_API_KEY } from "@/constants";
 import { WeeklyQueueTitleType } from "@/types";
-import { nextFriday, nextMonday, nextSaturday, nextSunday, nextDay, nextThursday, nextTuesday, nextWednesday } from "date-fns";
+import { nextFriday, nextMonday, nextSaturday, nextSunday, nextThursday, nextTuesday, nextWednesday } from "date-fns";
 
 
 export const FORMAT_PHONE_NUMBER = (value: string) => {

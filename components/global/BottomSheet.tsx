@@ -1,5 +1,5 @@
 import colors from '@/colors';
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { BottomSheet as RNBottomSheet, BottomSheetRef, BottomSheetProps } from 'react-native-sheet';
 
 

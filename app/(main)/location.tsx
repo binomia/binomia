@@ -4,7 +4,6 @@ import { Heading, HStack, Text, Image, VStack } from 'native-base'
 import { location } from '@/assets'
 import Button from '@/components/global/Button'
 import colors from '@/colors'
-import { router } from 'expo-router'
 import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Linking from 'expo-linking';

@@ -9,7 +9,7 @@ import { Heading, Image, Text, VStack, HStack, Pressable } from 'native-base'
 import { Entypo } from "@expo/vector-icons";
 import { FORMAT_PHONE_NUMBER } from '@/helpers'
 import { scale } from 'react-native-size-matters'
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { topupActions } from '@/redux/slices/topupSlice'
 import { FlatGrid } from 'react-native-super-grid'
 import { useLazyQuery } from '@apollo/client'
@@ -28,7 +28,6 @@ const CreateTopUp: React.FC<Props> = ({ next }: Props) => {
     const { phoneNumber, fullName, company, setCompany, setFullName, setPhoneNumber } = useContext(TopUpContext)
 
     const [topUpCompanies] = useLazyQuery(TopUpApolloQueries.topUpCompanies())
-    const { topup, newTopUp } = useSelector((state: any) => state.topupReducer)
     const dispatch = useDispatch()
 
     const [openBottomSheet, setOpenBottomSheet] = useState(false);

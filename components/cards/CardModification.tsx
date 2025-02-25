@@ -85,19 +85,6 @@ const CardModification: React.FC<Props> = ({ open = false, onCloseFinish = () =>
         }
     }
 
-    const renderCardLogo = (brand: string) => {
-        switch (brand) {
-            case "visa":
-                return <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={visaLogo} />
-
-            case "mastercard":
-                return <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={mastercardLogo} />
-
-            default:
-                return null
-        }
-    }
-
     const RenderCardLogo: React.FC<{ brand: string }> = ({ brand }: { brand: string }) => {
         switch (brand) {
             case "visa":

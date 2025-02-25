@@ -2,18 +2,15 @@ import { useContext, useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack } from 'native-base';
 import { SafeAreaView, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
 import { SessionContext } from '@/contexts/sessionContext';
-import { GlobalContextType, SessionPropsType } from '@/types';
 import colors from '@/colors';
 import { INPUT_CODE_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell, } from 'react-native-confirmation-code-field';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Button from '@/components/global/Button';
-import { GlobalContext } from '@/contexts/globalContext';
-import { useDispatch, useSelector } from 'react-redux';
-import { useMutation } from '@apollo/client';
-import { UserApolloQueries } from '@/apollo/query/userQuery';
+import { useSelector } from 'react-redux';
 import { UserAuthSchema } from '@/auth/userAuth';
+import { SessionPropsType } from '@/types';
 
 type Props = {
     nextPage: () => void
@@ -51,6 +48,7 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
             nextPage()
             setLoading(false)
 
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             setLoading(false)
         }

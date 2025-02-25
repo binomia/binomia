@@ -1,18 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import colors from '@/colors'
-import { Dimensions, TouchableOpacity, SafeAreaView } from 'react-native'
+import { TouchableOpacity, SafeAreaView } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Stack, Pressable } from 'native-base'
 import { scale } from 'react-native-size-matters';
-import BottomSheet from '@/components/global/BottomSheet';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDispatch, useSelector } from 'react-redux';
 import KeyNumberPad from '../global/KeyNumberPad';
 import { transactionActions } from '@/redux/slices/transactionSlice';
-import { useMutation } from '@apollo/client';
-import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import Cards from '../cards';
 import { depositIcon } from '@/assets';
-import * as Constants from 'expo-constants'
 import { useNavigation } from '@react-navigation/native';
 
 
@@ -23,17 +19,11 @@ type Props = {
     onCloseFinish?: () => void
 }
 
-const { height } = Dimensions.get('window')
-const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Deposito", open = true, onSendFinish = () => { }, onCloseFinish = () => { } }) => {
+const DepositOrWithdrawTransaction: React.FC<Props> = ({ onCloseFinish = () => { } }) => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>()
 
-    const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { card } = useSelector((state: any) => state.accountReducer)
-    const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
-
-    const [input, setInput] = useState<string>("0");
-    const [visible, setVisible] = useState<boolean>(open);
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showPayButton, setShowPayButton] = useState<boolean>(false);
 
@@ -44,23 +34,18 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Deposito", ope
         else
             setShowPayButton(false)
 
-        setInput(value)
     }
 
     const handleOnClose = async () => {
         await dispatch(transactionActions.setReceiver({}))
 
         onCloseFinish()
-        setVisible(false)
         navigation.goBack()
     }
 
-    useEffect(() => {
-        setVisible(open)
-    }, [open])
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray}}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
             <VStack variant={"body"} h={"100%"} justifyContent={"space-between"}>
                 <VStack >
                     <HStack alignItems={"center"} justifyContent={"space-between"}>

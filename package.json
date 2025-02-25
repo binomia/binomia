@@ -42,6 +42,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.33.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
     "expo": "^51.0.38",
     "expo-application": "~5.9.1",
     "expo-barcode-scanner": "^13.0.1",
@@ -131,8 +132,15 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@types/react": "~18.2.45",
+    "@typescript-eslint/eslint-plugin": "^8.24.1",
+    "@typescript-eslint/parser": "^8.24.1",
     "drizzle-kit": "^0.24.2",
-    "typescript": "~5.3.3"
+    "eslint": "^9.21.0",
+    "eslint-plugin-expo": "^0.1.0",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^16.0.0",
+    "typescript": "~5.3.3",
+    "typescript-eslint": "^8.24.1"
   },
   "private": true
 }

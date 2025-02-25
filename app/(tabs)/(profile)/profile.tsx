@@ -6,7 +6,6 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 import ImageView from "react-native-image-viewing";
 import QRScanner from '@/components/global/QRScanner'
 import * as ImagePicker from 'expo-image-picker';
-import { Dimensions, StyleSheet, } from 'react-native'
 import { Heading, Image, VStack, Text, HStack, Pressable, ZStack, Spinner, ScrollView, Avatar } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import { EXTRACT_FIRST_LAST_INITIALS, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
@@ -115,8 +114,8 @@ const ProfileScreen: React.FC = () => {
 						</HStack>
 						<Heading mt={"50px"} mb={"10px"} textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>Configuraciónes</Heading>
 						<VStack borderRadius={10} w={"100%"} space={2} h={"auto"}>
-							{profileScreenData.slice(0, 6).map((item) => (
-								<Pressable _pressed={{ opacity: 0.5 }} flexDirection={"row"} w={"100%"} h={scale(45)} justifyContent={"space-between"} alignItems={"center"} onPress={() => router.navigate(item.path)}>
+							{profileScreenData?.slice(0, 6).map((item, key) => (
+								<Pressable key={`${key}=${item.path}-profile`} _pressed={{ opacity: 0.5 }} flexDirection={"row"} w={"100%"} h={scale(45)} justifyContent={"space-between"} alignItems={"center"} onPress={() => router.navigate(item.path)}>
 									<HStack alignItems={"center"}>
 										<Image alt='logo-image' borderRadius={100} resizeMode='contain' w={scale(35)} h={scale(35)} source={item.icon} />
 										<Heading ml={"10px"} fontSize={scale(15)} textTransform={"capitalize"} color={colors.white}>{item.name}</Heading>

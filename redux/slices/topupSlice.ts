@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import phone from 'phone'
 import { fetchRecentTopUps } from '../fetchHelper'
 
 const initialState = {
@@ -17,6 +16,7 @@ const topupSlice = createSlice({
     initialState,
     reducers: {
         reSetAllState: (state) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             state = initialState
         },
         setPhoneNumber: (state, action) => {

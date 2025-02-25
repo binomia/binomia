@@ -30,7 +30,6 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
     const [showDNIError, setShowDNIError] = useState<boolean>(false);
     const [showDNIErroreMessage, setShowDNErrorMessage] = useState<string>("");
     const [disabledButton, setDisabledButton] = useState<boolean>(true);
-    const [openBottomSheetUrl, setOpenBottomSheetUrl] = useState<string>("");
     const [isInvalid, setIsInvalid] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
     const [exp, setExp] = useState<string>("");
@@ -50,6 +49,7 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
             setIsInvalid(false)
             checkIfDNIExists()
 
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             setIsInvalid(true)
             setShowDNErrorMessage("La Cedula Ingresada No Es Valida")
@@ -58,7 +58,8 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
 
     const checkIfDNIExists = async () => {
         try {
-          
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
             setShowDNIError(false)
             setShowDNErrorMessage("Error Al Validar La Cedula")
@@ -179,7 +180,7 @@ const IDData: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
                         />
                     </HStack>
                 </View>
-            </TouchableWithoutFeedback>           
+            </TouchableWithoutFeedback>
             <DatePicker
                 locale='es'
                 confirmText='Confirmar'

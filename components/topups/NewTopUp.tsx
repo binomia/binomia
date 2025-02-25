@@ -4,7 +4,7 @@ import PagerView from 'react-native-pager-view'
 import CreateTopUp from './CreateTopUp'
 import NewTopUpQuantity from './NewTopUpQuantity'
 import TopTupDetails from './TopTupDetails'
-import { Dimensions, StyleSheet } from 'react-native'
+import { Dimensions } from 'react-native'
 import { useDispatch } from 'react-redux'
 import { topupActions } from '@/redux/slices/topupSlice'
 import { useNavigation } from 'expo-router'
@@ -40,5 +40,3 @@ const NewTopUp: React.FC<Props> = ({ open, onClose = () => { } }: Props) => {
 }
 
 export default NewTopUp
-
-const styles = StyleSheet.create({})

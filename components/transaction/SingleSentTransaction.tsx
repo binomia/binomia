@@ -4,7 +4,7 @@ import Button from '@/components/global/Button';
 import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import * as Sharing from 'expo-sharing';
-import { StyleSheet, Dimensions } from 'react-native'
+import {  Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, ZStack, Avatar } from 'native-base'
 import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -20,7 +20,6 @@ import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
-import { router } from 'expo-router';
 
 
 type Props = {
@@ -31,7 +30,7 @@ type Props = {
 	iconImage?: any
 }
 
-const { height, width } = Dimensions.get('window')
+const { height } = Dimensions.get('window')
 const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClose = async (_?: boolean) => { }, showPayButton = false, goNext = (_?: number) => { } }) => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
@@ -88,7 +87,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 
 			setIsCancelLoading(false)
 
-		} catch (error) {
+		} catch (_: any) {
 			setIsCancelLoading(false)
 		}
 	}
@@ -122,7 +121,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 					goNext(paymentApproved ? 1 : 2)
 				}
 
-			} catch (error: any) {
+			} catch (_: any) {
 				setIsLoading(false)
 				await dispatch(fetchRecentTransactions())
 				onClose()
@@ -296,26 +295,3 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 }
 
 export default SingleSentTransaction
-
-
-const styles = StyleSheet.create({
-	contentContainerStyle: {
-		width: 55,
-		height: 55,
-		borderRadius: 100
-	},
-	textStyle: {
-		fontSize: 30,
-		color: 'white',
-		marginBottom: 2,
-		textTransform: 'capitalize',
-		fontWeight: 'bold',
-		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-	}
-})

@@ -1,14 +1,11 @@
 import React, { } from 'react'
 import colors from '@/colors'
-import { StyleSheet, SafeAreaView, Dimensions } from 'react-native'
+import { SafeAreaView, Dimensions } from 'react-native'
 import { Center, HStack, Skeleton, VStack } from 'native-base'
-import { scale } from 'react-native-size-matters'
 
-
-type Props = {}
 
 const { } = Dimensions.get('window')
-const TransactionSkeleton: React.FC<Props> = ({ }) => {
+const TransactionSkeleton: React.FC = () => {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
             <Center w="100%">
@@ -34,8 +31,3 @@ const TransactionSkeleton: React.FC<Props> = ({ }) => {
 }
 
 export default TransactionSkeleton
-
-
-const styles = StyleSheet.create({
-
-})

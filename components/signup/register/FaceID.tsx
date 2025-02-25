@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack, Spinner, ZStack } from 'native-base';
-import { StyleSheet, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { TouchableOpacity, Dimensions, Image } from 'react-native';
 import colors from '@/colors';
 import { TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
 import Button from '@/components/global/Button';
@@ -21,7 +21,7 @@ type Props = {
 
 
 const { width, height } = Dimensions.get("window");
-const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): JSX.Element => {
+const FaceID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => {
     const dispatch = useDispatch()
     const state = useSelector((state: any) => state.registerReducer)
     const { sendVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
@@ -45,7 +45,8 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
             nextPage()
             setLoading(false)
 
-        } catch (error) {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_: any) {
             setLoading(false)
             setError(true)
         }
@@ -67,6 +68,7 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
                     setIsVideoFinishedUploaded(true)
                 }
 
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (error) {
                 setOpenBottomSheet(false)
                 setIsVideoFinishedUploaded(true)
@@ -160,27 +162,3 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage, reRenderPage }: Props): J
 
 
 export default FaceID
-
-
-const styles = StyleSheet.create({
-    Shadow: {
-        shadowColor: "#fff",
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 1,
-        elevation: 1,
-    },
-    InputsSucess: {
-        borderColor: colors.mainGreen,
-        borderWidth: 1,
-        borderRadius: 10,
-    },
-    InputsFail: {
-        borderColor: colors.alert,
-        borderWidth: 1,
-        borderRadius: 10,
-    }
-});

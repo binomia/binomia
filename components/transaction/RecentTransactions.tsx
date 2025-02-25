@@ -4,7 +4,7 @@ import BottomSheet from '@/components/global/BottomSheet';
 import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
-import { StyleSheet, Dimensions } from 'react-native'
+import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, Avatar } from 'native-base'
 import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -13,7 +13,7 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { noTransactions, pendingClock } from '@/assets';
 import { router, useNavigation } from 'expo-router';
 import SingleTopTup from '../topups/SingleTopTup';
-import { fetchAllTransactions, fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
+import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 
 
 const { height, width } = Dimensions.get('window')
@@ -216,32 +216,3 @@ const RecentTransactions: React.FC = () => {
 }
 
 export default RecentTransactions
-
-const styles = StyleSheet.create({
-	contentContainerStyle: {
-		width: 50,
-		height: 50,
-		borderRadius: 100
-	},
-	textStyle: {
-		fontSize: 20,
-		color: 'white',
-		marginBottom: 2,
-		textTransform: 'capitalize',
-		fontWeight: 'bold',
-		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-	},
-	ScrollView: {
-		flexDirection: "row",
-		alignItems: "center",
-		// height: 100,
-		marginTop: 15,
-		marginBottom: 40
-	}
-}) 

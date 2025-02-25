@@ -1,12 +1,11 @@
 import ExpoVpnChecker from "expo-vpn-checker";
 import NetInfo from '@react-native-community/netinfo';
-import VPNScreen from "@/screens/VPNScreen";
+import VPNScreen from "@/components/global/VPNScreen";
 import { Stack, useNavigation } from "expo-router";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { globalActions } from "@/redux/slices/globalSlice";
 import colors from "@/colors";
-import { HomeHeaderLeft } from "@/components/navigation/HeaderBar";
 
 
 export const RouterContext = createContext({});
@@ -23,7 +22,7 @@ export const RouterContextProvider = () => {
     }, []);
 
     useEffect(() => {
-        const unsubscribe = NetInfo.addEventListener(async (state) => {
+        const unsubscribe = NetInfo.addEventListener(async () => {
             await dispatch(globalActions.setIsVPNConnected(ExpoVpnChecker.checkVpn()))
         });
 

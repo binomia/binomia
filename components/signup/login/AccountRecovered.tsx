@@ -14,7 +14,7 @@ type Props = {
 
 
 const { width, height } = Dimensions.get("window");
-const AccountRecovered: React.FC<Props> = ({ cancelBottomSheet }): JSX.Element => {
+const AccountRecovered: React.FC<Props> = ({ cancelBottomSheet }: Props): JSX.Element => {
     const { setVerificationCode, setVerificationData } = useContext<SessionPropsType>(SessionContext);
     const [loading, setLoading] = useState(false);
 

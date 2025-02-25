@@ -28,6 +28,7 @@ const registerSlice = createSlice({
     initialState,
     reducers: {
         reSetAllState: (state) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             state = initialState
         },
         setUserAgreement: (state, action) => {
@@ -50,8 +51,6 @@ const registerSlice = createSlice({
         },
         setAddress: (state, action) => {
             state.address = action.payload
-        },
-        setAddressAgreement: (state, action) => {
         },
         setDni: (state, action) => {
             state.dniNumber = action.payload

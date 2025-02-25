@@ -1,13 +1,10 @@
-import React, { } from 'react'
+import React from 'react'
 import colors from '@/colors'
-import { StyleSheet, SafeAreaView } from 'react-native'
-import { Center, HStack, Skeleton, VStack, ZStack } from 'native-base'
+import { HStack, Skeleton, VStack, ZStack } from 'native-base'
 import { scale } from 'react-native-size-matters'
 
 
-type Props = {}
-
-const HomeSkeleton: React.FC<Props> = ({ }) => {
+const HomeSkeleton: React.FC = () => {
     return (
         <VStack variant={"body"} w="100%" pt={"20px"} flex={1} space={2} bg={colors.darkGray} >
             <HStack w={"100%"} h={"250px"}>
@@ -47,8 +44,3 @@ const HomeSkeleton: React.FC<Props> = ({ }) => {
 }
 
 export default HomeSkeleton
-
-
-const styles = StyleSheet.create({
-
-})

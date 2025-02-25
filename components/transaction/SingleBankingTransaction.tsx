@@ -3,7 +3,7 @@ import colors from '@/colors'
 import BottomSheet from '@/components/global/BottomSheet';
 import moment from 'moment';
 import * as Sharing from 'expo-sharing';
-import { StyleSheet, SafeAreaView, Dimensions } from 'react-native'
+import { SafeAreaView, Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Pressable } from 'native-base'
 import { FORMAT_CURRENCY } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -136,36 +136,3 @@ const SingleTransactionBanking: React.FC<Props> = ({ }) => {
 }
 
 export default SingleTransactionBanking
-
-
-const styles = StyleSheet.create({
-	Shadow: {
-		shadowColor: colors.lightGray,
-		shadowOffset: {
-			width: 5,
-			height: 1,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 1,
-		elevation: 1,
-	},
-	contentContainerStyle: {
-		width: 55,
-		height: 55,
-		borderRadius: 100
-	},
-	textStyle: {
-		fontSize: 30,
-		color: 'white',
-		marginBottom: 2,
-		textTransform: 'capitalize',
-		fontWeight: 'bold',
-		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-	}
-})

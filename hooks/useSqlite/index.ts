@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/expo-sqlite";
-import { SQLiteDatabase, useSQLiteContext } from "expo-sqlite/next";
+import {  useSQLiteContext } from "expo-sqlite/next";
 import { searchedUsersSchema } from "@/db/schemas/usersSchema";
 import { z } from "zod";
 import { UserAuthSchema } from "@/auth/userAuth";

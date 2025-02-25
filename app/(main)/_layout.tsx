@@ -1,14 +1,9 @@
 import 'react-native-reanimated';
 import { Stack } from 'expo-router';
 import colors from '@/colors';
-import { BackHeaderIcon, CardsRight, HomeHeaderRight } from '@/components/navigation/HeaderBar';
-import { Image } from 'native-base';
-import { logo } from '@/assets';
-import { AntDesign, Ionicons } from '@expo/vector-icons';
 
 
-
-export default () => {
+const TabLayout: React.FC = (): JSX.Element => {
 	const defaultHeaderStyles = {
 		backgroundColor: colors.darkGray,
 		shadowOpacity: 0,
@@ -29,11 +24,10 @@ export default () => {
 	}
 	return (
 		<Stack screenOptions={{ ...defaultscreenOptions }}>
-			<Stack.Screen name='location' options={{  headerShown: false}} />
-			<Stack.Screen name="deposit" options={{ headerShown: false }} />
-			<Stack.Screen name='flagged' options={{ headerShadowVisible: false, title: "Advertencias" }} />
-			<Stack.Screen name='recurrences' options={{ headerShown: false }} />
-			<Stack.Screen name='transaction' options={{ headerShown: false, presentation: "formSheet" }} />
+			<Stack.Screen name='location' options={{ headerShown: false }} />
+			<Stack.Screen name='flagged' options={{ headerShown: false }} />
 		</Stack>
 	);
 }
+
+export default TabLayout

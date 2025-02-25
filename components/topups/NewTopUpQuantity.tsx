@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import KeyNumberPad from '../global/KeyNumberPad'
 import Button from '../global/Button';
 import colors from '@/colors';
-import { Dimensions, StyleSheet } from 'react-native'
 import { Heading, HStack, VStack, Image, Text, Pressable } from 'native-base'
 import { MaterialIcons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from 'react-redux';
@@ -17,7 +16,6 @@ type Props = {
     back: () => void
 }
 
-const { height } = Dimensions.get('window')
 const NewTopUpQuantity: React.FC<Props> = ({ next, back }: Props) => {
     const dispatch = useDispatch();
     const { newTopUp } = useSelector((state: any) => state.topupReducer)
@@ -89,5 +87,3 @@ const NewTopUpQuantity: React.FC<Props> = ({ next, back }: Props) => {
 }
 
 export default NewTopUpQuantity
-
-const styles = StyleSheet.create({})

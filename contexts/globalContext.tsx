@@ -1,5 +1,4 @@
 import useAsyncStorage from "@/hooks/useAsyncStorage";
-import { useLocalAuthentication } from "@/hooks/useLocalAuthentication";
 import { globalContextInitialState } from "@/mocks";
 import { GlobalContextType } from "@/types";
 import { createContext, useEffect, useState } from "react";
@@ -28,7 +27,6 @@ export const GlobalContextProvider = ({ children }: { children: JSX.Element }) =
 
 
     const { getItem, setItem } = useAsyncStorage();
-    const { authenticate } = useLocalAuthentication();
 
     const resetAllStates = () => {
         setEmail("")

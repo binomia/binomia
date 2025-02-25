@@ -1,18 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import colors from '@/colors'
-import { Dimensions, TouchableOpacity, SafeAreaView } from 'react-native'
-import { Heading, Image, Text, VStack, HStack, Stack, Pressable } from 'native-base'
+import { SafeAreaView } from 'react-native'
+import { Heading, Image, Text, VStack, HStack, Pressable } from 'native-base'
 import { scale } from 'react-native-size-matters';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import KeyNumberPad from '@/components/global/KeyNumberPad';
-import { transactionActions } from '@/redux/slices/transactionSlice';
-import { useMutation } from '@apollo/client';
-import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import Cards from '@/components/cards';
-import { depositIcon, mastercardLogo, visaLogo } from '@/assets';
-import { useNavigation } from '@react-navigation/native';
-import { Entypo } from '@expo/vector-icons';
+import { mastercardLogo, visaLogo } from '@/assets';
 import Button from '@/components/global/Button';
 
 
@@ -23,7 +18,7 @@ type Props = {
     onCloseFinish?: () => void
 }
 
-const DepositInputs: React.FC<Props> = ({ onSendFinish = () => { }, onCloseFinish = () => { } }) => {   
+const DepositInputs: React.FC<Props> = ({ onSendFinish = () => { } }) => {
     const { card } = useSelector((state: any) => state.accountReducer)
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
     const [showPayButton, setShowPayButton] = useState<boolean>(false);

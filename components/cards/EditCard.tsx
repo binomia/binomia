@@ -3,11 +3,10 @@ import Button from '../global/Button';
 import Input from '../global/Input';
 import colors from '@/colors';
 import PagerView from 'react-native-pager-view';
-import cardValidator from "card-validator";
-import { Dimensions, Keyboard, TouchableWithoutFeedback, View } from 'react-native'
-import { HStack, Pressable, Image, VStack, Text, Heading, ScrollView } from 'native-base'
+import { Dimensions, Keyboard, TouchableWithoutFeedback } from 'react-native'
+import { HStack, Pressable, Image, VStack, Text, Heading } from 'native-base'
 import { KeyboardAvoidingScrollView } from '@cassianosch/react-native-keyboard-sticky-footer-avoiding-scroll-view';
-import { CreditCardView, CreditCardFormData, LiteCreditCardInput, CreditCardInput } from 'react-native-credit-card-input';
+import { CreditCardView, CreditCardFormData, CreditCardInput } from 'react-native-credit-card-input';
 import { cardBackHolder, cardHolder, noCard } from '@/assets';
 import { scale } from 'react-native-size-matters';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -16,7 +15,6 @@ import { CreditCardFormField, CreditCardIssuer } from 'react-native-credit-card-
 import { useLazyQuery } from '@apollo/client';
 import { CardApolloQueries } from '@/apollo/query/cardQuery';
 import { useDispatch, useSelector } from 'react-redux';
-import { globalActions } from '@/redux/slices/globalSlice';
 import { CardType } from '@/types';
 import { accountActions } from '@/redux/slices/accountSlice';
 
@@ -29,7 +27,7 @@ type Props = {
 }
 
 const { height } = Dimensions.get('window')
-const EditCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose = () => { }, openToEdit = false }: Props) => {
+const EditCard: React.FC<Props> = ({ onPress = async (_: any) => {}, onClose = () => { }, openToEdit = false }: Props) => {
     const ref = useRef<PagerView>(null);
     const [fetchCards] = useLazyQuery(CardApolloQueries.cards())
     const [fetchCard] = useLazyQuery(CardApolloQueries.card())
@@ -49,13 +47,6 @@ const EditCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose = 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("")
     const [type, setType] = useState<CreditCardIssuer>()
-    const [placeholders, setPlaceholders] = useState<{ [key: string]: string }>({
-        number: "0000 0000 0000 0000",
-        expiry: "MM/YY",
-        cvc: "CVC",
-        name: "Nombre Completo",
-    })
-
 
 
     const cardPlaceholders = {

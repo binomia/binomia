@@ -12,7 +12,6 @@ import { mastercardLogo, americanExpressLogo, jcbLogo, visaLogo } from '@/assets
 import { FORMAT_CURRENCY } from '@/helpers';
 import { MaterialIcons } from '@expo/vector-icons';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { set } from 'date-fns';
 
 
 type Props = {
@@ -22,7 +21,7 @@ type Props = {
     onCloseFinish?: () => void
 }
 
-const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", showBalance = false, onSendFinish = (_: number) => { } }) => {
+const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", onSendFinish = (p: number) => p }) => {
     const { card, account, limits } = useSelector((state: any) => state.accountReducer)
     const [input, setInput] = useState<string>("0");
     const [showAllCards, setShowAllCards] = useState<boolean>(false)

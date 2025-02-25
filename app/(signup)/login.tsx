@@ -22,7 +22,6 @@ import { SessionApolloQueries } from '@/apollo/query';
 import useAsyncStorage from '@/hooks/useAsyncStorage';
 import { UserAuthSchema } from '@/auth/userAuth';
 import { useDispatch } from 'react-redux';
-import { globalActions } from '@/redux/slices/globalSlice';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 

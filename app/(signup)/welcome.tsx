@@ -4,12 +4,10 @@ import Button from '@/components/global/Button'
 import { SafeAreaView, Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack } from 'native-base'
 import { welcome } from '@/assets'
-import { useNavigation } from '@react-navigation/native'
 import { router } from 'expo-router'
 
 const { height } = Dimensions.get('window')
 const WelcomeScreen: React.FC = () => {
-	const navigation = useNavigation<any>()
 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>

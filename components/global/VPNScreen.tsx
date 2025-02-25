@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions } from 'react-native'
+import { Dimensions } from 'react-native'
 import React, { useState } from 'react'
 import { Heading, HStack, Text, Image, VStack } from 'native-base'
 import { vpnIcon } from '@/assets'
@@ -58,5 +58,3 @@ const VPNScreen: React.FC = () => {
 }
 
 export default VPNScreen
-
-const styles = StyleSheet.create({})

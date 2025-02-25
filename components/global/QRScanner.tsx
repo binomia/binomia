@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions, Alert } from 'react-native'
+import { StyleSheet, Dimensions } from 'react-native'
 import React, { useRef, useState } from 'react'
 import { HStack, VStack, ZStack, Text, Heading } from 'native-base'
 import colors from '@/colors'

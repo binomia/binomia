@@ -1,7 +1,7 @@
 import { StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
 import BottomSheet from './BottomSheet'
-import { Camera, Frame, useCameraDevice, useFrameProcessor, useSkiaFrameProcessor } from 'react-native-vision-camera'
+import { Camera, Frame, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera'
 import { Face, FaceDetectionOptions, useFaceDetector } from 'react-native-vision-camera-face-detector'
 import { Heading, HStack, VStack, ZStack } from 'native-base'
 import Fade from 'react-native-fade'
@@ -38,12 +38,12 @@ const CameraComponent: React.FC<Props> = ({ open, onCloseFinish, setVideo, setIm
     const { detectFaces } = useFaceDetector(faceDetectionOptions)
 
 
-    const handleDetectedFaces = Worklets.createRunOnJS((faces: Face[], frame: Frame) => {
+    const handleDetectedFaces = Worklets.createRunOnJS((faces: Face[]) => {
         if (faces.length > 0) {
         }
     })
 
-    const frameProcessor = useFrameProcessor((frame) => {
+    const frameProcessor = useFrameProcessor((frame: Frame) => {
         'worklet'
         const faces = detectFaces(frame)
         
@@ -52,7 +52,7 @@ const CameraComponent: React.FC<Props> = ({ open, onCloseFinish, setVideo, setIm
             console.log("face detected", faces[0].bounds);
         }
 
-        handleDetectedFaces(faces, frame)
+        handleDetectedFaces(faces)
         // faceBox.value = { x: 0, y: 0, width: 0, height: 0 }
 
     }, [])
