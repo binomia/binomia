@@ -1,16 +1,16 @@
-import { TransactionJoiSchema } from "@/auth/transactionJoiSchema";
 import TransactionController from "@/controllers/transactionController";
+import { Cryptography } from "@/helpers/cryptography";
 import { transactionsQueue } from "@/queues";
 import { CreateTransactionRPCParamsType } from "@/types";
 import { JSONRPCServer } from "json-rpc-2.0";
-import { z } from "zod";
 
 
 export const transactionMethods = (server: JSONRPCServer) => {
     server.addMethod("createTransaction", async (data: CreateTransactionRPCParamsType) => {
         try {
             const jobId = `queueTransaction@${data.transactionId}`
-            const job = await transactionsQueue.queue.add(jobId, data, {
+            const encryptedData = await Cryptography.encrypt(JSON.stringify(data))
+            const job = await transactionsQueue.queue.add(jobId, encryptedData, {
                 jobId,
                 removeOnComplete: {
                     age: 20 // 30 minutes
@@ -31,7 +31,9 @@ export const transactionMethods = (server: JSONRPCServer) => {
     server.addMethod("createRequestTransaction", async (data: CreateTransactionRPCParamsType) => {
         try {
             const jobId = `queueRequestTransaction@${data.transactionId}`
-            const job = await transactionsQueue.queue.add(jobId, data, {
+            const encryptedData = await Cryptography.encrypt(JSON.stringify(data))
+
+            const job = await transactionsQueue.queue.add(jobId, encryptedData, {
                 jobId,
                 removeOnComplete: {
                     age: 1000 * 60 * 30 // 30 minutes

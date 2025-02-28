@@ -15,31 +15,29 @@ export default class TransactionsQueue {
 
     private executeJob = async (job: JobJson) => {
         try {
-            const name = job.name.split("@")[0]
-            switch (name) {
-                case "queueTransaction": {
-                    await TransactionController.createQueuedTransaction(JSON.parse(job.data))
+            switch (true) {
+                case job.name.includes("queueTransaction"): {
+                    await TransactionController.createQueuedTransaction(job)
                     break;
                 }
-                case "queueRequestTransaction": {
+                case job.name.includes("queueRequestTransaction"): {
                     await TransactionController.createRequestQueueedTransaction(JSON.parse(job.data))
                     break;
                 }
-                case "pendingTransaction": {
+                case job.name.includes("pendingTransaction"): {
                     const status = await TransactionController.pendingTransaction(job)
                     if (status === "completed")
                         if (job.repeatJobKey)
                             this.removeJob(job.repeatJobKey, "completed")
                     break;
                 }
-                case "trainTransactionFraudDetectionModel": {
+                case job.name.includes("trainTransactionFraudDetectionModel"): {
                     await TransactionController.trainTransactionFraudDetectionModel(job)
                     break;
                 }
                 default: {
                     await TransactionController.prosessQueuedTransaction(job)
                     break;
-
                 }
             }
 
@@ -59,11 +57,13 @@ export default class TransactionsQueue {
             }
         });
 
-        worker.on('completed', (job: Job) => {
-            const name = job.name.split("@")[0]
-            if (name === "queueTransaction" || name === "queueRequestTransaction" || name === "trainTransactionFraudDetectionModel")
-                job.remove()
-
+        worker.on('completed', async (job: Job) => {
+            try {
+                await job.remove()
+                
+            } catch (error) {
+                console.log({ completed: error });
+            }
         })
     }
 

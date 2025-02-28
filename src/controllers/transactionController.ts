@@ -9,7 +9,6 @@ import { notificationServer } from "@/rpc/clients/notificationRPC"
 import { CreateTransactionRPCParamsType, CreateTransactionType, FraudulentTransactionType } from "@/types"
 import { Job, JobJson } from "bullmq"
 import { Op } from "sequelize"
-import { z } from "zod"
 import shortUUID from "short-uuid"
 
 
@@ -218,9 +217,10 @@ export default class TransactionController {
         }
     }
 
-    static createQueuedTransaction = async (data: CreateTransactionRPCParamsType) => {
+    static createQueuedTransaction = async ({ data }: JobJson) => {
         try {
-            const { senderUsername, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location } = data
+            const decryptedData = await Cryptography.decrypt(JSON.parse(data))
+            const { senderUsername, ipAddress, platform, sessionId, deviceId, isRecurring, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location }: CreateTransactionRPCParamsType = JSON.parse(decryptedData)
             const senderAccount = await AccountModel.findOne({
                 where: { username: senderUsername },
                 include: [
@@ -333,11 +333,11 @@ export default class TransactionController {
                 location,
 
                 signature,
-                deviceId: data.deviceId,
-                ipAddress: data.ipAddress,
-                isRecurring: data.isRecurring,
-                platform: data.platform,
-                sessionId: data.sessionId,
+                deviceId: deviceId,
+                ipAddress: ipAddress,
+                isRecurring: isRecurring,
+                platform: platform,
+                sessionId: sessionId,
                 previousBalance: senderAccount.toJSON().balance,
                 fraudScore: 0,
                 speed,
@@ -373,7 +373,7 @@ export default class TransactionController {
                 currency: ["dop"].indexOf(transactionData.toJSON().currency.toLowerCase()),
                 transactionType: ["transfer"].indexOf(transactionData.toJSON().transactionType.toLowerCase()),
                 platform: ["ios", "android", "web"].indexOf(transactionData.toJSON().platform.toLowerCase()),
-                isRecurring: data.isRecurring ? 1 : 0,
+                isRecurring: isRecurring ? 1 : 0,
             })
 
             const detectedFraudulentTransaction = await anomalyRpcClient("detect_fraudulent_transaction", {
