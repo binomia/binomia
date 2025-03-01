@@ -26,6 +26,7 @@ const TabLayout: React.FC = (): JSX.Element => {
 		<Stack screenOptions={{ ...defaultscreenOptions }}>
 			<Stack.Screen name='location' options={{ headerShown: false }} />
 			<Stack.Screen name='flagged' options={{ headerShown: false }} />
+			<Stack.Screen name='error' options={{ headerShown: false }} />
 		</Stack>
 	);
 }

@@ -6,7 +6,7 @@ import BottomSheet from '@/components/global/BottomSheet';
 import PagerView from 'react-native-pager-view';
 import TranferRequestDetails from '@/components/transaction/TranferRequestDetails';
 import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
-import { StyleSheet, SafeAreaView, Keyboard, TouchableWithoutFeedback, TouchableOpacity, Dimensions, Alert } from 'react-native'
+import { SafeAreaView, Keyboard, TouchableWithoutFeedback, TouchableOpacity, Dimensions, Alert } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Avatar } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
@@ -91,13 +91,13 @@ const Request: React.FC = () => {
         }
     }
 
-    const onCloseFinishFromDetails = async () => {
-        await onCloseFinish()
-        await dispatch(transactionActions.setTransactionDetails({}))
-        await fetchSugestedUsers()
+    // const onCloseFinishFromDetails = async () => {
+    //     await onCloseFinish()
+    //     await dispatch(transactionActions.setTransactionDetails({}))
+    //     await fetchSugestedUsers()
 
-        ref.current?.setPage(0)
-    }
+    //     ref.current?.setPage(0)
+    // }
 
     const nextPage = () => {
         ref.current?.setPage(currentPage + 1)
@@ -180,7 +180,7 @@ const Request: React.FC = () => {
                                             <Heading size={"sm"} color={colors.white}>
                                                 {EXTRACT_FIRST_LAST_INITIALS(item.fullName || "0")}
                                             </Heading>
-                                        </Avatar>                                       
+                                        </Avatar>
                                     }
                                     <VStack ml={"10px"} justifyContent={"center"}>
                                         <Heading textTransform={"capitalize"} fontSize={scale(15)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(item.fullName)}</Heading>
@@ -195,7 +195,7 @@ const Request: React.FC = () => {
                             <HStack h={"95%"}>
                                 <CreateTransaction nextPage={nextPage} title='Solicitar' showBalance={false} setInput={setInput} input={input} />
                             </HStack>
-                            <TranferRequestDetails goBack={prevPage} onCloseFinish={onCloseFinishFromDetails} goNext={nextPage} />
+                            <TranferRequestDetails goBack={prevPage} onCloseFinish={onCloseFinish} goNext={nextPage} />
                             <SingleSentTransaction key={"single-request-transaction-2"} iconImage={pendingClock} />
                         </PagerView>
                     </BottomSheet>
@@ -206,26 +206,3 @@ const Request: React.FC = () => {
 }
 
 export default Request
-
-
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: 55,
-        height: 55,
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 30,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    }
-})

@@ -16,6 +16,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { UserApolloQueries } from '@/apollo/query';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { useLocation } from '@/hooks/useLocation';
+import { AccountAuthSchema } from '@/auth/accountAuth';
+import { accountActions } from '@/redux/slices/accountSlice';
+import { fetchAccountLimit, fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
+import { router } from 'expo-router';
 
 type Props = {
     goBack?: () => void
@@ -35,8 +39,29 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 
 
     const [createRequestTransaction] = useMutation(TransactionApolloQueries.createRequestTransaction())
-    const [singleTransaction] = useLazyQuery(TransactionApolloQueries.transaction())
     const [fetchSingleUser] = useLazyQuery(UserApolloQueries.singleUser())
+    const [singleTransaction, { startPolling, stopPolling }] = useLazyQuery(TransactionApolloQueries.transaction(), {
+        fetchPolicy: "network-only",
+        notifyOnNetworkStatusChange: true,
+        onCompleted: async (data) => {
+            console.log("onCompleted called");
+            const transactionSent = data?.transaction
+            if (transactionSent) {
+                stopPolling()
+                await dispatch(transactionActions.setTransaction(Object.assign({}, transactionSent, {
+                    ...formatTransaction(Object.assign({}, singleTransaction, {
+                        to: receiver,
+                        from: user
+                    })),
+                    ...singleTransaction,
+                    to: receiver,
+                    from: user
+                })))
+
+                await onSuspicious(transactionSent)
+            }
+        }
+    })
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
     const [recurrenceSelected, setRecurrenceSelected] = useState<string>("");
@@ -47,6 +72,22 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 
 
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
+
+    const onSuspicious = async (transactionSent: any) => {
+        const accountsData = await AccountAuthSchema.account.parseAsync(transactionSent.from)
+        if (transactionSent.status !== "suspicious")
+            await Promise.all([
+                dispatch(accountActions.setAccount(accountsData ?? {})),
+                dispatch(accountActions.setHaveAccountChanged(false)),
+                dispatch(transactionActions.setHasNewTransaction(true)),
+                dispatch(fetchRecentTransactions()),
+                dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
+                dispatch(fetchAccountLimit()),
+            ])
+
+        goNext()
+        setLoading(false)
+    }
 
     const validateIfCanSend = async () => {
         try {
@@ -98,16 +139,11 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                 variables: { data, recurrence }
             })
 
-            let i = 0
-            const interval = setInterval(async () => {
-                const singleTransaction = await fetchSingleTransaction(transaction.createRequestTransaction.transactionId)
-
-                i++;
-                if (i === 5 || singleTransaction) {
-                    clearInterval(interval)
-
-                    await Promise.all([
-                        dispatch(transactionActions.setTransaction(Object.assign({}, transaction.createRequestTransaction, {
+            const transactionId = transaction?.createRequestTransaction?.transactionId
+            if (!transactionId) {
+                await singleTransaction({ variables: { transactionId } }).then(async (res) => {
+                    if (!!res.data.transaction) {
+                        await dispatch(transactionActions.setTransaction(Object.assign({}, transaction.createRequestTransaction, {
                             ...formatTransaction(Object.assign({}, singleTransaction, {
                                 to: receiver,
                                 from: user
@@ -116,15 +152,20 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                             to: receiver,
                             from: user
                         })))
-                    ])
 
-                    goNext()
+                        await onSuspicious(res.data.transaction)
+                    } else
+                        startPolling(1000)
 
-                    await delay(1500)
-                    setLoading(false)
-                }
-            }, 1500)
-
+                }).catch((error: any) => {
+                    console.error(error);
+                })
+            } else {
+                onCloseFinish()
+                await delay(1000).then(() => {
+                    router.navigate("/error?title=Transaction&message=Se ha producido un error al intentar crear la transacción. Por favor, inténtalo de nuevo.")                    
+                })
+            }
 
         } catch (error: any) {
             setLoading(false)
@@ -146,23 +187,6 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
             amount: transaction.amount,
             fullName: fullName || "",
             username: username || ""
-        }
-    }
-
-    const fetchSingleTransaction = async (transactionId: string) => {
-        try {
-            const { data } = await singleTransaction({
-                variables: {
-                    transactionId
-                }
-            })
-            return data.transaction
-
-        } catch (error) {
-            console.error(error);
-
-            setLoading(false)
-            goNext()
         }
     }
 

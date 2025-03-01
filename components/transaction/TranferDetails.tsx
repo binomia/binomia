@@ -29,7 +29,7 @@ const { width } = Dimensions.get("screen")
 const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () => { }, goBack = () => { } }) => {
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
-    const {  user } = useSelector((state: any) => state.accountReducer)
+    const { user } = useSelector((state: any) => state.accountReducer)
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
@@ -39,6 +39,7 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
         fetchPolicy: "network-only",
         notifyOnNetworkStatusChange: true,
         onCompleted: async (data) => {
+            console.log("onCompleted");
             const transactionSent = data?.transaction
             if (transactionSent) {
                 stopPolling()
@@ -52,7 +53,7 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                 }))
 
                 goNext()
-                await onNext(transactionSent)
+                await onSuspicious(transactionSent)
             }
         }
     })
@@ -87,6 +88,8 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
             const transactionId = transaction?.createTransaction?.transactionId
             if (transactionId) {
                 await fetchTransaction({ variables: { transactionId } }).then(async (res) => {
+                    console.log("res", res);
+
                     if (!!res.data.transaction) {
                         await dispatch(transactionActions.setTransaction({
                             ...res.data.transaction,
@@ -97,15 +100,17 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                             isFromMe: true,
                         }))
 
-                        goNext()
-                        await onNext(res.data.transaction)
+                        await onSuspicious(res.data.transaction)
                     }
                     else
                         startPolling(1000);
 
+
                 }).catch((error) => {
                     console.error("Fetch transaction error:", error);
                 });
+            } else {
+                console.log("Transaction not created");
             }
 
         } catch (error: any) {
@@ -115,7 +120,7 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
     }
 
 
-    const onNext = async (transactionSent: any) => {
+    const onSuspicious = async (transactionSent: any) => {
         const accountsData = await AccountAuthSchema.account.parseAsync(transactionSent.from)
         if (transactionSent.status !== "suspicious")
             await Promise.all([

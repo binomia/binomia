@@ -1,12 +1,9 @@
 import 'react-native-reanimated';
 import { useFonts } from 'expo-font';
-import { Stack, useNavigation } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useCallback, useEffect } from 'react';
 import { NativeBaseProvider } from 'native-base';
 import { theme } from '@/themes';
-import { DATABASE_NAME } from '@/constants';
-// import { SQLiteProvider } from "expo-sqlite/next";
 import { Provider } from 'react-redux';
 import { store } from '@/redux';
 import { ApolloProvider } from '@apollo/client';
@@ -18,20 +15,21 @@ import { useCameraPermission, useMicrophonePermission } from 'react-native-visio
 import { SocketContextProvider } from '@/contexts/socketContext';
 import { TopUpContextProvider } from '@/contexts/topUpContext';
 import { RouterContextProvider } from '@/contexts/RouterContext';
-// import * as Network from "expo-network";
-// import NetInfo from '@react-native-community/netinfo';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const  SpaceMono = require('../fonts/SpaceMono-Regular.ttf');
 
 
 LogBox.ignoreAllLogs(true);
 LogBox.ignoreLogs(['In React 18']);
 SplashScreen.preventAutoHideAsync();
 
-export default () => {
+const Layout = () => {
 	const cameraPermission = useCameraPermission()
 	const microphonePermission = useMicrophonePermission()
 
 	const [loaded] = useFonts({
-		SpaceMono: require('../fonts/SpaceMono-Regular.ttf'),
+		SpaceMono
 	});
 
 
@@ -86,3 +84,6 @@ export default () => {
 		</NativeBaseProvider>
 	);
 }
+
+
+export default Layout

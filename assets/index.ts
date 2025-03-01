@@ -32,6 +32,7 @@ import visaLogo from './visa.png';
 import americanExpressLogo from './american-express.png';
 import jcbLogo from './jcb.png';
 import vpnIcon from './vpn.png';
+import errorIcon from './icons/error.png';
 
 // icons
 import plusIconGreen from './icons/plus.png';
@@ -75,6 +76,7 @@ import location from './icons/location.png';
 
 
 export {
+    errorIcon,
     location,
     flagged,
     suspicious,
