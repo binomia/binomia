@@ -74,7 +74,7 @@ export class TransactionsController {
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
             const { deviceid, ipaddress, platform } = context.req.headers
 
-            await queueServer("createTransaction", {
+            const transaction = await queueServer("createTransaction", {
                 transactionId,
                 senderUsername: user.username,
                 receiverUsername: validatedData.receiver,
@@ -96,13 +96,7 @@ export class TransactionsController {
                 platform,
             })
 
-            return {
-                transactionId,
-                status: "queued",
-                jobId: `queueRequestTransaction@${transactionId}`,
-                jobName: "queueRequestTransaction",
-                jobTime: "queueRequestTransaction"
-            }
+            return transaction
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -112,6 +106,8 @@ export class TransactionsController {
     static createRequestTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
         try {
             const { user, userId, sid: sessionId } = await checkForProtectedRequests(context.req);
+            const { deviceid, ipaddress, platform } = context.req.headers
+
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
@@ -119,10 +115,7 @@ export class TransactionsController {
             const signature = await Cryptography.sign(message, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
 
-            const { deviceid, ipaddress, platform } = context.req.headers
-
-
-            await queueServer("createRequestTransaction", {
+            const transaction = await queueServer("createRequestTransaction", {
                 transactionId,
                 senderUsername: user.username,
                 receiverUsername: validatedData.receiver,
@@ -144,13 +137,7 @@ export class TransactionsController {
                 platform,
             })
 
-            return {
-                transactionId,
-                status: "queued",
-                jobId: `queueRequestTransaction@${transactionId}`,
-                jobName: "queueRequestTransaction",
-                jobTime: "queueRequestTransaction"
-            }
+            return transaction
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -257,67 +244,12 @@ export class TransactionsController {
     static accountTransactions = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(context.req);
-
             const fields = getQueryResponseFields(fieldNodes, 'transactions')
             const { user } = session
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
             const limit = _pageSize;
             const offset = (page - 1) * _pageSize;
-
-            // const transactions = await TransactionsModel.findAll({
-            //     limit,
-            //     offset,
-            //     order: [['createdAt', 'DESC']],
-            //     attributes: [...fields['transactions'], "fromAccount", "toAccount"],
-            //     where: {
-            //         [Op.and]: [
-            //             {
-            //                 [Op.or]: [
-            //                     {
-            //                         fromAccount: user.account.id
-            //                     },
-            //                     {
-            //                         toAccount: user.account.id,
-            //                     }
-            //                 ]
-            //             },
-            //             {
-            //                 [Op.and]: [
-            //                     {
-            //                         fromAccount: user.account.id
-            //                     },
-            //                     {
-            //                         status: { [Op.ne]: "suspicious" }
-            //                     }
-            //                 ]
-            //             }
-            //         ]
-
-            //     },
-            //     include: [
-            //         {
-            //             model: AccountModel,
-            //             as: 'from',
-            //             attributes: fields['from'],
-            //             include: [{
-            //                 model: UsersModel,
-            //                 as: 'user',
-            //                 attributes: fields['user']
-            //             }]
-            //         },
-            //         {
-            //             model: AccountModel,
-            //             as: 'to',
-            //             attributes: fields['to'],
-            //             include: [{
-            //                 model: UsersModel,
-            //                 as: 'user',
-            //                 attributes: fields['user']
-            //             }]
-            //         }
-            //     ]
-            // })
 
             const transactions = await TransactionsModel.findAll({
                 limit,
@@ -328,7 +260,7 @@ export class TransactionsController {
                     [Op.or]: [
                         {
                             fromAccount: user.account.id,
-                            
+
                         },
                         {
                             toAccount: user.account.id,
