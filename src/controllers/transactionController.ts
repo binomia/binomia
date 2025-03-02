@@ -217,10 +217,8 @@ export default class TransactionController {
         }
     }
 
-    static createQueuedTransaction = async ({ data }: JobJson) => {
+    static createQueuedTransaction = async ({ senderUsername, ipAddress, platform, sessionId, deviceId, isRecurring, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location }: CreateTransactionRPCParamsType) => {
         try {
-            const decryptedData = await Cryptography.decrypt(JSON.parse(data))
-            const { senderUsername, ipAddress, platform, sessionId, deviceId, isRecurring, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location }: CreateTransactionRPCParamsType = JSON.parse(decryptedData)
             const senderAccount = await AccountModel.findOne({
                 where: { username: senderUsername },
                 include: [
@@ -519,9 +517,8 @@ export default class TransactionController {
         }
     }
 
-    static createRequestQueueedTransaction = async (data: CreateTransactionRPCParamsType) => {
+    static createRequestQueueedTransaction = async ({ deviceId, ipAddress, isRecurring, platform, sessionId, senderUsername, signature, transactionId, receiverUsername, amount, transactionType, currency, location }: CreateTransactionRPCParamsType) => {
         try {
-            const { senderUsername, signature, transactionId, receiverUsername, amount, transactionType, currency, location } = data
             const senderAccount = await AccountModel.findOne({
                 where: { username: senderUsername },
                 include: [
@@ -565,10 +562,10 @@ export default class TransactionController {
             if (!verify)
                 throw "Transaction signature verification failed"
 
-            const lastTransaction = await TransactionsModel.findOne({
-                order: [['createdAt', 'DESC']],
-                attributes: ['id']
-            });
+            // const lastTransaction = await TransactionsModel.findOne({
+            //     order: [['createdAt', 'DESC']],
+            //     attributes: ['id']
+            // });
 
             const features = `[[0.0, 0.0, ${Number(amount).toFixed(1)}, ${Number(0).toFixed(1)}, 0.0, 1.0, 0.0]]`
             const transaction = await TransactionsModel.create({
@@ -585,11 +582,11 @@ export default class TransactionController {
                 status: "requested",
                 signature,
 
-                deviceId: data.deviceId,
-                ipAddress: data.ipAddress,
-                isRecurring: data.isRecurring,
-                platform: data.platform,
-                sessionId: data.sessionId,
+                deviceId,
+                ipAddress,
+                isRecurring,
+                platform,
+                sessionId,
                 previousBalance: senderAccount.toJSON().balance,
                 fraudScore: 0,
                 speed: 0,
@@ -652,7 +649,7 @@ export default class TransactionController {
                 })
             ])
 
-            return transactionData.toJSON().transactionId
+            return transactionData.toJSON()
 
         } catch (error: any) {
             throw error.message
@@ -693,7 +690,7 @@ export default class TransactionController {
             if (!transaction)
                 throw "transaction not found"
 
-            if (transaction.toJSON().status === "cancelled") {
+            if (transaction.toJSON().status !== "requested") {
                 await notificationServer("socketEventEmitter", {
                     data: transaction.toJSON(),
                     channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_REQUEST_CANCELED,
@@ -721,7 +718,6 @@ export default class TransactionController {
 
     static payRequestTransaction = async ({ transactionId, toAccount, paymentApproved }: { transactionId: string, toAccount: number, paymentApproved: boolean }) => {
         try {
-
             const transaction = await TransactionsModel.findOne({
                 where: {
                     [Op.and]: [
@@ -800,7 +796,27 @@ export default class TransactionController {
                     recipientSocketRoom: receiverAccount.toJSON().user.username
                 })
 
-                const transactionData = await transaction.reload()
+                const transactionData = await transaction.reload({
+                    include: [
+                        {
+                            model: AccountModel,
+                            as: 'from',
+                            include: [{
+                                model: UsersModel,
+                                as: 'user',
+                            }]
+                        },
+                        {
+                            model: AccountModel,
+                            as: 'to',
+                            include: [{
+                                model: UsersModel,
+                                as: 'user',
+                            }]
+                        }
+                    ]
+                })
+
                 return transactionData.toJSON()
 
             } else {
@@ -826,7 +842,26 @@ export default class TransactionController {
                     status: "pending",
                 })
 
-                const transactionData = await transaction.reload()
+                const transactionData = await transaction.reload({
+                    include: [
+                        {
+                            model: AccountModel,
+                            as: 'from',
+                            include: [{
+                                model: UsersModel,
+                                as: 'user',
+                            }]
+                        },
+                        {
+                            model: AccountModel,
+                            as: 'to',
+                            include: [{
+                                model: UsersModel,
+                                as: 'user',
+                            }]
+                        }
+                    ]
+                })
                 await Promise.all([
                     notificationServer("socketEventEmitter", {
                         data: transaction.toJSON(),

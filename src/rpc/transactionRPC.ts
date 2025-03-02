@@ -1,6 +1,4 @@
 import TransactionController from "@/controllers/transactionController";
-import { Cryptography } from "@/helpers/cryptography";
-import { transactionsQueue } from "@/queues";
 import { CreateTransactionRPCParamsType } from "@/types";
 import { JSONRPCServer } from "json-rpc-2.0";
 
@@ -8,19 +6,8 @@ import { JSONRPCServer } from "json-rpc-2.0";
 export const transactionMethods = (server: JSONRPCServer) => {
     server.addMethod("createTransaction", async (data: CreateTransactionRPCParamsType) => {
         try {
-            const jobId = `queueTransaction@${data.transactionId}`
-            const encryptedData = await Cryptography.encrypt(JSON.stringify(data))
-            const job = await transactionsQueue.queue.add(jobId, encryptedData, {
-                jobId,
-                removeOnComplete: {
-                    age: 20 // 30 minutes
-                },
-                removeOnFail: {
-                    age: 60 * 30 // 24 hours
-                }
-            })
-
-            return job.asJSON()
+            const transaction = await TransactionController.createQueuedTransaction(data)
+            return transaction
 
         } catch (error) {
             console.log({ createTransaction: error });
@@ -30,23 +17,11 @@ export const transactionMethods = (server: JSONRPCServer) => {
 
     server.addMethod("createRequestTransaction", async (data: CreateTransactionRPCParamsType) => {
         try {
-            const jobId = `queueRequestTransaction@${data.transactionId}`
-            const encryptedData = await Cryptography.encrypt(JSON.stringify(data))
-
-            const job = await transactionsQueue.queue.add(jobId, encryptedData, {
-                jobId,
-                removeOnComplete: {
-                    age: 1000 * 60 * 30 // 30 minutes
-                },
-                removeOnFail: {
-                    age: 1000 * 60 * 60 * 24 // 24 hours
-                }
-            })
-
-            return job.asJSON()
+            const transaction = await TransactionController.createRequestQueueedTransaction(data)
+            return transaction
 
         } catch (error) {
-            console.log({ createTransaction: error });
+            console.log({ createRequestTransaction: error });
             throw error
         }
     });

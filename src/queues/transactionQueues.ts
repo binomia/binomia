@@ -15,15 +15,7 @@ export default class TransactionsQueue {
 
     private executeJob = async (job: JobJson) => {
         try {
-            switch (true) {
-                case job.name.includes("queueTransaction"): {
-                    await TransactionController.createQueuedTransaction(job)
-                    break;
-                }
-                case job.name.includes("queueRequestTransaction"): {
-                    await TransactionController.createRequestQueueedTransaction(JSON.parse(job.data))
-                    break;
-                }
+            switch (true) {              
                 case job.name.includes("pendingTransaction"): {
                     const status = await TransactionController.pendingTransaction(job)
                     if (status === "completed")
