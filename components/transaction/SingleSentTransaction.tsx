@@ -134,6 +134,11 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 			ref.current?.setPage(1)
 	}
 
+	const formatDate = (_date: any) => {
+		const  date  = Number(_date)
+		return isNaN(date) ? moment(_date).format("lll") : moment(date).format("lll")
+	}
+
 	const StatuIcon: React.FC<{ status: string }> = ({ status }: { status: string }) => {
 		if (status === "completed") {
 			return (
@@ -199,7 +204,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				<VStack>
 					<VStack mt={"10px"} alignItems={"center"}>
 						<Heading textTransform={"capitalize"} fontSize={scale(34)} color={colors.white}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
-						<Text color={colors.lightSkyGray}>{moment(transaction?.createdAt).format("lll")}</Text>
+						<Text color={colors.lightSkyGray}>{formatDate(transaction?.createdAt)}</Text>
 						{transaction.isFromMe ? <VStack my={"15px"} textAlign={"center"} space={1} alignItems={"center"}>
 							<StatuIcon status={transaction?.status || ""} />
 							<VStack w={"80%"}>
