@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { recurenceMonthlyData, recurenceWeeklyData } from '@/mocks';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
-import { useLazyQuery, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -18,6 +18,7 @@ import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAccountLimit, fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { useLocation } from '@/hooks/useLocation'
 import { AccountAuthSchema } from '@/auth/accountAuth';
+import { router } from 'expo-router';
 
 type Props = {
     goBack?: () => void
@@ -35,28 +36,6 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
     const { authenticate } = useLocalAuthentication();
     const { fetchGeoLocation, getLocation } = useLocation();
     const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
-    const [fetchTransaction, { startPolling, stopPolling }] = useLazyQuery(TransactionApolloQueries.transaction(), {
-        fetchPolicy: "network-only",
-        notifyOnNetworkStatusChange: true,
-        onCompleted: async (data) => {
-            console.log("onCompleted");
-            const transactionSent = data?.transaction
-            if (transactionSent) {
-                stopPolling()
-                await dispatch(transactionActions.setTransaction({
-                    ...transactionSent,
-                    amountColor: colors.red,
-                    fullName: formatTransaction(transactionSent).fullName,
-                    profileImageUrl: formatTransaction(transactionSent).profileImageUrl,
-                    username: formatTransaction(transactionSent).username,
-                    isFromMe: true,
-                }))
-
-                goNext()
-                await onSuspicious(transactionSent)
-            }
-        }
-    })
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
     const [recurrence, setRecurrence] = useState<string>("oneTime");
@@ -81,59 +60,44 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                 location: geoLocation ?? {},
             })
 
-            const { data: transaction } = await createTransaction({
+            const { data: createedTransaction } = await createTransaction({
                 variables: { data, recurrence }
             })
+            const transaction = createedTransaction?.createTransaction
+            if (transaction) {
+                const accountsData = await AccountAuthSchema.account.parseAsync(transaction?.from)
 
-            const transactionId = transaction?.createTransaction?.transactionId
-            if (transactionId) {
-                await fetchTransaction({ variables: { transactionId } }).then(async (res) => {
-                    console.log("res", res);
+                await Promise.all([
+                    dispatch(accountActions.setAccount(accountsData ?? {})),
+                    dispatch(accountActions.setHaveAccountChanged(false)),
+                    dispatch(transactionActions.setHasNewTransaction(true)),
+                    dispatch(fetchRecentTransactions()),
+                    dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
+                    dispatch(fetchAccountLimit()),
+                    dispatch(transactionActions.setTransaction({
+                        ...transaction,
+                        amountColor: colors.red,
+                        fullName: formatTransaction(transaction).fullName,
+                        profileImageUrl: formatTransaction(transaction).profileImageUrl,
+                        username: formatTransaction(transaction).username,
+                        isFromMe: true,
+                    }))
+                ])
 
-                    if (!!res.data.transaction) {
-                        await dispatch(transactionActions.setTransaction({
-                            ...res.data.transaction,
-                            amountColor: colors.red,
-                            fullName: formatTransaction(res.data.transaction).fullName,
-                            profileImageUrl: formatTransaction(res.data.transaction).profileImageUrl,
-                            username: formatTransaction(res.data.transaction).username,
-                            isFromMe: true,
-                        }))
-
-                        await onSuspicious(res.data.transaction)
-                    }
-                    else
-                        startPolling(1000);
-
-
-                }).catch((error) => {
-                    console.error("Fetch transaction error:", error);
-                });
-            } else {
-                console.log("Transaction not created");
+                goNext()
             }
+
+            setLoading(false)
 
         } catch (error: any) {
             setLoading(false)
             console.error(error.message);
+
+            onClose()
+            await delay(1000).then(() => {
+                router.navigate("/error?title=Transaction&message=Se ha producido un error al intentar crear la transacción. Por favor, inténtalo de nuevo.")
+            })
         }
-    }
-
-
-    const onSuspicious = async (transactionSent: any) => {
-        const accountsData = await AccountAuthSchema.account.parseAsync(transactionSent.from)
-        if (transactionSent.status !== "suspicious")
-            await Promise.all([
-                dispatch(accountActions.setAccount(accountsData ?? {})),
-                dispatch(accountActions.setHaveAccountChanged(false)),
-                dispatch(transactionActions.setHasNewTransaction(true)),
-                dispatch(fetchRecentTransactions()),
-                dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
-                dispatch(fetchAccountLimit()),
-            ])
-
-        goNext()
-        setLoading(false)
     }
 
 

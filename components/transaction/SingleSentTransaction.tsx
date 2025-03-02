@@ -4,7 +4,7 @@ import Button from '@/components/global/Button';
 import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import * as Sharing from 'expo-sharing';
-import {  Dimensions } from 'react-native'
+import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, ZStack, Avatar } from 'native-base'
 import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -108,6 +108,9 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 						}
 					})
 
+					console.log(JSON.stringify({ payRequestTransaction: data }, null, 2));
+
+
 					await Promise.all([
 						dispatch(fetchRecentTransactions()),
 						dispatch(fetchAllTransactions({ page: 1, pageSize: 5 })),
@@ -196,7 +199,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				<VStack>
 					<VStack mt={"10px"} alignItems={"center"}>
 						<Heading textTransform={"capitalize"} fontSize={scale(34)} color={colors.white}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
-						<Text color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
+						<Text color={colors.lightSkyGray}>{moment(transaction?.createdAt).format("lll")}</Text>
 						{transaction.isFromMe ? <VStack my={"15px"} textAlign={"center"} space={1} alignItems={"center"}>
 							<StatuIcon status={transaction?.status || ""} />
 							<VStack w={"80%"}>
