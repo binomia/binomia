@@ -32,19 +32,26 @@ export class AccountController {
         }
     }
 
-    static account = async (_: unknown, { hash }: { hash: string }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
+    static account = async (_: unknown, ___: unknown, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(req);
 
+            const accountLimit = await redis.get(`account@${session.user.account.hash}`)
+            if (accountLimit)
+                return JSON.parse(accountLimit)
+
             const fields = getQueryResponseFields(fieldNodes, 'account')
-            const user = await AccountModel.findOne({
+            const account = await AccountModel.findOne({
                 where: {
                     hash: session.user.account.hash
                 },
                 attributes: fields['account']
             })
 
-            return user
+            await redis.set(`account@${session.user.account.hash}`, JSON.stringify(account), 'EX', 10)
+
+
+            return account
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -124,7 +131,8 @@ export class AccountController {
                         createdAt: {
                             [Op.gte]: lastMonday
                         },
-                        fromAccount: session.user.account.id
+                        fromAccount: session.user.account.id,
+                        status: { [Op.or]: ['completed', 'pending'] }
                     }
                 }
             });
