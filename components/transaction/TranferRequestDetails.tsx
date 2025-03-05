@@ -155,8 +155,8 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 
     const handleOnPress = async () => {
         try {
+            setLoading(true)
             await validateIfCanSend()
-
             const authenticated = await authenticate()
 
             if (authenticated.success)

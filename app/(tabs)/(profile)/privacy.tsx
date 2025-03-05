@@ -1,7 +1,6 @@
 import React from 'react'
 import colors from '@/colors'
-import { StyleSheet, } from 'react-native'
-import { Image, VStack, Text, HStack, Divider, Switch, FlatList, Heading } from 'native-base'
+import { Image, VStack, HStack, Switch, FlatList, Heading } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import { scale } from 'react-native-size-matters'
 import { globalActions } from '@/redux/slices/globalSlice'
@@ -46,11 +45,11 @@ const PrivacyScreen: React.FC = () => {
                     keyExtractor={(_, index) => index.toString()}
                     renderItem={({ item: permit, index }) => (
                         <HStack justifyContent={"space-between"} key={`privacies-${index}-${permit.id}${permit.name}`} w={"100%"} borderRadius={10} h={scale(45)} py={"10px"} space={2} >
-                            <HStack h={scale(35)}  justifyContent={"center"} alignItems={"center"}>
+                            <HStack h={scale(35)} justifyContent={"center"} alignItems={"center"}>
                                 <Image alt='logo-image' borderRadius={2000} resizeMode='contain' w={scale(35)} h={scale(35)} source={permit.icon} />
                                 <Heading ml={"10px"} borderRadius={"100px"} fontSize={scale(15)} textTransform={"capitalize"} color={colors.white}>{permit.name}</Heading>
                             </HStack>
-                            <Switch isChecked={permit.allow} onChange={(e) => onSwitchChange(permit.id, !permit.allow)} mr={"10px"} />
+                            <Switch disabled={account.status !== "active"} isChecked={permit.allow && account.status === "active"} onChange={() => onSwitchChange(permit.id, !permit.allow)} mr={"10px"} />
                         </HStack>
                     )} />
             </VStack>
@@ -59,26 +58,3 @@ const PrivacyScreen: React.FC = () => {
 }
 
 export default PrivacyScreen
-
-
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: 55,
-        height: 55,
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 30,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    }
-})

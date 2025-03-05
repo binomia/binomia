@@ -12,10 +12,10 @@ import { EXTRACT_FIRST_LAST_INITIALS, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_F
 import { scale } from 'react-native-size-matters'
 import { SessionContext } from '@/contexts/sessionContext'
 import { useCloudinary } from '@/hooks/useCloudinary'
-import { useMutation } from '@apollo/client'
-import { UserApolloQueries } from '@/apollo/query'
+import { useLazyQuery, useMutation } from '@apollo/client'
+import { AccountApolloQueries, UserApolloQueries } from '@/apollo/query'
 import { profileScreenData } from '@/mocks'
-import { router } from 'expo-router'
+import { router, useNavigation } from 'expo-router'
 import { accountActions } from '@/redux/slices/accountSlice'
 
 
@@ -24,6 +24,9 @@ const ProfileScreen: React.FC = () => {
 
 	const dispatch = useDispatch()
 	const { user } = useSelector((state: any) => state.accountReducer)
+	const [fetchAccount] = useLazyQuery(AccountApolloQueries.account())
+
+	const isFocused = useNavigation().isFocused()
 
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const { uploadImage } = useCloudinary()
@@ -71,6 +74,17 @@ const ProfileScreen: React.FC = () => {
 	useEffect(() => {
 		setProfileImage(user?.profileImageUrl || null)
 	}, [])
+
+	useEffect(() => {
+		if (isFocused) {
+			(async () => {
+				const { data } = await fetchAccount()
+				await dispatch(accountActions.setAccount(data.account))
+				console.log(JSON.stringify(data, null, 2));
+			})()
+		}
+
+	}, [isFocused])
 
 
 	return (

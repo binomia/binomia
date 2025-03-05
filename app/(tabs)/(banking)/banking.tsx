@@ -14,7 +14,7 @@ import { cashIn, cashout, noTransactions } from '@/assets'
 import { FORMAT_CURRENCY } from '@/helpers'
 import { Alert, Dimensions, RefreshControl } from 'react-native'
 import { transactionActions } from '@/redux/slices/transactionSlice'
-import { router } from 'expo-router'
+import { router, useNavigation } from 'expo-router'
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery'
 import { useLazyQuery, useMutation } from '@apollo/client'
 import { TransactionAuthSchema } from '@/auth/transactionAuth'
@@ -35,8 +35,11 @@ const BankingScreen: React.FC = () => {
     const [showCardModification, setShowCardModification] = useState<boolean>(false)
     const [transactions, setTransactions] = useState<any[]>(bankingTransactions)
 
+    const isFocused = useNavigation().isFocused()
+
     const [createBankingTransaction] = useMutation(TransactionApolloQueries.createBankingTransaction())
     const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
+    const [fetchAccount] = useLazyQuery(AccountApolloQueries.account())
 
     const [refreshing, setRefreshing] = useState(false);
     const [showDeposit, setShowDeposit] = useState(false);
@@ -85,6 +88,8 @@ const BankingScreen: React.FC = () => {
     }
 
     const handleMakeTransaction = async (title: string) => {
+        console.log(JSON.stringify({ account }, null, 2));
+
         const { data } = await accountStatus()
         if (data.account.status === "flagged") {
             router.navigate(`/flagged`)
@@ -179,6 +184,16 @@ const BankingScreen: React.FC = () => {
 
 
     useEffect(() => {
+        if (isFocused) {
+            (async () => {
+                const { data } = await fetchAccount()
+                await dispatch(accountActions.setAccount(data.account))
+            })()
+        }
+
+    }, [isFocused])
+
+    useEffect(() => {
         setEnableDeposit(limits.depositAmount >= account.depositLimit)
         setEnableWithdraw(limits.withdrawAmount >= account.withdrawLimit)
 
@@ -188,11 +203,11 @@ const BankingScreen: React.FC = () => {
         <VStack variant={"body"} h={"100%"}>
             <ScrollView showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}  >
                 <HStack borderRadius={10} w={"100%"} mt={"50px"} space={2} justifyContent={"space-between"}>
-                    <Pressable opacity={!enableDeposit ? 1 : 0.5} onPress={() => handleMakeTransaction("Deposito")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
+                    <Pressable disabled={!account.allowDeposit || account.status !== "active"} opacity={account.allowDeposit && account.status === "active" ? 1 : 0.5} onPress={() => handleMakeTransaction("Deposito")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
                         <Image alt='logo-image' resizeMode='contain' w={"50px"} h={"50px"} source={cashIn} />
                         <Heading size={"md"} mt={"10px"} color={colors.white}>Depositar</Heading>
                     </Pressable>
-                    <Pressable opacity={!enableWithdraw ? 1 : 0.5} onPress={() => handleMakeTransaction("Retiro")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
+                    <Pressable disabled={!account.allowWithdraw || account.status !== "active"} opacity={account.allowWithdraw && account.status === "active" ? 1 : 0.5} onPress={() => handleMakeTransaction("Retiro")} _pressed={{ opacity: 0.5 }} w={"49%"} h={scale(130)} bg={colors.lightGray} borderRadius={10} alignItems={"center"} justifyContent={"center"}>
                         <Image alt='logo-image' resizeMode='contain' w={scale(45)} h={scale(45)} source={cashout} />
                         <Heading size={"md"} mt={"10px"} color={!enableWithdraw ? colors.white : colors.gray}>Retirar</Heading>
                     </Pressable>

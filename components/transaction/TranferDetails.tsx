@@ -51,13 +51,11 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
-            setLoading(true)
-
             const geoLocation = await fetchGeoLocation({ latitude: location.latitude, longitude: location.longitude }).then((res) => res).catch(() => { return {} })
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
-                location: geoLocation ?? {},
+                location: geoLocation ?? {}
             })
 
             const { data: createedTransaction } = await createTransaction({
@@ -130,6 +128,7 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
 
     const handleOnPress = async () => {
         try {
+            setLoading(true)
             const newLocation = await getLocation()
             if (!newLocation)
                 onClose()

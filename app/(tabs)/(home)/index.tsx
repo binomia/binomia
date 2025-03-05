@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AccountApolloQueries } from '@/apollo/query';
 import { FORMAT_CURRENCY } from '@/helpers';
 import { scale } from 'react-native-size-matters';
-import { router } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
@@ -22,6 +22,8 @@ const HomeScreen: React.FC = () => {
 	const dispatch = useDispatch()
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
 	const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
+
+	const isFocused = useNavigation().isFocused()
 
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const [refreshing, setRefreshing] = useState(false);
@@ -64,11 +66,6 @@ const HomeScreen: React.FC = () => {
 				onPress: () => router.navigate("/privacy"),
 			}
 		])
-	}
-
-	function getSizeInMB(arr: string[]): number {
-		const totalBytes = arr.reduce((acc, str) => acc + new TextEncoder().encode(str).length, 0);
-		return totalBytes / (1024 * 1024); // Convert bytes to MB
 	}
 
 	const services = [
@@ -119,10 +116,20 @@ const HomeScreen: React.FC = () => {
 	}
 
 
+	useEffect(() => {
+		if (isFocused) {
+			(async () => {
+				await fetchAccount()
+			})()
+		}
+
+	}, [isFocused])
 
 	useEffect(() => {
 		dispatch(fetchRecentTransactions())
 	}, [])
+
+
 
 
 	return (
