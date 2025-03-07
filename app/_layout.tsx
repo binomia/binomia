@@ -15,9 +15,21 @@ import { useCameraPermission, useMicrophonePermission } from 'react-native-visio
 import { SocketContextProvider } from '@/contexts/socketContext';
 import { TopUpContextProvider } from '@/contexts/topUpContext';
 import { RouterContextProvider } from '@/contexts/RouterContext';
+import * as Sentry from '@sentry/react-native';
+
+
+Sentry.init({
+	dsn: "https://fbfc6726bd4ce4d8269b85359bf908fe@o4508923661058048.ingest.us.sentry.io/4508928816906240",
+
+	// // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+	// // spotlight: __DEV__,
+	// tracesSampleRate: 1.0,
+	// integrations: [navigationIntegration],
+	// enableNativeFramesTracking: Constants.executionEnvironment === ExecutionEnvironment.StoreClient, // Only in native builds, not in Expo Go.
+});
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const  SpaceMono = require('../fonts/SpaceMono-Regular.ttf');
+const SpaceMono = require('../fonts/SpaceMono-Regular.ttf');
 
 
 LogBox.ignoreAllLogs(true);
@@ -27,6 +39,7 @@ SplashScreen.preventAutoHideAsync();
 const Layout = () => {
 	const cameraPermission = useCameraPermission()
 	const microphonePermission = useMicrophonePermission()
+
 
 	const [loaded] = useFonts({
 		SpaceMono
@@ -57,7 +70,7 @@ const Layout = () => {
 		if (loaded) {
 			SplashScreen.hideAsync();
 		}
-	}, [loaded]);
+	}, [loaded])
 
 
 	if (!loaded) {
@@ -72,8 +85,8 @@ const Layout = () => {
 						<GlobalContextProvider>
 							<SocketContextProvider>
 								<TopUpContextProvider>
-									<View onLayout={onLayoutRootView} style={{ flex: 1 }}>										
-										<RouterContextProvider/>
+									<View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+										<RouterContextProvider />
 									</View>
 								</TopUpContextProvider>
 							</SocketContextProvider>

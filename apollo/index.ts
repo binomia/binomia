@@ -12,13 +12,12 @@ const httpLink = createHttpLink({
     preserveHeaderCase: true,
 });
 
-
 const errorLink = onError(({ graphQLErrors, networkError }) => {
     if (graphQLErrors)
         graphQLErrors.forEach(async (error) => {
             const { message } = error;
 
-            console.log("error", message);
+            console.log("error", { message, networkError });
 
 
             if (message.includes("INVALID_SESSION")) {

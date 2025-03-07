@@ -15,6 +15,7 @@ import { router, useNavigation } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
+import * as Sentry from '@sentry/react-native';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
@@ -80,13 +81,33 @@ const HomeScreen: React.FC = () => {
 			id: 1,
 			name: "Seguros",
 			image: cars,
-			onPress: () => { }
+			onPress: () => {
+				const message = Sentry.captureMessage('seguros');
+				console.log({ message });
+			}
 		},
 		{
 			id: 2,
 			name: "Electricidad",
 			image: house,
-			onPress: async () => { }
+			onPress: async () => {
+				const electricidad = Sentry.captureMessage("electricidad",{
+					level: 'info',
+					extra: {
+						account
+					},
+					tags: {
+						environment: 'production',
+					},
+					contexts: {
+						user: {
+							id: '123',
+							email: 'X0b0W@example.com',
+						},
+					}
+				});
+				console.log({ electricidad });
+			}
 		},
 		{
 			id: 3,

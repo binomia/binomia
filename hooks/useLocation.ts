@@ -90,16 +90,21 @@ export const useLocation = () => {
                 accuracy: Location.Accuracy.Highest
             });
 
-            return {
+            const newLocation = {
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421,
             }
 
+            await dispatch(globalActions.setLocation(newLocation));
+
+            return newLocation
+
         } catch (error) {
             console.error("Error getting location:", error);
             router.navigate("/location")
+            throw error
         }
     }
 

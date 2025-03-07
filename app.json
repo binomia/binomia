@@ -133,7 +133,15 @@
         }
       ],
       "expo-build-properties",
-      "expo-router"
+      "expo-router",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "binomia",
+          "organization": "brayhan-qo"
+        }
+      ]
     ]
   }
 }

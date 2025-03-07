@@ -34,7 +34,7 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
-    const { fetchGeoLocation, getLocation } = useLocation();
+    const { getLocation } = useLocation();
     const [createTransaction] = useMutation(TransactionApolloQueries.createTransaction())
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
@@ -51,11 +51,15 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
-            const geoLocation = await fetchGeoLocation({ latitude: location.latitude, longitude: location.longitude }).then((res) => res).catch(() => { return {} })
+            if (!location) {
+                await getLocation()
+                onClose()
+            }
+
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
-                location: geoLocation ?? {}
+                location
             })
 
             const { data: createedTransaction } = await createTransaction({
@@ -129,18 +133,12 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
     const handleOnPress = async () => {
         try {
             setLoading(true)
-            const newLocation = await getLocation()
-            if (!newLocation)
-                onClose()
-
-            else {
-                const authenticated = await authenticate()
-                if (authenticated.success)
-                    await handleOnSend({
-                        title: recurrence,
-                        time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
-                    })
-            }
+            const authenticated = await authenticate()
+            if (authenticated.success)
+                await handleOnSend({
+                    title: recurrence,
+                    time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
+                })
 
         } catch (error) {
             setLoading(false)
