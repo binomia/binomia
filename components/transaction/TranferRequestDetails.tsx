@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import colors from '@/colors'
 import Button from '@/components/global/Button';
 import BottomSheet from '../global/BottomSheet';
@@ -32,22 +32,19 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
     const dispatch = useDispatch();
 
     const { authenticate } = useLocalAuthentication();
-    const { fetchGeoLocation } = useLocation();
+    const { getLocation } = useLocation();
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
     const { user } = useSelector((state: any) => state.accountReducer)
 
-
     const [createRequestTransaction] = useMutation(TransactionApolloQueries.createRequestTransaction())
     const [fetchSingleUser] = useLazyQuery(UserApolloQueries.singleUser())
-
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
     const [recurrenceSelected, setRecurrenceSelected] = useState<string>("");
     const [recurrenceDaySelected, setRecurrenceDaySelected] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false)
     const [openOptions, setOpenOptions] = useState<string>("")
-    const [locationInfo, setLocationInfo] = useState<any>({})
 
 
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
@@ -90,12 +87,16 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
-            setLoading(true)
+            if (!location) {
+                await getLocation()
+                onCloseFinish()
+            }
+
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 transactionType: "request",
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
-                location: locationInfo
+                location
             })
 
             const { data: createdRequestTransaction } = await createRequestTransaction({
@@ -229,14 +230,6 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
         )
     }
 
-    useEffect(() => {
-        (async () => {
-            const geoLocation = await fetchGeoLocation({ latitude: location.latitude, longitude: location.longitude }).then((res) => res).catch(() => { return {} })
-            setLocationInfo(geoLocation)
-        })()
-    }, [])
-
-
     return (
         <SafeAreaView style={{ flex: 0.95, backgroundColor: colors.darkGray }}>
             <VStack px={"10px"} h={"100%"}>
@@ -259,7 +252,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                     </VStack>
                     <VStack px={"20px"} mt={"20px"} w={"100%"} justifyContent={"center"}>
                         <HStack w={"85%"} mb={"5px"}>
-                            <Heading fontSize={scale(15)} textTransform={"capitalize"} color={"white"}>{locationInfo?.fullArea || "Ubicación"}</Heading>
+                            <Heading fontSize={scale(15)} textTransform={"capitalize"} color={"white"}>{location?.fullArea || "Ubicación"}</Heading>
                         </HStack>
                         <Image
                             alt='fine-location-image-alt'
