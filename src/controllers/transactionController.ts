@@ -1,6 +1,6 @@
 import { TransactionJoiSchema } from "@/auth/transactionJoiSchema"
 import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants"
-import { calculateDistance, calculateSpeed, FORMAT_CURRENCY, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
+import { calculateDistance, calculateSpeed, fetchGeoLocation, FORMAT_CURRENCY, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
 import { Cryptography } from "@/helpers/cryptography"
 import { AccountModel, BankingTransactionsModel, CardsModel, QueuesModel, SessionModel, TransactionsModel, UsersModel } from "@/models"
 import { transactionsQueue } from "@/queues"
@@ -203,9 +203,12 @@ export default class TransactionController {
             if (!transaction)
                 throw "transaction not found";
 
+            const geoLocation = await fetchGeoLocation(transaction.toJSON().location)
+
             if (newStatus !== transaction.toJSON().status) {
                 await transaction.update({
-                    status: newStatus
+                    status: newStatus,
+                    location: geoLocation
                 })
             }
 

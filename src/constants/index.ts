@@ -5,6 +5,8 @@ export const ZERO_SIGN_PRIVATE_KEY: string = process.env.ZERO_SIGN_PRIVATE_KEY |
 export const AUTH_SERVER_URL: string = process.env.AUTH_SERVER_URL || "";
 export const SENDGRID_API_KEY: string = process.env.SENDGRID_API_KEY || "";
 
+export const GOOGLE_MAPS_API_KEY = "AIzaSyD8C__KVlZ6dbV94IxdFZRzfRrgYX4XWMs"
+
 export const NOTIFICATION_SERVER_URL = "http://notification-server:8001"
 export const ANOMALY_SERVER_URL = "http://anomaly-server:8004"
 export const DASHBOARD_LOGO_URL: string = "https://res.cloudinary.com/brayhandeaza/image/upload/v1734925393/gwxyuqagrvxxwq2xps6f.png";

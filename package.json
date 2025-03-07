@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@bull-board/express": "^6.5.0",
+    "@googlemaps/google-maps-services-js": "^3.4.0",
     "@types/cors": "^2.8.17",
     "@types/elliptic": "^6.4.18",
     "@types/express": "^5.0.0",

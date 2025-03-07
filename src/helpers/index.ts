@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import { nextFriday, nextMonday, nextSaturday, nextSunday, nextThursday, nextTuesday, nextWednesday } from "date-fns";
 import { WeeklyQueueTitleType } from '@/types';
+import { Client } from '@googlemaps/google-maps-services-js';
+import axios from 'axios';
+import { GOOGLE_MAPS_API_KEY } from '@/constants';
 
 
 export const unAuthorizedResponse = (req: Request, res: Response) => {
@@ -162,6 +165,53 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
 export const calculateSpeed = (distanceKm: number, timeDiffMs: number): number => {
     const timeDiffHours = timeDiffMs / (1000 * 60 * 60); // Convert milliseconds to hours
     return +Number(timeDiffHours > 0 ? distanceKm / timeDiffHours : 0).toFixed(2);
+}
+
+export  const fetchGeoLocation = async ({ latitude, longitude }: { latitude: number, longitude: number }) => {
+    try {
+        const client = new Client();
+
+        const response = await client.reverseGeocode({
+            adapter: 'fetch',
+            httpAgent: axios.defaults.httpAgent,
+            params: {
+                latlng: [latitude, longitude],
+                key: GOOGLE_MAPS_API_KEY
+            }
+        });
+
+        const results = response.data.results;
+        const found = results.reduce<any>((acc, result) => {
+            if (acc) return acc;
+
+            const sublocalityComp = result.address_components.find((comp) => comp.types.includes("sublocality" as any));
+            const neighborhoodComp = result.address_components.find((comp) => comp.types.includes("neighborhood" as any));
+            const admAreaLevel2Comp = result.address_components.find((comp) => comp.types.includes("administrative_area_level_2" as any));
+
+            if (sublocalityComp && neighborhoodComp && admAreaLevel2Comp)
+                return {
+                    neighbourhood: neighborhoodComp.long_name,
+                    sublocality: sublocalityComp.long_name,
+                    municipality: admAreaLevel2Comp.long_name,
+                    fullArea: `${neighborhoodComp.long_name}, ${sublocalityComp.long_name}, ${admAreaLevel2Comp.long_name}`,
+                }
+
+            return acc;
+
+        }, null);
+
+        const address = {
+            ...found,
+            latitude,
+            longitude
+        }
+
+        return address
+
+    } catch (error: any) {
+        console.error("Reverse geocoding error:", error);
+        return {}
+    }
 }
 
 
