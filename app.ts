@@ -16,9 +16,15 @@ import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { collectDefaultMetrics, register } from 'prom-client';
 import { initTracing } from "@/tracing";
-import { metrics } from '@opentelemetry/api';
+import { metrics, Span, trace } from '@opentelemetry/api';
 
 
+// Define the Context Type
+interface Context {
+    span: Span;
+}
+
+const tracer = trace.getTracer("graphql-request");
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -41,6 +47,32 @@ const errorHandlingPlugin: ApolloServerPlugin = {
     },
 };
 
+const tracingPlugin: ApolloServerPlugin<Context> = {
+    async requestDidStart({ request }) {
+        if (request.operationName) {
+            const span: Span = tracer.startSpan(request.operationName);
+
+            return {
+                async didResolveOperation({ request }) {
+                    span.setAttribute("graphql.query", request.operationName || "");
+
+                },
+                async willSendResponse({ errors, request }) {
+                    if (request.operationName)
+                        span.addEvent(request.operationName);
+
+                    span.setAttribute("graphql.response", JSON.stringify({
+                        errors,
+                        status: errors ? 500 : 200
+                    }));
+
+                    span.end();
+                },
+            };
+        }
+    },
+};
+
 
 (async () => {
     if (cluster.isPrimary) {
@@ -57,6 +89,7 @@ const errorHandlingPlugin: ApolloServerPlugin = {
             console.log('\nUnable to connect to the database:', err);
         })
 
+
         const server = new ApolloServer<any>({
             typeDefs,
             resolvers,
@@ -65,7 +98,8 @@ const errorHandlingPlugin: ApolloServerPlugin = {
             formatError,
             plugins: [
                 errorHandlingPlugin,
-                ApolloServerPluginDrainHttpServer({ httpServer })
+                ApolloServerPluginDrainHttpServer({ httpServer }),
+                // tracingPlugin
             ]
         });
 
@@ -88,9 +122,9 @@ const errorHandlingPlugin: ApolloServerPlugin = {
             }),
             express.json(),
             expressMiddleware(server, {
-                context: async ({ req, res }) => {
-                    return { req, res };
-                },
+                context: async ({ req, res }) => {                    
+                    return { req, res, tracer };
+                }
             }),
         );
 

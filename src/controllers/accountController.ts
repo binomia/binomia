@@ -4,6 +4,7 @@ import { GraphQLError } from 'graphql';
 import { AccountZodSchema } from '@/auth';
 import { Op } from 'sequelize';
 import redis from '@/redis';
+import { context, Span, trace, SpanStatusCode, Tracer } from '@opentelemetry/api';
 
 export class AccountController {
     static accounts = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, _context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -32,33 +33,57 @@ export class AccountController {
         }
     }
 
-    static account = async (_: unknown, ___: unknown, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
-        try {
-            const session = await checkForProtectedRequests(req);
+    static account = async (_: unknown, ___: unknown, { req, tracer }: { req: any, tracer: Tracer }, { fieldNodes }: { fieldNodes: any }) => {
+        const span: Span = tracer.startSpan("account");
+        return await context.with(trace.setSpan(context.active(), span), async () => {
+            try {
+                span.addEvent("Starting account processing");
 
-            const accountLimit = await redis.get(`account@${session.user.account.hash}`)
-            if (accountLimit)
-                return JSON.parse(accountLimit)
+                const sessionSpan: Span = tracer.startSpan("sessionSpan");
+                sessionSpan.addEvent("Verifying user session");
+                const session = await checkForProtectedRequests(req);
 
-            const fields = getQueryResponseFields(fieldNodes, 'account')
-            const account = await AccountModel.findOne({
-                where: {
-                    hash: session.user.account.hash
-                },
-                attributes: fields['account']
-            })
-
-            await redis.set(`account@${session.user.account.hash}`, JSON.stringify(account), 'EX', 10)
+                sessionSpan.setStatus({ code: SpanStatusCode.OK });
+                sessionSpan.end();
 
 
-            return account
 
-        } catch (error: any) {
-            throw new GraphQLError(error.message);
-        }
+                const cachedAccount = await redis.get(`account@${session.user.account.hash}`)
+                if (cachedAccount) {
+                    span.addEvent("Fetching account from redis");
+                    return JSON.parse(cachedAccount)
+                }
+
+                const fields = getQueryResponseFields(fieldNodes, 'account')
+
+                span.setAttribute("graphql.query.fields", JSON.stringify(fields));
+
+                const account = await AccountModel.findOne({
+                    where: {
+                        hash: session.user.account.hash
+                    },
+                    attributes: fields['account']
+                })
+
+
+                span.setAttribute("graphql.response", JSON.stringify(account?.toJSON() || {}));
+                span.setStatus({ code: SpanStatusCode.OK });
+
+                await redis.set(`account@${session.user.account.hash}`, JSON.stringify(account), 'EX', 10)
+                return account
+
+            } catch (error: any) {
+                span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+                span.end();
+                throw new GraphQLError(error.message);
+            } finally {
+                span.end();
+            }
+
+        });
     }
 
-    static accountPermissions = async (_: unknown, ___: unknown, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
+    static accountPermissions = async (_: unknown, ___: unknown, { __, req }: { __: any, tracer: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(req);
 
@@ -77,7 +102,7 @@ export class AccountController {
         }
     }
 
-    static updateAccountPermissions = async (_: unknown, { data }: { data: any }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
+    static updateAccountPermissions = async (_: unknown, { data }: { data: any }, { req }: { tracer: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(req);
 
@@ -108,7 +133,7 @@ export class AccountController {
         }
     }
 
-    static accountLimit = async (_: unknown, { data }: { data: any }, { __, req }: { __: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
+    static accountLimit = async (_: unknown, ___: unknown, { req }: { req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(req);
 

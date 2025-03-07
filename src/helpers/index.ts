@@ -6,6 +6,7 @@ import { ZERO_ENCRYPTION_KEY } from '@/constants';
 import jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
 import { z } from 'zod'
+import redis from '@/redis';
 
 
 
@@ -175,6 +176,13 @@ export const checkForProtectedRequests = async (req: any) => {
                 sid: z.string().min(1).transform((val) => val.trim())
             }).parseAsync(data);
 
+            const cachedSession = await redis.get(`session@${jwtData.sid}`)
+
+            if (cachedSession) {
+                req.session = JSON.parse(cachedSession)
+                return JSON.parse(cachedSession)
+            }
+
             const session = await SessionModel.findOne({
                 where: {
                     [Op.and]: [
@@ -211,6 +219,7 @@ export const checkForProtectedRequests = async (req: any) => {
             else
                 req.session = session.toJSON()
 
+            await redis.set(`session@${jwtData.sid}`, JSON.stringify(session.toJSON()), 'EX', 10)
             return session.toJSON()
 
         }).catch((error: any) => {

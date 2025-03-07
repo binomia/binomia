@@ -20,7 +20,7 @@ const metricReader = new PrometheusExporter({
 // Initialize MeterProvider separately (DO NOT pass metricReader to NodeSDK)
 const meterProvider = new MeterProvider({
     resource: new Resource({
-        [ATTR_SERVICE_NAME]: 'binomia-apollo-main-server',
+        [ATTR_SERVICE_NAME]: 'main-server',
     }),
 });
 
@@ -46,7 +46,7 @@ export function recordHttpRequest(route: string, method: string) {
 const sdk = new NodeSDK({
     resource: Resource.default().merge(
         new Resource({
-            [ATTR_SERVICE_NAME]: 'binimia-main-server',
+            [ATTR_SERVICE_NAME]: 'main-server',
         })
     ),
     traceExporter,

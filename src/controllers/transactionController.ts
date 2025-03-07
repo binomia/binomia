@@ -7,6 +7,7 @@ import { Cryptography } from '@/helpers/cryptography';
 import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
 import { queueServer } from '@/rpc/queueRPC';
+import { Span, SpanStatusCode, Tracer } from '@opentelemetry/api';
 
 export class TransactionsController {
     static transaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -62,9 +63,13 @@ export class TransactionsController {
         }
     }
 
-    static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
+    static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, { req, tracer }: { req: any, tracer: Tracer }) => {
+        const span: Span = tracer.startSpan("createTransaction");
         try {
-            const session = await checkForProtectedRequests(context.req);
+            span.addEvent("Starting transaction creation");
+            span.setAttribute("graphql.mutation.data", JSON.stringify(data));
+
+            const session = await checkForProtectedRequests(req);
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
             const { user } = session
@@ -72,8 +77,9 @@ export class TransactionsController {
             const message = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
             const signature = await Cryptography.sign(message, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
-            const { deviceid, ipaddress, platform } = context.req.headers
+            const { deviceid, ipaddress, platform } = req.headers
 
+            span.addEvent("queueServer is creating the transaction");
             const transaction = await queueServer("createTransaction", {
                 transactionId,
                 senderUsername: user.username,
@@ -96,10 +102,15 @@ export class TransactionsController {
                 platform,
             })
 
+            span.setAttribute("queueServer.response", JSON.stringify(transaction));
+            span.setStatus({ code: SpanStatusCode.OK });
+
             return transaction
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
+        } finally {
+            span.end();
         }
     }
 
