@@ -1,12 +1,11 @@
 import React, { useRef, useState } from 'react'
 import colors from '@/colors'
 import Button from '@/components/global/Button';
-import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import * as Sharing from 'expo-sharing';
 import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, ZStack, Avatar } from 'native-base'
-import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CREATED_DATE, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMutation } from '@apollo/client';
@@ -134,11 +133,6 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 			ref.current?.setPage(1)
 	}
 
-	const formatDate = (_date: any) => {
-		const  date  = Number(_date)
-		return isNaN(date) ? moment(_date).format("lll") : moment(date).format("lll")
-	}
-
 	const StatuIcon: React.FC<{ status: string }> = ({ status }: { status: string }) => {
 		if (status === "completed") {
 			return (
@@ -204,7 +198,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				<VStack>
 					<VStack mt={"10px"} alignItems={"center"}>
 						<Heading textTransform={"capitalize"} fontSize={scale(34)} color={colors.white}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
-						<Text color={colors.lightSkyGray}>{formatDate(transaction?.createdAt)}</Text>
+						<Text color={colors.lightSkyGray}>{FORMAT_CREATED_DATE(transaction?.createdAt)}</Text>
 						{transaction.isFromMe ? <VStack my={"15px"} textAlign={"center"} space={1} alignItems={"center"}>
 							<StatuIcon status={transaction?.status || ""} />
 							<VStack w={"80%"}>

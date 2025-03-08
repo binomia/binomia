@@ -1,15 +1,15 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import colors from '@/colors'
 import moment from 'moment';
 import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
 import Entypo from '@expo/vector-icons/Entypo';
 import BottomSheet from '@/components/global/BottomSheet';
 import * as Sharing from 'expo-sharing';
-import { Dimensions, TouchableOpacity, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
+import { Dimensions, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Spinner, Pressable, ScrollView, ZStack } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { TopUpApolloQueries } from '@/apollo/query'
-import { FORMAT_CURRENCY, FORMAT_PHONE_NUMBER, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { FORMAT_CURRENCY, FORMAT_PHONE_NUMBER } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';

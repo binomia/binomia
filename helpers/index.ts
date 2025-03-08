@@ -1,6 +1,7 @@
 import { GOOGLE_MAPS_API_KEY } from "@/constants";
 import { WeeklyQueueTitleType } from "@/types";
 import { nextFriday, nextMonday, nextSaturday, nextSunday, nextThursday, nextTuesday, nextWednesday } from "date-fns";
+import moment from "moment";
 
 
 export const FORMAT_PHONE_NUMBER = (value: string) => {
@@ -27,6 +28,13 @@ export const VALIDATE_EMAIL = (email: string) => {
             /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
         );
 };
+
+
+export const FORMAT_CREATED_DATE = (_date: any) => {
+    const date = Number(_date)
+    return isNaN(date) ? moment(_date).format("lll") : moment(date).format("lll")
+}
+
 
 
 export const GENERATE_SIX_DIGIT_TOKEN = (): string => {
@@ -160,15 +168,15 @@ export const MAKE_FULL_NAME_SHORTEN = (fullName: string) => {
 
 export const EXTRACT_FIRST_LAST_INITIALS = (fullName: string): string => {
     const nameParts = fullName.trim().split(/\s+/);
-    
+
     // If there's only one part, just return its first letter
     if (nameParts.length === 1) {
         return nameParts[0].charAt(0).toUpperCase();
     }
-    
+
     // Initially assume the last part of the array is the last name
     let lastNameIndex = nameParts.length - 1;
-    
+
     // Walk backward to detect if short (≤3 letters) or all-lowercase words
     // should be part of the last name
     for (let i = nameParts.length - 2; i > 0; i--) {
@@ -178,15 +186,15 @@ export const EXTRACT_FIRST_LAST_INITIALS = (fullName: string): string => {
             break;
         }
     }
-    
+
     // Get first name’s initial
     const firstInitial = nameParts[0].charAt(0).toUpperCase();
-    
+
     // Join all parts from lastNameIndex onward for the "last name"
     const lastName = nameParts.slice(lastNameIndex).join(" ");
     // Get last name’s initial
     const lastInitial = lastName.charAt(0).toUpperCase();
-    
+
     // Return something like "J.D." (you can adjust the format as you prefer)
     return `${firstInitial}${lastInitial}`;
 };
@@ -202,7 +210,7 @@ export const CAPITALIZE_WORDS = (text: string) => {
 
 export const FORMAT_LIMIT = (amount: number, limit: number) => {
     if (amount === 0)
-        return String(0)    
+        return String(0)
 
     return Number(String((amount / limit) * 100)).toFixed(1)
 }

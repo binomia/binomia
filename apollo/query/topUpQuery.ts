@@ -84,7 +84,56 @@ export class TopUpApolloQueries {
     static createTopUp = () => {
         return gql`
             mutation CreateTopUp($data: TopUpInput!, $recurrence: TopUpRecurrenceInput!) {
-                createTopUp(data: $data, recurrence: $recurrence)
+                createTopUp(data: $data, recurrence: $recurrence) {
+                    id
+                    status
+                    amount
+                    referenceId
+                    createdAt
+                    updatedAt
+                    phone {
+                        id
+                        fullName
+                        phone
+                        createdAt
+                        updatedAt
+                    }
+                    user {
+                        id
+                        fullName
+                        username
+                        phone
+                        email
+                        dniNumber
+                        password
+                        profileImageUrl
+                        userAgreementSigned
+                        idFrontUrl
+                        status
+                        idBackUrl
+                        faceVideoUrl
+                        address
+                        createdAt
+                        updatedAt
+                    }
+                    company {
+                        id
+                        uuid
+                        status
+                        name
+                        logo
+                        createdAt
+                        updatedAt
+                    }
+                    location {
+                        latitude
+                        longitude
+                        neighbourhood
+                        sublocality
+                        municipality
+                        fullArea
+                    }
+                }
             }
         `
     }

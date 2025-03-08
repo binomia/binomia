@@ -3,6 +3,7 @@ import { AccountApolloQueries, TopUpApolloQueries } from "@/apollo/query";
 import { TransactionApolloQueries } from "@/apollo/query/transactionQuery"
 import { AccountAuthSchema } from "@/auth/accountAuth";
 import { createAsyncThunk } from "@reduxjs/toolkit"
+import moment from "moment";
 
 
 export const fetchAccountLimit = createAsyncThunk('fetchAccountLimit', async (): Promise<any> => {
@@ -21,18 +22,20 @@ export const fetchRecentTransactions = createAsyncThunk('fetchRecentTransactions
         const { data: recentTransactions } = await apolloClient.query({ query: TransactionApolloQueries.accountTransactions(), variables: { page: 1, pageSize: 5 } });
         const { data: recentTopUps } = await apolloClient.query({ query: TopUpApolloQueries.recentTopUps(), variables: { page: 1, pageSize: 5 } });
 
-        const topupsMapped = recentTopUps.recentTopUps?.map((topup: any) => {
+        const topupsMapped: any[] = recentTopUps.recentTopUps?.map((topup: any) => {
+            const date = Number(topup.createdAt);
             return {
                 type: "topup",
-                timestamp: topup.createdAt,
+                timestamp: isNaN(date) ? moment(topup.createdAt).valueOf() : date,
                 data: topup
             }
         })
 
-        const transactionsMapped = recentTransactions.accountTransactions?.map((transaction: any) => {
+        const transactionsMapped: any[] = recentTransactions.accountTransactions?.map((transaction: any) => {
+            const date = Number(transaction.createdAt);
             return {
                 type: "transaction",
-                timestamp: transaction.createdAt,
+                timestamp: isNaN(date) ? moment(transaction.createdAt).valueOf() : date,
                 data: transaction
             }
         })

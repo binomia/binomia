@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import colors from '@/colors'
 import BottomSheet from '@/components/global/BottomSheet';
-import moment from 'moment';
 import * as Sharing from 'expo-sharing';
 import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, ZStack } from 'native-base'
-import { FORMAT_CURRENCY, FORMAT_PHONE_NUMBER } from '@/helpers'
+import { FORMAT_CREATED_DATE, FORMAT_CURRENCY, FORMAT_PHONE_NUMBER } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { cancelIcon, checked, pendingClock } from '@/assets';
 import { TEXT_HEADING_FONT_SIZE } from '@/constants';
@@ -23,9 +22,6 @@ const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
     const onCloseFinish = async () => {
         onClose(false)
     }
-
-
-
 
     const StatuIcon: React.FC<{ status: string }> = ({ status }: { status: string }) => {
         const _w = "25px"
@@ -69,13 +65,6 @@ const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
         await Sharing.shareAsync("http://test.com")
     }
 
-
-    useEffect(() => {
-        console.log(JSON.stringify(topup, null, 2));
-
-    }, [])
-
-
     return (
         <BottomSheet height={height * 0.50} open={open} onCloseFinish={onCloseFinish}>
             <VStack px={"20px"} pt={"30px"} w={"100%"} h={"80%"} justifyContent={"space-between"}>
@@ -89,7 +78,7 @@ const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
                 <VStack alignItems={"center"} borderRadius={10}>
                     <VStack alignItems={"center"}>
                         <Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={colors.red}>{FORMAT_CURRENCY(topup?.amount)}</Heading>
-                        <Text mb={"10px"} color={colors.lightSkyGray}>{moment(Number(topup?.createdAt)).format("lll")}</Text>
+                        <Text mb={"10px"} color={colors.lightSkyGray}>{FORMAT_CREATED_DATE(topup?.createdAt)}</Text>
                         <HStack mb={"20px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
                             <StatuIcon status={topup.status} />
                             <Text ml={"3px"} fontSize={scale(16)} color={colors.lightSkyGray}>{transactionStatus(topup.status)}</Text>

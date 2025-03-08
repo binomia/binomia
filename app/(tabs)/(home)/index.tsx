@@ -38,9 +38,10 @@ const HomeScreen: React.FC = () => {
 		}
 	}
 
-	const onRefresh = useCallback(async () => {
+	const onRefresh = useCallback(async (showRefresh: boolean = true) => {
 		try {
-			setRefreshing(true);
+			if (showRefresh)
+				setRefreshing(true);
 
 			await fetchAccount();
 			await dispatch(fetchRecentTransactions());
@@ -91,7 +92,7 @@ const HomeScreen: React.FC = () => {
 			name: "Electricidad",
 			image: house,
 			onPress: async () => {
-				const electricidad = Sentry.captureMessage("electricidad",{
+				const electricidad = Sentry.captureMessage("electricidad", {
 					level: 'info',
 					extra: {
 						account
@@ -141,14 +142,15 @@ const HomeScreen: React.FC = () => {
 		if (isFocused) {
 			(async () => {
 				await fetchAccount()
+				await onRefresh(false)
 			})()
 		}
 
 	}, [isFocused])
 
-	useEffect(() => {
-		dispatch(fetchRecentTransactions())
-	}, [])
+	// useEffect(() => {
+	// 	dispatch(fetchRecentTransactions())
+	// }, [])
 
 
 

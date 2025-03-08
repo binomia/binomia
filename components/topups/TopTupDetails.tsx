@@ -9,7 +9,7 @@ import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { recurenceMonthlyData, recurenceWeeklyData } from '@/mocks';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
-import { useLazyQuery, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocation } from '@/hooks/useLocation';
@@ -18,7 +18,6 @@ import { TopUpAuthSchema } from '@/auth/topUpAuth';
 import { topupActions } from '@/redux/slices/topupSlice';
 import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
-
 
 type Props = {
     goBack?: () => void
@@ -29,17 +28,6 @@ type Props = {
 const { width } = Dimensions.get("screen")
 const TopTupDetails: React.FC<Props> = ({ goBack = () => { }, onClose = (_?: any) => { } }) => {
     const [createTopUp] = useMutation(TopUpApolloQueries.createTopUp())
-    const [getTopUp, { startPolling, stopPolling }] = useLazyQuery(TopUpApolloQueries.topUp(), {
-        fetchPolicy: "network-only",
-        notifyOnNetworkStatusChange: true,
-        onCompleted: async (data) => {
-            const topUpSent = data?.topUp
-            if (topUpSent) {
-                stopPolling()
-                await onNext()
-            }
-        }
-    })
 
     const { newTopUp } = useSelector((state: any) => state.topupReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
@@ -47,7 +35,7 @@ const TopTupDetails: React.FC<Props> = ({ goBack = () => { }, onClose = (_?: any
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
-    const { fetchGeoLocation, getLocation } = useLocation();
+    const { getLocation } = useLocation();
 
     const [recurrence, setRecurrence] = useState<string>("oneTime");
     const [recurrenceSelected, setRecurrenceSelected] = useState<string>("");
@@ -62,35 +50,23 @@ const TopTupDetails: React.FC<Props> = ({ goBack = () => { }, onClose = (_?: any
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
-            const geoLocation = await fetchGeoLocation({ latitude: location.latitude, longitude: location.longitude }).then((res) => res).catch(() => { return {} })
+            if (!location)
+                await getLocation()
+
             const data = await TopUpAuthSchema.createTopUp.parseAsync({
                 phone: newTopUp.phone,
                 amount: newTopUp.amount,
                 fullName: newTopUp.fullName?.trim(),
                 companyId: Number(newTopUp.company.id),
-                location: geoLocation ?? {},
+                location,
             })
 
-            const { data: createdTopUp } = await createTopUp({ variables: { data, recurrence } })
-
-            const referenceId = createdTopUp?.createTopUp?.referenceId
-            if (referenceId)
-                await getTopUp({ variables: { referenceId } }).then(async (res) => {
-                    if (res.data?.topUp)
-                        await onNext()
-
-                    else
-                        startPolling(1500);
-
-                }).catch((error) => {
-                    console.error("Fetch transaction error:", error);
-                });
-
-            else
-                startPolling(1500);
+            await createTopUp({ variables: { data, recurrence } })
+            await onNext()
 
         } catch (error: any) {
             console.error(error.message);
+            onClose()
         }
     }
 
@@ -113,26 +89,19 @@ const TopTupDetails: React.FC<Props> = ({ goBack = () => { }, onClose = (_?: any
 
     const handleOnPress = async () => {
         try {
-            const newLocation = await getLocation()
-            if (!newLocation)
-                onClose()
-
-            else {
-                const authenticated = await authenticate()
-                setLoading(true)
-                if (authenticated.success) {
-                    await handleOnSend({
-                        title: recurrence,
-                        time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
-                    })
-
-                }
-
-                await dispatch(fetchRecentTransactions())
-                await dispatch(transactionActions.setHasNewTransaction(true))
-
-                setLoading(false)
+            setLoading(true)
+            const authenticated = await authenticate()
+            if (authenticated.success) {
+                await handleOnSend({
+                    title: recurrence,
+                    time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
+                })
             }
+
+            await dispatch(fetchRecentTransactions())
+            await dispatch(transactionActions.setHasNewTransaction(true))
+
+            setLoading(false)
 
         } catch (error) {
             console.log({ handleOnSend: error });

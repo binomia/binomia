@@ -1,18 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react'
 import colors from '@/colors'
 import BottomSheet from '@/components/global/BottomSheet';
-import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import SingleSentTransaction from '@/components/transaction/SingleSentTransaction';
+import SingleTopTup from '../topups/SingleTopTup';
 import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, Avatar } from 'native-base'
-import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CREATED_DATE, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { noTransactions, pendingClock } from '@/assets';
 import { router, useNavigation } from 'expo-router';
-import SingleTopTup from '../topups/SingleTopTup';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 
 
@@ -33,7 +32,6 @@ const RecentTransactions: React.FC = () => {
 	const [bottomSheetHeught, setBottomSheetHeught] = useState<number>(height * 0.9);
 
 	const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
-
 
 	const formatTransaction = (transaction: any) => {
 		const { transactionType, status } = transaction
@@ -155,7 +153,7 @@ const RecentTransactions: React.FC = () => {
 											}
 											<VStack ml={"10px"} justifyContent={"center"}>
 												<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(data).fullName || "")}</Heading>
-												<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(data.createdAt)).format("lll")}</Text>
+												<Text fontSize={scale(10)} color={colors.lightSkyGray}>{FORMAT_CREATED_DATE(data?.createdAt)}</Text>
 											</VStack>
 										</HStack>
 										<VStack ml={"10px"} justifyContent={"center"}>
@@ -185,7 +183,7 @@ const RecentTransactions: React.FC = () => {
 											}
 											<VStack ml={"10px"} justifyContent={"center"}>
 												<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(data.phone.fullName || "")}</Heading>
-												<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(data.createdAt)).format("lll")}</Text>
+												<Text fontSize={scale(10)} color={colors.lightSkyGray}>{FORMAT_CREATED_DATE(data?.createdAt)}</Text>
 											</VStack>
 										</HStack>
 										<VStack ml={"10px"} justifyContent={"center"}>
