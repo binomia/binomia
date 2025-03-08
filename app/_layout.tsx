@@ -16,21 +16,11 @@ import { SocketContextProvider } from '@/contexts/socketContext';
 import { TopUpContextProvider } from '@/contexts/topUpContext';
 import { RouterContextProvider } from '@/contexts/RouterContext';
 import * as Sentry from '@sentry/react-native';
+import Constants, { ExecutionEnvironment } from "expo-constants";
 
-
-Sentry.init({
-	dsn: "https://fbfc6726bd4ce4d8269b85359bf908fe@o4508923661058048.ingest.us.sentry.io/4508928816906240",
-
-	// // uncomment the line below to enable Spotlight (https://spotlightjs.com)
-	// // spotlight: __DEV__,
-	// tracesSampleRate: 1.0,
-	// integrations: [navigationIntegration],
-	// enableNativeFramesTracking: Constants.executionEnvironment === ExecutionEnvironment.StoreClient, // Only in native builds, not in Expo Go.
-});
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const SpaceMono = require('../fonts/SpaceMono-Regular.ttf');
-
 
 LogBox.ignoreAllLogs(true);
 LogBox.ignoreLogs(['In React 18']);
@@ -40,8 +30,7 @@ const Layout = () => {
 	const cameraPermission = useCameraPermission()
 	const microphonePermission = useMicrophonePermission()
 
-
-	const [loaded] = useFonts({
+	const [fontsLoaded] = useFonts({
 		SpaceMono
 	});
 
@@ -67,13 +56,33 @@ const Layout = () => {
 	}, []);
 
 	useEffect(() => {
-		if (loaded) {
+		Sentry.init({
+			dsn: "https://fbfc6726bd4ce4d8269b85359bf908fe@o4508923661058048.ingest.us.sentry.io/4508928816906240",
+			debug: false,
+			tracesSampleRate: 1.0,
+			replaysOnErrorSampleRate: 1.0,
+			replaysSessionSampleRate: 1.0,
+			enableNativeFramesTracking: Constants.executionEnvironment === ExecutionEnvironment.StoreClient,
+			attachViewHierarchy: true,
+			autoInitializeNativeSdk: true,					
+			integrations: [
+				Sentry.mobileReplayIntegration({
+					maskAllText: true,
+					maskAllImages: true,
+					maskAllVectors: true					
+				})
+			],
+		});
+	}, []);
+
+	useEffect(() => {
+		if (fontsLoaded) {
 			SplashScreen.hideAsync();
 		}
-	}, [loaded])
+	}, [fontsLoaded])
 
 
-	if (!loaded) {
+	if (!fontsLoaded) {
 		return null;
 	}
 
