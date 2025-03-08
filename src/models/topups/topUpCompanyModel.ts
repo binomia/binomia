@@ -3,7 +3,7 @@ import { db } from "@/config"
 import short from "short-uuid"
 
 
-const TopUpCompanyModel = db.define('toptups-company', {
+const TopUpCompanyModel = db.define('topups-company', {
     uuid: {
         type: STRING,
         defaultValue: () => `${short.generate()}${short.generate()}`

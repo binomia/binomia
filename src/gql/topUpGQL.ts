@@ -107,9 +107,10 @@ const query = () => {
 
 const mutation = () => {
     return `
-        createTopUp(data: TopUpInput!, recurrence: TopUpRecurrenceInput!): JSON
+        createTopUp(data: TopUpInput!, recurrence: TopUpRecurrenceInput!): TopUpsType
     `
 }
+
 
 const subscription = () => {
     return ``

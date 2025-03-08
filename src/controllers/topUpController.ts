@@ -5,6 +5,7 @@ import { Op } from 'sequelize';
 import { TopUpSchema } from '@/auth';
 import { queueServer } from '@/rpc/queueRPC';
 import shortUUID from 'short-uuid';
+import redis from '@/redis';
 
 
 export class TopUpController {
@@ -13,7 +14,12 @@ export class TopUpController {
             const session = await checkForProtectedRequests(context.req);
             const fields = getQueryResponseFields(fieldNodes, 'topup')
 
-            const tupup = await TopUpsModel.findOne({          
+            const cachedTopUp = await redis.get(`topup:${session.userId}:${referenceId}`)
+            if (cachedTopUp)
+                return JSON.parse(cachedTopUp)
+
+
+            const tupup = await TopUpsModel.findOne({
                 order: [['createdAt', 'DESC']],
                 attributes: fields['topup'],
                 where: {
@@ -23,6 +29,9 @@ export class TopUpController {
                     ]
                 }
             })
+
+            if (tupup)
+                await redis.set(`topup:${session.userId}:${referenceId}`, JSON.stringify(tupup), 'EX', 10)
 
             return tupup
 
@@ -40,6 +49,10 @@ export class TopUpController {
             const offset = (page - 1) * _pageSize;
             const limit = _pageSize;
 
+            const cachedTopUps = await redis.get(`topups:${session.userId}:${phoneId}:${page}:${pageSize}`)
+            if (cachedTopUps)
+                return JSON.parse(cachedTopUps)
+
             const tupups = await TopUpsModel.findAll({
                 limit,
                 offset,
@@ -52,6 +65,9 @@ export class TopUpController {
                     ]
                 }
             })
+
+            if (tupups.length > 0)
+                await redis.set(`topups:${session.userId}:${phoneId}:${page}:${pageSize}`, JSON.stringify(tupups), 'EX', 10)
 
             return tupups
 
@@ -69,6 +85,10 @@ export class TopUpController {
                 const _pageSize = pageSize > 50 ? 50 : pageSize
                 const offset = (page - 1) * _pageSize;
                 const limit = _pageSize;
+
+                const cachedTopUps = await redis.get(`recentTopUps:${session.userId}:${page}:${pageSize}`)
+                if (cachedTopUps)
+                    return JSON.parse(cachedTopUps)
 
                 const tupups = await TopUpsModel.findAll({
                     limit,
@@ -94,6 +114,9 @@ export class TopUpController {
                     ]
                 })
 
+                if (tupups.length > 0)
+                    await redis.set(`recentTopUps:${session.userId}:${page}:${pageSize}`, JSON.stringify(tupups), 'EX', 10)
+
                 return tupups
 
             } catch (error: any) {
@@ -114,6 +137,10 @@ export class TopUpController {
             const offset = (page - 1) * _pageSize;
             const limit = _pageSize;
 
+            const cachedTopUpPhones = await redis.get(`topUpPhones:${session.userId}:${page}:${pageSize}`)
+            if (cachedTopUpPhones)
+                return JSON.parse(cachedTopUpPhones)
+
             const phones = await TopUpPhonesModel.findAll({
                 limit,
                 offset,
@@ -131,6 +158,9 @@ export class TopUpController {
                 ]
             })
 
+            if (phones.length > 0)
+                await redis.set(`topUpPhones:${session.userId}:${page}:${pageSize}`, JSON.stringify(phones))
+
             return phones
 
         } catch (error: any) {
@@ -145,7 +175,7 @@ export class TopUpController {
             const recurrenceData = await TopUpSchema.recurrenceTopUp.parseAsync(recurrence)
 
             const referenceId = `${shortUUID.generate()}${shortUUID.generate()}`
-            await queueServer("createTopUp", {
+            const topUp = await queueServer("createTopUp", {
                 amount: topUpData.amount,
                 userId: session.userId,
                 data: {
@@ -158,7 +188,7 @@ export class TopUpController {
                 }
             })
 
-            return { referenceId }
+            return topUp
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -169,11 +199,18 @@ export class TopUpController {
         try {
             await checkForProtectedRequests(context.req);
 
+            const cachedCompanies = await redis.get('topUpCompanies')
+            if (cachedCompanies)
+                return JSON.parse(cachedCompanies)
+
             const companies = await TopUpCompanyModel.findAll({
                 where: {
                     status: 'active'
                 }
             })
+
+            if (companies.length > 0)
+                await redis.set('topUpCompanies', JSON.stringify(companies), 'EX', 30)
 
             return companies
 
