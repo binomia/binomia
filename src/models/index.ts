@@ -4,10 +4,10 @@ import CardsModel from "./cardsModel"
 import TransactionsModel from "./transactionModel"
 import BankingTransactionsModel from "./bankingTransactionModel"
 import QueuesModel from "./queuesModel"
-import TopUpsModel from "./topUpModel"
 import SessionModel from "./sessionModel"
 import TopUpPhonesModel from "./topups/topUpPhonesModel"
 import TopUpCompanyModel from "./topups/topUpCompanyModel"
+import TopUpsModel from "./topups/topUpModel"
 
 
 TopUpsModel.belongsTo(TopUpPhonesModel, { foreignKey: 'phoneId', targetKey: 'id', as: 'phone' })

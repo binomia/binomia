@@ -1,7 +1,7 @@
 import { DECIMAL, JSONB, STRING } from "sequelize"
 import { db } from "@/config"
 
-const TopUpsModel = db.define('toptups', {
+const TopUpsModel = db.define('topups', {
     amount: DECIMAL,
     referenceId: STRING,
     status: STRING,
