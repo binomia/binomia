@@ -19,6 +19,11 @@ const type = () => {
             allowSend: Boolean
             allowRequestMe: Boolean
             allowDeposit: Boolean
+
+            allowWhatsappNotification: Boolean
+            allowEmailNotification: Boolean
+            allowSmsNotification: Boolean
+            allowPushNotification: Boolean
         }
 
         type OnlyAccountType {
@@ -29,6 +34,10 @@ const type = () => {
             allowSend: Boolean
             allowRequestMe: Boolean
             allowDeposit: Boolean
+            allowWhatsappNotification: Boolean
+            allowEmailNotification: Boolean
+            allowSmsNotification: Boolean
+            allowPushNotification: Boolean
             status: String
             sendLimit: Float
             receiveLimit: Float

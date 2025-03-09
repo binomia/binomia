@@ -101,7 +101,7 @@ export class AccountController {
             throw new GraphQLError(error.message);
         }
     }
-
+    
     static updateAccountPermissions = async (_: unknown, { data }: { data: any }, { req }: { tracer: any, req: any }, { fieldNodes }: { fieldNodes: any }) => {
         try {
             const session = await checkForProtectedRequests(req);

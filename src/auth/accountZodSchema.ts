@@ -7,7 +7,12 @@ export class AccountZodSchema {
         allowWithdraw: z.boolean().nullish().optional(),
         allowDeposit: z.boolean().nullish().optional(),
         allowSend: z.boolean().nullish().optional(),
-        allowRequestMe: z.boolean().nullish().optional()
+        allowRequestMe: z.boolean().nullish().optional(),
+
+        allowEmailNotification: z.boolean().nullish().optional(),
+        allowPushNotification: z.boolean().nullish().optional(),
+        allowSmsNotification: z.boolean().nullish().optional(),
+        allowWhatsappNotification: z.boolean().nullish().optional()
     })
 
     static accountLimits = z.object({

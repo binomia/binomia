@@ -28,7 +28,7 @@ export class GlobalController {
 
     static test = async (_: unknown, { hash }: { hash: string }, { req }: { req: any }) => {
         try {
-            await seedDatabase()
+            // await seedDatabase()
             // const session = await checkForProtectedRequests(req);
 
             return null;
