@@ -88,8 +88,6 @@ const BankingScreen: React.FC = () => {
     }
 
     const handleMakeTransaction = async (title: string) => {
-        console.log(JSON.stringify({ account }, null, 2));
-
         const { data } = await accountStatus()
         if (data.account.status === "flagged") {
             router.navigate(`/flagged`)

@@ -190,28 +190,43 @@ export const transactionStatus = (title: string) => {
         case "requested":
             return "Solicitado"
         case "suspicious":
-            return "Transacción en revisión, por favor espere que terminemos, o comuníquese con nosotros."            
+            return "Transacción en revisión, por favor espere que terminemos, o comuníquese con nosotros."
         default:
             return "Procesando";
     }
 }
 
-export const notificationsScreenData = ({ pushNotifications, emailNotifications, smsNotifications }: any) => [
+// allowWhatsappNotification: Boolean
+// allowEmailNotification: Boolean
+// allowSmsNotification: Boolean
+// allowPushNotification: Boolean
+
+export const notificationsScreenData = ({ allowWhatsappNotification, allowPushNotification, allowEmailNotification, allowSmsNotification }: { allowWhatsappNotification: boolean, allowPushNotification: boolean, allowEmailNotification: boolean, allowSmsNotification: boolean }) => [
     {
+        id: "allowWhatsappNotification",
+        name: "Whatsapp",
+        icon: whatsappIcon,
+        allow: allowWhatsappNotification
+    },
+    {
+        id: "allowPushNotification",
         name: "Notificaciónes Mobil",
         icon: notificacionIcon,
-        allow: pushNotifications
+        allow: allowPushNotification
     },
     {
+        id: "allowEmailNotification",
         name: "Correo Electrónico",
         icon: mailIcon,
-        allow: emailNotifications
+        allow: allowEmailNotification
     },
     {
+        id: "allowSmsNotification",
         name: "Mensajes SMS",
         icon: phoneIcon,
-        allow: smsNotifications
-    }
+        allow: allowSmsNotification
+    },
+
 ]
 
 export const supportScreenData = ({ openEmail, openPhone, openWhatsApp }: any) => [

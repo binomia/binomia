@@ -80,7 +80,6 @@ const ProfileScreen: React.FC = () => {
 			(async () => {
 				const { data } = await fetchAccount()
 				await dispatch(accountActions.setAccount(data.account))
-				console.log(JSON.stringify(data, null, 2));
 			})()
 		}
 

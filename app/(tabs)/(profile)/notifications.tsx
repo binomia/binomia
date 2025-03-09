@@ -1,35 +1,54 @@
 import React from 'react'
-import useAsyncStorage from '@/hooks/useAsyncStorage'
 import colors from '@/colors'
-import { Image, VStack, Text, HStack, Divider, Switch, Heading } from 'native-base'
-import { whatsappIcon } from '@/assets'
+import { Image, VStack, HStack, Switch, Heading } from 'native-base'
+import { allIcon } from '@/assets'
 import { useDispatch, useSelector } from 'react-redux'
 import { scale } from 'react-native-size-matters'
-import { globalActions } from '@/redux/slices/globalSlice'
 import { notificationsScreenData } from '@/mocks'
+import { useMutation } from '@apollo/client'
+import { AccountApolloQueries } from '@/apollo/query'
+import { accountActions } from '@/redux/slices/accountSlice'
 
 const NotificationsScreen: React.FC = () => {
     const dispatch = useDispatch()
-    const { setItem } = useAsyncStorage()
-    const { smsNotifications, whatsappNotifications, emailNotifications, pushNotifications } = useSelector((state: any) => state.globalReducer)
+    const { account } = useSelector((state: any) => state.accountReducer)
+    const { allowWhatsappNotification, allowPushNotification, allowEmailNotification, allowSmsNotification } = account
 
-    const onSwitchChange = async (name: string, allow: boolean) => {
+    const [updateAccountPermissions] = useMutation(AccountApolloQueries.updateAccountPermissions())
+    const [allNotifications, setAllNotifications] = React.useState<{ id: string, allow: boolean, icon: any }>({
+        id: "all",
+        allow: true,
+        icon: allIcon
+    })
+
+
+    const onSwitchChange = async (id: string, allow: boolean) => {
         try {
-            if (name === "whatsapp") {
-                await setItem("whatsappNotification", allow ? "true" : "false")
-                await dispatch(globalActions.setWhatsappNotification(allow))
+            if (id === "all") {
+                const { data } = await updateAccountPermissions({
+                    variables: {
+                        data: {
+                            "allowEmailNotification": allow,
+                            "allowPushNotification": allow,
+                            "allowSmsNotification": allow,
+                            "allowWhatsappNotification": allow
+                        }
+                    }
+                })
 
-            } else if (name === "Notificaciónes Mobil") {
-                await setItem("pushNotification", allow ? "true" : "false")
-                await dispatch(globalActions.setPushNotification(allow))
+                await dispatch(accountActions.setAccount(data.updateAccountPermissions))
+                setAllNotifications(Object.assign({}, allNotifications, { allow }))
 
-            } else if (name === "Correo Electrónico") {
-                await setItem("emailNotification", allow ? "true" : "false")
-                await dispatch(globalActions.setEmailNotification(allow))
+            } else {
+                const { data } = await updateAccountPermissions({
+                    variables: {
+                        data: {
+                            [id]: allow
+                        }
+                    }
+                })
 
-            } else if (name === "Mensajes SMS") {
-                await setItem("smsNotification", allow ? "true" : "false")
-                await dispatch(globalActions.setSmsNotification(allow))
+                await dispatch(accountActions.setAccount(data.updateAccountPermissions))
             }
 
         } catch (error) {
@@ -39,22 +58,22 @@ const NotificationsScreen: React.FC = () => {
 
     return (
         <VStack px={"20px"} variant={"body"} justifyContent={"space-between"} h={"100%"}>
-            <VStack w={"100%"} h={"auto"} mt={"50px"}>               
-                <HStack justifyContent={"space-between"} w={"100%"} borderRadius={10} h={scale(45)} py={"10px"} space={2} >
+            <VStack w={"100%"} h={"auto"} mt={"50px"}>
+                <HStack justifyContent={"space-between"} w={"100%"} mb={"30px"} borderRadius={10} h={scale(45)} py={"10px"} space={2} >
                     <HStack h={scale(35)} justifyContent={"center"} alignItems={"center"}>
-                        <Image alt='logo-image' borderRadius={2000} resizeMode='contain' w={scale(35)} h={scale(35)} source={whatsappIcon} />
-                        <Heading ml={"10px"} borderRadius={"100px"} fontSize={scale(15)} textTransform={"capitalize"} color={colors.white}>{"Whatsapp"}</Heading>
+                        <Image alt='logo-image' borderRadius={2000} resizeMode='contain' w={scale(35)} h={scale(35)} source={allNotifications.icon} />
+                        <Heading ml={"10px"} borderRadius={"100px"} fontSize={scale(15)} textTransform={"capitalize"} color={colors.white}>Todas</Heading>
                     </HStack>
-                    <Switch isChecked={whatsappNotifications} onChange={() => onSwitchChange("whatsapp", !whatsappNotifications)} mr={"10px"} />
-                </HStack>
+                    <Switch disabled={account.status !== "active"} isChecked={allNotifications.allow && account.status === "active"} onChange={() => onSwitchChange(allNotifications.id, !allNotifications.allow)} mr={"10px"} />
+                </HStack>               
                 <VStack borderRadius={10} pb={"3px"}>
-                    {notificationsScreenData({ pushNotifications, emailNotifications, smsNotifications }).map((item, index) => (
+                    {notificationsScreenData({ allowWhatsappNotification, allowPushNotification, allowEmailNotification, allowSmsNotification }).map((item, index) => (
                         <HStack justifyContent={"space-between"} key={`privacies-${index}-${item.name}`} w={"100%"} borderRadius={10} h={scale(45)} py={"10px"} space={2} >
                             <HStack h={scale(35)} justifyContent={"center"} alignItems={"center"}>
                                 <Image alt='logo-image' borderRadius={2000} resizeMode='contain' w={scale(35)} h={scale(35)} source={item.icon} />
                                 <Heading ml={"10px"} borderRadius={"100px"} fontSize={scale(15)} textTransform={index === 2 ? undefined : "capitalize"} color={colors.white}>{item.name}</Heading>
                             </HStack>
-                            <Switch isChecked={item.allow} defaultIsChecked onChange={(e) => onSwitchChange(item.name, !item.allow)} mr={"10px"} />
+                            <Switch isChecked={item.allow} defaultIsChecked onChange={() => onSwitchChange(item.id, !item.allow)} mr={"10px"} />
                         </HStack>
                     ))}
                 </VStack>

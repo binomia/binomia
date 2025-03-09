@@ -107,9 +107,6 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 						}
 					})
 
-					console.log(JSON.stringify({ payRequestTransaction: data }, null, 2));
-
-
 					await Promise.all([
 						dispatch(fetchRecentTransactions()),
 						dispatch(fetchAllTransactions({ page: 1, pageSize: 5 })),

@@ -73,9 +73,11 @@ import cashIn from './icons/cash-in.png';
 import suspicious from './icons/suspicous.png';
 import flagged from './icons/flagged.png';
 import location from './icons/location.png';
+import allIcon from './icons/all.png';
 
 
 export {
+    allIcon,
     errorIcon,
     location,
     flagged,

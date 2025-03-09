@@ -10,6 +10,10 @@ export class AccountApolloQueries {
                     allowSend
                     allowRequestMe
                     allowDeposit
+                    allowEmailNotification
+                    allowPushNotification
+                    allowSmsNotification
+                    allowWhatsappNotification
                 }
             }
         `
@@ -26,6 +30,10 @@ export class AccountApolloQueries {
                     allowSend
                     allowRequestMe    
                     allowDeposit
+                    allowEmailNotification
+                    allowPushNotification
+                    allowSmsNotification
+                    allowWhatsappNotification
                     status
                     sendLimit
                     receiveLimit
@@ -51,6 +59,10 @@ export class AccountApolloQueries {
                     allowSend
                     allowRequestMe    
                     allowDeposit
+                    allowEmailNotification
+                    allowPushNotification
+                    allowSmsNotification
+                    allowWhatsappNotification
                     status
                     sendLimit
                     receiveLimit
