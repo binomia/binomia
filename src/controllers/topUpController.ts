@@ -159,7 +159,7 @@ export class TopUpController {
             })
 
             if (phones.length > 0)
-                await redis.set(`topUpPhones:${session.userId}:${page}:${pageSize}`, JSON.stringify(phones))
+                await redis.set(`topUpPhones:${session.userId}:${page}:${pageSize}`, JSON.stringify(phones), 'EX', 10)
 
             return phones
 

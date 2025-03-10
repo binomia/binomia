@@ -1,21 +1,19 @@
-import { REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
-import redis from "@/redis";
-import cluster from 'cluster';
-import { Counter } from "prom-client";
+import { Counter, Gauge, Registry } from "prom-client";
 
-export default class UserMetrics {
-    private user: Counter
-    private users: Counter
-    private sessionUser: Counter
-    private searchUsers: Counter
-    private searchSingleUser: Counter
-    private userByEmail: Counter
-    private sugestedUsers: Counter
-    private createUser: Counter
-    private updateUser: Counter
-    private updateUserPassword: Counter
-    private login: Counter
-    private verifySession: Counter
+export default class PrometheusMetrics {
+    user: Counter
+    users: Counter
+    sessionUser: Counter
+    searchUsers: Counter
+    searchSingleUser: Counter
+    userByEmail: Counter
+    sugestedUsers: Counter
+    createUser: Counter
+    updateUser: Counter
+    updateUserPassword: Counter
+    login: Counter
+    verifySession: Counter
+    moneyFlow: Gauge
 
 
     constructor() {
@@ -78,69 +76,32 @@ export default class UserMetrics {
             name: `binomia_verify_session_graphql_total_calls`,
             help: `Number of times the verify_session resolver is called`,
         })
+
+        this.moneyFlow = new Gauge({
+            name: `binomia_total_money_flow`,
+            help: `Number of times the money_flow resolver is called`,
+        })
+
+        this.registerMetrics()
     }
 
-    prossessPrometheusMetrics = (name: string) => {
-        switch (name) {
-            case "user":
-                this.user.inc()
-                break;
 
-            case "users":
-                this.users.inc()
-                break;
+    registerMetrics() {
+        const register = new Registry();
+        register.registerMetric(this.user);
+        register.registerMetric(this.users);
+        register.registerMetric(this.sessionUser);
+        register.registerMetric(this.searchUsers);
+        register.registerMetric(this.searchSingleUser);
+        register.registerMetric(this.userByEmail);
+        register.registerMetric(this.sugestedUsers);
+        register.registerMetric(this.createUser);
+        register.registerMetric(this.updateUser);
+        register.registerMetric(this.updateUserPassword);
+        register.registerMetric(this.login);
+        register.registerMetric(this.verifySession);
+        register.registerMetric(this.moneyFlow);
 
-            case "session_user":
-                this.sessionUser.inc()
-                break;
-
-            case "search_users":
-                this.searchUsers.inc()
-                break;
-
-            case "search_single_user":
-                this.searchSingleUser.inc()
-                break;
-
-            case "user_by_email":
-                this.userByEmail.inc()
-                break;
-
-            case "sugested_users":
-                this.sugestedUsers.inc()
-                break;
-
-            case "create_user":
-                this.createUser.inc()
-                break;
-
-            case "update_user":
-                this.updateUser.inc()
-                break;
-
-            case "update_user_password":
-                this.updateUserPassword.inc()
-                break;
-
-            case "login":
-                this.login.inc()
-                break;
-
-            case "verify_session":
-                this.verifySession.inc()
-                break;
-
-            default:
-                break;
-        }
+        return register
     }
-
-    static sendPrometheusMetricsViaRedis = async (payload: string) => {
-        await redis.publish(REDIS_SUBSCRIPTION_CHANNEL.PROMETHEUS_METRICS, JSON.stringify({
-            channel: REDIS_SUBSCRIPTION_CHANNEL.PROMETHEUS_METRICS,
-            workerId: cluster.worker?.id,
-            payload
-        }));
-    }
-
 }

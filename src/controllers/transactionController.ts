@@ -8,6 +8,7 @@ import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
 import { queueServer } from '@/rpc/queueRPC';
 import { Span, SpanStatusCode, Tracer } from '@opentelemetry/api';
+import PrometheusMetrics from '@/metrics/PrometheusMetrics';
 
 export class TransactionsController {
     static transaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -63,7 +64,7 @@ export class TransactionsController {
         }
     }
 
-    static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, { req, tracer }: { req: any, tracer: Tracer }) => {
+    static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, { req, metrics, tracer }: { req: any, metrics: PrometheusMetrics, tracer: Tracer }) => {
         const span: Span = tracer.startSpan("createTransaction");
         try {
             span.addEvent("Starting transaction creation");
@@ -104,6 +105,11 @@ export class TransactionsController {
 
             span.setAttribute("queueServer.response", JSON.stringify(transaction));
             span.setStatus({ code: SpanStatusCode.OK });
+
+            if (transaction.status !== "suspicious") {
+                metrics.moneyFlow.inc(validatedData.amount);
+                console.log("metrics.createUser.inc();");
+            }
 
             return transaction
 

@@ -14,9 +14,10 @@ import { formatError } from "@/helpers";
 import { PORT } from "@/constants";
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
-import { collectDefaultMetrics, register } from 'prom-client';
+import { register } from 'prom-client';
 import { initTracing } from "@/tracing";
-import { metrics, Span, trace } from '@opentelemetry/api';
+import { Span, trace } from '@opentelemetry/api';
+import PrometheusMetrics from "@/metrics/PrometheusMetrics";
 
 
 // Define the Context Type
@@ -30,8 +31,9 @@ const app = express();
 const httpServer = http.createServer(app);
 
 // Collect default Node.js metrics
-collectDefaultMetrics();
+// collectDefaultMetrics();
 initTracing();
+const metrics = new PrometheusMetrics()
 
 
 const errorHandlingPlugin: ApolloServerPlugin = {
@@ -105,10 +107,6 @@ const tracingPlugin: ApolloServerPlugin<Context> = {
 
         await server.start();
 
-        const meter = metrics.getMeter('binomia-apollo-main-server');
-        const counter = meter.createCounter('transactions');
-
-        counter.add(1, { transaction: 'deposit' });
 
         // // 2) Create a custom /metrics endpoint
         app.get('/metrics', async (req, res) => {
@@ -122,8 +120,8 @@ const tracingPlugin: ApolloServerPlugin<Context> = {
             }),
             express.json(),
             expressMiddleware(server, {
-                context: async ({ req, res }) => {                    
-                    return { req, res, tracer };
+                context: async ({ req, res }) => {
+                    return { req, res, tracer, metrics };
                 }
             }),
         );

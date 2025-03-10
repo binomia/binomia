@@ -1,11 +1,10 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import KYCModel from '@/models/kycModel';
-import UserMetrics from '@/metrics/userMetrics';
 import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel, SessionModel } from '@/models'
 import { Op } from 'sequelize'
 import { getQueryResponseFields, checkForProtectedRequests, GENERATE_SIX_DIGIT_TOKEN } from '@/helpers'
-import {ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
+import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
 import { GlobalZodSchema, UserJoiSchema } from '@/auth';
 import { UserModelType, VerificationDataType } from '@/types';
@@ -15,6 +14,7 @@ import { generate } from 'short-uuid';
 import { z } from 'zod'
 import { Counter } from 'prom-client';
 import { notificationServer } from '@/rpc/notificationRPC';
+import PrometheusMetrics from '@/metrics/PrometheusMetrics';
 
 
 export class UsersController {
@@ -140,11 +140,12 @@ export class UsersController {
         }
     }
 
-    static sessionUser = async (_: unknown, ___: any, { __, req }: { __: any, req: any }) => {
+    // type instanceof PrometheusMetrics
+    static sessionUser = async (_: unknown, ___: any, { metrics, req }: { metrics: PrometheusMetrics, req: any }) => {
         try {
             const session = await checkForProtectedRequests(req);
 
-            await UserMetrics.sendPrometheusMetricsViaRedis("sessionUser")
+            metrics.sessionUser.inc()
             return session.user
 
         } catch (error: any) {
