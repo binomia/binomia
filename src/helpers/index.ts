@@ -162,12 +162,19 @@ export const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2
     return +Number(R * c).toFixed(2);
 }
 
+export const calcularTime = (velocidad: number, distancia: number): number => {
+    if (velocidad === 0 || distancia === 0)
+        return 0
+
+    return +Number(distancia / velocidad).toFixed(3);
+}
+
 export const calculateSpeed = (distanceKm: number, timeDiffMs: number): number => {
     const timeDiffHours = timeDiffMs / (1000 * 60 * 60); // Convert milliseconds to hours
     return +Number(timeDiffHours > 0 ? distanceKm / timeDiffHours : 0).toFixed(2);
 }
 
-export  const fetchGeoLocation = async ({ latitude, longitude }: { latitude: number, longitude: number }) => {
+export const fetchGeoLocation = async ({ latitude, longitude }: { latitude: number, longitude: number }) => {
     try {
         const client = new Client();
 

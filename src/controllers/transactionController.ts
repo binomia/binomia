@@ -1,6 +1,6 @@
 import { TransactionJoiSchema } from "@/auth/transactionJoiSchema"
 import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants"
-import { calculateDistance, calculateSpeed, fetchGeoLocation, FORMAT_CURRENCY, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
+import { calcularTime, calculateDistance, calculateSpeed, fetchGeoLocation, FORMAT_CURRENCY, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
 import { Cryptography } from "@/helpers/cryptography"
 import { AccountModel, BankingTransactionsModel, CardsModel, QueuesModel, SessionModel, TransactionsModel, UsersModel } from "@/models"
 import { transactionsQueue } from "@/queues"
@@ -321,6 +321,8 @@ export default class TransactionController {
             const speed = calculateSpeed(distance, timeDifference)
             const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
 
+            const time = calcularTime(speed, distance)
+
             const newTransactionData = {
                 transactionId,
                 fromAccount: senderAccountJSON.id,
@@ -394,7 +396,6 @@ export default class TransactionController {
                     }
                 })
 
-
             const flaggedTransactionsCount = await TransactionsModel.count({
                 where: {
                     [Op.and]: [
@@ -405,7 +406,7 @@ export default class TransactionController {
                 }
             })
 
-            console.log({ detectedFraudulentTransaction, flaggedTransactionsCount });
+            console.log({ detectedFraudulentTransaction, timeDifference, time, flaggedTransactionsCount });
 
             if (detectedFraudulentTransaction.is_fraud) {
                 await Promise.all([
@@ -465,10 +466,7 @@ export default class TransactionController {
                 if (recurrenceData.time !== "oneTime") {
                     const recurrenceQueueData = Object.assign(newTransactionData, {
                         transactionId: `${shortUUID.generate()}${shortUUID.generate()}`,
-                        recurrenceData: {
-                            time: "oneTime",
-                            title: "oneTime"
-                        },
+                        recurrenceData,
                         location: {}
                     })
 
