@@ -132,14 +132,14 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
 
     const handleOnPress = async () => {
         try {
-            setLoading(true)
             const authenticated = await authenticate()
-            if (authenticated.success)
+            if (authenticated.success) {
+                setLoading(true)
                 await handleOnSend({
                     title: recurrence,
                     time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
                 })
-
+            }
         } catch (error) {
             setLoading(false)
             console.log({ handleOnSend: error });

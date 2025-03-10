@@ -156,15 +156,16 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 
     const handleOnPress = async () => {
         try {
-            setLoading(true)
             await validateIfCanSend()
             const authenticated = await authenticate()
 
-            if (authenticated.success)
+            if (authenticated.success) {
+                setLoading(true)
                 await handleOnSend({
                     title: "oneTime",
                     time: "oneTime"
                 })
+            }
 
         } catch (error) {
             setLoading(false)
