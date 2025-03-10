@@ -67,18 +67,21 @@ export const fetchAllTransactions = createAsyncThunk('fetchAllTransactions', asy
         const { data: { recentTopUps } } = await apolloClient.query({ query: TopUpApolloQueries.recentTopUps(), variables: { page, pageSize } });
 
 
+
         const topupsMapped = recentTopUps?.map((topup: any) => {
+            const date = Number(topup.createdAt);
             return {
                 type: "topup",
-                timestamp: topup.createdAt,
+                timestamp: isNaN(date) ? moment(topup.createdAt).valueOf() : date,
                 data: topup
             }
         })
 
         const transactionsMapped = accountTransactions?.map((transaction: any) => {
+            const date = Number(transaction.createdAt);
             return {
                 type: "transaction",
-                timestamp: transaction.createdAt,
+                timestamp: isNaN(date) ? moment(transaction.createdAt).valueOf() : date,
                 data: transaction
             }
         })

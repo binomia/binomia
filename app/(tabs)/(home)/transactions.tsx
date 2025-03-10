@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState, useRef } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
 import BottomSheet from '@/components/global/BottomSheet';
-import moment from 'moment';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import SendTransaction from '@/components/transaction/SendTransaction';
 import PagerView from 'react-native-pager-view';
@@ -14,7 +13,7 @@ import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ScrollView, 
 import { useLazyQuery } from '@apollo/client'
 import { AccountApolloQueries, UserApolloQueries } from '@/apollo/query'
 import { UserAuthSchema } from '@/auth/userAuth'
-import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CREATED_DATE, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
@@ -22,10 +21,9 @@ import { noTransactions, pendingClock } from '@/assets';
 import { router } from 'expo-router';
 import { fetchAllTransactions, searchAccountTransactions } from '@/redux/fetchHelper';
 
-type Props = {}
 
 const { height, width } = Dimensions.get('window')
-const Transactions: React.FC<Props> = ({ }: Props) => {
+const Transactions: React.FC = () => {
 	const ref = useRef<PagerView>(null);
 	const dispatch = useDispatch()
 	const { user } = useSelector((state: any) => state.accountReducer)
@@ -254,7 +252,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 												}
 												<VStack ml={"10px"} justifyContent={"center"}>
 													<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(formatTransaction(data).fullName || "")}</Heading>
-													<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(data.createdAt)).format("lll")}</Text>
+													<Text fontSize={scale(10)} color={colors.lightSkyGray}>{FORMAT_CREATED_DATE(data?.createdAt)}</Text>
 												</VStack>
 											</HStack>
 											<VStack ml={"10px"} justifyContent={"center"}>
@@ -284,7 +282,7 @@ const Transactions: React.FC<Props> = ({ }: Props) => {
 												}
 												<VStack ml={"10px"} justifyContent={"center"}>
 													<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(data?.phone?.fullName || "")}</Heading>
-													<Text fontSize={scale(10)} color={colors.lightSkyGray}>{moment(Number(data?.createdAt)).format("lll")}</Text>
+													<Text fontSize={scale(10)} color={colors.lightSkyGray}>{FORMAT_CREATED_DATE(data?.createdAt)}</Text>
 												</VStack>
 											</HStack>
 											<VStack ml={"10px"} justifyContent={"center"}>
