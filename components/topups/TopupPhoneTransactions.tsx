@@ -190,7 +190,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                                         <HStack alignItems={"center"} justifyContent={"space-between"} my={"10px"} borderRadius={10}>
                                             <HStack>
                                                 {formatTransaction(item).profileImageUrl ?
-                                                    <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(item).profileImageUrl }} />
+                                                    <Image borderRadius={100} resizeMode='contain' alt='logo-image-transactions' w={scale(40)} h={scale(40)} source={{ uri: formatTransaction(item).profileImageUrl }} />
                                                     :
                                                     <Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(formatTransaction(item).fullName || "")}>
                                                         <Heading size={"sm"} color={colors.white}>
@@ -220,7 +220,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                         </VStack>
                         : (
                             <VStack mt={"20px"} w={"100%"} h={height / 3} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
-                                <Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
+                                <Image resizeMode='contain' alt='logo-image-resizeMode' w={"100%"} h={"100%"} source={noTransactions} />
                                 <VStack justifyContent={"center"} alignItems={"center"}>
                                     <Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No hay transacciones</Heading>
                                     <Text fontSize={scale(14)} color={"white"}>Todavía no hay transacciones para mostrar</Text>

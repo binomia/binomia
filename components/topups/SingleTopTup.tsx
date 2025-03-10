@@ -30,14 +30,14 @@ const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
             return (
                 <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
                     <HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
-                    <Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={checked} />
+                    <Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image1' w={"100%"} h={"100%"} source={checked} />
                 </ZStack>
             )
         } else if (status === "cancelled") {
             return (
                 <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
                     <HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
-                    <Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={cancelIcon} />
+                    <Image borderRadius={100} alt='logo-image2' w={"100%"} h={"100%"} source={cancelIcon} />
                 </ZStack>
             )
 
@@ -45,14 +45,14 @@ const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
             return (
                 <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
                     <HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
-                    <Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
+                    <Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image3' w={"100%"} h={"100%"} source={pendingClock} />
                 </ZStack>
             )
         } else if (status === "requested") {
             return (
                 <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
                     <HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
-                    <Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
+                    <Image borderRadius={100} alt='logo-image4' w={"100%"} h={"100%"} source={pendingClock} />
                 </ZStack>
             )
         }
@@ -69,7 +69,7 @@ const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
         <BottomSheet height={height * 0.50} open={open} onCloseFinish={onCloseFinish}>
             <VStack px={"20px"} pt={"30px"} w={"100%"} h={"80%"} justifyContent={"space-between"}>
                 <HStack alignItems={"center"}>
-                    <Image borderRadius={"100px"} w={"55px"} h={"55px"} alt={"top-image"} resizeMode='contain' source={{ uri: topup.company?.logo }} />
+                    <Image borderRadius={"100px"} w={"55px"} h={"55px"} alt={"top-images"} resizeMode='contain' source={{ uri: topup.company?.logo }} />
                     <VStack ml={"10px"} justifyContent={"center"}>
                         <Heading fontSize={scale(16)} color={colors.pureGray} textTransform={"capitalize"}>{topup.phone?.fullName}</Heading>
                         <Text fontWeight={"semibold"} fontSize={scale(12)} color={colors.pureGray}>{FORMAT_PHONE_NUMBER(topup.phone?.phone || "")}</Text>

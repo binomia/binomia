@@ -9,7 +9,7 @@ import { Dimensions, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } f
 import { Heading, Image, Text, VStack, FlatList, HStack, Spinner, Pressable, ScrollView, ZStack } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { TopUpApolloQueries } from '@/apollo/query'
-import { FORMAT_CURRENCY, FORMAT_PHONE_NUMBER } from '@/helpers'
+import { FORMAT_CREATED_DATE, FORMAT_CURRENCY, FORMAT_PHONE_NUMBER } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
@@ -90,14 +90,14 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
             return (
                 <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
                     <HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
-                    <Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={checked} />
+                    <Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image-completed' w={"100%"} h={"100%"} source={checked} />
                 </ZStack>
             )
         } else if (status === "cancelled") {
             return (
                 <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
                     <HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
-                    <Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={cancelIcon} />
+                    <Image borderRadius={100} alt='logo-image-cancel' w={"100%"} h={"100%"} source={cancelIcon} />
                 </ZStack>
             )
 
@@ -105,14 +105,14 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
             return (
                 <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
                     <HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
-                    <Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
+                    <Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image-pending' w={"100%"} h={"100%"} source={pendingClock} />
                 </ZStack>
             )
         } else if (status === "requested") {
             return (
                 <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
                     <HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
-                    <Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
+                    <Image borderRadius={100} alt='logo-image-requested' w={"100%"} h={"100%"} source={pendingClock} />
                 </ZStack>
             )
         }
@@ -169,7 +169,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
         isLoading ? <TransactionSkeleton /> : (
             <VStack flex={1} bg={colors.darkGray}>
                 <VStack px={"20px"} w={"100%"} alignItems={"center"}>
-                    <Image borderRadius={"100px"} w={"70px"} h={"70px"} alt={topup.fullName} resizeMode='contain' source={{ uri: topup.company?.logo }} />
+                    <Image borderRadius={"100px"} w={"70px"} h={"70px"} alt={topup.fullName + "logo"} resizeMode='contain' source={{ uri: topup.company?.logo }} />
                     <Heading mt={"10px"} fontSize={scale(18)} textTransform={"capitalize"} color={colors.white}>{topup.fullName}</Heading>
                     <Text fontSize={scale(14)} color={colors.white}>{FORMAT_PHONE_NUMBER(topup.phone || "")}</Text>
                 </VStack>
@@ -195,7 +195,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                                             </HStack>
                                             <VStack ml={"10px"} justifyContent={"center"}>
                                                 <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{FORMAT_CURRENCY(item.amount)}</Heading>
-                                                <Text fontSize={scale(12)} color={colors.lightSkyGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
+                                                <Text fontSize={scale(12)} color={colors.lightSkyGray}>{FORMAT_CREATED_DATE(item?.createdAt)}</Text>
                                             </VStack>
                                         </HStack>
                                     </HStack>
@@ -208,7 +208,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                 <BottomSheet height={height * 0.50} open={openBottomSheet} onCloseFinish={onCloseFinish}>
                     <VStack px={"20px"} pt={"30px"} w={"100%"} h={"80%"} justifyContent={"space-between"}>
                         <HStack alignItems={"center"}>
-                            <Image borderRadius={"100px"} w={"55px"} h={"55px"} alt={transaction.fullName} resizeMode='contain' source={{ uri: topup.company?.logo }} />
+                            <Image borderRadius={"100px"} w={"55px"} h={"55px"} alt={transaction.fullName + "bottomSheet"} resizeMode='contain' source={{ uri: topup.company?.logo }} />
                             <VStack ml={"10px"} justifyContent={"center"}>
                                 <Heading fontSize={scale(16)} color={colors.pureGray} textTransform={"capitalize"}>{topup.fullName}</Heading>
                                 <Text fontWeight={"semibold"} fontSize={scale(12)} color={colors.pureGray}>{FORMAT_PHONE_NUMBER(topup.phone || "")}</Text>

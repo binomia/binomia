@@ -123,7 +123,7 @@ const Topups: React.FC = () => {
                     spacing={15}
                     renderItem={({ item: topUp }) => (
                         <Pressable key={topUp.phone} style={[styles.itemContainer]} _pressed={{ opacity: 0.5 }} onPress={() => onSelectedPhone(topUp)}>
-                            <Image borderRadius={"100px"} w={"50px"} h={"50px"} alt={`${topUp.phone}`} resizeMode='contain' source={{ uri: topUp.company?.logo }} />
+                            <Image borderRadius={"100px"} w={"50px"} h={"50px"} alt={`${topUp.phone}-image`} resizeMode='contain' source={{ uri: topUp.company?.logo }} />
                             <Heading mt={"10px"} textTransform={"capitalize"} fontSize={scale(12)} color={colors.white}>{topUp.fullName}</Heading>
                             <Text fontSize={scale(11)} color={colors.white}>{FORMAT_PHONE_NUMBER(topUp.phone)}</Text>
                         </Pressable>
@@ -131,7 +131,7 @@ const Topups: React.FC = () => {
                 />
             ) : (
                 <VStack mt={"100px"} w={"100%"} h={height / 3} px={"20px"} justifyContent={"flex-end"} alignItems={"center"}>
-                    <Image resizeMode='contain' alt='logo-image' w={"100%"} h={"100%"} source={noTransactions} />
+                    <Image resizeMode='contain' alt='logo-image-fetchTopUpPhones' w={"100%"} h={"100%"} source={noTransactions} />
                     <VStack justifyContent={"center"} alignItems={"center"}>
                         <Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>No tienes recargas</Heading>
                         <Text textAlign={"center"} fontSize={scale(14)} color={"white"}>Agrega un nuevo número de teléfono para realizar una recarga</Text>

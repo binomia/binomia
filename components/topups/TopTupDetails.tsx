@@ -89,9 +89,9 @@ const TopTupDetails: React.FC<Props> = ({ goBack = () => { }, onClose = (_?: any
 
     const handleOnPress = async () => {
         try {
-            setLoading(true)
             const authenticated = await authenticate()
             if (authenticated.success) {
+                setLoading(true)
                 await handleOnSend({
                     title: recurrence,
                     time: recurrence === "biweekly" ? recurrence : recurrence === "monthly" ? recurrenceDaySelected : recurrence === "weekly" ? recurrenceSelected : recurrence
@@ -173,7 +173,7 @@ const TopTupDetails: React.FC<Props> = ({ goBack = () => { }, onClose = (_?: any
                 <VStack pb={"30px"} mt={"10px"} flex={1} justifyContent={"space-between"} alignItems={"center"} borderRadius={10}>
                     <VStack alignItems={"center"} justifyContent={"center"}>
                         <HStack my={"10px"}>
-                            <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(60)} h={scale(60)} source={{ uri: newTopUp.logo }} />
+                            <Image borderRadius={100} resizeMode='contain' alt='logo-image-details' w={scale(60)} h={scale(60)} source={{ uri: newTopUp.logo }} />
                         </HStack>
                         <Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(newTopUp?.fullName || "")}</Heading>
                         <Text fontSize={scale(16)} color={colors.lightSkyGray}>{FORMAT_PHONE_NUMBER(newTopUp?.phone || "")}</Text>
