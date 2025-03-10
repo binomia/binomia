@@ -193,7 +193,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 					</Pressable>
 				</HStack>
 				<VStack>
-					<VStack mt={"10px"} alignItems={"center"}>
+					<VStack mt={"30px"} alignItems={"center"}>
 						<Heading textTransform={"capitalize"} fontSize={scale(34)} color={colors.white}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
 						<Text color={colors.lightSkyGray}>{FORMAT_CREATED_DATE(transaction?.createdAt)}</Text>
 						{transaction.isFromMe ? <VStack my={"15px"} textAlign={"center"} space={1} alignItems={"center"}>

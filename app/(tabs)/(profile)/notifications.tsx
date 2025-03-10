@@ -49,6 +49,11 @@ const NotificationsScreen: React.FC = () => {
                 })
 
                 await dispatch(accountActions.setAccount(data.updateAccountPermissions))
+
+                const { allowEmailNotification, allowPushNotification, allowSmsNotification, allowWhatsappNotification } = data.updateAccountPermissions
+                setAllNotifications(Object.assign({}, allNotifications, {
+                    allow: allowEmailNotification && allowPushNotification && allowSmsNotification && allowWhatsappNotification ? true : false
+                }))
             }
 
         } catch (error) {
@@ -65,7 +70,7 @@ const NotificationsScreen: React.FC = () => {
                         <Heading ml={"10px"} borderRadius={"100px"} fontSize={scale(15)} textTransform={"capitalize"} color={colors.white}>Todas</Heading>
                     </HStack>
                     <Switch disabled={account.status !== "active"} isChecked={allNotifications.allow && account.status === "active"} onChange={() => onSwitchChange(allNotifications.id, !allNotifications.allow)} mr={"10px"} />
-                </HStack>               
+                </HStack>
                 <VStack borderRadius={10} pb={"3px"}>
                     {notificationsScreenData({ allowWhatsappNotification, allowPushNotification, allowEmailNotification, allowSmsNotification }).map((item, index) => (
                         <HStack justifyContent={"space-between"} key={`privacies-${index}-${item.name}`} w={"100%"} borderRadius={10} h={scale(45)} py={"10px"} space={2} >

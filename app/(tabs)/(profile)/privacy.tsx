@@ -3,7 +3,6 @@ import colors from '@/colors'
 import { Image, VStack, HStack, Switch, FlatList, Heading } from 'native-base'
 import { useDispatch, useSelector } from 'react-redux'
 import { scale } from 'react-native-size-matters'
-import { globalActions } from '@/redux/slices/globalSlice'
 import { useMutation } from '@apollo/client'
 import { AccountApolloQueries } from '@/apollo/query'
 import { privacyScreenData } from '@/mocks'
@@ -14,18 +13,17 @@ const PrivacyScreen: React.FC = () => {
     const dispatch = useDispatch()
     const { account } = useSelector((state: any) => state.accountReducer)
     const [updateAccountPermissions] = useMutation(AccountApolloQueries.updateAccountPermissions())
+
+    const { allowSend, allowReceive, allowWithdraw, allowDeposit, allowRequestMe } = account
     const [allPrivacy, setAllPrivacy] = React.useState<{ id: string, allow: boolean, icon: any }>({
         id: "all",
-        allow: true,
+        allow: allowSend && allowReceive && allowWithdraw && allowDeposit && allowRequestMe ? true : false,
         icon: allIcon
     })
 
     const onSwitchChange = async (id: string, allow: boolean) => {
         try {
-            if (id === "allowFaceId") {
-                await dispatch(globalActions.setAllowFaceId(allow))
-
-            } else if (id === "all") {
+            if (id === "all") {
                 const { data } = await updateAccountPermissions({
                     variables: {
                         data: {
@@ -50,6 +48,11 @@ const PrivacyScreen: React.FC = () => {
                 })
 
                 await dispatch(accountActions.setAccount(data.updateAccountPermissions))
+                const { allowSend, allowReceive, allowWithdraw, allowDeposit, allowRequestMe } = data.updateAccountPermissions
+                setAllPrivacy(Object.assign({}, allPrivacy, {
+                    allow: allowSend && allowReceive && allowWithdraw && allowDeposit && allowRequestMe ? true : false
+                }))
+
             }
 
         } catch (error) {
@@ -66,7 +69,7 @@ const PrivacyScreen: React.FC = () => {
                         <Image alt='logo-image' borderRadius={2000} resizeMode='contain' w={scale(35)} h={scale(35)} source={allPrivacy.icon} />
                         <Heading ml={"10px"} borderRadius={"100px"} fontSize={scale(15)} textTransform={"capitalize"} color={colors.white}>Todas</Heading>
                     </HStack>
-                    <Switch disabled={account.status !== "active"} isChecked={allPrivacy.allow && account.status === "active"} onChange={() => onSwitchChange(allPrivacy.id, !allPrivacy.allow)} mr={"10px"} />
+                    <Switch disabled={account.status !== "active"} isChecked={allPrivacy.allow} onChange={() => onSwitchChange(allPrivacy.id, !allPrivacy.allow)} mr={"10px"} />
                 </HStack>
                 <FlatList
                     data={privacyScreenData(account)}
