@@ -27,7 +27,7 @@ type Props = {
 }
 
 const { height } = Dimensions.get('window')
-const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => {}, onClose = () => { }, openToEdit = false }: Props) => {
+const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => { }, onClose = () => { }, openToEdit = false }: Props) => {
     const ref = useRef<PagerView>(null);
     const [fetchCards] = useLazyQuery(CardApolloQueries.cards())
     const [fetchCard] = useLazyQuery(CardApolloQueries.card())
@@ -138,7 +138,7 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => {}, onClose =
 
     const StickyFooter: React.FC = () => {
         return (
-            <HStack w={"100%"} px={"20px"} py={"10px"} bg={colors.darkGray} justifyContent={"space-between"}>
+            <HStack w={"100%"} px={"20px"} mt={"40px"} py={"10px"} bg={colors.darkGray} justifyContent={"space-between"}>
                 <Button
                     w={"49%"}
                     bg={colors.mainGreen}
@@ -174,7 +174,7 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => {}, onClose =
 
     return (
         <PagerView style={{ flex: 0.95 }} initialPage={0} ref={ref}>
-            <KeyboardAvoidingScrollView stickyFooter={<StickyFooter />}>
+            <KeyboardAvoidingScrollView>
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <VStack flex={1} p={"20px"}>
                         <HStack alignItems={"center"} bg={colors.lightGray} w={"100%"} py={scale(height * 0.015)} borderRadius={10}>
@@ -207,6 +207,7 @@ const CreateCard: React.FC<Props> = ({ onPress = async (_: any) => {}, onClose =
                                 Agregue tarjeta como principal.
                             </Text>
                         </HStack>
+                        <StickyFooter />
                     </VStack>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingScrollView>

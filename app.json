@@ -142,6 +142,12 @@
           "organization": "brayhan-qo"
         }
       ]
-    ]
+    ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/81aae9d0-025a-4c2c-b773-576219463b70"
+    }
   }
 }

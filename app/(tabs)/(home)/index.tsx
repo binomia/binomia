@@ -3,6 +3,7 @@ import colors from '@/colors';
 import Button from '@/components/global/Button';
 import QRScannerScreen from '@/components/global/QRScanner';
 import RecentTransactions from '@/components/transaction/RecentTransactions';
+import * as Sentry from '@sentry/react-native';
 import { Alert, Dimensions, RefreshControl } from 'react-native'
 import { Heading, HStack, Image, Pressable, VStack, Text, ScrollView } from 'native-base';
 import { bagIcon, bills, cars, house, phone, sendIcon } from '@/assets';
@@ -15,7 +16,6 @@ import { router, useNavigation } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
-import * as Sentry from '@sentry/react-native';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
@@ -24,8 +24,7 @@ const HomeScreen: React.FC = () => {
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
 	const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
 
-	const isFocused = useNavigation().isFocused()
-
+	const navigation = useNavigation()
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const [refreshing, setRefreshing] = useState(false);
 
@@ -118,7 +117,6 @@ const HomeScreen: React.FC = () => {
 		}
 	]
 
-
 	const onPress = async (route: string) => {
 		const { data } = await accountStatus()
 		if (data.account.status === "flagged")
@@ -137,23 +135,13 @@ const HomeScreen: React.FC = () => {
 		}
 	}
 
-
 	useEffect(() => {
-		if (isFocused) {
+		navigation.addListener('focus', () => {
 			(async () => {
-				await fetchAccount()
 				await onRefresh(false)
 			})()
-		}
-
-	}, [isFocused])
-
-	// useEffect(() => {
-	// 	dispatch(fetchRecentTransactions())
-	// }, [])
-
-
-
+		})
+	}, [])
 
 	return (
 		<VStack p={"20px"} w={width} bg={colors.darkGray} flex={1} alignItems={"center"}>
