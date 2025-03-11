@@ -16,8 +16,6 @@ import { SocketContextProvider } from '@/contexts/socketContext';
 import { TopUpContextProvider } from '@/contexts/topUpContext';
 import { RouterContextProvider } from '@/contexts/RouterContext';
 import * as Sentry from '@sentry/react-native';
-import Constants, { ExecutionEnvironment } from "expo-constants";
-
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const SpaceMono = require('../fonts/SpaceMono-Regular.ttf');
@@ -58,20 +56,7 @@ const Layout = () => {
 	useEffect(() => {
 		Sentry.init({
 			dsn: "https://fbfc6726bd4ce4d8269b85359bf908fe@o4508923661058048.ingest.us.sentry.io/4508928816906240",
-			debug: false,
-			tracesSampleRate: 1.0,
-			replaysOnErrorSampleRate: 1.0,
-			replaysSessionSampleRate: 1.0,
-			enableNativeFramesTracking: Constants.executionEnvironment === ExecutionEnvironment.StoreClient,
-			attachViewHierarchy: true,
-			autoInitializeNativeSdk: true,					
-			integrations: [
-				Sentry.mobileReplayIntegration({
-					maskAllText: true,
-					maskAllImages: true,
-					maskAllVectors: true					
-				})
-			],
+			debug: false			
 		});
 	}, []);
 

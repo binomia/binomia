@@ -1,9 +1,14 @@
-const {
-  getSentryExpoConfig
-} = require("@sentry/react-native/metro");
-/** @type {import('expo/metro-config').MetroConfig} */
+const { getDefaultConfig } = require("expo/metro-config");
 
+module.exports = (() => {
+  const config = getDefaultConfig(__dirname);
 
-const config = getSentryExpoConfig(__dirname);
-config.resolver.sourceExts.push('sql');
-module.exports = config;
+  config.resolver.extraNodeModules = {
+    ...config.resolver.extraNodeModules,
+    crypto: require.resolve("crypto-browserify"),
+    stream: require.resolve("stream-browserify"),
+    buffer: require.resolve("buffer"),
+  };
+
+  return config;
+})();
