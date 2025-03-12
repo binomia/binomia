@@ -16,6 +16,7 @@ import { router, useNavigation } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
+import { Cryptography } from '@/helpers/cryptography';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
@@ -82,8 +83,7 @@ const HomeScreen: React.FC = () => {
 			name: "Seguros",
 			image: cars,
 			onPress: () => {
-				const message = Sentry.captureMessage('seguros');
-				console.log({ message });
+
 			}
 		},
 		{
@@ -113,7 +113,30 @@ const HomeScreen: React.FC = () => {
 			id: 3,
 			name: "Facturas",
 			image: bills,
-			onPress: () => { }
+			onPress: async () => {
+				const publicKey = "10001.71575f6805716c6ba473c15f1e74d2a4d3cb2fe0a11b092f4cf0268d29c63241afa92b722af0afdbe626373642f5f8e4bffa3c2199dec92cfe991fbc157123dd"
+
+				const message = JSON.stringify({
+					"data": {
+						"receiver": "$brayhandeaza",
+						"amount": 10,
+						"transactionType": "transfer",
+						"currency": "DOP",
+						"location": {
+							"latitude": -17.5162,
+							"longitude": -136.5157
+						}
+					},
+					"recurrence": {
+						"time": "oneTime",
+						"title": "oneTime"
+					}
+				});
+
+				const encrypted = await Cryptography.encrypt(message, publicKey);
+				console.log("Encrypted:", encrypted);
+
+			}
 		}
 	]
 

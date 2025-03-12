@@ -1,14 +1,8 @@
-const { getDefaultConfig } = require("expo/metro-config");
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { getSentryExpoConfig } = require("@sentry/react-native/metro");
+/** @type {import('expo/metro-config').MetroConfig} */
 
-module.exports = (() => {
-  const config = getDefaultConfig(__dirname);
 
-  config.resolver.extraNodeModules = {
-    ...config.resolver.extraNodeModules,
-    crypto: require.resolve("crypto-browserify"),
-    stream: require.resolve("stream-browserify"),
-    buffer: require.resolve("buffer"),
-  };
-
-  return config;
-})();
+const config = getSentryExpoConfig(__dirname);
+config.resolver.sourceExts.push('sql');
+module.exports = config;
