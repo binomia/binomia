@@ -177,7 +177,6 @@ const Transactions: React.FC = () => {
 		})()
 	}, [])
 
-
 	return (
 
 		<VStack flex={1} pt={"20px"} bg={colors.darkGray}>
@@ -212,7 +211,7 @@ const Transactions: React.FC = () => {
 									{user.profileImageUrl ?
 										<Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(55)} h={scale(55)} source={{ uri: user.profileImageUrl }} />
 										:
-										<Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user.fullName || "")}>
+										<Avatar borderRadius={100} w={scale(55)} h={scale(55)}  bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user.fullName || "")}>
 											<Heading size={"sm"} color={colors.white}>
 												{EXTRACT_FIRST_LAST_INITIALS(user.fullName || "0")}
 											</Heading>

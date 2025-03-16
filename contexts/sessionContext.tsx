@@ -92,7 +92,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
         }
     }
 
-    const sendVerificationCode = async (to: string) => {
+    const sendVerificationCode = async () => {
         try {
             
 
@@ -169,7 +169,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
 
             return createUserResponse.data
-        } catch (error) {
+        } catch (_) {
             setInvalidCredentials(true)
         }
     }

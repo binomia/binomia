@@ -100,16 +100,16 @@ const ProfileScreen: React.FC = () => {
 										</Pressable>
 										:
 										<Pressable onPress={() => pickImage()} _pressed={{ opacity: 0.5 }}>
-											<Avatar borderRadius={100} w={"65px"} h={"65px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user?.fullName || "")}>
+											<Avatar borderRadius={100}  w={scale(60)} h={scale(60)} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(user?.fullName || "")}>
 												<Heading color={colors.white}>
 													{EXTRACT_FIRST_LAST_INITIALS(user?.fullName || "0")}
 												</Heading>
 											</Avatar>
 										</Pressable>
 									}
-									<HStack w={"90%"} justifyContent={"flex-end"} bottom={0}>
-										<Pressable onPress={() => pickImage()} _pressed={{ opacity: 0.5 }} w={"25px"} h={"25px"} borderRadius={100} bg={colors.lightGray} justifyContent={"center"} alignItems={"center"}>
-											<Fontisto name="camera" size={12} color="white" />
+									<HStack w={"90%"} justifyContent={"flex-end"}  bottom={0}>
+										<Pressable onPress={() => pickImage()} _pressed={{ opacity: 0.5 }} w={"25px"} h={"25px"}  borderRadius={100} bg={colors.darkGray} justifyContent={"center"} alignItems={"center"}>
+											<Fontisto name="camera" size={12} color={colors.white} />
 										</Pressable>
 									</HStack>
 									{isLoading ?

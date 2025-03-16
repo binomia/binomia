@@ -2,6 +2,7 @@ import * as Crypto from 'expo-crypto'; // Import expo-crypto
 import { Buffer } from "buffer";
 import CryptoJS from "crypto-js";
 
+
 export class Cryptography {
     // AES Encryption
     static async AESEncrypt(plainText: string, aesKey: string): Promise<string> {
