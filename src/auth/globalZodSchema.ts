@@ -11,12 +11,12 @@ export class GlobalZodSchema {
     })
 
     static header = z.object({
-        "session-auth-identifier": z.string().length(64, 'base64').transform((val) => val.trim()),
+        "deviceid": z.string().length(64, 'base64').transform((val) => val.trim()),
         authorization: z.string(),
         device: z.object({}).passthrough().optional().default({}),
     })
     static registerHeader = z.object({
-        "session-auth-identifier": z.string().length(64, 'base64').transform((val) => val.trim()),
+        "deviceid": z.string().length(64, 'base64').transform((val) => val.trim()),
         device: z.string(),
     })
 

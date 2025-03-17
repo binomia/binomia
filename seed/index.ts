@@ -198,7 +198,7 @@ const createBinomiaUser = async () => {
 
         await SessionModel.create({
             sid,
-            deviceId: registerHeader['session-auth-identifier'],
+            deviceId: registerHeader['deviceid'],
             jwt: token,
             userId: user.dataValues.id,
             expires,

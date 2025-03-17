@@ -106,12 +106,7 @@ export class TransactionsController {
             span.setAttribute("queueServer.response", JSON.stringify(transaction));
             span.setStatus({ code: SpanStatusCode.OK });
 
-            if (transaction.status !== "suspicious") {
-                metrics.moneyFlow.inc(validatedData.amount);
-                console.log("metrics.createUser.inc();");
-            }
-
-            return transaction
+           return transaction
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
