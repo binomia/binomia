@@ -6,6 +6,9 @@ import { TopUpSchema } from '@/auth';
 import { queueServer } from '@/rpc/queueRPC';
 import shortUUID from 'short-uuid';
 import redis from '@/redis';
+import { AES } from 'cryptografia';
+import { ZERO_ENCRYPTION_KEY } from '@/constants';
+
 
 
 export class TopUpController {
@@ -168,23 +171,27 @@ export class TopUpController {
         }
     }
 
-    static createTopUp = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
+    static createTopUp = async (_: unknown, { message }: { message: string }, context: any) => {
         try {
-            const session = await checkForProtectedRequests(context.req);
+            const { userId, user } = await checkForProtectedRequests(context.req);
+
+            const decryptedMessage = await AES.decrypt(message, ZERO_ENCRYPTION_KEY)
+            const { data, recurrence } = JSON.parse(decryptedMessage)
+
             const topUpData = await TopUpSchema.createTopUp.parseAsync(data)
             const recurrenceData = await TopUpSchema.recurrenceTopUp.parseAsync(recurrence)
 
             const referenceId = `${shortUUID.generate()}${shortUUID.generate()}`
             const topUp = await queueServer("createTopUp", {
                 amount: topUpData.amount,
-                userId: session.userId,
+                userId,
                 data: {
                     referenceId,
                     ...topUpData,
                     phoneNumber: topUpData.phone,
-                    senderUsername: session.user.username,
+                    senderUsername: user.username,
                     recurrenceData,
-                    userId: session.userId
+                    userId
                 }
             })
 

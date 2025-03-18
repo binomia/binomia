@@ -107,7 +107,7 @@ const query = () => {
 
 const mutation = () => {
     return `
-        createTopUp(data: TopUpInput!, recurrence: TopUpRecurrenceInput!): TopUpsType
+        createTopUp(message: String!): TopUpsType
     `
 }
 

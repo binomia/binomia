@@ -1,7 +1,6 @@
 import { DATE, STRING, JSONB, TEXT, BOOLEAN } from "sequelize"
 import { db } from "@/config"
-import { ZERO_ENCRYPTION_KEY } from "@/constants"
-import { AES } from "cryptografia"
+
 
 
 const SessionModel = db.define('sessions', {

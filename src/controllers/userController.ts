@@ -143,7 +143,7 @@ export class UsersController {
     // type instanceof PrometheusMetrics
     static sessionUser = async (_: unknown, ___: any, { metrics, req }: { metrics: PrometheusMetrics, req: any }) => {
         try {
-            const session = await checkForProtectedRequests(req);
+            const session = await checkForProtectedRequests(req);            
             metrics.sessionUser.inc()
             return session.user
 
