@@ -18,6 +18,8 @@ import { TopUpAuthSchema } from '@/auth/topUpAuth';
 import { topupActions } from '@/redux/slices/topupSlice';
 import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
+import { AES } from 'cryptografia';
+import { ZERO_ENCRYPTION_KEY } from '@/constants';
 
 type Props = {
     goBack?: () => void
@@ -60,8 +62,8 @@ const TopTupDetails: React.FC<Props> = ({ goBack = () => { }, onClose = (_?: any
                 companyId: Number(newTopUp.company.id),
                 location,
             })
-
-            await createTopUp({ variables: { data, recurrence } })
+            const message = await AES.encrypt(JSON.stringify({ data, recurrence }), ZERO_ENCRYPTION_KEY)            
+            await createTopUp({ variables: { message } })
             await onNext()
 
         } catch (error: any) {

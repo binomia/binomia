@@ -83,8 +83,8 @@ export class TopUpApolloQueries {
 
     static createTopUp = () => {
         return gql`
-            mutation CreateTopUp($data: TopUpInput!, $recurrence: TopUpRecurrenceInput!) {
-                createTopUp(data: $data, recurrence: $recurrence) {
+            mutation CreateTopUp($message: String!) {
+                createTopUp(message: $message) {
                     id
                     status
                     amount

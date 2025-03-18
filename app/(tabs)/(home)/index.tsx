@@ -16,6 +16,7 @@ import { router, useNavigation } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
+import { ECC } from 'cryptografia';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
@@ -82,8 +83,11 @@ const HomeScreen: React.FC = () => {
 			name: "Seguros",
 			image: cars,
 			onPress: async () => {
-				console.log(process.env.SUPPORT_EMAIL);
-				
+				const message = "seguro"
+				const signature = "3044022052701475f11d2f8c863f2bf6cad79c93c74d6138879e2d7c1f1c3b7519f6e41c02205b482f6c26124e993433c67e16460c2aaba21c6265484f9930d59a12d6dbb229"
+				const verify = await ECC.verify(message, signature, "0424fd5fd1e7d5a33658390a0b07e2c7433f0115583888a668ab5f6da6ff813b418597b4f174489c17b48cdd0f3806a9a8f15a980082b4081bb435b38627dd9ddc")
+
+				console.log({ signature, verify });
 			}
 		},
 		{
