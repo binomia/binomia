@@ -101,8 +101,8 @@ export class TransactionApolloQueries {
 
     static createRequestTransaction = () => {
         return gql`
-            mutation CreateRequestTransaction($data: TransactionInput!, $recurrence: TransactionRecurrenceInput!) {
-                createRequestTransaction(data: $data, recurrence: $recurrence) {
+            mutation CreateRequestTransaction($message: String!) {
+                createRequestTransaction(message: $message) {
                     transactionId
                     amount
                     deliveredAmount

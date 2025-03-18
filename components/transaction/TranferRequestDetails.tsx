@@ -20,6 +20,8 @@ import { AccountAuthSchema } from '@/auth/accountAuth';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAccountLimit, fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { router } from 'expo-router';
+import { AES } from 'cryptografia';
+import { ZERO_ENCRYPTION_KEY } from '@/constants';
 
 type Props = {
     goBack?: () => void
@@ -99,8 +101,9 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                 location
             })
 
+            const message = await AES.encrypt(JSON.stringify({ data, recurrence }), ZERO_ENCRYPTION_KEY)
             const { data: createdRequestTransaction } = await createRequestTransaction({
-                variables: { data, recurrence }
+                variables: { message }
             })
 
             const transaction = createdRequestTransaction?.createRequestTransaction
