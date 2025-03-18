@@ -4,6 +4,7 @@ import os from "os";
 import express from 'express';
 import http from 'http';
 import cors from 'cors';
+import PrometheusMetrics from "@/metrics/PrometheusMetrics";
 import { ApolloServer, ApolloServerPlugin } from '@apollo/server';
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import { typeDefs } from './src/gql'
@@ -17,8 +18,6 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { register } from 'prom-client';
 import { initTracing } from "@/tracing";
 import { Span, trace } from '@opentelemetry/api';
-import PrometheusMetrics from "@/metrics/PrometheusMetrics";
-
 
 // Define the Context Type
 interface Context {

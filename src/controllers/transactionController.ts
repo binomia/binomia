@@ -120,16 +120,19 @@ export class TransactionsController {
         }
     }
 
-    static createRequestTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, context: any) => {
+    static createRequestTransaction = async (_: unknown, { message }: { message: string }, context: any) => {
         try {
             const { user, userId, sid: sessionId } = await checkForProtectedRequests(context.req);
             const { deviceid, ipaddress, platform } = context.req.headers
 
+            const decryptedMessage = await AES.decrypt(message, ZERO_ENCRYPTION_KEY)
+            const { data, recurrence } = JSON.parse(decryptedMessage)
+
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
-            const message = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
-            const signature = await Cryptography.sign(message, ZERO_SIGN_PRIVATE_KEY)
+            const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
+            const signature = await Cryptography.sign(messageToSign, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
 
             const transaction = await queueServer("createRequestTransaction", {
