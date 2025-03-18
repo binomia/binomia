@@ -9,6 +9,7 @@ export class SessionApolloQueries {
                     sid
                     code
                     signature
+                    publicKey
                     needVerification
                 }
             }

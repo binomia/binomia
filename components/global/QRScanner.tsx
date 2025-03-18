@@ -87,24 +87,25 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                 <VStack alignItems={"center"} pt={"30px"}>
                                     <HStack w={width * 0.9} h={width * 0.9} alignItems={"center"} borderWidth={0} borderColor={colors.gray} justifyContent={"center"} borderRadius={"20px"} bg={colors.lightGray} >
                                         <QRCodeStyled
-                                            color={"#535353"}
                                             data={user?.username || ""}
+                                            color={colors.gray}
                                             pieceLiquidRadius={0}
                                             pieceStrokeWidth={1}
-                                            pieceStroke={colors.lightGray}
+                                            pieceStroke={colors.primaryBlack}
                                             padding={10}
-
                                             logo={{
                                                 href: icon,
                                                 padding: 5,
                                                 opacity: 0.8
                                             }}
                                             style={{
+                                                width: width * 0.8,
+                                                height: width * 0.8,
                                                 backgroundColor: "transparent"
                                             }}
                                             outerEyesOptions={{ borderRadius: 30 }}
                                             innerEyesOptions={{ borderRadius: 20, color: colors.mainGreen }}
-                                            pieceSize={width / 27}
+                                            pieceSize={width * 0.04}
                                             pieceBorderRadius={5}
                                         />
                                     </HStack>

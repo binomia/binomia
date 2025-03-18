@@ -3,8 +3,8 @@ import { gql } from "@apollo/client"
 export class TransactionApolloQueries {
     static createTransaction = () => {
         return gql`
-            mutation CreateTransaction($data: TransactionInput!, $recurrence: TransactionRecurrenceInput!) {
-                createTransaction(data: $data, recurrence: $recurrence) {
+            mutation CreateTransaction($message: String!) {
+                createTransaction(message: $message) {
                     transactionId
                     amount
                     deliveredAmount

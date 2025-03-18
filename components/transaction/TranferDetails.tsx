@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import colors from '@/colors'
 import Button from '@/components/global/Button';
 import BottomSheet from '../global/BottomSheet';
@@ -19,6 +19,11 @@ import { fetchAccountLimit, fetchAllTransactions, fetchRecentTransactions } from
 import { useLocation } from '@/hooks/useLocation'
 import { AccountAuthSchema } from '@/auth/accountAuth';
 import { router } from 'expo-router';
+import { AES } from 'cryptografia';
+import useAsyncStorage from '@/hooks/useAsyncStorage';
+import { SessionContext } from '@/contexts/sessionContext';
+import { ZERO_ENCRYPTION_KEY } from '@/constants';
+
 
 type Props = {
     goBack?: () => void
@@ -31,6 +36,8 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
     const { receiver } = useSelector((state: any) => state.transactionReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
     const { user } = useSelector((state: any) => state.accountReducer)
+
+    const { onLogout } = useContext(SessionContext)
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
@@ -47,53 +54,61 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
     const [loading, setLoading] = useState<boolean>(false)
     const [openOptions, setOpenOptions] = useState<string>("")
 
+    const { getItem } = useAsyncStorage()
+
+
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
-            if (!location) {
-                await getLocation()
-                onClose()
+            const publicKey = await getItem("publicKey");
+            if (publicKey) {
+                if (!location) {
+                    await getLocation()
+                    onClose()
+                }
+
+                const data = await TransactionAuthSchema.createTransaction.parseAsync({
+                    receiver: receiver.username,
+                    amount: parseFloat(transactionDeytails.amount),
+                    location
+                })
+
+                const message = await AES.encrypt(JSON.stringify({ data, recurrence }), ZERO_ENCRYPTION_KEY)            
+                const { data: createedTransaction } = await createTransaction({
+                    variables: { message }
+                })
+                const transaction = createedTransaction?.createTransaction
+                if (transaction) {
+                    const accountsData = await AccountAuthSchema.account.parseAsync(transaction?.from)
+                    await Promise.all([
+                        dispatch(accountActions.setAccount(accountsData ?? {})),
+                        dispatch(accountActions.setHaveAccountChanged(false)),
+                        dispatch(transactionActions.setHasNewTransaction(true)),
+                        dispatch(fetchRecentTransactions()),
+                        dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
+                        dispatch(fetchAccountLimit()),
+                        dispatch(transactionActions.setTransaction({
+                            ...transaction,
+                            amountColor: colors.red,
+                            fullName: formatTransaction(transaction).fullName,
+                            profileImageUrl: formatTransaction(transaction).profileImageUrl,
+                            username: formatTransaction(transaction).username,
+                            isFromMe: true,
+                        }))
+                    ])
+
+                    goNext()
+                }
+
+                setLoading(false)
+
+            } else {
+                onLogout()
             }
-
-            const data = await TransactionAuthSchema.createTransaction.parseAsync({
-                receiver: receiver.username,
-                amount: parseFloat(transactionDeytails.amount),
-                location
-            })
-
-            const { data: createedTransaction } = await createTransaction({
-                variables: { data, recurrence }
-            })
-            const transaction = createedTransaction?.createTransaction
-            if (transaction) {
-                const accountsData = await AccountAuthSchema.account.parseAsync(transaction?.from)
-
-                await Promise.all([
-                    dispatch(accountActions.setAccount(accountsData ?? {})),
-                    dispatch(accountActions.setHaveAccountChanged(false)),
-                    dispatch(transactionActions.setHasNewTransaction(true)),
-                    dispatch(fetchRecentTransactions()),
-                    dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
-                    dispatch(fetchAccountLimit()),
-                    dispatch(transactionActions.setTransaction({
-                        ...transaction,
-                        amountColor: colors.red,
-                        fullName: formatTransaction(transaction).fullName,
-                        profileImageUrl: formatTransaction(transaction).profileImageUrl,
-                        username: formatTransaction(transaction).username,
-                        isFromMe: true,
-                    }))
-                ])
-
-                goNext()
-            }
-
-            setLoading(false)
-
         } catch (error: any) {
             setLoading(false)
-            console.error(error.message);
+            console.error(error);
 
             onClose()
             await delay(1000).then(() => {

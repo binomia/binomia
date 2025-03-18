@@ -141,6 +141,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
             if (data.login.token) {
                 await setItem("jwt", data.login.token)
+                await setItem("publicKey", data.login.publicKey)
 
                 if (!data.login.needVerification) {
                     await fetchSessionUser()
