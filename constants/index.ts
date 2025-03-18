@@ -3,6 +3,34 @@ import { Dimensions } from "react-native"
 import { RFPercentage } from "react-native-responsive-fontsize";
 
 
+const evironmentVariables = {
+    ZERO_ENCRYPTION_KEY: process.env.ZERO_ENCRYPTION_KEY,
+    SUPPORT_PHONE_NUMBER: process.env.SUPPORT_PHONE_NUMBER,
+    SUPPORT_EMAIL: process.env.SUPPORT_EMAIL,
+
+    MAIN_SERVER_URL: process.env.MAIN_SERVER_URL,
+    NOTIFICATION_SERVER_URL: process.env.NOTIFICATION_SERVER_URL,
+    AUTHENTICATION_SERVER_URL: process.env.AUTHENTICATION_SERVER_URL,
+
+    AZURE_FACE_API_ENDPOINT: process.env.AZURE_FACE_API_ENDPOINT,
+    AZURE_FACE_API_KEY: process.env.AZURE_FACE_API_KEY,
+
+    NODEMAILER_EMAIL: process.env.NODEMAILER_EMAIL,
+    NODEMAILER_PASSWORD: process.env.NODEMAILER_PASSWORD,
+
+    OCR_SPACE_API_KEY: process.env.OCR_SPACE_API_KEY,
+
+    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+    CLOUDINARY_SECRET_KEY: process.env.CLOUDINARY_SECRET_KEY,
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+    CLOUDINARY_ID_UPLOAD_PRESET: process.env.CLOUDINARY_ID_UPLOAD_PRESET,
+    CLOUDINARY_VIDEO_UPLOAD_PRESET: process.env.CLOUDINARY_VIDEO_UPLOAD_PRESET,
+    CLOUDINARY_API_URL: process.env.CLOUDINARY_API_URL,
+    CLOUDINARY_AUDIO_API_URL: process.env.CLOUDINARY_AUDIO_API_URL,
+
+    GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY
+}
+
 export const {
     ZERO_ENCRYPTION_KEY,
     SUPPORT_PHONE_NUMBER,
@@ -10,11 +38,15 @@ export const {
     MAIN_SERVER_URL,
     NOTIFICATION_SERVER_URL,
     AUTHENTICATION_SERVER_URL,
+
     AZURE_FACE_API_ENDPOINT,
     AZURE_FACE_API_KEY,
+
     NODEMAILER_EMAIL,
     NODEMAILER_PASSWORD,
+
     OCR_SPACE_API_KEY,
+
     CLOUDINARY_API_KEY,
     CLOUDINARY_SECRET_KEY,
     CLOUDINARY_CLOUD_NAME,
@@ -23,8 +55,7 @@ export const {
     CLOUDINARY_API_URL,
     CLOUDINARY_AUDIO_API_URL,
     GOOGLE_MAPS_API_KEY
-} = ENVSchema.evironmentVariables.parse(process.env)
-
+} = ENVSchema.evironmentVariables.parse(evironmentVariables)
 
 
 export const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window")
