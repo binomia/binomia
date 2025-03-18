@@ -9,6 +9,7 @@ import { Op } from 'sequelize';
 import { queueServer } from '@/rpc/queueRPC';
 import { Span, SpanStatusCode, Tracer } from '@opentelemetry/api';
 import PrometheusMetrics from '@/metrics/PrometheusMetrics';
+import { AES } from 'cryptografia';
 
 export class TransactionsController {
     static transaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -64,19 +65,23 @@ export class TransactionsController {
         }
     }
 
-    static createTransaction = async (_: unknown, { data, recurrence }: { data: any, recurrence: any }, { req, metrics, tracer }: { req: any, metrics: PrometheusMetrics, tracer: Tracer }) => {
+    static createTransaction = async (_: unknown, { message }: { message: string }, { req, metrics, tracer }: { req: any, metrics: PrometheusMetrics, tracer: Tracer }) => {
         const span: Span = tracer.startSpan("createTransaction");
         try {
             span.addEvent("Starting transaction creation");
-            span.setAttribute("graphql.mutation.data", JSON.stringify(data));
+            span.setAttribute("graphql.mutation.data", JSON.stringify(message));
 
-            const session = await checkForProtectedRequests(req);
+            const { user, sid, userId } = await checkForProtectedRequests(req);
+
+            const decryptedMessage = await AES.decrypt(message, ZERO_ENCRYPTION_KEY)
+            const { data, recurrence } = JSON.parse(decryptedMessage)
+
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
-            const { user } = session
+            // const { user } = session
 
-            const message = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
-            const signature = await Cryptography.sign(message, ZERO_SIGN_PRIVATE_KEY)
+            const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
+            const signature = await Cryptography.sign(messageToSign, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
             const { deviceid, ipaddress, platform } = req.headers
 
@@ -91,13 +96,13 @@ export class TransactionsController {
                 location: validatedData.location,
                 currency: validatedData.currency,
                 transactionType: validatedData.transactionType,
-                userId: session.userId,
+                userId: userId,
                 signature,
                 jobTime: "queueTransaction",
                 jobName: "queueTransaction",
 
                 deviceId: deviceid,
-                sessionId: session.sid,
+                sessionId: sid,
                 ipAddress: ipaddress,
                 isRecurring: recurrenceData.time !== "oneTime",
                 platform,
@@ -106,7 +111,7 @@ export class TransactionsController {
             span.setAttribute("queueServer.response", JSON.stringify(transaction));
             span.setStatus({ code: SpanStatusCode.OK });
 
-           return transaction
+            return transaction
 
         } catch (error: any) {
             throw new GraphQLError(error.message);

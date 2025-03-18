@@ -15,7 +15,7 @@ import { z } from 'zod'
 import { Counter } from 'prom-client';
 import { notificationServer } from '@/rpc/notificationRPC';
 import PrometheusMetrics from '@/metrics/PrometheusMetrics';
-
+import { AES, ECC } from "cryptografia"
 
 export class UsersController {
     static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -144,7 +144,6 @@ export class UsersController {
     static sessionUser = async (_: unknown, ___: any, { metrics, req }: { metrics: PrometheusMetrics, req: any }) => {
         try {
             const session = await checkForProtectedRequests(req);
-
             metrics.sessionUser.inc()
             return session.user
 
@@ -411,7 +410,9 @@ export class UsersController {
                 jwt: token,
                 userId: user.dataValues.id,
                 expires,
-                data: registerHeader.device || {}
+                data: registerHeader.device || {},
+                publicKey: "test",
+                privateKey: "test"
             })
 
             return {
@@ -501,9 +502,13 @@ export class UsersController {
                     needVerification: !session.toJSON().verified
                 }
 
+            const { privateKey, publicKey } = await ECC.generateKeyPairs()
+            const encryptedPrivateKey = await AES.encrypt(privateKey, ZERO_ENCRYPTION_KEY)
+
             const sid = `${generate()}${generate()}${generate()}`
             const expires = new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days
-            const token = jwt.sign({ sid, username: user.toJSON().username }, ZERO_ENCRYPTION_KEY);
+            const token = jwt.sign({ sid, publicKey, username: user.toJSON().username }, ZERO_ENCRYPTION_KEY);
+
 
             const sessionCreated = await SessionModel.create({
                 sid,
@@ -513,7 +518,9 @@ export class UsersController {
                 jwt: token,
                 userId: user.dataValues.id,
                 expires,
-                data: req.headers.device ? JSON.stringify(req.headers.device) : {}
+                data: req.headers.device ? JSON.stringify(req.headers.device) : {},
+                publicKey,
+                privateKey: encryptedPrivateKey
             })
 
             const code = GENERATE_SIX_DIGIT_TOKEN()
@@ -537,6 +544,7 @@ export class UsersController {
                 token,
                 code,
                 signature,
+                publicKey,
                 needVerification: true
             }
 

@@ -194,7 +194,7 @@ const mutation = () => {
     return `
         deleteRecurrentTransactions(repeatJobKey: String!, queueType: String): OnlyRecurrentTransactionType
         updateRecurrentTransactions(data: UpdateQueuedTransactionInput!): OnlyRecurrentTransactionType
-        createTransaction(data: TransactionInput!, recurrence: TransactionRecurrenceInput!): TransactionType
+        createTransaction(message: String!): TransactionType
         payRequestTransaction(transactionId: String!, paymentApproved: Boolean!): TransactionType
         createRequestTransaction(data: TransactionInput!, recurrence: TransactionRecurrenceInput!): TransactionType
         cancelRequestedTransaction(transactionId: String!): TransactionType

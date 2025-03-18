@@ -112,6 +112,7 @@ const type = () => {
             sid: String
             token: String
             code: String
+            publicKey: String
             needVerification: Boolean
             signature: String
         }
