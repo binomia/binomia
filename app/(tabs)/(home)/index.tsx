@@ -16,8 +16,6 @@ import { router, useNavigation } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { AES } from 'cryptografia';
-
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
@@ -84,8 +82,8 @@ const HomeScreen: React.FC = () => {
 			name: "Seguros",
 			image: cars,
 			onPress: async () => {
-				const encrypted = await AES.encrypt("seguros", "seguros");
-				console.log(encrypted);
+				console.log(process.env.SUPPORT_EMAIL);
+				
 			}
 		},
 		{
