@@ -1,4 +1,5 @@
 import shortUUID from 'short-uuid';
+import PrometheusMetrics from '@/metrics/PrometheusMetrics';
 import { AccountModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, QueuesModel } from '@/models'
 import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
@@ -8,8 +9,8 @@ import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
 import { queueServer } from '@/rpc/queueRPC';
 import { Span, SpanStatusCode, Tracer } from '@opentelemetry/api';
-import PrometheusMetrics from '@/metrics/PrometheusMetrics';
-import { AES } from 'cryptografia';
+import { AES, RSA } from 'cryptografia';
+import redis from '@/redis';
 
 export class TransactionsController {
     static transaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -71,17 +72,33 @@ export class TransactionsController {
             span.addEvent("Starting transaction creation");
             span.setAttribute("graphql.mutation.data", JSON.stringify(message));
 
-            const { user, sid, userId } = await checkForProtectedRequests(req);
+            const { user, account, sid, userId, privateKey } = await checkForProtectedRequests(req);
 
-            const decryptedMessage = await AES.decrypt(message, ZERO_ENCRYPTION_KEY)
+            const decryptedPrivateKey = await AES.decrypt(privateKey, ZERO_ENCRYPTION_KEY)
+            const decryptedMessage = await RSA.decryptAsync(message, decryptedPrivateKey)
             const { data, recurrence } = JSON.parse(decryptedMessage)
 
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
-            // const { user } = session
+
+            const reciver = await AccountModel.findOne({
+                where: {
+                    username: validatedData.receiver
+                },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user'
+                    }
+                ]
+            })
+
+            if (!reciver) {
+                throw new GraphQLError("Receiver not found")
+            }
 
             const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
-            const signature = await Cryptography.sign(messageToSign, ZERO_SIGN_PRIVATE_KEY)
+            const signature = RSA.sign(messageToSign, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
             const { deviceid, ipaddress, platform } = req.headers
 
@@ -108,10 +125,36 @@ export class TransactionsController {
                 platform,
             })
 
+            const transactionResponse = {
+                transactionId,
+                "amount": validatedData.amount,
+                "deliveredAmount": validatedData.amount,
+                "voidedAmount": validatedData.amount,
+                "transactionType": validatedData.transactionType,
+                "currency": "DOP",
+                "status": "pending",
+                "location": validatedData.location,
+                "createdAt": Date.now().toString(),
+                "updatedAt": Date.now().toString(),
+                "from": {
+                    ...account,
+                    user
+                },
+                "to": {
+                    ...reciver.toJSON(),
+                }
+            }
+
+            const transactionResponseCached = await redis.get(`transactionQueue:${user.username}`)
+            if (transactionResponseCached)
+                await redis.set(`transactionQueue:${userId}`, JSON.stringify([...JSON.parse(transactionResponseCached), transactionResponse]))
+            else
+                await redis.set(`transactionQueue:${userId}`, JSON.stringify([transactionResponse]))
+
             span.setAttribute("queueServer.response", JSON.stringify(transaction));
             span.setStatus({ code: SpanStatusCode.OK });
 
-            return transaction
+            return transactionResponse
 
         } catch (error: any) {
             throw new GraphQLError(error.message);

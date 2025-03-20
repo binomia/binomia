@@ -119,6 +119,30 @@ const type = () => {
         type VerifySessionType {
             token: String           
         }
+
+        
+         type SessionType {
+            id: Int
+            publicKey: String
+            fullName: String
+            username: String
+            phone: String
+            email: String
+            password: String
+            dniNumber: String
+            profileImageUrl: String           
+            userAgreementSigned: Boolean
+            idFrontUrl: String
+            status: String
+            idBackUrl: String
+            faceVideoUrl: String
+            address: String
+            account: AccountTypeWithTransactions
+            cards: [OnlyCardType]
+            kyc: OnlyKYCType
+            createdAt: String
+            updatedAt: String
+        }
     `
 }
 
@@ -126,7 +150,7 @@ const query = () => {
     return `
         user: UserType
         singleUser(username: String!): UserType
-        sessionUser: UserType
+        sessionUser: SessionType
         userByEmail(email: String!): Boolean
         searchUsers(allowRequestMe: Boolean, search: UserInput!, limit: Int): [UserType]
         searchSingleUser(allowRequestMe: Boolean, search: UserInput!): UserType

@@ -15,11 +15,11 @@ const SessionModel = db.define('sessions', {
 	expires: DATE,
 	data: JSONB,
 	publicKey: {
-		type: STRING,
+		type: TEXT,
 		allowNull: false,
 	},
 	privateKey: {
-		type: STRING,
+		type: TEXT,
 		allowNull: false
 	}
 })

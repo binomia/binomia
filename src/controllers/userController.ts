@@ -15,7 +15,7 @@ import { z } from 'zod'
 import { Counter } from 'prom-client';
 import { notificationServer } from '@/rpc/notificationRPC';
 import PrometheusMetrics from '@/metrics/PrometheusMetrics';
-import { AES, ECC } from "cryptografia"
+import { AES, ECC, RSA } from "cryptografia"
 
 export class UsersController {
     static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -143,9 +143,11 @@ export class UsersController {
     // type instanceof PrometheusMetrics
     static sessionUser = async (_: unknown, ___: any, { metrics, req }: { metrics: PrometheusMetrics, req: any }) => {
         try {
-            const session = await checkForProtectedRequests(req);            
+            const session = await checkForProtectedRequests(req);
             metrics.sessionUser.inc()
-            return session.user
+            return Object.assign({}, session.user, {
+                publicKey: session.publicKey
+            })
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -502,7 +504,7 @@ export class UsersController {
                     needVerification: !session.toJSON().verified
                 }
 
-            const { privateKey, publicKey } = await ECC.generateKeyPairs()
+            const { privateKey, publicKey } = await RSA.generateKeysAsync()
             const encryptedPrivateKey = await AES.encrypt(privateKey, ZERO_ENCRYPTION_KEY)
 
             const sid = `${generate()}${generate()}${generate()}`
