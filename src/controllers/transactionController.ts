@@ -124,7 +124,7 @@ export class TransactionsController {
                 isRecurring: recurrenceData.time !== "oneTime",
                 platform,
             })
-
+            
             const transactionResponse = {
                 transactionId,
                 "amount": validatedData.amount,
@@ -144,16 +144,18 @@ export class TransactionsController {
                     ...reciver.toJSON(),
                 }
             }
-
+            
+            span.addEvent("queueServer is saving the transaction in cache");
             const transactionResponseCached = await redis.get(`transactionQueue:${user.username}`)
             if (transactionResponseCached)
-                await redis.set(`transactionQueue:${userId}`, JSON.stringify([...JSON.parse(transactionResponseCached), transactionResponse]))
+                await redis.set(`transactionQueue:${user.username}`, JSON.stringify([...JSON.parse(transactionResponseCached), transactionResponse]))
             else
-                await redis.set(`transactionQueue:${userId}`, JSON.stringify([transactionResponse]))
+                await redis.set(`transactionQueue:${user.username}`, JSON.stringify([transactionResponse]))
+
 
             span.setAttribute("queueServer.response", JSON.stringify(transaction));
             span.setStatus({ code: SpanStatusCode.OK });
-
+        
             return transactionResponse
 
         } catch (error: any) {
