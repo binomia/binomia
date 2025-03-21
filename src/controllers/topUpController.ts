@@ -186,7 +186,7 @@ export class TopUpController {
             const recurrenceData = await TopUpSchema.recurrenceTopUp.parseAsync(recurrence)
 
             const referenceId = `${shortUUID.generate()}${shortUUID.generate()}`
-            const topUp = await queueServer("createTopUp", {
+            await queueServer("createTopUp", {
                 amount: topUpData.amount,
                 userId,
                 data: {
