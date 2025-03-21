@@ -95,9 +95,9 @@ export default class TopUpController {
         }
     }
 
-    static createTopUp = async (data: any) => {
+    static createTopUp = async (job: JobJson) => {
         try {
-            const { fullName, amount, companyId, phoneNumber, location, senderUsername, recurrenceData, userId, referenceId } = data
+            const { fullName, amount, companyId, phoneNumber, location, senderUsername, recurrenceData, userId, referenceId } = JSON.parse(job.data)
 
             const [phone] = await TopUpPhonesModel.findOrCreate({
                 limit: 1,
@@ -221,9 +221,15 @@ export default class TopUpController {
                 });
             }
 
-            return topUp.toJSON()
+            return {
+                referenceId,
+                userId
+            }
+
 
         } catch (error: any) {
+            console.log({ createTopUp: error });
+
             throw error
         }
     }

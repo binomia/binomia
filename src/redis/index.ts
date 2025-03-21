@@ -1,8 +1,6 @@
 import Redis from "ioredis";
-import TransactionController from "@/controllers/transactionController";
 import MainController from "@/controllers/mainController";
 import { createBullBoard } from "@bull-board/api";
-import TopUpController from "@/controllers/topUpController";
 
 
 export const connection = {

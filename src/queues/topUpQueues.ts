@@ -4,6 +4,7 @@ import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PA
 import shortUUID from "short-uuid";
 import TopUpController from "@/controllers/topUpController";
 import MainController from "@/controllers/mainController";
+import { redis } from "@/redis";
 
 
 export default class TopUpQueue {
@@ -19,7 +20,18 @@ export default class TopUpQueue {
             const name = job.name.split("@")[0]
             switch (name) {
                 case "queueTopUp": {
-                    await TopUpController.createTopUp(job.asJSON())
+                    const {userId, referenceId } = await TopUpController.createTopUp(job.asJSON())
+
+                    const toptupsQueued = await redis.get(`queuedTopUps:${userId}`)
+                    const parsedTopUps: any[] = toptupsQueued ? JSON.parse(toptupsQueued) : []
+
+                    const filteredCachedQueuedTopUps = parsedTopUps.filter((toptup: any) => toptup.referenceId !== referenceId)
+                    if (filteredCachedQueuedTopUps.length === 0)
+                        await redis.del(`queuedTopUps:${userId}`)
+                    else
+                        await redis.set(`queuedTopUps:${userId}`, JSON.stringify(filteredCachedQueuedTopUps))
+
+                    // console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
                     break;
                 }
                 case "pendingTopUp": {
@@ -50,7 +62,9 @@ export default class TopUpQueue {
                 const name = job.name.split("@")[0]
                 if (name === "pendingTopUp" && job.repeatJobKey)
                     await this.removeJob(job?.repeatJobKey)
-                
+                else
+                    await job.remove()
+
                 console.log(`Job ${job.id} completed:`);
 
             } catch (error: any) {

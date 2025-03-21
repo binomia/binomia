@@ -1,13 +1,24 @@
 import TransactionController from "@/controllers/transactionController";
+import { transactionsQueue } from "@/queues";
 import { CreateTransactionRPCParamsType } from "@/types";
 import { JSONRPCServer } from "json-rpc-2.0";
 
 
 export const transactionMethods = (server: JSONRPCServer) => {
     server.addMethod("createTransaction", async (data: CreateTransactionRPCParamsType) => {
-        try {
-            const transaction = await TransactionController.createQueuedTransaction(data)
-            return transaction
+        try {          
+            const jobId = `queueTransaction@${data.transactionId}`
+            const job = await transactionsQueue.queue.add(jobId, data, {
+                jobId,
+                removeOnComplete: {
+                    age: 20 // 30 minutes
+                },
+                removeOnFail: {
+                    age: 60 * 30 // 24 hours
+                }
+            })
+
+            return job.asJSON().id
 
         } catch (error) {
             console.log({ createTransaction: error });

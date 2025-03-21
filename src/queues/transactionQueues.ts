@@ -1,9 +1,10 @@
 import { Job, JobJson, Queue, Worker } from "bullmq";
-import { MonthlyQueueTitleType, WeeklyQueueTitleType } from "@/types";
+import { CreateTransactionRPCParamsType, MonthlyQueueTitleType, WeeklyQueueTitleType } from "@/types";
 import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN } from "@/constants";
 import shortUUID from "short-uuid";
 import TransactionController from "@/controllers/transactionController";
 import MainController from "@/controllers/mainController";
+import { redis } from "@/redis";
 
 
 export default class TransactionsQueue {
@@ -15,7 +16,23 @@ export default class TransactionsQueue {
 
     private executeJob = async (job: JobJson) => {
         try {
-            switch (true) {              
+            switch (true) {
+                case job.name.includes("queueTransaction"): {
+                    const data: CreateTransactionRPCParamsType = JSON.parse(job.data)
+
+                    const { transactionId, fromAccount } = await TransactionController.createQueuedTransaction(data)
+                    const transactionQueued = await redis.get(`transactionQueue:${fromAccount}`)
+                    const parsedTransactions: any[] = transactionQueued ? JSON.parse(transactionQueued) : []
+
+                    const filteredCachedQueuedTransactions = parsedTransactions.filter((transaction: any) => transaction.transactionId !== transactionId)
+                    if (filteredCachedQueuedTransactions.length === 0)
+                        await redis.del(`transactionQueue:${fromAccount}`)
+                    else
+                        await redis.set(`transactionQueue:${fromAccount}`, JSON.stringify(filteredCachedQueuedTransactions))
+
+                    console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
+                    break;
+                }
                 case job.name.includes("pendingTransaction"): {
                     const status = await TransactionController.pendingTransaction(job)
                     if (status === "completed")
@@ -52,7 +69,7 @@ export default class TransactionsQueue {
         worker.on('completed', async (job: Job) => {
             try {
                 await job.remove()
-                
+
             } catch (error) {
                 console.log({ completed: error });
             }
