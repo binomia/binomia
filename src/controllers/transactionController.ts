@@ -146,11 +146,11 @@ export class TransactionsController {
             }
             
             span.addEvent("queueServer is saving the transaction in cache");
-            const transactionResponseCached = await redis.get(`transactionQueue:${user.username}`)
+            const transactionResponseCached = await redis.get(`transactionQueue:${user.account.id}`)
             if (transactionResponseCached)
-                await redis.set(`transactionQueue:${user.username}`, JSON.stringify([...JSON.parse(transactionResponseCached), transactionResponse]))
+                await redis.set(`transactionQueue:${user.account.id}`, JSON.stringify([...JSON.parse(transactionResponseCached), transactionResponse]))
             else
-                await redis.set(`transactionQueue:${user.username}`, JSON.stringify([transactionResponse]))
+                await redis.set(`transactionQueue:${user.account.id}`, JSON.stringify([transactionResponse]))
 
 
             span.setAttribute("queueServer.response", JSON.stringify(transaction));
@@ -357,11 +357,10 @@ export class TransactionsController {
                 ]
             });
 
+            const transactionQueued = await redis.get(`transactionQueue:${user.account.id}`)
+            const parsedTransactions: any[] = transactionQueued ? JSON.parse(transactionQueued) : []
 
-            if (!transactions)
-                throw new GraphQLError('No transactions found');
-
-            return transactions
+            return [...transactions, ...parsedTransactions]
 
         } catch (error: any) {
             throw new GraphQLError(error);

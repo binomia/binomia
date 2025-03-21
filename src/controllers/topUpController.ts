@@ -45,14 +45,14 @@ export class TopUpController {
 
     static topUps = async (_: unknown, { phoneId, page, pageSize }: { phoneId: string, page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
-            const session = await checkForProtectedRequests(context.req);
+            const { userId } = await checkForProtectedRequests(context.req);
             const fields = getQueryResponseFields(fieldNodes, 'topups')
 
             const _pageSize = pageSize > 50 ? 50 : pageSize
             const offset = (page - 1) * _pageSize;
             const limit = _pageSize;
 
-            const cachedTopUps = await redis.get(`topups:${session.userId}:${phoneId}:${page}:${pageSize}`)
+            const cachedTopUps = await redis.get(`topups:${userId}:${phoneId}:${page}:${pageSize}`)
             if (cachedTopUps)
                 return JSON.parse(cachedTopUps)
 
@@ -63,16 +63,20 @@ export class TopUpController {
                 attributes: fields['topups'],
                 where: {
                     [Op.and]: [
-                        { userId: session.userId },
-                        { phoneId: phoneId }
+                        { userId },
+                        { phoneId }
                     ]
                 }
             })
 
-            if (tupups.length > 0)
-                await redis.set(`topups:${session.userId}:${phoneId}:${page}:${pageSize}`, JSON.stringify(tupups), 'EX', 10)
+            const topUpQueued = await redis.get(`queuedTopUps:${userId}`)
+            const parsedTopUps: any[] = topUpQueued ? JSON.parse(topUpQueued) : []
+            const allTopUps = [...tupups, ...parsedTopUps]
 
-            return tupups
+            if (tupups.length > 0)
+                await redis.set(`topups:${userId}:${phoneId}:${page}:${pageSize}`, JSON.stringify(allTopUps), 'EX', 10)
+
+            return allTopUps
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -195,7 +199,22 @@ export class TopUpController {
                 }
             })
 
-            return topUp
+            const queuedTopUp = {
+                "status": "pending",
+                "amount": topUpData.amount,
+                "location": topUpData.location,
+                "referenceId": referenceId,
+                "createdAt": Date.now().toString(),
+                "updatedAt": Date.now().toString(),
+            }
+
+            const queuedTopUps = await redis.get(`queuedTopUps:${userId}`)
+            if (queuedTopUps)
+                await redis.set(`queuedTopUps:${userId}`, JSON.stringify([...JSON.parse(queuedTopUps), queuedTopUp]))
+            else
+                await redis.set(`queuedTopUps:${userId}`, JSON.stringify([queuedTopUp]))
+
+            return queuedTopUp
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
