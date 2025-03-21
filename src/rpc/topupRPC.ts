@@ -1,5 +1,4 @@
-import TopUpController from "@/controllers/topUpController";
-import { topUpQueue, transactionsQueue } from "@/queues";
+import { topUpQueue } from "@/queues";
 import { JSONRPCServer } from "json-rpc-2.0";
 import shortUUID from "short-uuid";
 
