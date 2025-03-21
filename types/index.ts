@@ -46,6 +46,7 @@ export type SessionPropsType = {
     setVerificationData: (token: VerificationDataType) => any
     setSessionVerificationData: (token: SessionVerificationDataType) => any
     setInvalidCredentials: (value: boolean) => void
+    fetchSessionUser: () => Promise<void>
     invalidCredentials: boolean
     verificationData: VerificationDataType
     sessionVerificationData: SessionVerificationDataType

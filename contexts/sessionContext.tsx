@@ -18,6 +18,7 @@ import { registerActions } from "@/redux/slices/registerSlice";
 import { topupActions } from "@/redux/slices/topupSlice";
 import { transactionActions } from "@/redux/slices/transactionSlice";
 import { useContacts } from "@/hooks/useContacts";
+import { HASH } from "cryptografia";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -28,6 +29,7 @@ export const SessionContext = createContext<SessionPropsType>({
     setVerificationData: (_: VerificationDataType) => { },
     setSessionVerificationData: (_: SessionVerificationDataType) => { },
     setInvalidCredentials: (_: boolean) => { },
+    fetchSessionUser: () => Promise.resolve(),
     invalidCredentials: false,
     verificationData: { token: "", signature: "", email: "" },
     sessionVerificationData: { signature: "", token: "", code: "", sid: "" },
@@ -53,7 +55,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const [createUser] = useMutation(UserApolloQueries.createUser());
     const [getSessionUser] = useLazyQuery(UserApolloQueries.sessionUser());
     const { getContacts } = useContacts();
-    
+
 
     const { registerForPushNotificationsAsync } = useNotifications()
 
@@ -61,7 +63,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const fetchSessionUser = async () => {
         try {
             const user = await getSessionUser()
-            
+
             const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user.data.sessionUser)
             const kycData = await UserAuthSchema.kycData.parseAsync(user.data.sessionUser.kyc)
             const accountsData = await AccountAuthSchema.account.parseAsync(user.data.sessionUser.account)
@@ -69,14 +71,14 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             const primaryCard = cardsData.find((card: any) => card.isPrimary === true)
 
             const contacts = await getContacts()
-           
+
             await Promise.all([
                 dispatch(accountActions.setUser(userProfileData ?? {})),
                 dispatch(accountActions.setKyc(kycData ?? {})),
                 dispatch(accountActions.setAccount(accountsData ?? {})),
                 dispatch(accountActions.setCards(cardsData ?? {})),
                 dispatch(accountActions.setCard(primaryCard ?? {})),
-                
+
                 dispatch(globalActions.setContacts(contacts)),
 
                 dispatch(fetchRecentTransactions()),
@@ -94,7 +96,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
     const sendVerificationCode = async () => {
         try {
-            
+
 
         } catch (error: any) {
             console.log({ error });
@@ -222,9 +224,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
 
                 let applicationId = _applicationId;
                 if (!applicationId) {
-                    applicationId = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, Crypto.randomUUID().toString(), {
-                        encoding: Crypto.CryptoEncoding.HEX
-                    })
+                    applicationId = HASH.stringToHex(HASH.sha256(Crypto.randomUUID()));
                     setItem("applicationId", applicationId)
                 }
 
@@ -262,7 +262,6 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 setItem("applicationId", applicationId)
             }
 
-
             if (applicationId) {
                 await dispatch(globalActions.setApplicationId(applicationId))
                 setApplicationId(applicationId)
@@ -286,10 +285,9 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 setJwt(jwt)
 
             } else {
-                router.navigate("/welcome")
+                onLogout()
             }
         })()
-        // onLogout()
     }, [])
 
     const value = {

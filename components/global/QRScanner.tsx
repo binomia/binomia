@@ -88,7 +88,7 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                     <HStack w={width * 0.9} h={width * 0.9} alignItems={"center"} borderWidth={0} borderColor={colors.gray} justifyContent={"center"} borderRadius={"20px"} bg={colors.lightGray} >
                                         <QRCodeStyled
                                             data={user?.username || ""}
-                                            color={colors.gray}
+                                            color={colors.whiteQR}
                                             pieceLiquidRadius={0}
                                             pieceStrokeWidth={1}
                                             pieceStroke={colors.primaryBlack}
@@ -105,8 +105,8 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                             }}
                                             outerEyesOptions={{ borderRadius: 30 }}
                                             innerEyesOptions={{ borderRadius: 20, color: colors.mainGreen }}
-                                            pieceSize={width * 0.04}
-                                            pieceBorderRadius={5}
+                                            pieceSize={width * 0.035}
+                                            pieceBorderRadius={6}
                                         />
                                     </HStack>
                                     <VStack alignItems={"center"} borderRadius={"10px"} mt={"10px"} py={"7px"} px={"15px"} bg={colors.darkGray} >

@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react'
 import colors from '@/colors'
 import Button from '@/components/global/Button';
 import BottomSheet from '../global/BottomSheet';
+import useAsyncStorage from '@/hooks/useAsyncStorage';
 import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, FlatList, Avatar } from 'native-base'
 import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
@@ -19,11 +20,8 @@ import { fetchAccountLimit, fetchAllTransactions, fetchRecentTransactions } from
 import { useLocation } from '@/hooks/useLocation'
 import { AccountAuthSchema } from '@/auth/accountAuth';
 import { router } from 'expo-router';
-import { AES } from 'cryptografia';
-import useAsyncStorage from '@/hooks/useAsyncStorage';
+import { RSA } from 'cryptografia';
 import { SessionContext } from '@/contexts/sessionContext';
-import { ZERO_ENCRYPTION_KEY } from '@/constants';
-
 
 type Props = {
     goBack?: () => void
@@ -74,7 +72,7 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                     location
                 })
 
-                const message = await AES.encrypt(JSON.stringify({ data, recurrence }), ZERO_ENCRYPTION_KEY)            
+                const message = await RSA.encryptAsync(JSON.stringify({ data, recurrence }), user.publicKey)
                 const { data: createedTransaction } = await createTransaction({
                     variables: { message }
                 })

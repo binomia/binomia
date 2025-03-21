@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import colors from '@/colors';
 import Button from '@/components/global/Button';
 import QRScannerScreen from '@/components/global/QRScanner';
@@ -16,14 +16,17 @@ import { router, useNavigation } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { ECC } from 'cryptografia';
+import { RSA } from 'cryptografia';
+import { SessionContext } from '@/contexts/sessionContext';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
-	const { account } = useSelector((state: any) => state.accountReducer)
+	const { account, user } = useSelector((state: any) => state.accountReducer)
 	const dispatch = useDispatch()
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
 	const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
+
+	const { fetchSessionUser } = useContext(SessionContext)
 
 	const navigation = useNavigation()
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
@@ -84,10 +87,9 @@ const HomeScreen: React.FC = () => {
 			image: cars,
 			onPress: async () => {
 				const message = "seguro"
-				const signature = "3044022052701475f11d2f8c863f2bf6cad79c93c74d6138879e2d7c1f1c3b7519f6e41c02205b482f6c26124e993433c67e16460c2aaba21c6265484f9930d59a12d6dbb229"
-				const verify = await ECC.verify(message, signature, "0424fd5fd1e7d5a33658390a0b07e2c7433f0115583888a668ab5f6da6ff813b418597b4f174489c17b48cdd0f3806a9a8f15a980082b4081bb435b38627dd9ddc")
+				const encryptedMessage = await RSA.encryptAsync(message, user.publicKey);
 
-				console.log({ signature, verify });
+				console.log("Encrypted Message:", encryptedMessage);
 			}
 		},
 		{
@@ -142,6 +144,7 @@ const HomeScreen: React.FC = () => {
 	useEffect(() => {
 		navigation.addListener('focus', () => {
 			(async () => {
+				await fetchSessionUser()
 				await onRefresh(false)
 			})()
 		})

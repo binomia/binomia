@@ -70,6 +70,7 @@ export class UserApolloQueries {
                     id
                     fullName
                     username
+                    publicKey
                     phone
                     email
                     password

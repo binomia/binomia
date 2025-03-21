@@ -5,6 +5,8 @@ import { setContext } from "@apollo/client/link/context";
 import { onError } from "@apollo/client/link/error";
 import { Alert, Platform } from 'react-native';
 import * as Network from 'expo-network';
+import * as SecureStore from 'expo-secure-store';
+import { router } from 'expo-router';
 
 const httpLink = createHttpLink({
     uri: MAIN_SERVER_URL,
@@ -21,10 +23,11 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 
 
             if (message.includes("INVALID_SESSION")) {
-                // await SecureStore.deleteItemAsync("jwt").then(async () => {
-                //     Alert.alert("Your session has expired. Please login again.");
-                //     await Updates.reloadAsync();
-                // });
+                await SecureStore.deleteItemAsync("jwt").then(async () => {
+                    Alert.alert("Your session has expired. Please login again.");
+                    //await Updates.reloadAsync();
+                    router.navigate("/login");
+                });
             } else if (message.includes("no puede recibir pagos")) {
                 Alert.alert(message);
             }
