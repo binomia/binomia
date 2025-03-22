@@ -1,25 +1,17 @@
 import React, { useState } from 'react'
-import { Dimensions, Keyboard, StyleSheet, TouchableWithoutFeedback, View } from 'react-native'
-import { Heading, Image, Text, VStack, Select, CheckIcon, Center, Box, HStack, Pressable, ScrollView } from 'native-base'
+import { Dimensions, Keyboard, StyleSheet, TouchableWithoutFeedback } from 'react-native'
+import { Heading, Image, Text, VStack, HStack, Pressable } from 'native-base'
 import colors from '@/colors'
 import BottomSheet from '@/components/global/BottomSheet'
 import { topUpCompanies } from '@/mocks'
 import Input from '@/components/global/Input'
 import { Entypo } from "@expo/vector-icons";
-import KeyNumberPad from '@/components/global/KeyNumberPad'
 import Button from '@/components/global/Button'
 import { FORMAT_PHONE_NUMBER } from '@/helpers'
-import { INPUT_HEIGHT } from '@/constants'
 import phone from 'phone'
-import { router } from 'expo-router'
 
 
-type Props = {
-    open: boolean
-    onClose: () => void
-}
-
-const { height, width } = Dimensions.get('window')
+const { height } = Dimensions.get('window')
 const CreateTopUp: React.FC = () => {
     const [selectedCompany, setSelectedCompany] = useState<any>({});
     const [openBottomSheet, setOpenBottomSheet] = useState(false);
@@ -35,7 +27,7 @@ const CreateTopUp: React.FC = () => {
         setOpenBottomSheet(false)
     }
 
-    const onChangeText = (value: string, type: string) => {
+    const onChangeText = (value: string) => {
         setPhoneNumber(value)
     }
 
@@ -43,14 +35,6 @@ const CreateTopUp: React.FC = () => {
         const { isValid } = phone(value, { country: "DO" });
         return isValid
     };
-
-    const onCancel = () => {
-        setOpenBottomSheet(false)
-        setPhoneNumber("")
-        setSelectedCompany({})
-        router.back()
-    }
-
 
     return (
         <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -81,22 +65,13 @@ const CreateTopUp: React.FC = () => {
                             isInvalid={(!isAValidPhoneNumber(phoneNumber) && Boolean(phoneNumber.length === 10))}
                             errorMessage='Este no es un numero no es de República Dominicana'
                             keyboardType="phone-pad"
-                            onChangeText={(value) => onChangeText(value.replaceAll(/[^0-9]/g, ''), "phone")}
+                            onChangeText={(value) => onChangeText(value.replaceAll(/[^0-9]/g, ''))}
                             placeholder="Numero De Telefono*"
                         />
                     </HStack>
                 </VStack>
 
-                <HStack w={"100%"} mb={"30px"} justifyContent={"center"} alignItems={"center"}>
-                    {/* <Button
-                        title={"Cancelar"}
-                        onPress={() => { }}
-                        w={"48%"}
-                        h={"50px"}
-                        bg={colors.lightGray}
-                        color={colors.red}
-
-                    /> */}
+                <HStack w={"100%"} mb={"30px"} justifyContent={"center"} alignItems={"center"}>                    
                     <Button
                         onPress={() => { }} title={"Siguientes"}
                         w={"80%"}

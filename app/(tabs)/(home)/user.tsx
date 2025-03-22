@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import colors from '@/colors'
 import Input from '@/components/global/Input'
 import SendTransaction from '@/components/transaction/SendTransaction';
-import { StyleSheet, SafeAreaView, Keyboard, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
+import { SafeAreaView, Keyboard, TouchableWithoutFeedback, TouchableOpacity } from 'react-native'
 import { Heading, Image, Text, VStack, FlatList, HStack, Avatar } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { AccountApolloQueries, UserApolloQueries } from '@/apollo/query'
@@ -10,23 +10,20 @@ import { UserAuthSchema } from '@/auth/userAuth'
 import { z } from 'zod'
 import { EXTRACT_FIRST_LAST_INITIALS, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
-import { SessionContext } from '@/contexts/sessionContext';
-import { accountActions } from '@/redux/slices/accountSlice';
+
 import { router } from 'expo-router';
 
 
 const SearchUserScreen: React.FC = () => {
     const dispatch = useDispatch()
-    const { fetchSessionUser } = useContext<any>(SessionContext)
 
     const [searchUser] = useLazyQuery(UserApolloQueries.searchUser())
     const [getSugestedUsers] = useLazyQuery(UserApolloQueries.sugestedUsers())
     const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
 
     const [users, setUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
-    const [sugestedUsers, setSugestedUsers] = useState<z.infer<typeof UserAuthSchema.searchUserData>>([])
     const [showSendTransaction, setShowSendTransaction] = useState<boolean>(false);
 
 
@@ -34,7 +31,6 @@ const SearchUserScreen: React.FC = () => {
         const sugestedUsers = await getSugestedUsers()
         const _users = await UserAuthSchema.searchUserData.parseAsync(sugestedUsers.data.sugestedUsers)
         setUsers(_users)
-        setSugestedUsers(_users)
     }
 
 
@@ -119,25 +115,3 @@ const SearchUserScreen: React.FC = () => {
 
 export default SearchUserScreen
 
-
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: 55,
-        height: 55,
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 30,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    }
-})

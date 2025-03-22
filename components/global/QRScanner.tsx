@@ -1,18 +1,18 @@
-import { StyleSheet, Dimensions } from 'react-native'
 import React, { useRef, useState } from 'react'
-import { HStack, VStack, ZStack, Text, Heading } from 'native-base'
 import colors from '@/colors'
 import PagerView from 'react-native-pager-view';
 import Button from '@/components/global/Button'
 import BottomSheet from '@/components/global/BottomSheet'
 import QRCodeStyled from 'react-native-qrcode-styled';
+import SendTransactionScreen from '@/components/transaction/SendTransaction'
+import { StyleSheet, Dimensions } from 'react-native'
+import { HStack, VStack, ZStack, Text, Heading } from 'native-base'
 import { icon } from '@/assets'
 import { useDispatch, useSelector } from 'react-redux'
 import { scale } from 'react-native-size-matters'
 import { MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { useLazyQuery } from '@apollo/client'
 import { UserApolloQueries } from '@/apollo/query'
-import SendTransactionScreen from '@/components/transaction/SendTransaction'
 import { transactionActions } from '@/redux/slices/transactionSlice'
 import { CameraView } from 'expo-camera';
 
@@ -34,7 +34,6 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
     const [currentPage, setCurrentPage] = useState<number>(defaultPage);
     const [showSendTransaction, setShowSendTransaction] = useState<boolean>(false);
     const [isScanning, setIsScanning] = useState(false);
-
 
 
     const onCloseFinished = () => {
@@ -81,66 +80,66 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
         <VStack flex={1}>
             {!showSendTransaction ? (
                 <BottomSheet showDragIcon={currentPage === 0} height={height * 0.90} open={open} onCloseFinish={onCloseFinished}>
-                    <PagerView scrollEnabled={false} style={{ flex: 1 }} initialPage={currentPage} ref={pageFef}>
-                        <VStack key={"QRScannerScreen-1"} flex={1}>
-                            <VStack space={2} w={"100%"} h={"90%"} alignItems={"center"} justifyContent={"space-between"}>
-                                <VStack alignItems={"center"} pt={"30px"}>
-                                    <HStack w={width * 0.9} h={width * 0.9} alignItems={"center"} borderWidth={0} borderColor={colors.gray} justifyContent={"center"} borderRadius={"20px"} bg={colors.lightGray} >
-                                        <QRCodeStyled
-                                            data={user?.username || ""}
-                                            color={colors.whiteQR}
-                                            pieceLiquidRadius={0}
-                                            pieceStrokeWidth={1}
-                                            pieceStroke={colors.primaryBlack}
-                                            padding={10}
-                                            logo={{
-                                                href: icon,
-                                                padding: 5,
-                                                opacity: 0.8
-                                            }}
-                                            style={{
-                                                width: width * 0.8,
-                                                height: width * 0.8,
-                                                backgroundColor: "transparent"
-                                            }}
-                                            outerEyesOptions={{ borderRadius: 30 }}
-                                            innerEyesOptions={{ borderRadius: 20, color: colors.mainGreen }}
-                                            pieceSize={width * 0.035}
-                                            pieceBorderRadius={6}
-                                        />
-                                    </HStack>
-                                    <VStack alignItems={"center"} borderRadius={"10px"} mt={"10px"} py={"7px"} px={"15px"} bg={colors.darkGray} >
-                                        <Heading textTransform={"capitalize"} fontSize={scale(28)} color={colors.white}>{MAKE_FULL_NAME_SHORTEN(user?.fullName || "")}</Heading>
-                                        <Text textTransform={"lowercase"} fontSize={scale(15)} color={colors.lightSkyGray}>{user?.username}</Text>
-                                    </VStack>
-                                </VStack>
-                                <HStack w={width * 0.85}>
-                                    <HStack h={55} borderRadius={"25px"} bg={"rgba(0,0,0,0.5)"} p={"3px"} w={"100%"} justifyContent={"space-between"}>
-                                        <Button
-                                            bg={currentPage === 0 ? "mainGreen" : null}
-                                            disabled={currentPage === 0}
-                                            w={"49%"}
-                                            h={"100%"}
-                                            onPress={() => {
-                                                pageFef.current?.setPageWithoutAnimation(0)
-                                                setCurrentPage(0)
-                                            }}
-                                            title="Mi Codigo"
-                                        />
-                                        <Button
-                                            w={"49%"}
-                                            h={"100%"}
-                                            bg={currentPage === 1 ? "mainGreen" : null}
-                                            onPress={() => {
-                                                pageFef.current?.setPageWithoutAnimation(1)
-                                                setCurrentPage(1)
-                                            }}
-                                            title="Escanear"
-                                        />
-                                    </HStack>
+                    {currentPage === 0 ? <VStack key={"QRScannerScreen-1"} flex={1}>
+                        <VStack space={2} w={"100%"} h={"90%"} alignItems={"center"} justifyContent={"space-between"}>
+                            <VStack alignItems={"center"} pt={"30px"}>
+                                <HStack w={width * 0.9} h={width * 0.9} alignItems={"center"} borderWidth={0} borderColor={colors.gray} justifyContent={"center"} borderRadius={"20px"} bg={colors.lightGray} >
+                                    <QRCodeStyled
+                                        data={user?.username || ""}
+                                        color={colors.whiteQR}
+                                        pieceLiquidRadius={0}
+                                        pieceStrokeWidth={1}
+                                        pieceStroke={colors.primaryBlack}
+                                        padding={10}
+                                        logo={{
+                                            href: icon,
+                                            padding: 5,
+                                            opacity: 0.8
+                                        }}
+                                        style={{
+                                            width: width * 0.8,
+                                            height: width * 0.8,
+                                            backgroundColor: "transparent"
+                                        }}
+                                        outerEyesOptions={{ borderRadius: 30 }}
+                                        innerEyesOptions={{ borderRadius: 20, color: colors.mainGreen }}
+                                        pieceSize={width * 0.035}
+                                        pieceBorderRadius={6}
+                                    />
                                 </HStack>
+                                <VStack alignItems={"center"} borderRadius={"10px"} mt={"10px"} py={"7px"} px={"15px"} bg={colors.darkGray} >
+                                    <Heading textTransform={"capitalize"} fontSize={scale(28)} color={colors.white}>{MAKE_FULL_NAME_SHORTEN(user?.fullName || "")}</Heading>
+                                    <Text textTransform={"lowercase"} fontSize={scale(15)} color={colors.lightSkyGray}>{user?.username}</Text>
+                                </VStack>
                             </VStack>
+                            <HStack w={width * 0.85}>
+                                <HStack h={55} borderRadius={"25px"} bg={"rgba(0,0,0,0.5)"} p={"3px"} w={"100%"} justifyContent={"space-between"}>
+                                    <Button
+                                        bg={"mainGreen"}
+                                        disabled={true}
+                                        w={"49%"}
+                                        h={"100%"}
+                                        onPress={() => {
+                                            pageFef.current?.setPageWithoutAnimation(0)
+                                            setCurrentPage(0)
+                                        }}
+                                        title="Mi Codigo"
+                                    />
+                                    <Button
+                                        w={"49%"}
+                                        h={"100%"}
+                                        bg={null}
+                                        onPress={() => {
+                                            pageFef.current?.setPageWithoutAnimation(1)
+                                            setCurrentPage(1)
+                                        }}
+                                        title="Escanear"
+                                    />
+                                </HStack>
+                            </HStack>
                         </VStack>
+                    </VStack>
+                        :
                         <ZStack key={"QRScannerScreen-2"} flex={1}>
                             <CameraView
                                 style={StyleSheet.absoluteFillObject}
@@ -159,8 +158,6 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                 <HStack w={width * 0.85}>
                                     <HStack p={"3px"} h={55} borderRadius={50} bg={"rgba(0,0,0,0.5)"} w={"100%"} justifyContent={"space-between"}>
                                         <Button
-                                            bg={currentPage === 0 ? "mainGreen" : "rgba(0,0,0,0.5)"}
-                                            disabled={currentPage === 0}
                                             w={"49%"}
                                             h={"100%"}
                                             onPress={() => {
@@ -171,7 +168,7 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                         />
                                         <Button
                                             bg={currentPage === 1 ? "mainGreen" : null}
-                                            disabled={currentPage === 1}
+                                            disabled={true}
                                             w={"49%"}
                                             h={"100%"}
                                             onPress={() => {
@@ -184,7 +181,7 @@ const QRScannerScreen: React.FC<Props> = ({ open, onCloseFinish, defaultPage = 0
                                 </HStack>
                             </VStack>
                         </ZStack>
-                    </PagerView>
+                    }
                 </BottomSheet>
             ) : (
                 <SendTransactionScreen open={true} onCloseFinish={() => setShowSendTransaction(false)} />

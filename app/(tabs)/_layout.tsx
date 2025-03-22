@@ -1,18 +1,13 @@
+import React from 'react';
 import { Tabs } from 'expo-router';
 import { Image } from 'native-base';
-import React, { useEffect, useState } from 'react';
 import colors from '@/colors';
-import { bankIcon, bankOff, cardHolder, creditCard, homeOff, homeOn, profileOff, profileOn, transationsOff, transationsOn } from '@/assets';
+import { bankIcon, bankOff, homeOff, homeOn, profileOff, profileOn } from '@/assets';
 import { HomeHeaderRight } from '@/components/navigation/HeaderBar';
-import { globalActions } from '@/redux/slices/globalSlice';
-import * as Crypto from 'expo-crypto';
-import * as Network from 'expo-network';
-import { useDispatch } from 'react-redux';
-import useAsyncStorage from '@/hooks/useAsyncStorage';
-import { useLocation } from '@/hooks/useLocation';
 
 
-export default () => {
+
+const Layout = () => {
 	const defaultTabStyles = {
 		tabBarStyle: {
 			backgroundColor: colors.darkGray,
@@ -38,29 +33,18 @@ export default () => {
 				options={{
 					freezeOnBlur: true,
 					title: '',
-					tabBarIcon: ({ color, focused }) => (
+					tabBarIcon: ({ focused }) => (
 						<Image resizeMode='contain' tintColor={focused ? colors.mainGreen : colors.pureGray} w={'25px'} h={'25px'} source={focused ? homeOn : homeOff} alt='home-on' />
 					),
 				}}
 			/>
-			{/* <Tabs.Screen
-				name="(transactions)"
-				options={{
-					...defaultHeaderOptions,
-					headerRight: () => <HomeHeaderRight p='15px' />,
-					title: '',
-					tabBarIcon: ({ color, focused }) => (
-						<Image resizeMode='contain' tintColor={focused ? colors.mainGreen : colors.pureGray} w={'25px'} h={'25px'} source={focused ? transationsOn : transationsOff} alt='home-on' />
-					),
-				}}
-			/> */}
 			<Tabs.Screen
 				name="(banking)"
 				options={{
 					...defaultHeaderOptions,
-					headerRight: () => <HomeHeaderRight p='15px' />,
+					headerRight: () => <HomeHeaderRight />,
 					title: '',
-					tabBarIcon: ({ color, focused }) => (
+					tabBarIcon: ({ focused }) => (
 						<Image tintColor={focused ? colors.mainGreen : colors.pureGray} w={'28px'} h={'28px'} source={focused ? bankIcon : bankOff} alt='home-on' />
 					),
 				}}
@@ -69,7 +53,7 @@ export default () => {
 				name="(profile)"
 				options={{
 					title: '',
-					tabBarIcon: ({ color, focused }) => (
+					tabBarIcon: ({ focused }) => (
 						<Image resizeMode='contain' tintColor={focused ? colors.mainGreen : colors.pureGray} w={'25px'} h={'25px'} source={focused ? profileOn : profileOff} alt='home-on' />
 					),
 				}}
@@ -78,3 +62,5 @@ export default () => {
 		</Tabs>
 	);
 }
+
+export default Layout

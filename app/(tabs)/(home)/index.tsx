@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import colors from '@/colors';
 import Button from '@/components/global/Button';
 import QRScannerScreen from '@/components/global/QRScanner';
@@ -17,7 +17,6 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { RSA } from 'cryptografia';
-import { SessionContext } from '@/contexts/sessionContext';
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
@@ -25,8 +24,6 @@ const HomeScreen: React.FC = () => {
 	const dispatch = useDispatch()
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
 	const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
-
-	const { fetchSessionUser } = useContext(SessionContext)
 
 	const navigation = useNavigation()
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
@@ -144,7 +141,7 @@ const HomeScreen: React.FC = () => {
 	useEffect(() => {
 		navigation.addListener('focus', () => {
 			(async () => {
-				await fetchSessionUser()
+				// await fetchSessionUser()
 				await onRefresh(false)
 			})()
 		})

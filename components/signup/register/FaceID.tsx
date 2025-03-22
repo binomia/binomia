@@ -45,7 +45,6 @@ const FaceID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element => 
             nextPage()
             setLoading(false)
 
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_: any) {
             setLoading(false)
             setError(true)

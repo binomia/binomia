@@ -1,6 +1,6 @@
-import { Linking, StyleSheet, } from 'react-native'
-import React, { useContext } from 'react'
-import { Image, VStack, Text, HStack, Divider, FlatList, Pressable, Heading } from 'native-base'
+import React from 'react'
+import { Linking } from 'react-native'
+import { Image, VStack, HStack, Pressable, Heading } from 'native-base'
 import colors from '@/colors'
 import { scale } from 'react-native-size-matters'
 import Feather from '@expo/vector-icons/Feather';
@@ -66,26 +66,3 @@ const SupportScreen: React.FC = () => {
 }
 
 export default SupportScreen
-
-
-const styles = StyleSheet.create({
-    contentContainerStyle: {
-        width: 55,
-        height: 55,
-        borderRadius: 100
-    },
-    textStyle: {
-        fontSize: 30,
-        color: 'white',
-        marginBottom: 2,
-        textTransform: 'capitalize',
-        fontWeight: 'bold',
-        shadowColor: "#000",
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-    }
-})

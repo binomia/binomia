@@ -61,7 +61,7 @@ const ScanBackID: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
 
                     setLoading(false)
 
-                } catch (error) {
+                } catch (_error: any) {
                     setLoading(false)
                 }
             })()

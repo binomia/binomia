@@ -1,4 +1,4 @@
-import { askingForMoneyIcon, withdrawIcon, depositIcon, idIcon, limitIcon, mailIcon, mastercardLogo, notificacionIcon, phoneIcon, privacyIcon, receiveIcon, sendMoneyIcon, soportIcon, userIcon, visaLogo, whatsappIcon, claroLogo, articeLogo } from "@/assets";
+import { askingForMoneyIcon, withdrawIcon, depositIcon, limitIcon, mailIcon, mastercardLogo, notificacionIcon, phoneIcon, privacyIcon, receiveIcon, sendMoneyIcon, soportIcon, userIcon, visaLogo, whatsappIcon, claroLogo, articeLogo } from "@/assets";
 import { SUPPORT_EMAIL } from "@/constants";
 import { FORMAT_CURRENCY, FORMAT_LIMIT, FORMAT_PHONE_NUMBER } from "@/helpers";
 import { AccountLimitsType, AccountType, GlobalContextType } from "@/types";
@@ -112,10 +112,10 @@ export const personalScreenData = (user: any) => [
         name: FORMAT_PHONE_NUMBER(user.phone),
         icon: phoneIcon,
     },
-    {
-        name: user.dniNumber,
-        icon: idIcon,
-    }
+    // {
+    //     name: user.dniNumber,
+    //     icon: idIcon,
+    // }
 ]
 
 
