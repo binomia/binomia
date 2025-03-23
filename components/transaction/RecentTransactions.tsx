@@ -163,7 +163,7 @@ const RecentTransactions: React.FC = () => {
 													<Text fontWeight={"semibold"} fontSize={scale(11)} color={colors.white}>{FORMAT_CURRENCY(formatTransaction(data).amount)}</Text>
 												</HStack>
 												:
-												<Heading opacity={data.status === "cancelled" ? 0.5 : 1} textDecorationLine={data.status === "cancelled" ? "line-through" : "none"} fontWeight={"bold"} textTransform={"capitalize"} fontSize={scale(14)} color={formatTransaction(data).amountColor}>{FORMAT_CURRENCY(formatTransaction(data).amount)}</Heading>
+												<Heading opacity={(data.status === "cancelled" || data.status === "suspicious") ? 0.5 : 1} textDecorationLine={(data.status === "cancelled" || data.status === "suspicious") ? "line-through" : "none"} fontWeight={"bold"} textTransform={"capitalize"} fontSize={scale(14)} color={formatTransaction(data).amountColor}>{FORMAT_CURRENCY(formatTransaction(data).amount)}</Heading>
 											}
 										</VStack>
 									</HStack>
