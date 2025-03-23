@@ -421,6 +421,13 @@ export default class TransactionController {
                     })
                 ])
 
+                await notificationServer("socketEventEmitter", {
+                    data: transactionData.toJSON(),
+                    channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_TRANSACTION_CREATED,
+                    senderSocketRoom: senderAccount.toJSON().user.username,
+                    recipientSocketRoom: senderAccount.toJSON().user.username
+                })
+
                 return Object.assign({}, transactionData.toJSON(), {
                     status: "suspicious",
                     features: JSON.stringify(detectedFraudulentTransaction.features),

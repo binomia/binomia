@@ -6,7 +6,7 @@ import { JSONRPCServer } from "json-rpc-2.0";
 
 export const transactionMethods = (server: JSONRPCServer) => {
     server.addMethod("createTransaction", async (data: CreateTransactionRPCParamsType) => {
-        try {          
+        try {
             const jobId = `queueTransaction@${data.transactionId}`
             const job = await transactionsQueue.queue.add(jobId, data, {
                 jobId,
@@ -17,7 +17,7 @@ export const transactionMethods = (server: JSONRPCServer) => {
                     age: 60 * 30 // 24 hours
                 }
             })
-
+           
             return job.asJSON().id
 
         } catch (error) {
