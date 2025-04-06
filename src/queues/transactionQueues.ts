@@ -1,5 +1,5 @@
 import { Job, JobJson, Queue, Worker } from "bullmq";
-import { CreateTransactionRPCParamsType, MonthlyQueueTitleType, WeeklyQueueTitleType } from "@/types";
+import { CreateRequestQueueedTransactionType, CreateTransactionRPCParamsType, MonthlyQueueTitleType, WeeklyQueueTitleType } from "@/types";
 import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN } from "@/constants";
 import shortUUID from "short-uuid";
 import TransactionController from "@/controllers/transactionController";
@@ -21,6 +21,22 @@ export default class TransactionsQueue {
                     const data: CreateTransactionRPCParamsType = JSON.parse(job.data)
 
                     const { transactionId, fromAccount } = await TransactionController.createQueuedTransaction(data)
+                    const transactionQueued = await redis.get(`transactionQueue:${fromAccount}`)
+                    const parsedTransactions: any[] = transactionQueued ? JSON.parse(transactionQueued) : []
+
+                    const filteredCachedQueuedTransactions = parsedTransactions.filter((transaction: any) => transaction.transactionId !== transactionId)
+                    if (filteredCachedQueuedTransactions.length === 0)
+                        await redis.del(`transactionQueue:${fromAccount}`)
+                    else
+                        await redis.set(`transactionQueue:${fromAccount}`, JSON.stringify(filteredCachedQueuedTransactions))
+
+                    console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
+                    break;
+                }
+                case job.name.includes("queueRequestTransaction"): {
+                    const data: CreateRequestQueueedTransactionType = JSON.parse(job.data)
+
+                    const { transactionId, fromAccount } = await TransactionController.createRequestQueueedTransaction(data)
                     const transactionQueued = await redis.get(`transactionQueue:${fromAccount}`)
                     const parsedTransactions: any[] = transactionQueued ? JSON.parse(transactionQueued) : []
 

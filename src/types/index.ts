@@ -28,3 +28,36 @@ export type CreateTransactionRPCParamsType = {
     isRecurring: boolean
     platform: string
 }
+export type CreateRequestQueueedTransactionType = { 
+    receiver: {
+        id: number
+        fullName: string
+        username: string
+        accountId: number
+        balance: number
+    },
+    sender: {
+        id: number
+        fullName: string
+        username: string
+        accountId: number
+        balance: number
+    },
+    transaction: {
+        transactionId: string
+        amount: number
+        location: z.infer<typeof TransactionJoiSchema.transactionLocation>
+        currency: string
+        transactionType: string
+        signature: string
+        recurrenceData: any
+        status: string
+        isRecurring: boolean
+    },
+    device: {
+        deviceId: string
+        sessionId: string
+        ipAddress: string
+        platform: string
+    }
+}

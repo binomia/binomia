@@ -1,6 +1,6 @@
 import TransactionController from "@/controllers/transactionController";
 import { transactionsQueue } from "@/queues";
-import { CreateTransactionRPCParamsType } from "@/types";
+import { CreateRequestQueueedTransactionType, CreateTransactionRPCParamsType } from "@/types";
 import { JSONRPCServer } from "json-rpc-2.0";
 
 
@@ -26,7 +26,7 @@ export const transactionMethods = (server: JSONRPCServer) => {
         }
     });
 
-    server.addMethod("createRequestTransaction", async (data: CreateTransactionRPCParamsType) => {
+    server.addMethod("createRequestTransaction", async (data: CreateRequestQueueedTransactionType) => {
         try {
             const transaction = await TransactionController.createRequestQueueedTransaction(data)
             return transaction

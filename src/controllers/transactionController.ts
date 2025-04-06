@@ -6,7 +6,7 @@ import { AccountModel, BankingTransactionsModel, CardsModel, QueuesModel, Sessio
 import { transactionsQueue } from "@/queues"
 import { anomalyRpcClient } from "@/rpc/clients/anomalyRPC"
 import { notificationServer } from "@/rpc/clients/notificationRPC"
-import { CreateTransactionRPCParamsType, CreateTransactionType, FraudulentTransactionType } from "@/types"
+import { CreateRequestQueueedTransactionType, CreateTransactionRPCParamsType, CreateTransactionType, FraudulentTransactionType } from "@/types"
 import { Job, JobJson } from "bullmq"
 import { Op } from "sequelize"
 import shortUUID from "short-uuid"
@@ -525,109 +525,71 @@ export default class TransactionController {
         }
     }
 
-    static createRequestQueueedTransaction = async ({ deviceId, ipAddress, isRecurring, platform, sessionId, senderUsername, signature, transactionId, receiverUsername, amount, transactionType, currency, location }: CreateTransactionRPCParamsType) => {
+    static createRequestQueueedTransaction = async ({ sender, receiver, transaction, device }: CreateRequestQueueedTransactionType) => {
         try {
-            const senderAccount = await AccountModel.findOne({
-                where: { username: senderUsername },
-                include: [
-                    {
-                        model: UsersModel,
-                        as: 'user',
-                    }
-                ]
-            })
-
-            if (!senderAccount)
-                throw "sender account not found"
-
-            const receiverAccount = await AccountModel.findOne({
-                where: {
-                    [Op.and]: [
-                        { username: receiverUsername },
-                        { allowRequestMe: true }
-                    ]
-                },
-                include: [
-                    {
-                        model: UsersModel,
-                        as: 'user',
-                        attributes: { exclude: ['createdAt', 'dniNumber', 'updatedAt', 'faceVideoUrl', 'idBackUrl', 'idFrontUrl', 'profileImageUrl', 'password'] }
-                    }
-                ]
-            })
-
-            if (!receiverAccount)
-                throw "receiver account not found"
+            // console.log(JSON.stringify({ sender, receiver, transaction, device }, null, 2));
 
 
-            if (!senderAccount.toJSON().allowRequestMe)
-                throw `${receiverAccount.toJSON().username} account does not receive request payment`
-
-            const message = `${receiverAccount.toJSON().username}&${senderAccount.toJSON().username}@${amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
-            const verify = await Cryptography.verify(message, signature, ZERO_SIGN_PRIVATE_KEY)
+            const message = `${receiver.username}&${sender.username}@${transaction.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
+            const verify = await Cryptography.verify(message, transaction.signature, ZERO_SIGN_PRIVATE_KEY)
 
 
             if (!verify)
                 throw "Transaction signature verification failed"
 
-            // const lastTransaction = await TransactionsModel.findOne({
-            //     order: [['createdAt', 'DESC']],
-            //     attributes: ['id']
-            // });
-
-            const features = `[[0.0, 0.0, ${Number(amount).toFixed(1)}, ${Number(0).toFixed(1)}, 0.0, 1.0, 0.0]]`
-            const transaction = await TransactionsModel.create({
-                transactionId,
-                senderFullName: senderAccount.toJSON().user.fullName,
-                receiverFullName: receiverAccount.toJSON().user.fullName,
-                fromAccount: senderAccount.toJSON().id,
-                toAccount: receiverAccount.toJSON().id,
-                amount: amount,
-                deliveredAmount: amount,
-                transactionType: transactionType,
-                currency: currency,
-                location: location,
+            const features = `[[0.0, 0.0, ${Number(transaction.amount).toFixed(1)}, ${Number(0).toFixed(1)}, 0.0, 1.0, 0.0]]`
+            const transactionCreated = await TransactionsModel.create({
+                transactionId: transaction.transactionId,
+                senderFullName: sender.fullName,
+                receiverFullName: receiver.fullName,
+                fromAccount: sender.accountId,
+                toAccount: receiver.accountId,
+                amount: transaction.amount,
+                deliveredAmount: transaction.amount,
+                transactionType: transaction.transactionType,
+                currency: transaction.currency,
+                location: transaction.location,
                 status: "requested",
-                signature,
+                signature: transaction.signature,
 
-                deviceId,
-                ipAddress,
-                isRecurring,
-                platform,
-                sessionId,
-                previousBalance: senderAccount.toJSON().balance,
+                deviceId: device.deviceId,
+                ipAddress: device.ipAddress,
+                isRecurring: transaction.isRecurring,
+                platform: device.platform,
+                sessionId: device.sessionId,
+                previousBalance: sender.balance,
                 fraudScore: 0,
                 speed: 0,
                 distance: 0,
                 features
             })
 
-            const transactionData = await transaction.reload({
-                include: [
-                    {
-                        model: AccountModel,
-                        as: 'from',
-                        include: [{
-                            model: UsersModel,
-                            as: 'user',
-                        }]
-                    },
-                    {
-                        model: AccountModel,
-                        as: 'to',
-                        include: [{
-                            model: UsersModel,
-                            as: 'user',
-                        }]
-                    }
-                ]
-            })
+            // const transactionData = await transactionCreated.reload({
+            //     include: [
+            //         {
+            //             model: AccountModel,
+            //             as: 'from',
+            //             include: [{
+            //                 model: UsersModel,
+            //                 as: 'user',
+            //             }]
+            //         },
+            //         {
+            //             model: AccountModel,
+            //             as: 'to',
+            //             include: [{
+            //                 model: UsersModel,
+            //                 as: 'user',
+            //             }]
+            //         }
+            //     ]
+            // })
 
             const receiverSession = await SessionModel.findAll({
                 attributes: ["expoNotificationToken"],
                 where: {
                     [Op.and]: [
-                        { userId: receiverAccount.toJSON().user.id },
+                        { userId: receiver.id },
                         { verified: true },
                         {
                             expires: {
@@ -643,21 +605,21 @@ export default class TransactionController {
                 }
             })
 
-            const expoNotificationTokens: { token: string, message: string }[] = receiverSession.map(obj => ({ token: obj.dataValues.expoNotificationToken, message: `${MAKE_FULL_NAME_SHORTEN(receiverAccount.toJSON().user.fullName)} te ha solicitado ${FORMAT_CURRENCY(amount)} pesos` }));
+            const expoNotificationTokens: { token: string, message: string }[] = receiverSession.map(obj => ({ token: obj.dataValues.expoNotificationToken, message: `${MAKE_FULL_NAME_SHORTEN(receiver.fullName)} te ha solicitado ${FORMAT_CURRENCY(transaction.amount)} pesos` }));
 
             await Promise.all([
                 notificationServer("newTransactionNotification", {
                     data: expoNotificationTokens
                 }),
                 notificationServer("socketEventEmitter", {
-                    data: transactionData.toJSON(),
+                    data: transactionCreated.toJSON(),
                     channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_QUEUE_TRANSACTION_CREATED,
-                    senderSocketRoom: senderUsername,
-                    recipientSocketRoom: transaction.toJSON().to.user.username,
+                    senderSocketRoom: sender.username,
+                    recipientSocketRoom: receiver.username,
                 })
             ])
 
-            return transactionData.toJSON()
+            return transactionCreated.toJSON()
 
         } catch (error: any) {
             throw error.message
