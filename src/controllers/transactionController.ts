@@ -13,6 +13,10 @@ import { AES, RSA } from 'cryptografia';
 import redis, { connection } from '@/redis';
 import { Queue } from 'bullmq';
 
+
+const queue = new Queue("transactions", { connection });
+
+
 export class TransactionsController {
     static transaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
@@ -104,7 +108,6 @@ export class TransactionsController {
             const { deviceid, ipaddress, platform } = req.headers
 
             span.addEvent("queueServer is creating the transaction");
-            const queue = new Queue("transactions", { connection });
 
             const jobId = `queueTransaction@${transactionId}`
             const queueData = {
@@ -193,31 +196,124 @@ export class TransactionsController {
             const signature = await Cryptography.sign(messageToSign, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
 
-            const transaction = await queueServer("createRequestTransaction", {
-                transactionId,
-                senderUsername: user.username,
-                receiverUsername: validatedData.receiver,
-                amount: validatedData.amount,
-                recurrenceData,
-                senderFullName: user.fullName,
-                location: validatedData.location,
-                currency: validatedData.currency,
-                transactionType: validatedData.transactionType,
-                userId,
-                signature,
-                jobTime: "queueRequestTransaction",
-                jobName: "queueRequestTransaction",
-
-                deviceId: deviceid,
-                sessionId,
-                ipAddress: ipaddress,
-                isRecurring: recurrenceData.time !== "oneTime",
-                platform,
+            const receiver = await AccountModel.findOne({
+                where: {
+                    username: validatedData.receiver
+                },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user'
+                    }
+                ]
             })
 
-            return transaction
+            if (!receiver)
+                throw new GraphQLError("Receiver not found")
+
+            if (!receiver.toJSON().allowRequestMe)
+                throw `${receiver.toJSON().username} account does not receive request payment`
+
+
+            // const transaction = await queueServer("createRequestTransaction", {
+            //     transactionId,
+            //     senderUsername: user.username,
+            //     receiverUsername: validatedData.receiver,
+            //     amount: validatedData.amount,
+            //     recurrenceData,
+            //     senderFullName: user.fullName,
+            //     location: validatedData.location,
+            //     currency: validatedData.currency,
+            //     transactionType: validatedData.transactionType,
+            //     userId,
+            //     signature,
+            //     jobTime: "queueRequestTransaction",
+            //     jobName: "queueRequestTransaction",
+
+            //     deviceId: deviceid,
+            //     sessionId,
+            //     ipAddress: ipaddress,
+            //     isRecurring: recurrenceData.time !== "oneTime",
+            //     platform,
+            // })
+
+            const receiverData = receiver.toJSON()
+
+            // console.log({account});
+
+
+            const queueData = {
+                receiver: {
+                    id: receiverData.user.id,
+                    fullName: receiverData.user.fullName,
+                    username: receiverData.user.username,
+                    accountId: receiverData.id,
+                    balance: receiverData.balance
+                },
+                sender: {
+                    id: userId,
+                    fullName: user.fullName,
+                    username: user.username,
+                    accountId: user.account.id,
+                    balance: user.account.balance
+                },
+                transaction: {
+                    transactionId,
+                    amount: validatedData.amount,
+                    location: validatedData.location,
+                    currency: validatedData.currency,
+                    transactionType: validatedData.transactionType,
+                    signature,
+                    recurrenceData,
+                    status: "pending",
+                    isRecurring: recurrenceData.time !== "oneTime",
+                },
+                device: {
+                    deviceId: deviceid,
+                    sessionId,
+                    ipAddress: ipaddress,
+                    platform,
+                }
+            }
+
+            const jobId = `queueRequestTransaction@${transactionId}`
+            await queue.add(jobId, queueData, {
+                jobId,
+                removeOnComplete: {
+                    age: 20 // 30 minutes
+                },
+                removeOnFail: {
+                    age: 60 * 30 // 24 hours
+                }
+            })
+
+            console.log("queueData created");
+
+            const transactionResponse = {
+                transactionId,
+                "amount": validatedData.amount,
+                "deliveredAmount": validatedData.amount,
+                "voidedAmount": validatedData.amount,
+                "transactionType": validatedData.transactionType,
+                "currency": "DOP",
+                "status": "pending",
+                "location": validatedData.location,
+                "createdAt": Date.now().toString(),
+                "updatedAt": Date.now().toString(),
+                "from": {
+                    ...user.account,
+                    user
+                },
+                "to": {
+                    ...receiver.toJSON(),
+                }
+            }
+
+            return transactionResponse
 
         } catch (error: any) {
+            console.log({ error });
+
             throw new GraphQLError(error.message);
         }
     }
