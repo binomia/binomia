@@ -10,7 +10,8 @@ import { Op } from 'sequelize';
 import { queueServer } from '@/rpc/queueRPC';
 import { Span, SpanStatusCode, Tracer } from '@opentelemetry/api';
 import { AES, RSA } from 'cryptografia';
-import redis from '@/redis';
+import redis, { connection } from '@/redis';
+import { Queue } from 'bullmq';
 
 export class TransactionsController {
     static transaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -103,7 +104,10 @@ export class TransactionsController {
             const { deviceid, ipaddress, platform } = req.headers
 
             span.addEvent("queueServer is creating the transaction");
-            const transaction = await queueServer("createTransaction", {
+            const queue = new Queue("transactions", { connection });
+
+            const jobId = `queueTransaction@${transactionId}`
+            const queueData = {
                 transactionId,
                 senderUsername: user.username,
                 receiverUsername: validatedData.receiver,
@@ -123,8 +127,18 @@ export class TransactionsController {
                 ipAddress: ipaddress,
                 isRecurring: recurrenceData.time !== "oneTime",
                 platform,
+            }
+
+            await queue.add(jobId, queueData, {
+                jobId,
+                removeOnComplete: {
+                    age: 20 // 30 minutes
+                },
+                removeOnFail: {
+                    age: 60 * 30 // 24 hours
+                }
             })
-            
+
             const transactionResponse = {
                 transactionId,
                 "amount": validatedData.amount,
@@ -144,7 +158,7 @@ export class TransactionsController {
                     ...reciver.toJSON(),
                 }
             }
-            
+
             span.addEvent("queueServer is saving the transaction in cache");
             const transactionResponseCached = await redis.get(`transactionQueue:${user.account.id}`)
             if (transactionResponseCached)
@@ -152,10 +166,9 @@ export class TransactionsController {
             else
                 await redis.set(`transactionQueue:${user.account.id}`, JSON.stringify([transactionResponse]))
 
-
-            span.setAttribute("queueServer.response", JSON.stringify(transaction));
+            span.setAttribute("queueServer.response", JSON.stringify(jobId));
             span.setStatus({ code: SpanStatusCode.OK });
-        
+
             return transactionResponse
 
         } catch (error: any) {

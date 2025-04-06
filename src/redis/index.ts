@@ -9,6 +9,8 @@ export const connection = {
     port: 6379
 }
 
+export const redis = new Redis(connection)
+
 
 export default new Redis({
     host: REDIS_HOST,

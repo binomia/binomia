@@ -1,11 +1,16 @@
-import { Job, JobJson, Queue, Worker } from "bullmq";
+import { Queue } from "bullmq";
+import { connection } from "@/redis";
+
 
 export default class TransactionsQueue {
     queue: Queue;
-
     constructor() {
-        this.queue = new Queue("transactions", { connection: { host: "redis", port: 6379 } });
+        this.queue = new Queue("transactions", { connection });
     }
 
 
+    addJob = async (jobName: string, data: string, pattern: string) => {
+        const job = await this.queue.upsertJobScheduler(jobName, { tz: "EST", pattern }, { data });
+        return job
+    }
 }
