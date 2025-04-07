@@ -71,7 +71,7 @@ export class TransactionsController {
         }
     }
 
-    static createTransaction = async (_: unknown, { message }: { message: string }, { req, metrics, tracer }: { req: any, metrics: PrometheusMetrics, tracer: Tracer }) => {
+    static createTransaction = async (_: unknown, { message }: { message: string }, { req, tracer }: { req: any, metrics: PrometheusMetrics, tracer: Tracer }) => {
         const span: Span = tracer.startSpan("createTransaction");
         try {
             span.addEvent("Starting transaction creation");
@@ -86,22 +86,6 @@ export class TransactionsController {
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
-            const reciver = await AccountModel.findOne({
-                where: {
-                    username: validatedData.receiver
-                },
-                include: [
-                    {
-                        model: UsersModel,
-                        as: 'user'
-                    }
-                ]
-            })
-
-            if (!reciver) {
-                throw new GraphQLError("Receiver not found")
-            }
-
             const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
             const signature = RSA.sign(messageToSign, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
@@ -111,25 +95,31 @@ export class TransactionsController {
 
             const jobId = `queueTransaction@${transactionId}`
             const queueData = {
-                transactionId,
-                senderUsername: user.username,
                 receiverUsername: validatedData.receiver,
-                amount: validatedData.amount,
-                recurrenceData,
-                senderFullName: user.fullName,
-                location: validatedData.location,
-                currency: validatedData.currency,
-                transactionType: validatedData.transactionType,
-                userId: userId,
-                signature,
-                jobTime: "queueTransaction",
-                jobName: "queueTransaction",
-
-                deviceId: deviceid,
-                sessionId: sid,
-                ipAddress: ipaddress,
-                isRecurring: recurrenceData.time !== "oneTime",
-                platform,
+                sender: {
+                    id: userId,
+                    fullName: user.fullName,
+                    username: user.username,
+                    accountId: user.account.id,
+                    balance: user.account.balance
+                },
+                transaction: {
+                    transactionId,
+                    amount: validatedData.amount,
+                    location: validatedData.location,
+                    currency: validatedData.currency,
+                    transactionType: validatedData.transactionType,
+                    signature,
+                    recurrenceData,
+                    status: "pending",
+                    isRecurring: recurrenceData.time !== "oneTime",
+                },
+                device: {
+                    deviceId: deviceid,
+                    sessionId: sid,
+                    ipAddress: ipaddress,
+                    platform,
+                }
             }
 
             await queue.add(jobId, queueData, {
@@ -156,9 +146,6 @@ export class TransactionsController {
                 "from": {
                     ...account,
                     user
-                },
-                "to": {
-                    ...reciver.toJSON(),
                 }
             }
 
@@ -197,7 +184,7 @@ export class TransactionsController {
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
 
             const queueData = {
-                receiverUsername: validatedData.receiver,               
+                receiverUsername: validatedData.receiver,
                 sender: {
                     id: userId,
                     fullName: user.fullName,
@@ -249,7 +236,7 @@ export class TransactionsController {
                 "from": {
                     ...user.account,
                     user
-                }              
+                }
             }
 
             return transactionResponse
@@ -279,14 +266,25 @@ export class TransactionsController {
 
     static payRequestTransaction = async (_: unknown, { transactionId, paymentApproved }: { transactionId: string, paymentApproved: boolean }, context: any) => {
         try {
-            const session = await checkForProtectedRequests(context.req);
-            const transaction = queueServer("payRequestTransaction", {
+            const session = await checkForProtectedRequests(context.req);            
+            const jobId = `payRequestTransaction@${transactionId}`
+            const queueData = {
                 transactionId,
                 paymentApproved,
-                toAccount: session.user.account.id
+                toAccount: session.user.account.id,
+            }
+
+            await queue.add(jobId, queueData, {
+                jobId,
+                removeOnComplete: {
+                    age: 20 // 30 minutes
+                },
+                removeOnFail: {
+                    age: 60 * 30 // 24 hours
+                }
             })
 
-            return transaction
+            return { status: "pending", transactionId }
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
