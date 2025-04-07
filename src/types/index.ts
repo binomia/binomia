@@ -28,7 +28,7 @@ export type CreateTransactionRPCParamsType = {
     isRecurring: boolean
     platform: string
 }
-export type CreateRequestQueueedTransactionType = {
+export interface CreateRequestQueueedTransactionType {
     receiverUsername: string
     sender: {
         id: number
@@ -55,3 +55,12 @@ export type CreateRequestQueueedTransactionType = {
         platform: string
     }
 }
+
+export interface CreateQueueedTransactionType extends CreateRequestQueueedTransactionType { }
+
+export type PayQueuedRequestedTransactionType = {
+    transactionId: string
+    toAccount: number
+    paymentApproved: boolean
+}
+

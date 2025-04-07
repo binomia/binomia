@@ -1,5 +1,5 @@
 import { Job, JobJson, Queue, Worker } from "bullmq";
-import { CreateRequestQueueedTransactionType, CreateTransactionRPCParamsType, MonthlyQueueTitleType, WeeklyQueueTitleType } from "@/types";
+import { CreateQueueedTransactionType, CreateRequestQueueedTransactionType, CreateTransactionRPCParamsType, MonthlyQueueTitleType, PayQueuedRequestedTransactionType, WeeklyQueueTitleType } from "@/types";
 import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN } from "@/constants";
 import shortUUID from "short-uuid";
 import TransactionController from "@/controllers/transactionController";
@@ -14,12 +14,11 @@ export default class TransactionsQueue {
         this.workers()
     }
 
-    private executeJob = async (job: Job) => {
+    private executeJob = async (job: JobJson) => {
         try {
-            const jobData = job.asJSON()
             switch (true) {
-                case jobData.name.includes("queueTransaction"): {
-                    const data: CreateTransactionRPCParamsType = JSON.parse(job.data)
+                case job.name.includes("queueTransaction"): {
+                    const data: CreateQueueedTransactionType = JSON.parse(job.data)
 
                     const { transactionId, fromAccount } = await TransactionController.createQueuedTransaction(data)
                     const transactionQueued = await redis.get(`transactionQueue:${fromAccount}`)
@@ -34,8 +33,8 @@ export default class TransactionsQueue {
                     console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
                     break;
                 }
-                case jobData.name.includes("queueRequestTransaction"): {
-                    const data: CreateRequestQueueedTransactionType = JSON.parse(jobData.data)
+                case job.name.includes("queueRequestTransaction"): {
+                    const data: CreateRequestQueueedTransactionType = JSON.parse(job.data)
 
                     const { transactionId, fromAccount } = await TransactionController.createRequestQueueedTransaction(data)
                     const transactionQueued = await redis.get(`transactionQueue:${fromAccount}`)
@@ -47,34 +46,38 @@ export default class TransactionsQueue {
                     else
                         await redis.set(`transactionQueue:${fromAccount}`, JSON.stringify(filteredCachedQueuedTransactions))
 
-                    console.log(`Job ${jobData.id} completed:`, jobData.name.split("@")[0]);
+                    console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
                     break;
                 }
                 case job.name.includes("pendingTransaction"): {
-                    const status = await TransactionController.pendingTransaction(jobData)
+                    const status = await TransactionController.pendingTransaction(job)
                     if (status === "completed")
                         if (job.repeatJobKey)
                             this.removeJob(job.repeatJobKey, "completed")
                     break;
                 }
+                case job.name.includes("payRequestTransaction"): {
+                    const data: PayQueuedRequestedTransactionType = JSON.parse(job.data)
+                    await TransactionController.payRequestTransaction(data)
+                    break
+                }
                 case job.name.includes("trainTransactionFraudDetectionModel"): {
-                    await TransactionController.trainTransactionFraudDetectionModel(jobData)
+                    await TransactionController.trainTransactionFraudDetectionModel(job)
                     break;
                 }
                 default: {
-                    await TransactionController.prosessQueuedTransaction(jobData)
+                    await TransactionController.prosessQueuedTransaction(job)
                     break;
                 }
             }
 
         } catch (error) {
-            job.remove()
             console.log({ executeJob: error });
         }
     }
 
     private workers = async () => {
-        const worker = new Worker('transactions', async (job) => this.executeJob(job), {
+        const worker = new Worker('transactions', async (job) => this.executeJob(job.asJSON()), {
             connection: { host: "redis", port: 6379 },
             removeOnComplete: {
                 age: 20

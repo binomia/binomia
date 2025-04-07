@@ -220,10 +220,10 @@ export default class TransactionController {
         }
     }
 
-    static createQueuedTransaction = async ({ senderUsername, ipAddress, platform, sessionId, deviceId, isRecurring, transactionId, receiverUsername, recurrenceData, amount, transactionType, currency, location }: CreateTransactionRPCParamsType) => {
+    static createQueuedTransaction = async ({ sender, receiverUsername, transaction, device }: CreateRequestQueueedTransactionType) => {
         try {
             const senderAccount = await AccountModel.findOne({
-                where: { username: senderUsername },
+                where: { username: sender.username },
                 include: [
                     {
                         model: UsersModel,
@@ -256,19 +256,19 @@ export default class TransactionController {
 
             const hash = await Cryptography.hash(JSON.stringify({
                 hash: {
-                    sender: senderUsername,
+                    sender: sender.username,
                     receiver: receiverUsername,
-                    amount,
-                    transactionType,
-                    currency,
-                    location
+                    amount: transaction.amount,
+                    transactionType: transaction.transactionType,
+                    currency: transaction.currency,
+                    location: transaction.location,
                 },
                 ZERO_ENCRYPTION_KEY,
                 ZERO_SIGN_PRIVATE_KEY,
             }))
 
             const senderAccountJSON = senderAccount.toJSON();
-            if (senderAccountJSON.balance < amount)
+            if (senderAccountJSON.balance < transaction.amount)
                 throw "insufficient balance";
 
             if (!senderAccountJSON.allowSend)
@@ -313,8 +313,8 @@ export default class TransactionController {
             const distance = !lastTransactionJSON ? 0 : calculateDistance(
                 lastTransactionJSON.location.latitude,
                 lastTransactionJSON.location.longitude,
-                location.latitude,
-                location.longitude
+                transaction.location.latitude,
+                transaction.location.longitude
             );
 
             const timeDifference = !lastTransactionJSON ? 0 : new Date().getTime() - new Date(lastTransactionJSON.createdAt).getTime()
@@ -324,31 +324,31 @@ export default class TransactionController {
             const time = calcularTime(speed, distance)
 
             const newTransactionData = {
-                transactionId,
+                transactionId: transaction.transactionId,
                 fromAccount: senderAccountJSON.id,
                 toAccount: receiverAccount.toJSON().id,
                 senderFullName: senderAccountJSON.user.fullName,
                 receiverFullName: receiverAccount.toJSON().user.fullName,
-                amount,
-                deliveredAmount: amount,
-                transactionType,
-                currency,
-                location,
+                amount: transaction.amount,
+                deliveredAmount: transaction.amount,
+                transactionType: transaction.transactionType,
+                currency: transaction.currency,
+                location: transaction.location,
 
                 signature,
-                deviceId: deviceId,
-                ipAddress: ipAddress,
-                isRecurring: isRecurring,
-                platform: platform,
-                sessionId: sessionId,
+                deviceId: device.deviceId,
+                ipAddress: device.ipAddress,
+                isRecurring: transaction.isRecurring,
+                platform: device.platform,
+                sessionId: device.sessionId,
                 previousBalance: senderAccount.toJSON().balance,
                 fraudScore: 0,
                 speed,
                 distance
             }
 
-            const transaction = await TransactionsModel.create(newTransactionData)
-            const transactionData = await transaction.reload({
+            const transactionCreated = await TransactionsModel.create(newTransactionData)
+            const transactionData = await transactionCreated.reload({
                 include: [
                     {
                         model: AccountModel,
@@ -372,11 +372,11 @@ export default class TransactionController {
             const features = await TransactionJoiSchema.transactionFeatures.parseAsync({
                 speed: lastTransactionJSON.status === "audited" ? 0 : +Number(speed).toFixed(2),
                 distance: lastTransactionJSON.status === "audited" ? 0 : +Number(distance).toFixed(2),
-                amount: +Number(amount).toFixed(2),
+                amount: +Number(transaction.amount).toFixed(2),
                 currency: ["dop"].indexOf(transactionData.toJSON().currency.toLowerCase()),
                 transactionType: ["transfer"].indexOf(transactionData.toJSON().transactionType.toLowerCase()),
                 platform: ["ios", "android", "web"].indexOf(transactionData.toJSON().platform.toLowerCase()),
-                isRecurring: isRecurring ? 1 : 0,
+                isRecurring: transaction.isRecurring ? 1 : 0,
             })
 
             const detectedFraudulentTransaction = await anomalyRpcClient("detect_fraudulent_transaction", {
@@ -390,7 +390,7 @@ export default class TransactionController {
                     jobTime: "trainTransactionFraudDetectionModel",
                     referenceData: null,
                     userId: senderAccount.toJSON().user.id,
-                    amount: +Number(amount).toFixed(4),
+                    amount: +Number(transaction.amount).toFixed(4),
                     data: {
                         last_transaction_features: JSON.stringify(detectedFraudulentTransaction.last_transaction_features)
                     }
@@ -414,7 +414,7 @@ export default class TransactionController {
                         status: "flagged",
                         blacklisted: flaggedTransactionsCount >= 1
                     }),
-                    transaction.update({
+                    transactionCreated.update({
                         status: "suspicious",
                         features: JSON.stringify(detectedFraudulentTransaction.features),
                         fraudScore: detectedFraudulentTransaction.fraud_score
@@ -435,18 +435,18 @@ export default class TransactionController {
                 })
 
             } else {
-                await transaction.update({
+                await transactionCreated.update({
                     features: JSON.stringify(detectedFraudulentTransaction.features),
                     fraudScore: detectedFraudulentTransaction.fraud_score
                 })
 
 
-                const newSenderBalance = Number(senderAccount.toJSON().balance - amount).toFixed(4)
+                const newSenderBalance = Number(senderAccount.toJSON().balance - transaction.amount).toFixed(4)
                 await senderAccount.update({
                     balance: +Number(newSenderBalance).toFixed(4)
                 })
 
-                const newReceiverBalance = Number(receiverAccount.toJSON().balance + amount).toFixed(4)
+                const newReceiverBalance = Number(receiverAccount.toJSON().balance + transaction.amount).toFixed(4)
                 await receiverAccount.update({
                     balance: +Number(newReceiverBalance).toFixed(4)
                 })
@@ -465,25 +465,25 @@ export default class TransactionController {
                         jobTime: "everyThirtyMinutes",
                         referenceData: null,
                         userId: senderAccount.toJSON().user.id,
-                        amount: amount,
+                        amount: transaction.amount,
                         data: encryptedData,
                     })
                 ])
 
-                if (recurrenceData.time !== "oneTime") {
+                if (transaction.recurrenceData.time !== "oneTime") {
                     const recurrenceQueueData = Object.assign(newTransactionData, {
                         transactionId: `${shortUUID.generate()}${shortUUID.generate()}`,
-                        recurrenceData,
+                        recurrenceData: transaction.recurrenceData,
                         location: {}
                     })
 
                     const encryptedData = await Cryptography.encrypt(JSON.stringify(recurrenceQueueData));
                     transactionsQueue.createJobs({
-                        jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
+                        jobId: `${transaction.recurrenceData.title}@${transaction.recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
                         userId: senderAccount.toJSON().user.id,
-                        jobName: recurrenceData.title,
-                        jobTime: recurrenceData.time,
-                        amount: amount,
+                        jobName: transaction.recurrenceData.title,
+                        jobTime: transaction.recurrenceData.time,
+                        amount: transaction.amount,
                         data: encryptedData,
                         referenceData: {
                             fullName: receiverAccount.toJSON().user.fullName,
@@ -512,12 +512,12 @@ export default class TransactionController {
                     }
                 })
 
-                const expoNotificationTokens: { token: string, message: string }[] = receiverSession.map(obj => ({ token: obj.dataValues.expoNotificationToken, message: `${MAKE_FULL_NAME_SHORTEN(receiverAccount.toJSON().user.fullName)} te ha enviado ${FORMAT_CURRENCY(amount)} pesos` }));
+                const expoNotificationTokens: { token: string, message: string }[] = receiverSession.map(obj => ({ token: obj.dataValues.expoNotificationToken, message: `${MAKE_FULL_NAME_SHORTEN(receiverAccount.toJSON().user.fullName)} te ha enviado ${FORMAT_CURRENCY(transaction.amount)} pesos` }));
                 await notificationServer("newTransactionNotification", {
                     data: expoNotificationTokens
                 })
 
-                return transaction.toJSON();
+                return transactionCreated.toJSON();
             }
 
         } catch (error: any) {
