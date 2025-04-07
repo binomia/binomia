@@ -525,25 +525,40 @@ export default class TransactionController {
         }
     }
 
-    static createRequestQueueedTransaction = async ({ sender, receiver, transaction, device }: CreateRequestQueueedTransactionType) => {
+    static createRequestQueueedTransaction = async ({ sender, receiverUsername, transaction, device }: CreateRequestQueueedTransactionType) => {
         try {
-            // console.log(JSON.stringify({ sender, receiver, transaction, device }, null, 2));
-
-
-            const message = `${receiver.username}&${sender.username}@${transaction.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
+            const message = `${receiverUsername}&${sender.username}@${transaction.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
             const verify = await Cryptography.verify(message, transaction.signature, ZERO_SIGN_PRIVATE_KEY)
-
 
             if (!verify)
                 throw "Transaction signature verification failed"
 
+            const receiver = await AccountModel.findOne({
+                where: {
+                    username: receiverUsername
+                },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user'
+                    }
+                ]
+            })
+
+            if (!receiver)
+                throw "Receiver not found"
+
+            if (!receiver.toJSON().allowRequestMe)
+                throw `${receiver.toJSON().username} account does not receive request payment`
+
+            const receiverData = receiver.toJSON()
             const features = `[[0.0, 0.0, ${Number(transaction.amount).toFixed(1)}, ${Number(0).toFixed(1)}, 0.0, 1.0, 0.0]]`
             const transactionCreated = await TransactionsModel.create({
                 transactionId: transaction.transactionId,
                 senderFullName: sender.fullName,
-                receiverFullName: receiver.fullName,
+                receiverFullName: receiverData.user.fullName,
                 fromAccount: sender.accountId,
-                toAccount: receiver.accountId,
+                toAccount: receiverData.id,
                 amount: transaction.amount,
                 deliveredAmount: transaction.amount,
                 transactionType: transaction.transactionType,
@@ -564,32 +579,11 @@ export default class TransactionController {
                 features
             })
 
-            // const transactionData = await transactionCreated.reload({
-            //     include: [
-            //         {
-            //             model: AccountModel,
-            //             as: 'from',
-            //             include: [{
-            //                 model: UsersModel,
-            //                 as: 'user',
-            //             }]
-            //         },
-            //         {
-            //             model: AccountModel,
-            //             as: 'to',
-            //             include: [{
-            //                 model: UsersModel,
-            //                 as: 'user',
-            //             }]
-            //         }
-            //     ]
-            // })
-
             const receiverSession = await SessionModel.findAll({
                 attributes: ["expoNotificationToken"],
                 where: {
                     [Op.and]: [
-                        { userId: receiver.id },
+                        { userId: receiverData.user.id },
                         { verified: true },
                         {
                             expires: {
@@ -605,8 +599,7 @@ export default class TransactionController {
                 }
             })
 
-            const expoNotificationTokens: { token: string, message: string }[] = receiverSession.map(obj => ({ token: obj.dataValues.expoNotificationToken, message: `${MAKE_FULL_NAME_SHORTEN(receiver.fullName)} te ha solicitado ${FORMAT_CURRENCY(transaction.amount)} pesos` }));
-
+            const expoNotificationTokens: { token: string, message: string }[] = receiverSession.map(obj => ({ token: obj.dataValues.expoNotificationToken, message: `${MAKE_FULL_NAME_SHORTEN(receiverData.user.fullName)} te ha solicitado ${FORMAT_CURRENCY(transaction.amount)} pesos` }));
             await Promise.all([
                 notificationServer("newTransactionNotification", {
                     data: expoNotificationTokens
@@ -615,7 +608,7 @@ export default class TransactionController {
                     data: transactionCreated.toJSON(),
                     channel: NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL.NOTIFICATION_QUEUE_TRANSACTION_CREATED,
                     senderSocketRoom: sender.username,
-                    recipientSocketRoom: receiver.username,
+                    recipientSocketRoom: receiverData.user.username,
                 })
             ])
 

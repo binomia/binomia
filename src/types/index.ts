@@ -28,14 +28,8 @@ export type CreateTransactionRPCParamsType = {
     isRecurring: boolean
     platform: string
 }
-export type CreateRequestQueueedTransactionType = { 
-    receiver: {
-        id: number
-        fullName: string
-        username: string
-        accountId: number
-        balance: number
-    },
+export type CreateRequestQueueedTransactionType = {
+    receiverUsername: string
     sender: {
         id: number
         fullName: string
