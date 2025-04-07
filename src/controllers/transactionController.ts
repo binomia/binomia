@@ -196,60 +196,8 @@ export class TransactionsController {
             const signature = await Cryptography.sign(messageToSign, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
 
-            const receiver = await AccountModel.findOne({
-                where: {
-                    username: validatedData.receiver
-                },
-                include: [
-                    {
-                        model: UsersModel,
-                        as: 'user'
-                    }
-                ]
-            })
-
-            if (!receiver)
-                throw new GraphQLError("Receiver not found")
-
-            if (!receiver.toJSON().allowRequestMe)
-                throw `${receiver.toJSON().username} account does not receive request payment`
-
-
-            // const transaction = await queueServer("createRequestTransaction", {
-            //     transactionId,
-            //     senderUsername: user.username,
-            //     receiverUsername: validatedData.receiver,
-            //     amount: validatedData.amount,
-            //     recurrenceData,
-            //     senderFullName: user.fullName,
-            //     location: validatedData.location,
-            //     currency: validatedData.currency,
-            //     transactionType: validatedData.transactionType,
-            //     userId,
-            //     signature,
-            //     jobTime: "queueRequestTransaction",
-            //     jobName: "queueRequestTransaction",
-
-            //     deviceId: deviceid,
-            //     sessionId,
-            //     ipAddress: ipaddress,
-            //     isRecurring: recurrenceData.time !== "oneTime",
-            //     platform,
-            // })
-
-            const receiverData = receiver.toJSON()
-
-            // console.log({account});
-
-
             const queueData = {
-                receiver: {
-                    id: receiverData.user.id,
-                    fullName: receiverData.user.fullName,
-                    username: receiverData.user.username,
-                    accountId: receiverData.id,
-                    balance: receiverData.balance
-                },
+                receiverUsername: validatedData.receiver,               
                 sender: {
                     id: userId,
                     fullName: user.fullName,
@@ -287,8 +235,6 @@ export class TransactionsController {
                 }
             })
 
-            console.log("queueData created");
-
             const transactionResponse = {
                 transactionId,
                 "amount": validatedData.amount,
@@ -303,10 +249,7 @@ export class TransactionsController {
                 "from": {
                     ...user.account,
                     user
-                },
-                "to": {
-                    ...receiver.toJSON(),
-                }
+                }              
             }
 
             return transactionResponse
