@@ -93,6 +93,7 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                             profileImageUrl: formatTransaction(transaction).profileImageUrl,
                             username: formatTransaction(transaction).username,
                             isFromMe: true,
+                            to: receiver
                         }))
                     ])
 
