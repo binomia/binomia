@@ -9,7 +9,7 @@ import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
 import { queueServer } from '@/rpc/queueRPC';
 import { Span, SpanStatusCode, Tracer } from '@opentelemetry/api';
-import { AES, RSA } from 'cryptografia';
+import { AES, HASH, RSA } from 'cryptografia';
 import redis, { connection } from '@/redis';
 import { Queue } from 'bullmq';
 
@@ -86,12 +86,31 @@ export class TransactionsController {
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
-            const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
-            const signature = RSA.sign(messageToSign, ZERO_SIGN_PRIVATE_KEY)
+            const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}`
+            const hash = await HASH.sha256Async(messageToSign)
+            const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+           
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
             const { deviceid, ipaddress, platform } = req.headers
 
-            span.addEvent("queueServer is creating the transaction");
+            const receiverAccount = await AccountModel.findOne({
+                attributes: { exclude: ['username'] },
+                where: {
+                    username: validatedData.receiver
+                },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user',
+                        attributes: { exclude: ['createdAt', 'dniNumber', 'updatedAt', 'faceVideoUrl', 'idBackUrl', 'idFrontUrl', 'password'] }
+                    }
+                ]
+            })
+
+            if (!receiverAccount)
+                throw "Receiver account not found";
+
+            span.addEvent("queueServer is queuing the transaction");
 
             const jobId = `queueTransaction@${transactionId}`
             const queueData = {
@@ -146,8 +165,13 @@ export class TransactionsController {
                 "from": {
                     ...account,
                     user
+                },
+                "to": {
+                    ...receiverAccount.toJSON()
                 }
             }
+
+
 
             span.addEvent("queueServer is saving the transaction in cache");
             const transactionResponseCached = await redis.get(`transactionQueue:${user.account.id}`)
@@ -266,7 +290,7 @@ export class TransactionsController {
 
     static payRequestTransaction = async (_: unknown, { transactionId, paymentApproved }: { transactionId: string, paymentApproved: boolean }, context: any) => {
         try {
-            const session = await checkForProtectedRequests(context.req);            
+            const session = await checkForProtectedRequests(context.req);
             const jobId = `payRequestTransaction@${transactionId}`
             const queueData = {
                 transactionId,

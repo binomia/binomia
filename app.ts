@@ -125,7 +125,7 @@ const tracingPlugin: ApolloServerPlugin<Context> = {
             }),
         );
 
-        httpServer.listen(PORT, () => {
+        httpServer.listen(PORT || 8000, () => {
             console.log(`[Main-Server]: worker ${cluster.worker?.id} is running on http://localhost:${PORT}`);
         })
     }

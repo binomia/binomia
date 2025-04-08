@@ -1,4 +1,4 @@
-import { STRING, JSONB, DECIMAL, BOOLEAN } from "sequelize"
+import { STRING, JSONB, DECIMAL, BOOLEAN, TEXT } from "sequelize"
 import { db } from "@/config"
 import short from "short-uuid"
 
@@ -47,10 +47,8 @@ const TransactionsModel = db.define('transactions', {
 		type: STRING,
 		allowNull: false
 	},
-
-	// Additional fields for geolocation fraud detection
 	signature: {
-		type: STRING,
+		type: TEXT,
 		allowNull: false
 	},
 	deviceId: {
