@@ -1,11 +1,11 @@
 import shortUUID from "short-uuid";
 import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants";
-import { Cryptography } from "@/helpers/cryptography";
 import { AccountModel, QueuesModel, TopUpCompanyModel, TopUpPhonesModel, TopUpsModel, UsersModel } from "@/models";
 import { JobJson } from "bullmq";
 import { Op } from "sequelize";
 import { TopUpSchema } from "@/auth/topUpSchema";
 import { topUpQueue } from "@/queues";
+import { AES, HASH, RSA } from "cryptografia";
 
 
 export default class TopUpController {
@@ -25,7 +25,7 @@ export default class TopUpController {
 
             const { jobName, jobTime, amount, signature, data } = queue.toJSON()
 
-            const hash = await Cryptography.hash(JSON.stringify({
+            const hash = await HASH.sha256Async(JSON.stringify({
                 jobTime,
                 jobName,
                 amount,
@@ -34,9 +34,9 @@ export default class TopUpController {
             }))
 
 
-            const verify = await Cryptography.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
+            const verify = await RSA.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
             if (verify) {
-                const decryptedData = await Cryptography.decrypt(data)
+                const decryptedData = await AES.decrypt(data, ZERO_ENCRYPTION_KEY)
                 const topUpData = await TopUpSchema.createFromQueueTopUp.parseAsync(decryptedData)
 
                 await TopUpsModel.create({
@@ -61,7 +61,7 @@ export default class TopUpController {
 
     static pendingTopUp = async ({ data }: JobJson): Promise<string> => {
         try {
-            const decryptedData = await Cryptography.decrypt(JSON.parse(data))
+            const decryptedData = await AES.decrypt(JSON.parse(data), ZERO_ENCRYPTION_KEY)
 
             // [TODO]: implement pending transaction
             const newStatus = "completed"
@@ -186,12 +186,12 @@ export default class TopUpController {
                 ]
             })
 
-            const encryptedData = await Cryptography.encrypt(JSON.stringify({
+            const encryptedData = await AES.encrypt(JSON.stringify({
                 id: topUp.toJSON().id,
                 phone: phoneNumber,
                 amount: amount,
                 referenceId: topUp.toJSON().referenceId
-            }))
+            }), ZERO_ENCRYPTION_KEY)
 
             await topUpQueue.createJobs({
                 jobId: `pendingTopUp@${shortUUID.generate()}${shortUUID.generate()}`,

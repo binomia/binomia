@@ -1,9 +1,9 @@
 import { QUEUE_JOBS_NAME, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants";
-import { Cryptography } from "@/helpers/cryptography";
 import { QueuesModel } from "@/models";
 import { createBullBoard } from "@bull-board/api";
 import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { JobJson, Queue } from "bullmq";
+import { HASH, RSA } from "cryptografia";
 import { Op } from "sequelize";
 
 
@@ -28,7 +28,7 @@ export default class MainController {
 
             if (queue) return
 
-            const hash = await Cryptography.hash(JSON.stringify({
+            const hash = await HASH.sha256Async(JSON.stringify({
                 jobTime,
                 jobName,
                 amount,
@@ -36,7 +36,7 @@ export default class MainController {
                 ZERO_ENCRYPTION_KEY
             }))
 
-            const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+            const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
             const transaction = await QueuesModel.create({
                 jobId: id,
                 userId,
