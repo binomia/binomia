@@ -202,8 +202,9 @@ export class TransactionsController {
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
-            const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
-            const signature = await RSA.sign(messageToSign, ZERO_SIGN_PRIVATE_KEY)
+            const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}`
+            const hash = await HASH.sha256Async(messageToSign)
+            const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
 
             const queueData = {
