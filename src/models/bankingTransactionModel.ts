@@ -1,4 +1,4 @@
-import { STRING, JSONB, DECIMAL } from "sequelize"
+import { STRING, JSONB, DECIMAL, TEXT } from "sequelize"
 import { db } from "@/config"
 import short from "short-uuid"
 
@@ -45,7 +45,7 @@ const BankingTransactionsModel = db.define('banking_transactions', {
 		defaultValue: {}
 	},
 	signature: {
-		type: STRING,
+		type: TEXT,
 		allowNull: false
 	}
 })

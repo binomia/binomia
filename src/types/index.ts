@@ -64,3 +64,8 @@ export type PayQueuedRequestedTransactionType = {
     paymentApproved: boolean
 }
 
+export type CancelRequestedTransactionType = {
+    transactionId: string
+    fromAccount: number
+    senderUsername: string
+}

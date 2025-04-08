@@ -5,7 +5,7 @@ import { AccountModel, BankingTransactionsModel, CardsModel, QueuesModel, Sessio
 import { transactionsQueue } from "@/queues"
 import { anomalyRpcClient } from "@/rpc/clients/anomalyRPC"
 import { notificationServer } from "@/rpc/clients/notificationRPC"
-import { CreateRequestQueueedTransactionType, CreateTransactionType, FraudulentTransactionType } from "@/types"
+import { CancelRequestedTransactionType, CreateRequestQueueedTransactionType, CreateTransactionType, FraudulentTransactionType } from "@/types"
 import { Job, JobJson } from "bullmq"
 import { Op } from "sequelize"
 import shortUUID from "short-uuid"
@@ -252,7 +252,7 @@ export default class TransactionController {
             if (!receiverAccount)
                 throw "Receiver account not found";
 
-            const messageToSign = `${receiverUsername}&${sender.username}@${transaction.amount}`
+            const messageToSign = `${receiverUsername}&${sender.username}@${transaction.amount}@${ZERO_ENCRYPTION_KEY}`
             const hash = await HASH.sha256Async(messageToSign)
             const verify = await RSA.verify(hash, transaction.signature, ZERO_SIGN_PUBLIC_KEY)
 
@@ -612,9 +612,8 @@ export default class TransactionController {
         }
     }
 
-    static cancelRequestedTransaction = async ({ transactionId, fromAccount, senderUsername }: { transactionId: string, fromAccount: number, senderUsername: string }) => {
+    static cancelRequestedTransaction = async ({ transactionId, fromAccount, senderUsername }: CancelRequestedTransactionType) => {
         try {
-
             const transaction = await TransactionsModel.findOne({
                 where: {
                     [Op.and]: [
@@ -777,10 +776,10 @@ export default class TransactionController {
                 return transactionData.toJSON()
 
             } else {
-                const message = `${senderAccount.toJSON().username}&${receiverAccount.toJSON().username}@${transaction.toJSON().amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
+                const message = `${senderAccount.toJSON().username}&${receiverAccount.toJSON().username}@${transaction.toJSON().amount}@${ZERO_ENCRYPTION_KEY}`
+                const hash = await HASH.sha256Async(message)
 
-                // [TODO] Verify signature
-                const verify = await RSA.verify(message, transaction.toJSON().signature, ZERO_SIGN_PRIVATE_KEY)
+                const verify = await RSA.verify(hash, transaction.toJSON().signature, ZERO_SIGN_PRIVATE_KEY)
                 if (!verify)
                     throw "error verificando transacción"
 
