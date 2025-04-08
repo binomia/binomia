@@ -97,7 +97,7 @@ const type = () => {
 const query = () => {
     return `
         topUp(referenceId: String!): OnlyTopUpsType
-        topUps(phoneId: Int!, page: Int!, pageSize: Int!): [OnlyTopUpsType]
+        topUps(phoneId: Int!, page: Int!, pageSize: Int!): [TopUpsType]
         searchTopUps(page: Int!, pageSize: Int!, search: String!): [SearchTopUpsType]
         recentTopUps(page: Int!, pageSize: Int!): [TopUpsType]
         topUpPhones(page: Int!, pageSize: Int!): [PhoneWithCompanyTopUpType]

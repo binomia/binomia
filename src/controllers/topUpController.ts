@@ -66,7 +66,23 @@ export class TopUpController {
                         { userId },
                         { phoneId }
                     ]
-                }
+                },
+                include: [
+                    {
+                        model: TopUpCompanyModel,
+                        as: 'company',
+                        attributes: fields['company']
+                    },
+                    {
+                        model: TopUpPhonesModel,
+                        as: 'phone'                       
+                    },
+                    {
+                        model: UsersModel,
+                        as: 'user',
+                        attributes: fields['user']
+                    }
+                ]
             })
 
             const topUpQueued = await redis.get(`queuedTopUps:${userId}`)
