@@ -519,8 +519,9 @@ export default class TransactionController {
 
     static createRequestQueueedTransaction = async ({ sender, receiverUsername, transaction, device }: CreateRequestQueueedTransactionType) => {
         try {
-            const message = `${receiverUsername}&${sender.username}@${transaction.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
-            const verify = await RSA.verify(message, transaction.signature, ZERO_SIGN_PRIVATE_KEY)
+            const message = `${receiverUsername}&${sender.username}@${transaction.amount}@${ZERO_ENCRYPTION_KEY}`
+            const hash = await HASH.sha256Async(message)
+            const verify = await RSA.verify(hash, transaction.signature, ZERO_SIGN_PUBLIC_KEY)
 
             if (!verify)
                 throw "Transaction signature verification failed"
