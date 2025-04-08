@@ -1,11 +1,12 @@
 import { checkForProtectedRequests, getQueryResponseFields } from '@/helpers'
 import { CardsModel, UsersModel } from '@/models'
-import { Cryptography, } from '@/helpers/cryptography'
 import { GraphQLError } from 'graphql';
 import { CardModelType } from '@/types';
 import { CardAuthSchema } from '@/auth';
 import { Op } from 'sequelize';
 import cardValidator from 'card-validator';
+import { AES, HASH } from 'cryptografia';
+import { ZERO_ENCRYPTION_KEY } from '@/constants';
 
 export class CardsController {
     static card = async (_: unknown, { cardId }: { cardId: number }, { req }: { req: any }, { fieldNodes }: { fieldNodes: any }) => {
@@ -31,7 +32,7 @@ export class CardsController {
                 throw new GraphQLError('The given user does not have a card linked');
 
 
-            const decryptedCardData = await Cryptography.decrypt(card?.dataValues?.data)
+            const decryptedCardData = await AES.decrypt(card?.dataValues?.data, ZERO_ENCRYPTION_KEY)
             const cardData = Object.assign({}, card.toJSON(), JSON.parse(decryptedCardData))
 
             return cardData
@@ -74,7 +75,7 @@ export class CardsController {
             // if (!IS_VALID_CARD_LENGTH(validatedData.cardNumber))
             //     throw new GraphQLError('Card inserted is not valid');
 
-            const hash = await Cryptography.hash(validatedData.cardNumber)
+            const hash = await HASH.sha256Async(validatedData.cardNumber)
             const cardExist = await CardsModel.findOne({
                 where: {
                     [Op.and]: [
@@ -87,7 +88,7 @@ export class CardsController {
             if (cardExist)
                 throw new GraphQLError('Tarjeta ya esta vinculada');
 
-            const encryptedCardData = await Cryptography.encrypt(JSON.stringify(validatedData))
+            const encryptedCardData = await AES.encrypt(JSON.stringify(validatedData), ZERO_ENCRYPTION_KEY)
 
             if (validatedData.isPrimary)
                 await CardsModel.update({ isPrimary: false }, {
@@ -142,8 +143,8 @@ export class CardsController {
                 throw new GraphQLError('The given user does not have a card linked');
 
 
-            const hash = await Cryptography.hash(validatedData.cardNumber)
-            const encryptedCardData = await Cryptography.encrypt(JSON.stringify(validatedData))
+            const hash = await HASH.sha256Async(validatedData.cardNumber)
+            const encryptedCardData = await AES.encrypt(JSON.stringify(validatedData), ZERO_ENCRYPTION_KEY)
             const cardUpdated = await card.update({
                 alias: validatedData.alias,
                 isPrimary: validatedData.isPrimary,

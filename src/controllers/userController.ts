@@ -8,14 +8,13 @@ import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
 import { GlobalZodSchema, UserJoiSchema } from '@/auth';
 import { UserModelType, VerificationDataType } from '@/types';
-import { Cryptography } from '@/helpers/cryptography';
 import { authServer } from '@/rpc';
 import { generate } from 'short-uuid';
 import { z } from 'zod'
 import { Counter } from 'prom-client';
 import { notificationServer } from '@/rpc/notificationRPC';
 import PrometheusMetrics from '@/metrics/PrometheusMetrics';
-import { AES, ECC, RSA } from "cryptografia"
+import { AES, ECC, HASH, RSA } from "cryptografia"
 
 export class UsersController {
     static users = async (_: unknown, { page, pageSize }: { page: number, pageSize: number }, context: any, { fieldNodes }: { fieldNodes: any }) => {
@@ -127,7 +126,7 @@ export class UsersController {
                 ]
             })
 
-            const decryptedCardData = userData.card ? await Cryptography.decrypt(userData.card.data) : null
+            const decryptedCardData = userData.card ? await AES.decrypt(userData.card.data, ZERO_ENCRYPTION_KEY) : null
             const card = decryptedCardData ? JSON.parse(decryptedCardData) : null
 
             return Object.assign({}, userData, {
@@ -527,13 +526,13 @@ export class UsersController {
 
             const code = GENERATE_SIX_DIGIT_TOKEN()
 
-            const hash = await Cryptography.hash(JSON.stringify({
+            const hash = await HASH.sha256Async(JSON.stringify({
                 sid: sessionCreated.toJSON().sid,
                 code,
                 ZERO_ENCRYPTION_KEY,
             }))
 
-            const signature = Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+            const signature = RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
             await notificationServer('sendVerificationCode', {
                 email,
                 code
@@ -588,13 +587,13 @@ export class UsersController {
             if (!session)
                 throw new GraphQLError('Session not found or already verified');
 
-            const hash = await Cryptography.hash(JSON.stringify({
+            const hash = await HASH.sha256Async(JSON.stringify({
                 sid,
                 code,
                 ZERO_ENCRYPTION_KEY,
             }))
 
-            const verified = await Cryptography.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
+            const verified = await RSA.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
 
             if (!verified)
                 throw new GraphQLError('Failed to verify session');

@@ -4,7 +4,6 @@ import { AccountModel, BankingTransactionsModel, TransactionsModel, UsersModel, 
 import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
-import { Cryptography } from '@/helpers/cryptography';
 import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
 import { queueServer } from '@/rpc/queueRPC';
@@ -204,7 +203,7 @@ export class TransactionsController {
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
             const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
-            const signature = await Cryptography.sign(messageToSign, ZERO_SIGN_PRIVATE_KEY)
+            const signature = await RSA.sign(messageToSign, ZERO_SIGN_PRIVATE_KEY)
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
 
             const queueData = {
