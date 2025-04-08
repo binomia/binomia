@@ -1,29 +1,23 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import colors from '@/colors'
-import moment from 'moment';
 import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
 import Entypo from '@expo/vector-icons/Entypo';
-import BottomSheet from '@/components/global/BottomSheet';
-import * as Sharing from 'expo-sharing';
-import { Dimensions, RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Spinner, Pressable, ScrollView, ZStack } from 'native-base'
+import SingleTopTup from '@/components/topups/SingleTopTup';
+import { RefreshControl, NativeSyntheticEvent, NativeScrollEvent } from 'react-native'
+import { Heading, Image, Text, VStack, FlatList, HStack, Spinner, Pressable, ScrollView } from 'native-base'
 import { useLazyQuery } from '@apollo/client'
 import { TopUpApolloQueries } from '@/apollo/query'
 import { FORMAT_CREATED_DATE, FORMAT_CURRENCY, FORMAT_PHONE_NUMBER } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { transactionActions } from '@/redux/slices/transactionSlice';
-import { cancelIcon, checked, pendingClock } from '@/assets';
 import { router, useNavigation } from 'expo-router';
-import { transactionStatus } from '@/mocks';
-import { TEXT_HEADING_FONT_SIZE } from '@/constants';
 
 
 type Props = {
     showNewTransaction?: boolean;
 }
 
-const { height } = Dimensions.get('window')
 const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: Props) => {
     const dispatch = useDispatch()
     const { topup } = useSelector((state: any) => state.topupReducer)
@@ -51,6 +45,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                     pageSize
                 }
             })
+
             setTopups(data.topUps)
             setIsLoading(false)
 
@@ -58,7 +53,6 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
             console.error(error)
         }
     }
-
 
     const onRefresh = useCallback(async () => {
         setRefreshing(true);
@@ -81,50 +75,10 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
     const onOpenBottomSheet = async (transaction: any) => {
         setTransaction(transaction)
         setOpenBottomSheet(true)
+
+        console.log(JSON.stringify(transaction, null, 2));
+
     }
-
-    const StatuIcon: React.FC<{ status: string }> = ({ status }: { status: string }) => {
-        const _w = "25px"
-        const _h = "25px"
-        if (status === "completed") {
-            return (
-                <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-                    <HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
-                    <Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image-completed' w={"100%"} h={"100%"} source={checked} />
-                </ZStack>
-            )
-        } else if (status === "cancelled") {
-            return (
-                <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-                    <HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
-                    <Image borderRadius={100} alt='logo-image-cancel' w={"100%"} h={"100%"} source={cancelIcon} />
-                </ZStack>
-            )
-
-        } else if (status === "pending") {
-            return (
-                <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-                    <HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
-                    <Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image-pending' w={"100%"} h={"100%"} source={pendingClock} />
-                </ZStack>
-            )
-        } else if (status === "requested") {
-            return (
-                <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-                    <HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
-                    <Image borderRadius={100} alt='logo-image-requested' w={"100%"} h={"100%"} source={pendingClock} />
-                </ZStack>
-            )
-        }
-    }
-
-    const handleShare = async () => {
-        const isAvailableAsync = await Sharing.isAvailableAsync()
-        if (!isAvailableAsync) return
-
-        await Sharing.shareAsync("http://test.com")
-    }
-
 
     useEffect(() => {
         (async () => {
@@ -205,7 +159,7 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                     </VStack>
                     {isLoadingMore ? <Spinner mt={"10px"} size={"lg"} /> : null}
                 </ScrollView>
-                <BottomSheet height={height * 0.50} open={openBottomSheet} onCloseFinish={onCloseFinish}>
+                {/* <BottomSheet height={height * 0.50} open={openBottomSheet} onCloseFinish={onCloseFinish}>
                     <VStack px={"20px"} pt={"30px"} w={"100%"} h={"80%"} justifyContent={"space-between"}>
                         <HStack alignItems={"center"}>
                             <Image borderRadius={"100px"} w={"55px"} h={"55px"} alt={transaction.fullName + "bottomSheet"} resizeMode='contain' source={{ uri: topup.company?.logo }} />
@@ -228,7 +182,8 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                             </VStack>
                         </VStack>
                     </VStack>
-                </BottomSheet>
+                </BottomSheet> */}
+                <SingleTopTup open={openBottomSheet} onClose={onCloseFinish} topup={transaction} />
             </VStack>
         )
     )

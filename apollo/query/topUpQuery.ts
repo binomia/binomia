@@ -34,6 +34,16 @@ export class TopUpApolloQueries {
                     referenceId
                     createdAt
                     updatedAt
+                    phone {
+                        fullName
+                        phone
+                    }
+                    user {
+                        fullName
+                    }
+                    company {
+                        logo
+                    }
                 }
             }
         `
