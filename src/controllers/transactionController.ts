@@ -1,16 +1,15 @@
 import { TransactionJoiSchema } from "@/auth/transactionJoiSchema"
-import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from "@/constants"
+import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL, REDIS_SUBSCRIPTION_CHANNEL, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY, ZERO_SIGN_PUBLIC_KEY } from "@/constants"
 import { calcularTime, calculateDistance, calculateSpeed, fetchGeoLocation, FORMAT_CURRENCY, MAKE_FULL_NAME_SHORTEN } from "@/helpers"
-import { Cryptography } from "@/helpers/cryptography"
 import { AccountModel, BankingTransactionsModel, CardsModel, QueuesModel, SessionModel, TransactionsModel, UsersModel } from "@/models"
 import { transactionsQueue } from "@/queues"
 import { anomalyRpcClient } from "@/rpc/clients/anomalyRPC"
 import { notificationServer } from "@/rpc/clients/notificationRPC"
-import { CreateRequestQueueedTransactionType, CreateTransactionRPCParamsType, CreateTransactionType, FraudulentTransactionType } from "@/types"
+import { CreateRequestQueueedTransactionType, CreateTransactionType, FraudulentTransactionType } from "@/types"
 import { Job, JobJson } from "bullmq"
 import { Op } from "sequelize"
 import shortUUID from "short-uuid"
-
+import { AES, HASH, RSA } from "cryptografia"
 
 export default class TransactionController {
     static createTransaction = async (data: CreateTransactionType) => {
@@ -44,7 +43,7 @@ export default class TransactionController {
             if (!receiverAccount)
                 throw "receiver account not found";
 
-            const hash = await Cryptography.hash(JSON.stringify({
+            const hash = await HASH.sha256Async(JSON.stringify({
                 ZERO_ENCRYPTION_KEY,
                 ZERO_SIGN_PRIVATE_KEY,
                 hash: {
@@ -58,7 +57,7 @@ export default class TransactionController {
             }))
 
 
-            const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+            const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
             const transaction = await TransactionsModel.create({
                 fromAccount: senderAccount.toJSON().id,
                 toAccount: receiverAccount.toJSON().id,
@@ -123,7 +122,7 @@ export default class TransactionController {
 
     static updateTransactionStatus = async (job: Job) => {
         try {
-            const decryptedData = await Cryptography.decrypt(job.data)
+            const decryptedData = await AES.decrypt(job.data, ZERO_ENCRYPTION_KEY)
             const { transactionId } = JSON.parse(decryptedData)
 
             const transaction = await TransactionsModel.findOne({
@@ -160,7 +159,7 @@ export default class TransactionController {
                 throw "transaction not found";
 
             const { jobName, jobTime, amount, signature, data } = queueTransaction.toJSON()
-            const hash = await Cryptography.hash(JSON.stringify({
+            const hash = await HASH.sha256Async(JSON.stringify({
                 jobTime,
                 jobName,
                 amount,
@@ -168,9 +167,9 @@ export default class TransactionController {
                 ZERO_ENCRYPTION_KEY
             }))
 
-            const verify = await Cryptography.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
+            const verify = await RSA.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
             if (verify) {
-                const decryptedData = await Cryptography.decrypt(data)
+                const decryptedData = await AES.decrypt(data, ZERO_ENCRYPTION_KEY)
                 await TransactionController.createQueuedTransaction(JSON.parse(decryptedData))
 
                 await queueTransaction.update({
@@ -191,7 +190,7 @@ export default class TransactionController {
         try {
             // [TODO]: implement pending transaction
             const newStatus = "completed"
-            const decryptedData = await Cryptography.decrypt(JSON.parse(data))
+            const decryptedData = await AES.decrypt(JSON.parse(data), ZERO_ENCRYPTION_KEY)
             const { transactionId } = JSON.parse(decryptedData)
 
             const transaction = await TransactionsModel.findOne({
@@ -253,19 +252,12 @@ export default class TransactionController {
             if (!receiverAccount)
                 throw "Receiver account not found";
 
+            const messageToSign = `${receiverUsername}&${sender.username}@${transaction.amount}`
+            const hash = await HASH.sha256Async(messageToSign)
+            const verify = await RSA.verify(hash, transaction.signature, ZERO_SIGN_PUBLIC_KEY)
 
-            const hash = await Cryptography.hash(JSON.stringify({
-                hash: {
-                    sender: sender.username,
-                    receiver: receiverUsername,
-                    amount: transaction.amount,
-                    transactionType: transaction.transactionType,
-                    currency: transaction.currency,
-                    location: transaction.location,
-                },
-                ZERO_ENCRYPTION_KEY,
-                ZERO_SIGN_PRIVATE_KEY,
-            }))
+            if (!verify)
+                throw "error signing transaction"
 
             const senderAccountJSON = senderAccount.toJSON();
             if (senderAccountJSON.balance < transaction.amount)
@@ -319,7 +311,7 @@ export default class TransactionController {
 
             const timeDifference = !lastTransactionJSON ? 0 : new Date().getTime() - new Date(lastTransactionJSON.createdAt).getTime()
             const speed = calculateSpeed(distance, timeDifference)
-            const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+
 
             const time = calcularTime(speed, distance)
 
@@ -335,7 +327,7 @@ export default class TransactionController {
                 currency: transaction.currency,
                 location: transaction.location,
 
-                signature,
+                signature: transaction.signature,
                 deviceId: device.deviceId,
                 ipAddress: device.ipAddress,
                 isRecurring: transaction.isRecurring,
@@ -451,7 +443,7 @@ export default class TransactionController {
                     balance: +Number(newReceiverBalance).toFixed(4)
                 })
 
-                const encryptedData = await Cryptography.encrypt(JSON.stringify({ transactionId: transactionData.toJSON().transactionId }));
+                const encryptedData = await AES.encrypt(JSON.stringify({ transactionId: transactionData.toJSON().transactionId }), ZERO_ENCRYPTION_KEY);
                 await Promise.all([
                     notificationServer("socketEventEmitter", {
                         data: transactionData.toJSON(),
@@ -477,7 +469,7 @@ export default class TransactionController {
                         location: {}
                     })
 
-                    const encryptedData = await Cryptography.encrypt(JSON.stringify(recurrenceQueueData));
+                    const encryptedData = await AES.encrypt(JSON.stringify(recurrenceQueueData), ZERO_ENCRYPTION_KEY);
                     transactionsQueue.createJobs({
                         jobId: `${transaction.recurrenceData.title}@${transaction.recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
                         userId: senderAccount.toJSON().user.id,
@@ -528,7 +520,7 @@ export default class TransactionController {
     static createRequestQueueedTransaction = async ({ sender, receiverUsername, transaction, device }: CreateRequestQueueedTransactionType) => {
         try {
             const message = `${receiverUsername}&${sender.username}@${transaction.amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
-            const verify = await Cryptography.verify(message, transaction.signature, ZERO_SIGN_PRIVATE_KEY)
+            const verify = await RSA.verify(message, transaction.signature, ZERO_SIGN_PRIVATE_KEY)
 
             if (!verify)
                 throw "Transaction signature verification failed"
@@ -615,7 +607,7 @@ export default class TransactionController {
             return transactionCreated.toJSON()
 
         } catch (error: any) {
-            throw error.message
+            throw error
         }
     }
 
@@ -713,6 +705,7 @@ export default class TransactionController {
             if (!transaction)
                 throw "transaction not found"
 
+            console.log("transaction");
 
             const senderAccount = await AccountModel.findOne({
                 where: { id: transaction.toJSON().toAccount },
@@ -786,7 +779,7 @@ export default class TransactionController {
                 const message = `${senderAccount.toJSON().username}&${receiverAccount.toJSON().username}@${transaction.toJSON().amount}@${ZERO_ENCRYPTION_KEY}&${ZERO_SIGN_PRIVATE_KEY}`
 
                 // [TODO] Verify signature
-                const verify = await Cryptography.verify(message, transaction.toJSON().signature, ZERO_SIGN_PRIVATE_KEY)
+                const verify = await RSA.verify(message, transaction.toJSON().signature, ZERO_SIGN_PRIVATE_KEY)
                 if (!verify)
                     throw "error verificando transacción"
 
@@ -847,7 +840,7 @@ export default class TransactionController {
             }
 
         } catch (error: any) {
-            throw error.message
+            throw error
         }
     }
 
@@ -875,13 +868,13 @@ export default class TransactionController {
             if (!card)
                 throw 'The given card is not linked to the user account'
 
-            const decryptedCardData = await Cryptography.decrypt(card.toJSON().data)
+            const decryptedCardData = await AES.decrypt(card.toJSON().data, ZERO_ENCRYPTION_KEY)
             const cardData = Object.assign({}, card.toJSON(), JSON.parse(decryptedCardData))
 
             //[TODO]: Need Payment Gateway Integration
             console.error("createBankingTransaction: Need Payment Gateway Integration");
 
-            const hash = await Cryptography.hash(JSON.stringify({
+            const hash = await HASH.sha256Async(JSON.stringify({
                 data: {
                     ...validatedData,
                     deliveredAmount: validatedData.amount,
@@ -891,7 +884,7 @@ export default class TransactionController {
                 ZERO_SIGN_PRIVATE_KEY,
             }))
 
-            const signature = await Cryptography.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+            const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
             const transaction = await BankingTransactionsModel.create({
                 ...validatedData,
                 deliveredAmount: validatedData.amount,

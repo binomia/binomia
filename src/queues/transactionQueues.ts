@@ -1,5 +1,5 @@
 import { Job, JobJson, Queue, Worker } from "bullmq";
-import { CreateQueueedTransactionType, CreateRequestQueueedTransactionType, CreateTransactionRPCParamsType, MonthlyQueueTitleType, PayQueuedRequestedTransactionType, WeeklyQueueTitleType } from "@/types";
+import { CreateQueueedTransactionType, CreateRequestQueueedTransactionType, MonthlyQueueTitleType, PayQueuedRequestedTransactionType, WeeklyQueueTitleType } from "@/types";
 import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN } from "@/constants";
 import shortUUID from "short-uuid";
 import TransactionController from "@/controllers/transactionController";
@@ -15,7 +15,7 @@ export default class TransactionsQueue {
     }
 
     private executeJob = async (job: JobJson) => {
-        try {
+        try {            
             switch (true) {
                 case job.name.includes("queueTransaction"): {
                     const data: CreateQueueedTransactionType = JSON.parse(job.data)
@@ -57,6 +57,8 @@ export default class TransactionsQueue {
                     break;
                 }
                 case job.name.includes("payRequestTransaction"): {
+                    console.log("payRequestTransaction");
+                    
                     const data: PayQueuedRequestedTransactionType = JSON.parse(job.data)
                     await TransactionController.payRequestTransaction(data)
                     break
