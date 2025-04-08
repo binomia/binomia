@@ -21,7 +21,7 @@ type Props = {
     onCloseFinish?: () => void
 }
 
-const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", onSendFinish = (p: number) => p }) => {
+const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", showBalance = true, onSendFinish = (p: number) => p }) => {
     const { card, account, limits } = useSelector((state: any) => state.accountReducer)
     const [input, setInput] = useState<string>("0");
     const [showAllCards, setShowAllCards] = useState<boolean>(false)
@@ -33,7 +33,6 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", on
     const dispatch = useDispatch();
 
     const onChange = (value: number) => {
-
         if (title === "Retirar") {
             const limit = account.withdrawLimit - limits.withdrawAmount
             setShowPayButton(value >= 10 && value <= account.balance && value <= limit)
@@ -72,7 +71,6 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", on
         setInput(value.toString())
     }
 
-
     const RenderCardLogo: React.FC<{ brand: string }> = ({ brand }: { brand: string }) => {
         switch (brand) {
             case "visa":
@@ -108,16 +106,18 @@ const DepositOrWithdrawTransaction: React.FC<Props> = ({ title = "Depositar", on
             <VStack px={"20px"} w={"100%"} h={"100%"} justifyContent={"space-between"}>
                 <VStack space={5}>
                     <HStack w={"100%"} mt={"10px"} alignItems={"center"} justifyContent={"center"}>
-                        <Heading size={"md"} color={colors.mainGreen} textAlign={"center"}>{FORMAT_CURRENCY(account.balance)}</Heading>
+                        {showBalance ?
+                            <Heading size={"md"} color={colors.mainGreen} textAlign={"center"}>{FORMAT_CURRENCY(account.balance)}</Heading>
+                            : null}
                     </HStack>
                     <HStack alignItems={"center"} justifyContent={"space-between"}>
                         <Pressable onPress={() => onCardPress(payFromCard)} _pressed={{ opacity: 0.5 }} flexDirection={"row"} alignItems={"center"}>
                             <RenderCardLogo brand={payFromCard.brand} />
                             <VStack justifyContent={"center"}>
                                 <Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{payFromCard?.alias} {payFromCard?.last4Number}</Heading>
-                                <Text textTransform={"capitalize"}  fontSize={scale(13)} color={colors.pureGray}>{payFromCard?.brand?.replaceAll("-", " ")}</Text>
+                                <Text textTransform={"capitalize"} fontSize={scale(13)} color={colors.pureGray}>{payFromCard?.brand?.replaceAll("-", " ")}</Text>
                             </VStack>
-                                <Ionicons style={{ }} name="chevron-forward" size={25} color={colors.gray} />
+                            <Ionicons style={{}} name="chevron-forward" size={25} color={colors.gray} />
                         </Pressable>
                         <Pressable opacity={showPayButton ? 1 : 0.5} disabled={!showPayButton} shadow={2} w={scale(100)} h={scale(35)} justifyContent={"center"} alignItems={"center"} _pressed={{ opacity: 0.5 }} bg={showPayButton ? "mainGreen" : "lightGray"} p={"5px"} borderRadius={100}>
                             <Button w={"100%"} color={showPayButton ? colors.white : colors.mainGreen} onPress={() => onSendFinish(Number(input))} title={title} />

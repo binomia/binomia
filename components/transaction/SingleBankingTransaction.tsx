@@ -4,13 +4,14 @@ import BottomSheet from '@/components/global/BottomSheet';
 import moment from 'moment';
 import * as Sharing from 'expo-sharing';
 import { SafeAreaView, Dimensions } from 'react-native'
-import { Heading, Image, Text, VStack, FlatList, HStack, Pressable } from 'native-base'
-import { FORMAT_CURRENCY } from '@/helpers'
+import { Heading, Image, Text, VStack, FlatList, HStack, Pressable, ZStack } from 'native-base'
+import { FORMAT_CREATED_DATE, FORMAT_CURRENCY } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useSelector } from 'react-redux';
-import { americanExpressLogo, checked, jcbLogo, mastercardLogo, visaLogo } from '@/assets';
+import { americanExpressLogo, cancelIcon, checked, jcbLogo, mastercardLogo, pendingClock, suspicious, visaLogo } from '@/assets';
 import { Entypo } from '@expo/vector-icons';
 import { TEXT_HEADING_FONT_SIZE } from '@/constants';
+import { transactionStatus } from '@/mocks';
 
 
 type Props = {
@@ -87,29 +88,72 @@ const SingleTransactionBanking: React.FC<Props> = ({ }) => {
 		await Sharing.shareAsync("http://test.com")
 	}
 
+	const StatuIcon: React.FC<{ status: string }> = ({ status }: { status: string }) => {
+		if (status === "completed") {
+			return (
+				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+					<HStack w={"80%"} h={"80%"} bg={colors.mainGreen} borderRadius={100} />
+					<Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={checked} />
+				</ZStack>
+			)
+		} else if (status === "cancelled") {
+			return (
+				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+					<HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />
+					<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={cancelIcon} />
+				</ZStack>
+			)
+
+		} else if (status === "pending" || status === "created") {
+			return (
+				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+					<HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
+					<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
+				</ZStack>
+			)
+		} else if (status === "requested") {
+			return (
+				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+					<HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
+					<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
+				</ZStack>
+			)
+		} else if (status === "suspicious") {
+			return (
+				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+					<Image resizeMethod="resize" tintColor={colors.goldenYellow} borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={suspicious} />
+				</ZStack>
+			)
+		}
+	}
+
 
 	return (
 		<SafeAreaView style={{ flex: 1, backgroundColor: colors.darkGray }}>
 			<VStack px={"20px"} h={"100%"}>
-				<VStack flex={1} pb={"40px"} my={"20px"} justifyContent={"space-between"}>
-					<HStack >
-						{/* {renderCardLogo(transaction.card.brand)} */}
-						<RenderCardLogo brand={transaction.card.brand} />
-						<VStack justifyContent={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{transaction.card?.brand} {transaction.card?.last4Number}</Heading>
-							<Text fontSize={scale(13)} color={colors.pureGray}>{transaction.card?.alias}</Text>
-						</VStack>
+				<VStack flex={1} pb={"40px"} my={"20px"} >
+					<HStack justifyContent={"space-between"} alignItems={"center"}>
+						<HStack>
+							<RenderCardLogo brand={transaction.card.brand} />
+							<VStack justifyContent={"center"}>
+								<Heading textTransform={"capitalize"} fontSize={scale(13)} color={"white"}>{transaction.card?.brand} {transaction.card?.last4Number}</Heading>
+								<Text fontSize={scale(13)} color={colors.pureGray}>{transaction.card?.alias}</Text>
+							</VStack>
+						</HStack>
+						<Pressable onPress={handleShare} _pressed={{ opacity: 0.5 }} w={scale(35)} h={scale(35)} shadow={1} borderWidth={0.4} borderColor={colors.placeholder} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
+							<Entypo name="share" size={24} color={colors.mainGreen} />
+						</Pressable>
 					</HStack>
-					<VStack alignItems={"center"} borderRadius={10}>
-						<VStack mt={"10px"} mb={"10px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(20)} color={"white"}>{transaction.transactionType}</Heading>
-						</VStack>
-						<VStack alignItems={"center"}>
-							<Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={!transaction.isDeposit ? "red" : "mainGreen"}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
-							<Text mb={"20px"} color={colors.lightSkyGray}>{moment(Number(transaction?.createdAt)).format("lll")}</Text>
-							<Pressable onPress={handleShare} _pressed={{ opacity: 0.5 }} w={scale(60)} h={scale(60)} shadow={1} borderWidth={0.4} borderColor={colors.placeholder} alignItems={"center"} justifyContent={"center"} borderRadius={100} bg={colors.lightGray}>
-								<Entypo name="share" size={24} color="white" />
-							</Pressable>
+					<VStack mt={"30px"}borderRadius={10}>
+						<VStack alignItems={"center"} justifyContent={"space-between"} h={"95%"}>
+							<VStack>
+								<Heading textTransform={"capitalize"} fontSize={scale(TEXT_HEADING_FONT_SIZE)} color={!transaction.isDeposit ? "red" : "mainGreen"}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
+								<Text mb={"20px"} color={colors.lightSkyGray}>{FORMAT_CREATED_DATE(transaction?.createdAt)}</Text>
+							</VStack>
+							<VStack alignItems={"center"} w={"80%"}>
+								<StatuIcon status={transaction?.status || ""} />
+								<Text textAlign={"center"} fontSize={scale(16)} color={colors.white}>{transactionStatus(transaction.status)}</Text>
+							</VStack>
 						</VStack>
 					</VStack>
 				</VStack>

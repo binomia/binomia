@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import colors from '@/colors'
 import AntDesign from '@expo/vector-icons/AntDesign';
-import moment from 'moment'
 import BottomSheet from '@/components/global/BottomSheet'
 import Cards from '@/components/cards'
 import CardModification from '@/components/cards/CardModification'
@@ -11,7 +10,7 @@ import { VStack, Text, HStack, FlatList, Heading, Image, Pressable, ScrollView }
 import { useDispatch, useSelector } from 'react-redux'
 import { scale } from 'react-native-size-matters'
 import { cashIn, cashout, noTransactions } from '@/assets'
-import { FORMAT_CURRENCY } from '@/helpers'
+import { FORMAT_CREATED_DATE, FORMAT_CURRENCY } from '@/helpers'
 import { Alert, Dimensions, RefreshControl } from 'react-native'
 import { transactionActions } from '@/redux/slices/transactionSlice'
 import { router, useNavigation } from 'expo-router'
@@ -156,7 +155,7 @@ const BankingScreen: React.FC = () => {
                 }
             }
 
-            await dispatch(transactionActions.setTransaction(data))
+            await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, data)))
             setShowSingleTransaction(true)
 
         } catch (error) {
@@ -216,7 +215,7 @@ const BankingScreen: React.FC = () => {
                             <Heading fontSize={scale(19)} color={colors.white}>Transacciones</Heading>
                             <FlatList
                                 mt={"20px"}
-                                data={transactions as any[]}
+                                data={transactions}
                                 scrollEnabled={false}
                                 renderItem={({ item, index }) => (
                                     <Pressable key={`transaction-banking-${index}`} _pressed={{ opacity: 0.5 }} onPress={() => onSelectTransaction(item)} mb={"25px"} flexDirection={"row"} justifyContent={"space-between"} alignItems={"center"} >
@@ -226,7 +225,7 @@ const BankingScreen: React.FC = () => {
                                             </HStack>
                                             <VStack ml={"10px"} justifyContent={"center"}>
                                                 <Heading textTransform={"capitalize"} fontSize={scale(13)} color={colors.white}>{formatTransaction(item).transactionType}</Heading>
-                                                <Text fontSize={scale(12)} color={colors.pureGray}>{moment(Number(item.createdAt)).format("lll")}</Text>
+                                                <Text fontSize={scale(12)} color={colors.pureGray}>{FORMAT_CREATED_DATE(item.createdAt)}</Text>
                                             </VStack>
                                         </HStack>
                                         <Heading fontSize={scale(12)} color={formatTransaction(item).isDeposit ? colors.mainGreen : colors.red} >{FORMAT_CURRENCY(item.amount)}</Heading>
@@ -251,7 +250,7 @@ const BankingScreen: React.FC = () => {
             <Cards onCloseFinish={() => setShowAllCards(false)} open={showAllCards} />
             <CardModification onCloseFinish={() => setShowCardModification(false)} open={showCardModification} />
             <BottomSheet height={height * 0.9} onCloseFinish={() => setShowDeposit(false)} open={showDeposit}>
-                <DepositOrWithdrawTransaction onSendFinish={(amount: number) => onDepositBankingTransaction(amount, "deposit")} />
+                <DepositOrWithdrawTransaction showBalance={false} onSendFinish={(amount: number) => onDepositBankingTransaction(amount, "deposit")} />
             </BottomSheet>
             <BottomSheet height={height * 0.9} onCloseFinish={() => setShowWithdraw(false)} open={showWithdraw}>
                 <DepositOrWithdrawTransaction title='Retirar' showBalance={true} onSendFinish={(amount: number) => onDepositBankingTransaction(amount, "withdraw")} />

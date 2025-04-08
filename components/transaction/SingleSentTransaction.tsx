@@ -38,7 +38,6 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 	const { account, user }: { account: any, user: any, location: z.infer<typeof TransactionAuthSchema.transactionLocation> } = useSelector((state: any) => state.accountReducer)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [isCancelLoading, setIsCancelLoading] = useState<boolean>(false)
-	const [isPayLoading, setIsPayLoading] = useState<boolean>(false)
 	const [payRequestTransaction] = useMutation(TransactionApolloQueries.payRequestTransaction());
 	const [cancelRequestedTransaction] = useMutation(TransactionApolloQueries.cancelRequestedTransaction());
 
@@ -98,7 +97,6 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				const authenticated = await authenticate()
 
 				if (authenticated.success) {
-					setIsPayLoading(true)
 					setIsCancelLoading(!paymentApproved)
 					setIsLoading(paymentApproved)
 
@@ -237,7 +235,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 							disabled={isCancelLoading || account.balance < transaction.amount}
 							opacity={isCancelLoading || account.balance < transaction.amount ? 0.5 : 1}
 							onPress={() => onPress(true)}
-							spin={isPayLoading}
+							spin={isLoading}
 							w={showPayButton ? "49%" : "80%"}
 							bg={account.balance > transaction.amount ? colors.mainGreen : colors.lightGray}
 							color={account.balance > transaction.amount ? colors.white : colors.mainGreen}
