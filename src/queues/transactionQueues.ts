@@ -1,16 +1,22 @@
 import { Job, JobJson, Queue, Worker } from "bullmq";
 import { CancelRequestedTransactionType, CreateQueueedTransactionType, CreateRequestQueueedTransactionType, MonthlyQueueTitleType, PayQueuedRequestedTransactionType, WeeklyQueueTitleType } from "@/types";
-import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN } from "@/constants";
+import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN, ZERO_ENCRYPTION_KEY } from "@/constants";
 import shortUUID from "short-uuid";
 import TransactionController from "@/controllers/transactionController";
 import MainController from "@/controllers/mainController";
-import { redis } from "@/redis";
+import { connection, redis } from "@/redis";
+import { AES } from "cryptografia";
+import { BullMQOtel } from "bullmq-otel"
 
 
 export default class TransactionsQueue {
     queue: Queue;
     constructor() {
-        this.queue = new Queue("transactions", { connection: { host: "redis", port: 6379 } });
+        this.queue = new Queue("transactions", {
+            connection,
+            telemetry: new BullMQOtel("queue-server-transactions")
+        });
+
         this.workers()
     }
 
@@ -18,7 +24,8 @@ export default class TransactionsQueue {
         try {
             switch (true) {
                 case job.name.includes("queueTransaction"): {
-                    const data: CreateQueueedTransactionType = JSON.parse(job.data)
+                    const decryptedData = await AES.decrypt(JSON.parse(job.data), ZERO_ENCRYPTION_KEY)
+                    const data: CreateQueueedTransactionType = JSON.parse(decryptedData)
 
                     const { transactionId, fromAccount } = await TransactionController.createQueuedTransaction(data)
                     const transactionQueued = await redis.get(`transactionQueue:${fromAccount}`)
@@ -34,7 +41,8 @@ export default class TransactionsQueue {
                     break;
                 }
                 case job.name.includes("queueRequestTransaction"): {
-                    const data: CreateRequestQueueedTransactionType = JSON.parse(job.data)
+                    const decryptedData = await AES.decrypt(JSON.parse(job.data), ZERO_ENCRYPTION_KEY)
+                    const data: CreateRequestQueueedTransactionType = JSON.parse(decryptedData)
 
                     const { transactionId, fromAccount } = await TransactionController.createRequestQueueedTransaction(data)
                     const transactionQueued = await redis.get(`transactionQueue:${fromAccount}`)
@@ -94,7 +102,8 @@ export default class TransactionsQueue {
             },
             settings: {
                 backoffStrategy: (attemptsMade: number) => attemptsMade * 1000
-            }
+            },
+            // telemetry: new BullMQOtel("queue-transactions")
         });
 
         worker.on('completed', async (job: Job) => {

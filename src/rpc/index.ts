@@ -1,22 +1,67 @@
 import { topUpQueue, transactionsQueue } from "@/queues";
 import { WeeklyQueueTitleType } from "@/types";
 import { JSONRPCServer } from "json-rpc-2.0";
-import { redis } from "@/redis";
-import { QUEUE_JOBS_NAME } from "@/constants";
-import { Job, Queue } from "bullmq";
+import { connection, redis } from "@/redis";
+import { QUEUE_JOBS_NAME, ZERO_ENCRYPTION_KEY } from "@/constants";
+import { Job, JobType, Queue } from "bullmq";
 import { transactionMethods } from "./transactionRPC";
 import { topUpMethods } from "./topupRPC";
+import { AES } from "cryptografia";
 
 
 
 export const initMethods = (server: JSONRPCServer) => {
     transactionMethods(server)
     topUpMethods(server)
-    
+
     // gloabal methods
-    server.addMethod("test", async ({ queueName, jobId, jobKey }: { queueName: string, jobId: string, jobKey: string }) => {
-        const job = await transactionsQueue.queue.getJobScheduler(jobKey)
-        return job
+    server.addMethod("test", async ({ name, }: { name: string }) => {
+        try {
+            const queue = new Queue(name, { connection: { host: "redis", port: 6379 } });
+            const getJobs = await queue.getJobs()
+
+            const jobs = await Promise.all(
+                getJobs.map(async job => ({
+                    ...job.asJSON(),
+                    state: (await job.getState()),
+                    queueName: job.queueName,
+                }))
+            )
+
+            return jobs
+
+        } catch (error: any) {
+            console.log({ error });
+            throw new Error(error);
+        }
+    });
+
+    // gloabal methods
+    server.addMethod("getJob", async ({ status,userId }: { status: JobType, userId: string }) => {
+        try {
+            const queue = new Queue("transactions", { connection });
+            const getJobs = await queue.getJobs([status])
+
+            const jobs = await Promise.all(
+                getJobs.map(async job => {
+                    const jsonData = job.asJSON()
+                    const decryptedData = await AES.decrypt(JSON.parse(jsonData.data), ZERO_ENCRYPTION_KEY)
+
+                    const response = JSON.parse(decryptedData).response
+
+                    if (response.usersIds.includes(userId))
+                        return response
+
+                    return []
+                }).flat()
+            )
+
+            return jobs.flat()
+
+        } catch (error: any) {
+            console.log({ error });
+            throw new Error(error);
+        }
     });
 
     // queue methods

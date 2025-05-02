@@ -4,7 +4,26 @@ import { WeeklyQueueTitleType } from '@/types';
 import { Client } from '@googlemaps/google-maps-services-js';
 import axios from 'axios';
 import { GOOGLE_MAPS_API_KEY } from '@/constants';
+import * as zlib from 'zlib';
 
+
+export function compressData(data: string): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        zlib.gzip(data, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+}
+
+export function decompressData(data: Buffer): Promise<string> {
+    return new Promise((resolve, reject) => {
+        zlib.gunzip(data, (err, result) => {
+            if (err) reject(err);
+            else resolve(result.toString());
+        });
+    });
+}
 
 export const unAuthorizedResponse = (req: Request, res: Response) => {
     res.status(401).json({

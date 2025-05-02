@@ -43,19 +43,8 @@ export default class TransactionController {
             if (!receiverAccount)
                 throw "receiver account not found";
 
-            const hash = await HASH.sha256Async(JSON.stringify({
-                ZERO_ENCRYPTION_KEY,
-                ZERO_SIGN_PRIVATE_KEY,
-                hash: {
-                    receiverUsername: validatedData.receiver,
-                    receiver: validatedData.receiver,
-                    amount: validatedData.amount,
-                    transactionType: validatedData.transactionType,
-                    currency: validatedData.currency,
-                    location: validatedData.location
-                }
-            }))
-
+            const messageToSign = `${validatedData.receiver}&${senderAccount.toJSON().user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}`
+            const hash = await HASH.sha256Async(messageToSign)
 
             const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
             const transaction = await TransactionsModel.create({
@@ -191,6 +180,9 @@ export default class TransactionController {
             // [TODO]: implement pending transaction
             const newStatus = "completed"
             const decryptedData = await AES.decrypt(JSON.parse(data), ZERO_ENCRYPTION_KEY)
+
+            console.log({ decryptedData });
+            
             const { transactionId } = JSON.parse(decryptedData)
 
             const transaction = await TransactionsModel.findOne({
@@ -479,7 +471,7 @@ export default class TransactionController {
                         data: encryptedData,
                         referenceData: {
                             fullName: receiverAccount.toJSON().user.fullName,
-                            logo: receiverAccount.toJSON().user.profileImageUrl,
+                            logo: receiverAccount.toJSON().user.profileImageUrl
                         }
                     })
                 }
@@ -519,7 +511,7 @@ export default class TransactionController {
 
     static createRequestQueueedTransaction = async ({ sender, receiverUsername, transaction, device }: CreateRequestQueueedTransactionType) => {
         try {
-            const message = `${receiverUsername}&${sender.username}@${transaction.amount}@${ZERO_ENCRYPTION_KEY}`
+            const message = `${transaction.transactionId}&${transaction.amount}@${ZERO_ENCRYPTION_KEY}`
             const hash = await HASH.sha256Async(message)
             const verify = await RSA.verify(hash, transaction.signature, ZERO_SIGN_PUBLIC_KEY)
 
@@ -705,7 +697,14 @@ export default class TransactionController {
             if (!transaction)
                 throw "transaction not found"
 
-            console.log("transaction");
+
+            const message = `${transactionId}&${transaction.toJSON().amount}@${ZERO_ENCRYPTION_KEY}`
+            const hash = await HASH.sha256Async(message)
+
+            const verify = await RSA.verify(hash, transaction.toJSON().signature, ZERO_SIGN_PUBLIC_KEY)
+            if (!verify)
+                throw "error verificando transacción"
+
 
             const senderAccount = await AccountModel.findOne({
                 where: { id: transaction.toJSON().toAccount },
@@ -776,14 +775,6 @@ export default class TransactionController {
                 return transactionData.toJSON()
 
             } else {
-                const message = `${senderAccount.toJSON().username}&${receiverAccount.toJSON().username}@${transaction.toJSON().amount}@${ZERO_ENCRYPTION_KEY}`
-                const hash = await HASH.sha256Async(message)
-
-                const verify = await RSA.verify(hash, transaction.toJSON().signature, ZERO_SIGN_PRIVATE_KEY)
-                if (!verify)
-                    throw "error verificando transacción"
-
-
                 const newSenderBalance = Number(senderAccount.toJSON().balance) - Number(transaction.toJSON().amount)
                 await senderAccount.update({
                     balance: Number(newSenderBalance.toFixed(4))

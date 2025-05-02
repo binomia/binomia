@@ -12,12 +12,14 @@ import { createBullBoard } from '@bull-board/api';
 import { ExpressAdapter } from '@bull-board/express';
 import { queuesBullAdapter, transactionsQueue } from "@/queues";
 import { dbConnection } from "@/config";
+import { initTracing } from "@/tracing";
 
 const app: Express = express();
 const serverAdapter = new ExpressAdapter();
 serverAdapter.setBasePath('/')
 const server = new JSONRPCServer();
 
+initTracing();
 
 if (cluster.isPrimary) {
     console.log(`[Queue-Server]: Master(${process.pid}) started`);
