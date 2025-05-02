@@ -19,7 +19,7 @@ import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
-import { Image as ExpoImage } from 'expo-image';
+
 
 type Props = {
 	title?: string
@@ -160,7 +160,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 			return (
 				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 					<HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
-					<ExpoImage tintColor={colors.white} alt='logo-image' style={{ width: "100%", height: "100%" }} source={waiting} />
+					<Image tintColor={colors.white} borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={waiting} />
 				</ZStack>
 			)
 		} else if (status === "requested") {
