@@ -1,7 +1,7 @@
 import shortUUID from 'short-uuid';
 import PrometheusMetrics from '@/metrics/PrometheusMetrics';
 import { AccountModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, QueuesModel } from '@/models'
-import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
+import { checkForProtectedRequests, compressData, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
 import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
@@ -10,10 +10,35 @@ import { queueServer } from '@/rpc/queueRPC';
 import { Span, SpanStatusCode, Tracer } from '@opentelemetry/api';
 import { AES, HASH, RSA } from 'cryptografia';
 import redis, { connection } from '@/redis';
-import { Queue } from 'bullmq';
+import { JobType, Queue } from 'bullmq';
 
 
 const queue = new Queue("transactions", { connection });
+
+
+const getJob = async ({ status, userId }: { status: JobType, userId: string }) => {
+    try {
+        const getJobs = await queue.getJobs([status])
+        const jobs = await Promise.all(
+            getJobs.map(async job => {
+                const jsonData = job.asJSON()
+                const decryptedData = await AES.decrypt(JSON.parse(jsonData.data), ZERO_ENCRYPTION_KEY)
+
+                const response = JSON.parse(decryptedData).response
+                if (response.userId === userId)
+                    return response
+
+                return []
+            }).flat()
+        )
+
+        return jobs.flat()
+
+    } catch (error: any) {
+        console.log({ error });
+        throw new Error(error);
+    }
+}
 
 
 export class TransactionsController {
@@ -85,10 +110,10 @@ export class TransactionsController {
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
-            const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}`
+            const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}`
             const hash = await HASH.sha256Async(messageToSign)
             const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
-           
+
             const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
             const { deviceid, ipaddress, platform } = req.headers
 
@@ -111,7 +136,28 @@ export class TransactionsController {
 
             span.addEvent("queueServer is queuing the transaction");
 
-            const jobId = `queueTransaction@${transactionId}`
+
+            const transactionResponse = {
+                userId,
+                transactionId,
+                "amount": validatedData.amount,
+                "deliveredAmount": validatedData.amount,
+                "voidedAmount": validatedData.amount,
+                "transactionType": validatedData.transactionType,
+                "currency": "DOP",
+                "status": "waiting",
+                "location": validatedData.location,
+                "createdAt": Date.now().toString(),
+                "updatedAt": Date.now().toString(),
+                "from": {
+                    ...account,
+                    user
+                },
+                "to": {
+                    ...receiverAccount.toJSON()
+                }
+            }
+
             const queueData = {
                 receiverUsername: validatedData.receiver,
                 sender: {
@@ -137,10 +183,14 @@ export class TransactionsController {
                     sessionId: sid,
                     ipAddress: ipaddress,
                     platform,
-                }
+                },
+                response: transactionResponse
             }
 
-            await queue.add(jobId, queueData, {
+            const jobId = `queueTransaction@${transactionId}`
+            const encryptedData = await AES.encrypt(JSON.stringify(queueData), ZERO_ENCRYPTION_KEY)
+
+            await queue.add(jobId, encryptedData, {
                 jobId,
                 removeOnComplete: {
                     age: 20 // 30 minutes
@@ -149,35 +199,6 @@ export class TransactionsController {
                     age: 60 * 30 // 24 hours
                 }
             })
-
-            const transactionResponse = {
-                transactionId,
-                "amount": validatedData.amount,
-                "deliveredAmount": validatedData.amount,
-                "voidedAmount": validatedData.amount,
-                "transactionType": validatedData.transactionType,
-                "currency": "DOP",
-                "status": "pending",
-                "location": validatedData.location,
-                "createdAt": Date.now().toString(),
-                "updatedAt": Date.now().toString(),
-                "from": {
-                    ...account,
-                    user
-                },
-                "to": {
-                    ...receiverAccount.toJSON()
-                }
-            }
-
-
-
-            span.addEvent("queueServer is saving the transaction in cache");
-            const transactionResponseCached = await redis.get(`transactionQueue:${user.account.id}`)
-            if (transactionResponseCached)
-                await redis.set(`transactionQueue:${user.account.id}`, JSON.stringify([...JSON.parse(transactionResponseCached), transactionResponse]))
-            else
-                await redis.set(`transactionQueue:${user.account.id}`, JSON.stringify([transactionResponse]))
 
             span.setAttribute("queueServer.response", JSON.stringify(jobId));
             span.setStatus({ code: SpanStatusCode.OK });
@@ -202,10 +223,10 @@ export class TransactionsController {
             const validatedData = await TransactionJoiSchema.createTransaction.parseAsync(data)
             const recurrenceData = await TransactionJoiSchema.recurrenceTransaction.parseAsync(recurrence)
 
-            const messageToSign = `${validatedData.receiver}&${user.username}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}`
+            const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
+            const messageToSign = `${transactionId}&${validatedData.amount}@${ZERO_ENCRYPTION_KEY}`
             const hash = await HASH.sha256Async(messageToSign)
             const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
-            const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
 
             const queueData = {
                 receiverUsername: validatedData.receiver,
@@ -235,8 +256,10 @@ export class TransactionsController {
                 }
             }
 
+            const encryptedData = await AES.encrypt(JSON.stringify(queueData), ZERO_ENCRYPTION_KEY)
             const jobId = `queueRequestTransaction@${transactionId}`
-            await queue.add(jobId, queueData, {
+
+            await queue.add(jobId, encryptedData, {
                 jobId,
                 removeOnComplete: {
                     age: 20 // 30 minutes
@@ -431,10 +454,8 @@ export class TransactionsController {
                 ]
             });
 
-            const transactionQueued = await redis.get(`transactionQueue:${user.account.id}`)
-            const parsedTransactions: any[] = transactionQueued ? JSON.parse(transactionQueued) : []
-
-            return [...transactions, ...parsedTransactions]
+            const queuedTransactions = await getJob({ status: "waiting", userId: user.id }).catch(() => [])
+            return [...transactions, ...queuedTransactions]
 
         } catch (error: any) {
             throw new GraphQLError(error);

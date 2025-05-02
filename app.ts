@@ -49,14 +49,14 @@ const errorHandlingPlugin: ApolloServerPlugin = {
 };
 
 const tracingPlugin: ApolloServerPlugin<Context> = {
-    async requestDidStart({ request }) {
+    async requestDidStart(requestContext) {
+        const { request } = requestContext;
         if (request.operationName) {
             const span: Span = tracer.startSpan(request.operationName);
 
             return {
                 async didResolveOperation({ request }) {
                     span.setAttribute("graphql.query", request.operationName || "");
-
                 },
                 async willSendResponse({ errors, request }) {
                     if (request.operationName)
@@ -73,6 +73,8 @@ const tracingPlugin: ApolloServerPlugin<Context> = {
         }
     },
 };
+
+
 
 
 (async () => {

@@ -7,8 +7,26 @@ import jwt from 'jsonwebtoken';
 import { Op } from 'sequelize';
 import { z } from 'zod'
 import redis from '@/redis';
+import * as zlib from 'zlib';
 
 
+export function compressData(data: string): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        zlib.gzip(data, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+}
+
+export function decompressData(data: Buffer): Promise<string> {
+    return new Promise((resolve, reject) => {
+        zlib.gunzip(data, (err, result) => {
+            if (err) reject(err);
+            else resolve(result.toString());
+        });
+    });
+}
 
 const getGqlBody = (fieldNodes: any[], schema: string) => {
     let body: any = {
