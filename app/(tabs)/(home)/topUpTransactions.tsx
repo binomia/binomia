@@ -75,9 +75,6 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
     const onOpenBottomSheet = async (transaction: any) => {
         setTransaction(transaction)
         setOpenBottomSheet(true)
-
-        console.log(JSON.stringify(transaction, null, 2));
-
     }
 
     useEffect(() => {

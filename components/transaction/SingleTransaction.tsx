@@ -4,7 +4,7 @@ import Button from '@/components/global/Button';
 import moment from 'moment';
 import PagerView from 'react-native-pager-view';
 import * as Sharing from 'expo-sharing';
-import {  Dimensions } from 'react-native'
+import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, ZStack, Avatar } from 'native-base'
 import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
@@ -14,7 +14,7 @@ import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { transactionStatus } from '@/mocks';
 import { Ionicons, Entypo } from '@expo/vector-icons';
-import { cancelIcon, checked, pendingClock, suspicious } from '@/assets';
+import { cancelIcon, checked, pendingClock, suspicious, waiting } from '@/assets';
 import { z } from 'zod';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
@@ -149,6 +149,13 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 					<HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
 					<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
+				</ZStack>
+			)
+		} else if (status === "waiting") {
+			return (
+				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+					<HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
+					<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={waiting} />
 				</ZStack>
 			)
 		} else if (status === "requested") {

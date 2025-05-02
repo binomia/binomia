@@ -1,54 +1,55 @@
-import logo from './logo.png';
-import logoChar from './logo-char.png';
-import welcome from './welcome.png';
-import account from './account.png';
-import idMock from './idMock.png';
-import idFrontMock from './idFrontdMock.jpg';
-import idFront from './id-front.png';
-import idBack from './id-back.png';
-import welcomeSignup from './welcome-signup.png';
-import biometric from './biometric.png';
-import biometricOn from './biometric-on.png';
-import biometricError from './biometric-error.png';
-import pendingVerification from './pending-verification.png';
-import pendingVerificationSVG from './pending-verification.svg';
-import homeOff from './homeOff.png';
-import homeOn from './homeOn.png';
-import transationsOff from './transationsOff.png';
-import transationsOn from './transationsOn.png';
-import profileOff from './profileOff.png';
-import profileOn from './profileOn.png';
-import noCard from './no-card.png';
-import phone from './phone.png';
-import cars from './cars.png';
-import house from './house.png';
-import bills from './bills.png';
-import checked from './checked.png';
-import noTransactions from './no-transactions.png';
-import cardHolder from './card-holder.png';
-import cardBackHolder from './card-back-holder.png';
-import mastercardLogo from './mastercard.png';
-import visaLogo from './visa.png';
-import americanExpressLogo from './american-express.png';
-import jcbLogo from './jcb.png';
-import vpnIcon from './vpn.png';
+import logo from './img/logo.png';
+import logoChar from './img/logo-char.png';
+import welcome from './img/welcome.png';
+import account from './img/account.png';
+import idMock from './img/idMock.png';
+import idFrontMock from './img/idFrontdMock.jpg';
+import idFront from './img/id-front.png';
+import idBack from './img/id-back.png';
+import welcomeSignup from './img/welcome-signup.png';
+import biometric from './img/biometric.png';
+import biometricOn from './img/biometric-on.png';
+import biometricError from './img/biometric-error.png';
+import pendingVerification from './img/pending-verification.png';
+import pendingVerificationSVG from './img/pending-verification.svg';
+import homeOff from './img/homeOff.png';
+import homeOn from './img/homeOn.png';
+import transationsOff from './img/transationsOff.png';
+import transationsOn from './img/transationsOn.png';
+import profileOff from './img/profileOff.png';
+import profileOn from './img/profileOn.png';
+import noCard from './img/no-card.png';
+import phone from './img/phone.png';
+import cars from './img/cars.png';
+import house from './img/house.png';
+import bills from './img/bills.png';
+import checked from './img/checked.png';
+import noTransactions from './img/no-transactions.png';
+import cardHolder from './img/card-holder.png';
+import cardBackHolder from './img/card-back-holder.png';
+import mastercardLogo from './img/mastercard.png';
+import visaLogo from './img/visa.png';
+import americanExpressLogo from './img/american-express.png';
+import jcbLogo from './img/jcb.png';
+import vpnIcon from './img/vpn.png';
 import errorIcon from './icons/error.png';
+import waiting from './waiting.gif';
 
 // icons
 import plusIconGreen from './icons/plus.png';
-import icon from './icon.png';
-import qrIcon from './qr.png';
-import sendIcon from './sendIcon.png';
-import bagIcon from './receiveIcon.png';
-import userIcon from './user.png';
-import privacyIcon from './privacy.png';
-import limitIcon from './limit.png';
-import notificacionIcon from './notificacion.png';
-import soportIcon from './soport.png';
+import icon from './img/icon.png';
+import qrIcon from './img/qr.png';
+import sendIcon from './img/sendIcon.png';
+import bagIcon from './img/receiveIcon.png';
+import userIcon from './img/user.png';
+import privacyIcon from './img/privacy.png';
+import limitIcon from './img/limit.png';
+import notificacionIcon from './img/notificacion.png';
+import soportIcon from './img/soport.png';
 import addressIcon from './icons/address.png';
 import idIcon from './icons/id.png';
 import phoneIcon from './icons/phone.png';
-import mailIcon from './mail.png';
+import mailIcon from './img/mail.png';
 import faceIdIcon from './icons/face-id.png';
 import receiveIcon from './icons/back.png';
 import sendMoneyIcon from './icons/return-right.png';
@@ -66,8 +67,8 @@ import creditCard from './icons/credit-card.png';
 import recurrenceIcon from './icons/recurrence.png';
 import pendingClock from './icons/pendingClock.png';
 import cancelIcon from './icons/cancel.png';
-import claroLogo from './claroLogo.png';
-import articeLogo from './articeLogo.png';
+import claroLogo from './img/claroLogo.png';
+import articeLogo from './img/articeLogo.png';
 import cashout from './icons/cashout.png';
 import cashIn from './icons/cash-in.png';
 import suspicious from './icons/suspicous.png';
@@ -76,7 +77,13 @@ import location from './icons/location.png';
 import allIcon from './icons/all.png';
 
 
+// lotties files
+import waitingLottie from './lottie/waiting.json';
+
+
 export {
+    waitingLottie,
+    waiting,
     allIcon,
     errorIcon,
     location,

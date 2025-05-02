@@ -189,6 +189,8 @@ export const transactionStatus = (title: string) => {
             return "Cancelado"
         case "requested":
             return "Solicitado"
+        case "waiting":
+            return "La transacción está siendo procesada. Este proceso puede tardar unos minutos."
         case "suspicious":
             return "Transacción en revisión, por favor espere que terminemos, o comuníquese con nosotros."
         default:
@@ -196,10 +198,28 @@ export const transactionStatus = (title: string) => {
     }
 }
 
-// allowWhatsappNotification: Boolean
-// allowEmailNotification: Boolean
-// allowSmsNotification: Boolean
-// allowPushNotification: Boolean
+export const transactionStatusColor = (title: string) => {
+    switch (title) {
+        case "approved":
+            return "#4CAF50"
+        case "rejected":
+            return "#F44336"
+        case "completed":
+            return "#4CAF50"
+        case "paid":
+            return "#4CAF50"
+        case "cancelled":
+            return "#F44336"
+        case "requested":
+            return "#FF9800"
+        case "waiting":
+            return "#FF9800"
+        case "suspicious":
+            return "#FF9800"
+        default:
+            return "#FF9800";
+    }
+}
 
 export const notificationsScreenData = ({ allowWhatsappNotification, allowPushNotification, allowEmailNotification, allowSmsNotification }: { allowWhatsappNotification: boolean, allowPushNotification: boolean, allowEmailNotification: boolean, allowSmsNotification: boolean }) => [
     {

@@ -13,13 +13,13 @@ import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { transactionStatus } from '@/mocks';
 import { Ionicons, Entypo, AntDesign, MaterialIcons } from '@expo/vector-icons';
-import { cancelIcon, checked, pendingClock, suspicious } from '@/assets';
+import { cancelIcon, checked, pendingClock, suspicious, waiting } from '@/assets';
 import { z } from 'zod';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
-
+import { Image as ExpoImage } from 'expo-image';
 
 type Props = {
 	title?: string
@@ -95,10 +95,10 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 		if (transaction?.showPayButton) {
 			try {
 				const authenticated = await authenticate()
+				setIsCancelLoading(!paymentApproved)
+				setIsLoading(paymentApproved)
 
 				if (authenticated.success) {
-					setIsCancelLoading(!paymentApproved)
-					setIsLoading(paymentApproved)
 
 					const { data } = await payRequestTransaction({
 						variables: {
@@ -114,8 +114,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 						dispatch(accountActions.setAccount(Object.assign({}, account, { balance: Number(account.balance) - Number(transaction?.amount) })))
 					])
 
-					setIsLoading(false)
-					setIsCancelLoading(false)
+
 					goNext(paymentApproved ? 1 : 2)
 				}
 
@@ -123,9 +122,13 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				setIsLoading(false)
 				await dispatch(fetchRecentTransactions())
 				onClose()
+
+			} finally {
+				setIsLoading(false)
+				setIsCancelLoading(false)
 			}
 
-		} 
+		}
 		else
 			ref.current?.setPage(1)
 	}
@@ -151,6 +154,13 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 					<HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
 					<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={pendingClock} />
+				</ZStack>
+			)
+		} else if (status === "waiting") {
+			return (
+				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+					<HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
+					<ExpoImage tintColor={colors.white} alt='logo-image' style={{ width: "100%", height: "100%" }} source={waiting} />
 				</ZStack>
 			)
 		} else if (status === "requested") {

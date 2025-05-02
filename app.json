@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.binomia.com",
       "infoPlist": {
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
-        "NSMicrophoneUsageDescription": "$(PRODUCT_NAME) needs access to your Microphone."
+        "NSMicrophoneUsageDescription": "$(PRODUCT_NAME) needs access to your Microphone.",
+        "ITSAppUsesNonExemptEncryption": false
       },
       "entitlements": {
         "com.apple.developer.networking.wifi-info": true
