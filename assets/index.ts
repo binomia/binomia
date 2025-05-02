@@ -33,7 +33,7 @@ import americanExpressLogo from './img/american-express.png';
 import jcbLogo from './img/jcb.png';
 import vpnIcon from './img/vpn.png';
 import errorIcon from './icons/error.png';
-import waiting from './waiting.gif';
+import waiting from './icons/waiting.png';
 
 // icons
 import plusIconGreen from './icons/plus.png';

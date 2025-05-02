@@ -158,9 +158,9 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 			)
 		} else if (status === "waiting") {
 			return (
-				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-					<HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
-					<Image tintColor={colors.white} borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={waiting} />
+				<ZStack w={"60px"} h={"60px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+					<HStack w={"100%"} h={"100%"} bg={colors.lightGray} borderRadius={100} />
+					<Image borderRadius={100}  alt='logo-image' w={"100%"} h={"100%"} source={waiting} />
 				</ZStack>
 			)
 		} else if (status === "requested") {

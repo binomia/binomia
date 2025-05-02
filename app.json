@@ -5,10 +5,10 @@
     "scheme": "binomia",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/img/icon.png",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/img/splash.png",
       "resizeMode": "cover",
       "backgroundColor": "#1D9B48"
     },
@@ -29,7 +29,7 @@
       "package": "com.binomia.com",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/img/adaptive-icon.png",
         "backgroundColor": "#000"
       },
       "permissions": [
@@ -45,7 +45,7 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/img/favicon.png"
     },
     "extra": {
       "eas": {
@@ -58,11 +58,11 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/notification_icon.png",
+          "icon": "./assets/img/notification_icon.png",
           "color": "#ffffff",
           "defaultChannel": "default",
           "sounds": [
-            "./assets/money.wav"
+            "./assets/img/audio/money.wav"
           ]
         }
       ],
