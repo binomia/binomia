@@ -500,8 +500,6 @@ export default class TransactionController {
                 await notificationServer("newTransactionNotification", {
                     data: expoNotificationTokens
                 })
-
-                return transactionCreated.toJSON();
             }
 
         } catch (error: any) {
@@ -596,8 +594,6 @@ export default class TransactionController {
                     recipientSocketRoom: receiverData.user.username,
                 })
             ])
-
-            return transactionCreated.toJSON()
 
         } catch (error: any) {
             throw error

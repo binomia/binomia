@@ -37,7 +37,7 @@ export const initMethods = (server: JSONRPCServer) => {
     });
 
     // gloabal methods
-    server.addMethod("getJob", async ({ status,userId }: { status: JobType, userId: string }) => {
+    server.addMethod("getJob", async ({ status, userId }: { status: JobType, userId: string }) => {
         try {
             const queue = new Queue("transactions", { connection });
             const getJobs = await queue.getJobs([status])
@@ -49,7 +49,7 @@ export const initMethods = (server: JSONRPCServer) => {
 
                     const response = JSON.parse(decryptedData).response
 
-                    if (response.usersIds.includes(userId))
+                    if (response.userId === userId)
                         return response
 
                     return []

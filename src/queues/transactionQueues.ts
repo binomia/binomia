@@ -4,7 +4,7 @@ import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PA
 import shortUUID from "short-uuid";
 import TransactionController from "@/controllers/transactionController";
 import MainController from "@/controllers/mainController";
-import { connection, redis } from "@/redis";
+import { connection } from "@/redis";
 import { AES } from "cryptografia";
 import { BullMQOtel } from "bullmq-otel"
 
@@ -27,16 +27,7 @@ export default class TransactionsQueue {
                     const decryptedData = await AES.decrypt(JSON.parse(job.data), ZERO_ENCRYPTION_KEY)
                     const data: CreateQueueedTransactionType = JSON.parse(decryptedData)
 
-                    const { transactionId, fromAccount } = await TransactionController.createQueuedTransaction(data)
-                    const transactionQueued = await redis.get(`transactionQueue:${fromAccount}`)
-                    const parsedTransactions: any[] = transactionQueued ? JSON.parse(transactionQueued) : []
-
-                    const filteredCachedQueuedTransactions = parsedTransactions.filter((transaction: any) => transaction.transactionId !== transactionId)
-                    if (filteredCachedQueuedTransactions.length === 0)
-                        await redis.del(`transactionQueue:${fromAccount}`)
-                    else
-                        await redis.set(`transactionQueue:${fromAccount}`, JSON.stringify(filteredCachedQueuedTransactions))
-
+                    await TransactionController.createQueuedTransaction(data)
                     console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
                     break;
                 }
@@ -44,16 +35,7 @@ export default class TransactionsQueue {
                     const decryptedData = await AES.decrypt(JSON.parse(job.data), ZERO_ENCRYPTION_KEY)
                     const data: CreateRequestQueueedTransactionType = JSON.parse(decryptedData)
 
-                    const { transactionId, fromAccount } = await TransactionController.createRequestQueueedTransaction(data)
-                    const transactionQueued = await redis.get(`transactionQueue:${fromAccount}`)
-                    const parsedTransactions: any[] = transactionQueued ? JSON.parse(transactionQueued) : []
-
-                    const filteredCachedQueuedTransactions = parsedTransactions.filter((transaction: any) => transaction.transactionId !== transactionId)
-                    if (filteredCachedQueuedTransactions.length === 0)
-                        await redis.del(`transactionQueue:${fromAccount}`)
-                    else
-                        await redis.set(`transactionQueue:${fromAccount}`, JSON.stringify(filteredCachedQueuedTransactions))
-
+                    await TransactionController.createRequestQueueedTransaction(data)
                     console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
                     break;
                 }
@@ -67,11 +49,6 @@ export default class TransactionsQueue {
                 case job.name.includes("payRequestTransaction"): {
                     const data: PayQueuedRequestedTransactionType = JSON.parse(job.data)
                     await TransactionController.payRequestTransaction(data)
-                    break
-                }
-                case job.name.includes("cancelRequestedTransaction"): {
-                    const data: CancelRequestedTransactionType = JSON.parse(job.data)
-                    await TransactionController.cancelRequestedTransaction(data)
                     break
                 }
                 case job.name.includes("cancelRequestedTransaction"): {
@@ -96,14 +73,13 @@ export default class TransactionsQueue {
 
     private workers = async () => {
         const worker = new Worker('transactions', async (job) => this.executeJob(job.asJSON()), {
-            connection: { host: "redis", port: 6379 },
+            connection,
             removeOnComplete: {
                 age: 20
             },
             settings: {
                 backoffStrategy: (attemptsMade: number) => attemptsMade * 1000
             },
-            // telemetry: new BullMQOtel("queue-transactions")
         });
 
         worker.on('completed', async (job: Job) => {

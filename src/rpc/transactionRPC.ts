@@ -36,7 +36,7 @@ export const transactionMethods = (server: JSONRPCServer) => {
             throw error
         }
     });
-
+    // cancelRequestedTransaction
     server.addMethod("cancelRequestedTransaction", async ({ transactionId, fromAccount, senderUsername }: { transactionId: string, fromAccount: number, senderUsername: string }) => {
         try {
             const transaction = await TransactionController.cancelRequestedTransaction({ transactionId, fromAccount, senderUsername })

@@ -5,7 +5,8 @@ import { createBullBoard } from "@bull-board/api";
 
 export const connection = {
     host: "redis",
-    port: 6379
+    port: 6379,
+    enableOfflineQueue: false,
 }
 
 export const redis = new Redis({
