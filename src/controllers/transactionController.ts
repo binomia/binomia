@@ -1,7 +1,7 @@
 import shortUUID from 'short-uuid';
 import PrometheusMetrics from '@/metrics/PrometheusMetrics';
 import { AccountModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, QueuesModel } from '@/models'
-import { checkForProtectedRequests, compressData, getQueryResponseFields, } from '@/helpers'
+import { checkForProtectedRequests, getQueryResponseFields, } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
 import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
@@ -9,7 +9,7 @@ import { Op } from 'sequelize';
 import { queueServer } from '@/rpc/queueRPC';
 import { Span, SpanStatusCode, Tracer } from '@opentelemetry/api';
 import { AES, HASH, RSA } from 'cryptografia';
-import redis, { connection } from '@/redis';
+import { connection } from '@/redis';
 import { JobType, Queue } from 'bullmq';
 
 
@@ -192,12 +192,17 @@ export class TransactionsController {
 
             await queue.add(jobId, encryptedData, {
                 jobId,
+                attempts: 3,
+                backoff: {
+                    type: 'exponential',
+                    delay: 1000,
+                },
                 removeOnComplete: {
                     age: 20 // 30 minutes
                 },
                 removeOnFail: {
                     age: 60 * 30 // 24 hours
-                }
+                },
             })
 
             span.setAttribute("queueServer.response", JSON.stringify(jobId));
@@ -228,6 +233,44 @@ export class TransactionsController {
             const hash = await HASH.sha256Async(messageToSign)
             const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
 
+            const receiverAccount = await AccountModel.findOne({
+                attributes: { exclude: ['username'] },
+                where: {
+                    username: validatedData.receiver
+                },
+                include: [
+                    {
+                        model: UsersModel,
+                        as: 'user',
+                        attributes: { exclude: ['createdAt', 'dniNumber', 'updatedAt', 'faceVideoUrl', 'idBackUrl', 'idFrontUrl', 'password'] }
+                    }
+                ]
+            })
+
+            if (!receiverAccount)
+                throw "Receiver account not found";
+
+            const transactionResponse = {
+                userId,
+                transactionId,
+                "amount": validatedData.amount,
+                "deliveredAmount": validatedData.amount,
+                "voidedAmount": validatedData.amount,
+                "transactionType": validatedData.transactionType,
+                "currency": "DOP",
+                "status": "waiting",
+                "location": validatedData.location,
+                "createdAt": Date.now().toString(),
+                "updatedAt": Date.now().toString(),
+                "from": {
+                    ...user.account,
+                    user
+                },
+                "to": {
+                    ...receiverAccount.toJSON()
+                }
+            }
+
             const queueData = {
                 receiverUsername: validatedData.receiver,
                 sender: {
@@ -253,7 +296,9 @@ export class TransactionsController {
                     sessionId,
                     ipAddress: ipaddress,
                     platform,
-                }
+                },
+                response: transactionResponse
+
             }
 
             const encryptedData = await AES.encrypt(JSON.stringify(queueData), ZERO_ENCRYPTION_KEY)
@@ -261,30 +306,18 @@ export class TransactionsController {
 
             await queue.add(jobId, encryptedData, {
                 jobId,
+                attempts: 3,
+                backoff: {
+                    type: 'exponential',
+                    delay: 1000,
+                },
                 removeOnComplete: {
-                    age: 20 // 30 minutes
+                    age: 20
                 },
                 removeOnFail: {
-                    age: 60 * 30 // 24 hours
+                    age: 60 * 30
                 }
             })
-
-            const transactionResponse = {
-                transactionId,
-                "amount": validatedData.amount,
-                "deliveredAmount": validatedData.amount,
-                "voidedAmount": validatedData.amount,
-                "transactionType": validatedData.transactionType,
-                "currency": "DOP",
-                "status": "pending",
-                "location": validatedData.location,
-                "createdAt": Date.now().toString(),
-                "updatedAt": Date.now().toString(),
-                "from": {
-                    ...user.account,
-                    user
-                }
-            }
 
             return transactionResponse
 
@@ -294,17 +327,28 @@ export class TransactionsController {
             throw new GraphQLError(error.message);
         }
     }
-
+    // TODO: Refactor this function to use the new queue system
     static cancelRequestedTransaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any) => {
         try {
-            const { user } = await checkForProtectedRequests(context.req);
-            const transaction = await queueServer("cancelRequestedTransaction", {
+            const { user } = await checkForProtectedRequests(context.req);            
+            const jobId = `cancelRequestedTransaction@${transactionId}`
+            const queueData = {
                 transactionId,
                 fromAccount: user.account.id,
                 senderUsername: user.username
+            }
+           await queue.add(jobId, queueData, {
+                jobId,
+                attempts: 3,
+                backoff: {
+                    type: 'exponential',
+                    delay: 1000,
+                },
+                removeOnComplete: { age: 20 },
+                removeOnFail: { age: 60 * 30 }
             })
 
-            return transaction
+            return { transactionId }
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
@@ -323,6 +367,11 @@ export class TransactionsController {
 
             await queue.add(jobId, queueData, {
                 jobId,
+                attempts: 3,
+                backoff: {
+                    type: 'exponential',
+                    delay: 1000,
+                },
                 removeOnComplete: {
                     age: 20 // 30 minutes
                 },
@@ -338,6 +387,7 @@ export class TransactionsController {
         }
     }
 
+    // TODO: Refactor this function to use the new queue system
     static createBankingTransaction = async (_: unknown, { cardId, data }: { cardId: number, data: any }, context: any) => {
         try {
             const { user } = await checkForProtectedRequests(context.req);
@@ -592,6 +642,7 @@ export class TransactionsController {
         }
     }
 
+    // TODO: Refactor this function to use the new queue system
     static deleteRecurrentTransactions = async (_: unknown, { repeatJobKey, queueType }: { repeatJobKey: string, queueType: string }, context: any, { fieldNodes }: { fieldNodes: any }) => {
         try {
             await checkForProtectedRequests(context.req);
@@ -603,6 +654,7 @@ export class TransactionsController {
         }
     }
 
+    // TODO: Refactor this function to use the new queue system
     static updateRecurrentTransactions = async (_: unknown, { data: { repeatJobKey, queueType, jobName, jobTime } }: { data: { repeatJobKey: string, queueType: string, jobName: string, jobTime: string } }, context: any) => {
         try {
             await checkForProtectedRequests(context.req);
