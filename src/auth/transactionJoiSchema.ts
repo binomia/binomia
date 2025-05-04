@@ -46,8 +46,7 @@ export class TransactionJoiSchema {
     })
 
     // extende the create transaction schema but forbid the receiver
-    static bankingCreateTransaction = TransactionJoiSchema.createTransaction.extend({
-        receiver: z.string().nullish().optional(),
+    static bankingCreateTransaction = TransactionJoiSchema.createTransaction.omit({ receiver: true }).extend({
         transactionType: z.enum(["deposit", "withdraw"])
     })
 

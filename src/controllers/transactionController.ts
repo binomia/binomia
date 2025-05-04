@@ -327,17 +327,17 @@ export class TransactionsController {
             throw new GraphQLError(error.message);
         }
     }
-    // TODO: Refactor this function to use the new queue system
+
     static cancelRequestedTransaction = async (_: unknown, { transactionId }: { transactionId: string }, context: any) => {
         try {
-            const { user } = await checkForProtectedRequests(context.req);            
+            const { user } = await checkForProtectedRequests(context.req);
             const jobId = `cancelRequestedTransaction@${transactionId}`
             const queueData = {
                 transactionId,
                 fromAccount: user.account.id,
                 senderUsername: user.username
             }
-           await queue.add(jobId, queueData, {
+            await queue.add(jobId, queueData, {
                 jobId,
                 attempts: 3,
                 backoff: {
@@ -390,17 +390,66 @@ export class TransactionsController {
     // TODO: Refactor this function to use the new queue system
     static createBankingTransaction = async (_: unknown, { cardId, data }: { cardId: number, data: any }, context: any) => {
         try {
-            const { user } = await checkForProtectedRequests(context.req);
+            const { user, sid } = await checkForProtectedRequests(context.req);
+            const { deviceid, ipaddress, platform } = context.req.headers
+
             const validatedData = await TransactionJoiSchema.bankingCreateTransaction.parseAsync(data)
 
-            const transaction = await queueServer("createBankingTransaction", {
+            const transactionId = `${shortUUID.generate()}${shortUUID.generate()}`
+            
+            const messageToSign = `${user.account.id}&${user.id}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}`
+            const hash = await HASH.sha256Async(messageToSign)
+            const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+            
+            const responseData = {
+                transactionId,
+                ...validatedData,
+                account: null,
+                card: null,
+                deliveredAmount: validatedData.amount,
+                voidedAmount: validatedData.amount,
+                status: "waiting",
+                createdAt: Date.now().toString(),
+                updatedAt: Date.now().toString(),
+                data: {
+                    deviceId: deviceid,
+                    sessionId: sid,
+                    ipAddress: ipaddress,
+                    platform,
+                }
+            }
+            
+            const queueData = {
+                transactionId,
+                ...validatedData,
+                status: "pending",
+                voidedAmount: validatedData.amount,
+                deliveredAmount: validatedData.amount,
+                signature,
                 cardId,
                 accountId: user.account.id,
                 userId: user.id,
-                data: validatedData
+                data: {
+                    deviceId: deviceid,
+                    sessionId: sid,
+                    ipAddress: ipaddress,
+                    platform,
+                }
+            }
+            
+            const jobId = `createBankingTransaction@${transactionId}`
+            await queue.add(jobId, queueData, {
+                jobId,
+                attempts: 3,
+                backoff: {
+                    type: 'exponential',
+                    delay: 1000,
+                },
+                removeOnComplete: { age: 20 },
+                removeOnFail: { age: 60 * 30 }
             })
 
-            return transaction
+            return responseData
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
