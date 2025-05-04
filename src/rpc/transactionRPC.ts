@@ -36,17 +36,6 @@ export const transactionMethods = (server: JSONRPCServer) => {
             throw error
         }
     });
-    // cancelRequestedTransaction
-    server.addMethod("cancelRequestedTransaction", async ({ transactionId, fromAccount, senderUsername }: { transactionId: string, fromAccount: number, senderUsername: string }) => {
-        try {
-            const transaction = await TransactionController.cancelRequestedTransaction({ transactionId, fromAccount, senderUsername })
-            return transaction
-
-        } catch (error) {
-            console.log({ createTransaction: error });
-            throw error
-        }
-    });
 
     server.addMethod("payRequestTransaction", async ({ transactionId, toAccount, paymentApproved }: { transactionId: string, toAccount: number, paymentApproved: boolean }) => {
         try {
@@ -59,14 +48,14 @@ export const transactionMethods = (server: JSONRPCServer) => {
         }
     });
 
-    server.addMethod("createBankingTransaction", async ({ cardId, accountId, userId, data }: { cardId: number, accountId: number, userId: number, data: any }) => {
-        try {
-            const transaction = await TransactionController.createBankingTransaction({ cardId, accountId, userId, data })
-            return transaction
+    // server.addMethod("createBankingTransaction", async ({ cardId, accountId, userId, data }: { cardId: number, accountId: number, userId: number, data: any }) => {
+    //     try {
+    //         const transaction = await TransactionController.createBankingTransaction({ cardId, accountId, userId, data })
+    //         return transaction
 
-        } catch (error) {
-            console.log({ createTransaction: error });
-            throw error
-        }
-    });
+    //     } catch (error) {
+    //         console.log({ createTransaction: error });
+    //         throw error
+    //     }
+    // });
 }

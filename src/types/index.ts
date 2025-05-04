@@ -69,3 +69,19 @@ export type CancelRequestedTransactionType = {
     fromAccount: number
     senderUsername: string
 }
+
+export interface CreateBankingTransactionType {
+    transactionId: string
+    amount: number
+    transactionType: string
+    deliveredAmount: number
+    voidedAmount: number
+    currency: string
+    status: string
+    location: z.infer<typeof TransactionJoiSchema.transactionLocation>
+    data: any
+    signature: string
+    cardId: number
+    accountId: number
+    userId: number,
+}

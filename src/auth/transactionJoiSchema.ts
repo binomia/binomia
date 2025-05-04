@@ -36,11 +36,19 @@ export class TransactionJoiSchema {
     })
 
     static bankingCreateTransaction = z.object({
+        transactionId: z.string(),
         amount: z.number().gt(0),
+        transactionType: z.enum(["deposit", "withdraw"]),
+        deliveredAmount: z.number().gt(0),
+        voidedAmount: z.number().gt(0),
         currency: z.enum(["DOP"]),
+        status: z.string(),
         location: TransactionJoiSchema.transactionLocation,
-        receiver: z.string().nullish().optional(),
-        transactionType: z.enum(["deposit", "withdraw"])
+        data: z.object({}).passthrough(),
+        signature: z.string(),
+        cardId: z.number(),
+        accountId: z.number(),
+        userId: z.number(),
     })
 
 

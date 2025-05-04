@@ -48,6 +48,9 @@ AccountModel.hasMany(TransactionsModel, { foreignKey: 'toAccount', sourceKey: 'i
 BankingTransactionsModel.belongsTo(CardsModel)
 CardsModel.hasMany(BankingTransactionsModel)
 
+BankingTransactionsModel.belongsTo(UsersModel)
+UsersModel.hasMany(BankingTransactionsModel)
+
 BankingTransactionsModel.belongsTo(AccountModel)
 AccountModel.hasMany(BankingTransactionsModel)
 

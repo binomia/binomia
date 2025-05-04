@@ -5,7 +5,7 @@ import { AccountModel, BankingTransactionsModel, CardsModel, QueuesModel, Sessio
 import { transactionsQueue } from "@/queues"
 import { anomalyRpcClient } from "@/rpc/clients/anomalyRPC"
 import { notificationServer } from "@/rpc/clients/notificationRPC"
-import { CancelRequestedTransactionType, CreateRequestQueueedTransactionType, CreateTransactionType, FraudulentTransactionType } from "@/types"
+import { CancelRequestedTransactionType, CreateBankingTransactionType, CreateRequestQueueedTransactionType, CreateTransactionType, FraudulentTransactionType } from "@/types"
 import { Job, JobJson } from "bullmq"
 import { Op } from "sequelize"
 import shortUUID from "short-uuid"
@@ -182,7 +182,7 @@ export default class TransactionController {
             const decryptedData = await AES.decrypt(JSON.parse(data), ZERO_ENCRYPTION_KEY)
 
             console.log({ decryptedData });
-            
+
             const { transactionId } = JSON.parse(decryptedData)
 
             const transaction = await TransactionsModel.findOne({
@@ -831,55 +831,44 @@ export default class TransactionController {
         }
     }
 
-    static createBankingTransaction = async ({ cardId, accountId, userId, data }: { accountId: number, cardId: number, userId: number, data: any }) => {
+    static createBankingTransaction = async (transactionData: CreateBankingTransactionType) => {
         try {
-            const validatedData = await TransactionJoiSchema.bankingCreateTransaction.parseAsync(data)
+            const validatedData = await TransactionJoiSchema.bankingCreateTransaction.parseAsync(transactionData)
             const account = await AccountModel.findOne({
                 where: {
-                    id: accountId
+                    id: validatedData.accountId
                 }
             })
 
             if (!account)
                 throw "account not found"
 
-            const card = await CardsModel.findOne({
-                where: {
-                    [Op.and]: [
-                        { userId },
-                        { id: cardId }
-                    ]
-                }
-            })
+            // const card = await CardsModel.findOne({
+            //     where: {
+            //         [Op.and]: [
+            //             { userId: transactionData.userId },
+            //             { id: transactionData.cardId }
+            //         ]
+            //     }
+            // })
 
-            if (!card)
-                throw 'The given card is not linked to the user account'
+            // if (!card)
+            //     throw 'The given card is not linked to the user account'
 
-            const decryptedCardData = await AES.decrypt(card.toJSON().data, ZERO_ENCRYPTION_KEY)
-            const cardData = Object.assign({}, card.toJSON(), JSON.parse(decryptedCardData))
+            // const decryptedCardData = await AES.decrypt(card.toJSON().data, ZERO_ENCRYPTION_KEY)
+            // const cardData = Object.assign({}, card.toJSON(), JSON.parse(decryptedCardData))
 
             //[TODO]: Need Payment Gateway Integration
             console.error("createBankingTransaction: Need Payment Gateway Integration");
 
-            const hash = await HASH.sha256Async(JSON.stringify({
-                data: {
-                    ...validatedData,
-                    deliveredAmount: validatedData.amount,
-                    accountId,
-                },
-                ZERO_ENCRYPTION_KEY,
-                ZERO_SIGN_PRIVATE_KEY,
-            }))
+            const messageToSign = `${validatedData.accountId}&${validatedData.userId}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}`
+            const hash = await HASH.sha256Async(messageToSign)
 
-            const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
-            const transaction = await BankingTransactionsModel.create({
-                ...validatedData,
-                deliveredAmount: validatedData.amount,
-                accountId,
-                cardId: cardData.id,
-                signature,
-                data: {}
-            })
+            const verifySignature = await RSA.verify(hash, validatedData.signature, ZERO_SIGN_PUBLIC_KEY)
+            if (!verifySignature)
+                throw "invalid signature"
+
+            await BankingTransactionsModel.create(validatedData)
 
             const accountData = account.toJSON()
             const newBalance: number = validatedData.transactionType === "deposit" ? accountData.balance + validatedData.amount : accountData.balance - validatedData.amount
@@ -891,9 +880,10 @@ export default class TransactionController {
                 balance: newBalance
             })
 
-            return Object.assign({}, transaction.toJSON(), { card: cardData })
 
         } catch (error: any) {
+            console.error(error);
+            
             throw error.message
         }
     }

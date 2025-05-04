@@ -1,5 +1,5 @@
 import { Job, JobJson, Queue, Worker } from "bullmq";
-import { CancelRequestedTransactionType, CreateQueueedTransactionType, CreateRequestQueueedTransactionType, MonthlyQueueTitleType, PayQueuedRequestedTransactionType, WeeklyQueueTitleType } from "@/types";
+import { CancelRequestedTransactionType, CreateBankingTransactionType, CreateQueueedTransactionType, CreateRequestQueueedTransactionType, MonthlyQueueTitleType, PayQueuedRequestedTransactionType, WeeklyQueueTitleType } from "@/types";
 import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN, ZERO_ENCRYPTION_KEY } from "@/constants";
 import shortUUID from "short-uuid";
 import TransactionController from "@/controllers/transactionController";
@@ -58,6 +58,10 @@ export default class TransactionsQueue {
                 }
                 case job.name.includes("trainTransactionFraudDetectionModel"): {
                     await TransactionController.trainTransactionFraudDetectionModel(job)
+                    break;
+                }
+                case job.name.includes("createBankingTransaction"): {                    
+                    await TransactionController.createBankingTransaction(JSON.parse(job.data))
                     break;
                 }
                 default: {
