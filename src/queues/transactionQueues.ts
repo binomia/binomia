@@ -63,7 +63,7 @@ export default class TransactionsQueue {
                 case job.name.includes("createBankingTransaction"): {                    
                     await TransactionController.createBankingTransaction(JSON.parse(job.data))
                     break;
-                }
+                }                
                 default: {
                     await TransactionController.prosessQueuedTransaction(job)
                     break;

@@ -10,6 +10,7 @@ import { Job, JobJson } from "bullmq"
 import { Op } from "sequelize"
 import shortUUID from "short-uuid"
 import { AES, HASH, RSA } from "cryptografia"
+import { sign } from "crypto"
 
 export default class TransactionController {
     static createTransaction = async (data: CreateTransactionType) => {
@@ -455,15 +456,33 @@ export default class TransactionController {
                 ])
 
                 if (transaction.recurrenceData.time !== "oneTime") {
+
+                    const jobId = `${transaction.recurrenceData.title}@${transaction.recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`
+                    const transactionResponse = {
+                        jobId,
+                        isRecurrence: transaction.isRecurring,
+                        userId: senderAccount.toJSON().user.id,
+                        jobName: transaction.recurrenceData.title,
+                        jobTime: transaction.recurrenceData.time,
+                        "amount": newTransactionData.amount,
+                        "status": "waiting",
+                        referenceData: {
+                            fullName: receiverAccount.toJSON().user.fullName,
+                            logo: receiverAccount.toJSON().user.profileImageUrl
+                        },
+                        signature: newTransactionData.signature,
+                        user: senderAccount.toJSON().user                                              
+                    }
                     const recurrenceQueueData = Object.assign(newTransactionData, {
                         transactionId: `${shortUUID.generate()}${shortUUID.generate()}`,
                         recurrenceData: transaction.recurrenceData,
-                        location: {}
+                        location: {},
+                        response: transactionResponse
                     })
 
                     const encryptedData = await AES.encrypt(JSON.stringify(recurrenceQueueData), ZERO_ENCRYPTION_KEY);
                     transactionsQueue.createJobs({
-                        jobId: `${transaction.recurrenceData.title}@${transaction.recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
+                        jobId,
                         userId: senderAccount.toJSON().user.id,
                         jobName: transaction.recurrenceData.title,
                         jobTime: transaction.recurrenceData.time,

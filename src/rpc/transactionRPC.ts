@@ -47,15 +47,4 @@ export const transactionMethods = (server: JSONRPCServer) => {
             throw error
         }
     });
-
-    // server.addMethod("createBankingTransaction", async ({ cardId, accountId, userId, data }: { cardId: number, accountId: number, userId: number, data: any }) => {
-    //     try {
-    //         const transaction = await TransactionController.createBankingTransaction({ cardId, accountId, userId, data })
-    //         return transaction
-
-    //     } catch (error) {
-    //         console.log({ createTransaction: error });
-    //         throw error
-    //     }
-    // });
 }
