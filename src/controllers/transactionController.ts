@@ -471,7 +471,9 @@ export default class TransactionController {
                             logo: receiverAccount.toJSON().user.profileImageUrl
                         },
                         signature: newTransactionData.signature,
-                        user: senderAccount.toJSON().user                                              
+                        user: senderAccount.toJSON().user,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now(),
                     }
                     const recurrenceQueueData = Object.assign(newTransactionData, {
                         transactionId: `${shortUUID.generate()}${shortUUID.generate()}`,
@@ -902,7 +904,7 @@ export default class TransactionController {
 
         } catch (error: any) {
             console.error(error);
-            
+
             throw error.message
         }
     }

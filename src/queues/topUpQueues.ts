@@ -20,7 +20,7 @@ export default class TopUpQueue {
             const name = job.name.split("@")[0]
             switch (name) {
                 case "queueTopUp": {
-                    const {userId, referenceId } = await TopUpController.createTopUp(job.asJSON())
+                    const { userId, referenceId } = await TopUpController.createTopUp(job.asJSON())
 
                     const toptupsQueued = await redis.get(`queuedTopUps:${userId}`)
                     const parsedTopUps: any[] = toptupsQueued ? JSON.parse(toptupsQueued) : []
@@ -74,49 +74,49 @@ export default class TopUpQueue {
         })
     }
 
-    createJobs = async ({ jobId, jobName, referenceData, jobTime, amount, userId, data }: { jobId: string, referenceData: any, userId: number, amount: number, jobName: string, jobTime: string, data: string }) => {
+    createJobs = async ({ jobId, jobName, jobTime, data }: { jobId: string, jobName: string, jobTime: string, data: string }) => {
         switch (jobName) {
             case "weekly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_WEEKLY_PATTERN[jobTime as WeeklyQueueTitleType]);
-                const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
-                    queueType: "topup",
-                    jobTime,
-                    jobName,
-                    userId,
-                    amount,
-                    data,
-                    referenceData
-                }))
+                // const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
+                //     queueType: "topup",
+                //     jobTime,
+                //     jobName,
+                //     userId,
+                //     amount,
+                //     data,
+                //     referenceData
+                // }))
 
-                return transaction
+                // return transaction
             }
             case "biweekly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_BIWEEKLY_PATTERN);
-                const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
-                    queueType: "topup",
-                    jobTime,
-                    jobName,
-                    userId,
-                    amount,
-                    data,
-                    referenceData
-                }))
+                // const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
+                //     queueType: "topup",
+                //     jobTime,
+                //     jobName,
+                //     userId,
+                //     amount,
+                //     data,
+                //     referenceData
+                // }))
 
-                return transaction
+                // return transaction
             }
             case "monthly": {
                 const job = await this.addJob(jobId, data, CRON_JOB_MONTHLY_PATTERN[jobTime as MonthlyQueueTitleType]);
-                const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
-                    queueType: "topup",
-                    jobTime,
-                    jobName,
-                    userId,
-                    amount,
-                    data,
-                    referenceData
-                }))
+                // const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
+                //     queueType: "topup",
+                //     jobTime,
+                //     jobName,
+                //     userId,
+                //     amount,
+                //     data,
+                //     referenceData
+                // }))
 
-                return transaction
+                // return transaction
             }
             case "pendingTopUp": {
                 const time = 1000 * 60 * 30 // 30 minutes
@@ -167,12 +167,9 @@ export default class TopUpQueue {
 
             const newJob = await this.createJobs({
                 jobId: `${jobName}@${jobTime}@${shortUUID.generate()}${shortUUID.generate()}`,
-                amount: queue.amount,
                 jobName,
                 jobTime,
-                userId: queue.userId,
                 data: queue.data,
-                referenceData: queue.referenceData
             })
 
             return newJob;

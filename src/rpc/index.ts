@@ -1,95 +1,21 @@
 import { topUpQueue, transactionsQueue } from "@/queues";
-import { WeeklyQueueTitleType } from "@/types";
 import { JSONRPCServer } from "json-rpc-2.0";
 import { connection, redis } from "@/redis";
 import { QUEUE_JOBS_NAME, ZERO_ENCRYPTION_KEY } from "@/constants";
-import { Job, JobType, Queue } from "bullmq";
-import { transactionMethods } from "./transactionRPC";
+import { Queue } from "bullmq";
 import { topUpMethods } from "./topupRPC";
 import { AES } from "cryptografia";
 
 
 
 export const initMethods = (server: JSONRPCServer) => {
-    transactionMethods(server)
     topUpMethods(server)
 
     // gloabal methods
-    server.addMethod("test", async ({ name, }: { name: string }) => {
-        try {
-            const queue = new Queue(name, { connection: { host: "redis", port: 6379 } });
-            const getJobs = await queue.getJobs()
-
-            const jobs = await Promise.all(
-                getJobs.map(async job => ({
-                    ...job.asJSON(),
-                    state: (await job.getState()),
-                    queueName: job.queueName,
-                }))
-            )
-
-            return jobs
-
-        } catch (error: any) {
-            console.log({ error });
-            throw new Error(error);
-        }
-    });
-
-    // const transactionResponse = {
-    //     userId,
-    //     transactionId,
-    //     "amount": validatedData.amount,
-    //     "deliveredAmount": validatedData.amount,
-    //     "voidedAmount": validatedData.amount,
-    //     "transactionType": validatedData.transactionType,
-    //     "currency": "DOP",
-    //     "status": "waiting",
-    //     "location": validatedData.location,
-    //     "createdAt": Date.now().toString(),
-    //     "updatedAt": Date.now().toString(),
-    //     "from": {
-    //         ...account,
-    //         user
-    //     },
-    //     "to": {
-    //         ...receiverAccount.toJSON()
-    //     }
-    // }
-
-    // const queueData = {
-    //     receiverUsername: validatedData.receiver,
-    //     sender: {
-    //         id: userId,
-    //         fullName: user.fullName,
-    //         username: user.username,
-    //         accountId: user.account.id,
-    //         balance: user.account.balance
-    //     },
-    //     transaction: {
-    //         transactionId,
-    //         amount: validatedData.amount,
-    //         location: validatedData.location,
-    //         currency: validatedData.currency,
-    //         transactionType: validatedData.transactionType,
-    //         signature,
-    //         recurrenceData,
-    //         status: "pending",
-    //         isRecurring: recurrenceData.time !== "oneTime",
-    //     },
-    //     device: {
-    //         deviceId: deviceid,
-    //         sessionId: sid,
-    //         ipAddress: ipaddress,
-    //         platform,
-    //     },
-    //     response: transactionResponse
-    // }
-
-    // gloabal methods
-    server.addMethod("getJob", async ({ userId }: { userId: string }) => {
+    server.addMethod("test", async ({ userId }: { userId: number }) => {
         try {
             const queue = new Queue("transactions", { connection });
+
             const getJobs = await queue.getJobs(["delayed"])
 
             const jobs = await Promise.all(
@@ -100,7 +26,34 @@ export const initMethods = (server: JSONRPCServer) => {
                     const response = JSON.parse(decryptedData).response
 
                     if (response?.userId === userId && response.isRecurrence)
-                        return { response, userId }
+                        return response
+
+                    return []
+                }).flat()
+            )
+
+            return jobs.flat()
+
+        } catch (error: any) {
+            console.log({ error });
+            throw new Error(error);
+        }
+    });
+
+    server.addMethod("getJob", async ({ userId }: { userId: string }) => {
+        try {
+            const queue = new Queue("topups", { connection });
+            const getJobs = await queue.getJobs(["delayed"])
+
+            const jobs = await Promise.all(
+                getJobs.map(async job => {
+                    const jsonData = job.asJSON()
+
+                    const decryptedData = await AES.decrypt(JSON.parse(jsonData.data), ZERO_ENCRYPTION_KEY)
+                    const response = JSON.parse(decryptedData).response
+
+                    if (response?.userId === userId && response.isRecurrence)
+                        return response
 
                     return []
                 }).flat()
@@ -188,23 +141,4 @@ export const initMethods = (server: JSONRPCServer) => {
         }
     });
 
-    server.addMethod("updateRecurrentTransactions", async ({ jobKey, jobName, jobTime, queueType }: { jobKey: string, queueType: string, jobName: string, jobTime: WeeklyQueueTitleType }) => {
-        try {
-            // if (queueType === "topup") {
-            //     const job = await topUpQueue.updateTopUpJob(jobKey, jobName, jobTime)
-            //     return job
-            // }
-
-            const job = await transactionsQueue.updateTransactionJob(jobKey, jobName, jobTime)
-            return job
-
-            // Creates a new Job Scheduler that generates a job every 1000 milliseconds (1 second)
-            const firstJob = await transactionsQueue.queue.upsertJobScheduler('my-scheduler-id', {
-                every: 1000,
-            });
-
-        } catch (error: any) {
-            throw new Error(error.toString());
-        }
-    });
 }

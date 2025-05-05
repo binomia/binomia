@@ -97,7 +97,8 @@ export default class TopUpController {
 
     static createTopUp = async (job: JobJson) => {
         try {
-            const { fullName, amount, companyId, phoneNumber, location, senderUsername, recurrenceData, userId, referenceId } = JSON.parse(job.data)
+            const decryptedData = await AES.decrypt(JSON.parse(job.data), ZERO_ENCRYPTION_KEY)
+            const { fullName, amount, companyId, phoneNumber, location, senderUsername, recurrenceData, userId, referenceId } = JSON.parse(decryptedData)
 
             const [phone] = await TopUpPhonesModel.findOrCreate({
                 limit: 1,
@@ -190,34 +191,48 @@ export default class TopUpController {
                 id: topUp.toJSON().id,
                 phone: phoneNumber,
                 amount: amount,
-                referenceId: topUp.toJSON().referenceId
+                referenceId: topUp.toJSON().referenceId,
+                response: {}
             }), ZERO_ENCRYPTION_KEY)
+
 
             await topUpQueue.createJobs({
                 jobId: `pendingTopUp@${shortUUID.generate()}${shortUUID.generate()}`,
                 jobName: "pendingTopUp",
                 jobTime: "everyThirtyMinutes",
-                referenceData: {
-                    fullName: fullName,
-                    logo: topUp.toJSON().company.logo,
-                },
-                amount,
-                userId,
                 data: encryptedData
             });
 
             if (recurrenceData.time !== "oneTime") {
-                await topUpQueue.createJobs({
+                const responseData = {
                     jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
+                    isRecurrence: true,
+                    userId,
                     jobName: recurrenceData.title,
                     jobTime: recurrenceData.time,
+                    amount,
+                    status: "waiting",
                     referenceData: {
                         fullName,
                         logo: topUp.toJSON().company.logo,
                     },
-                    amount,
-                    userId,
-                    data: encryptedData
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                }
+
+                const encryptedRecurrenceData = await AES.encrypt(JSON.stringify({
+                    id: topUp.toJSON().id,
+                    phone: phoneNumber,
+                    amount: amount,
+                    referenceId: topUp.toJSON().referenceId,
+                    response: responseData
+                }), ZERO_ENCRYPTION_KEY)
+
+                await topUpQueue.createJobs({
+                    jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
+                    jobName: recurrenceData.title,
+                    jobTime: recurrenceData.time,
+                    data: encryptedRecurrenceData
                 });
             }
 
