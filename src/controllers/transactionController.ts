@@ -1,17 +1,15 @@
 import shortUUID from 'short-uuid';
 import PrometheusMetrics from '@/metrics/PrometheusMetrics';
-import { AccountModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel, QueuesModel } from '@/models'
-import { checkForProtectedRequests, getQueryResponseFields, getRecurrenceTransactions, getWaitingTransactions, } from '@/helpers'
+import { AccountModel, BankingTransactionsModel, TransactionsModel, UsersModel, CardsModel } from '@/models'
+import { checkForProtectedRequests, getQueryResponseFields, getRecurrenceTopUps, getRecurrenceTransactions, getWaitingTransactions, } from '@/helpers'
 import { GraphQLError } from 'graphql';
 import { TransactionJoiSchema } from '@/auth/transactionJoiSchema';
 import { CRON_JOB_BIWEEKLY_PATTERN, CRON_JOB_MONTHLY_PATTERN, CRON_JOB_WEEKLY_PATTERN, ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants';
 import { Op } from 'sequelize';
-import { queueServer } from '@/rpc/queueRPC';
 import { Span, SpanStatusCode, Tracer } from '@opentelemetry/api';
 import { AES, HASH, RSA } from 'cryptografia';
 import { connection } from '@/redis';
 import { Queue } from 'bullmq';
-import { response } from 'express';
 
 
 const transactionQueue = new Queue("transactions", { connection });
@@ -628,9 +626,19 @@ export class TransactionsController {
         try {
             const session = await checkForProtectedRequests(context.req);
             const transactions = await getRecurrenceTransactions({ userId: session.userId, queue: transactionQueue })
+            const topups = await getRecurrenceTopUps({ userId: session.userId, queue: topUpQueue })
 
             const limitedTransactions = transactions.slice((page - 1) * pageSize, page * pageSize)
-            return limitedTransactions
+            const limitedTopUps = topups.slice((page - 1) * pageSize, page * pageSize)
+
+            const allTransactions = [...limitedTransactions, ...limitedTopUps]
+
+            // sort by createdAt
+            const sortedTransactions = allTransactions.sort((a: any, b: any) => {
+                return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            })
+            
+            return sortedTransactions
 
         } catch (error: any) {
             throw new GraphQLError(error);

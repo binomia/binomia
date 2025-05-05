@@ -3,12 +3,13 @@ import { GraphQLError } from 'graphql';
 import { TopUpsModel, UsersModel, TopUpCompanyModel, TopUpPhonesModel } from '@/models';
 import { Op } from 'sequelize';
 import { TopUpSchema } from '@/auth';
-import { queueServer } from '@/rpc/queueRPC';
 import shortUUID from 'short-uuid';
-import redis from '@/redis';
+import redis, { connection } from '@/redis';
 import { AES } from 'cryptografia';
 import { ZERO_ENCRYPTION_KEY } from '@/constants';
+import { Queue } from 'bullmq';
 
+const topUpQueue = new Queue('topups', { connection });
 
 
 export class TopUpController {
@@ -75,7 +76,7 @@ export class TopUpController {
                     },
                     {
                         model: TopUpPhonesModel,
-                        as: 'phone'                       
+                        as: 'phone'
                     },
                     {
                         model: UsersModel,
@@ -202,35 +203,52 @@ export class TopUpController {
             const recurrenceData = await TopUpSchema.recurrenceTopUp.parseAsync(recurrence)
 
             const referenceId = `${shortUUID.generate()}${shortUUID.generate()}`
-            await queueServer("createTopUp", {
-                amount: topUpData.amount,
-                userId,
-                data: {
-                    referenceId,
-                    ...topUpData,
-                    phoneNumber: topUpData.phone,
-                    senderUsername: user.username,
-                    recurrenceData,
-                    userId
-                }
-            })
+            
 
-            const queuedTopUp = {
-                "status": "pending",
+            const jobId = `queueTopUp@${shortUUID.generate()}${shortUUID.generate()}`
+
+            const transactionResponse = {
+                userId,
+                jobId,
+                repeatJobKey: jobId,
+                transactionId: referenceId,
                 "amount": topUpData.amount,
+                "deliveredAmount": topUpData.amount,
+                "voidedAmount": topUpData.amount,
+                "transactionType": "topup",
+                "currency": "DOP",
+                "status": "waiting",
                 "location": topUpData.location,
-                "referenceId": referenceId,
                 "createdAt": Date.now().toString(),
                 "updatedAt": Date.now().toString(),
+                "from": {
+                    ...user.account,
+                    user
+                },
+                "to": {
+                    ...user.account,
+                    user
+                }
             }
+            
+            const encryptedData = await AES.encrypt(JSON.stringify({
+                referenceId,
+                ...topUpData,
+                phoneNumber: topUpData.phone,
+                senderUsername: user.username,
+                recurrenceData,
+                userId,
+                response: transactionResponse
+            }), ZERO_ENCRYPTION_KEY)
 
-            const queuedTopUps = await redis.get(`queuedTopUps:${userId}`)
-            if (queuedTopUps)
-                await redis.set(`queuedTopUps:${userId}`, JSON.stringify([...JSON.parse(queuedTopUps), queuedTopUp]))
-            else
-                await redis.set(`queuedTopUps:${userId}`, JSON.stringify([queuedTopUp]))
 
-            return queuedTopUp
+           await topUpQueue.add(jobId, encryptedData, {
+                jobId,
+                removeOnComplete: { age: 20 },
+                removeOnFail: { age: 60 * 30 }
+            });
+
+            return transactionResponse
 
         } catch (error: any) {
             throw new GraphQLError(error.message);
