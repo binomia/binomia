@@ -466,6 +466,7 @@ export default class TransactionController {
                         jobTime: transaction.recurrenceData.time,
                         "amount": newTransactionData.amount,
                         "status": "waiting",
+                        queueType: "transaction",
                         referenceData: {
                             fullName: receiverAccount.toJSON().user.fullName,
                             logo: receiverAccount.toJSON().user.profileImageUrl

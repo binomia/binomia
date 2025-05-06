@@ -204,13 +204,15 @@ export default class TopUpController {
             });
 
             if (recurrenceData.time !== "oneTime") {
+                const jobId = `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`
                 const responseData = {
-                    jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
+                    jobId,
                     isRecurrence: true,
                     userId,
                     jobName: recurrenceData.title,
                     jobTime: recurrenceData.time,
                     amount,
+                    queueType: "topUp",
                     status: "waiting",
                     referenceData: {
                         fullName,
@@ -229,7 +231,7 @@ export default class TopUpController {
                 }), ZERO_ENCRYPTION_KEY)
 
                 await topUpQueue.createJobs({
-                    jobId: `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`,
+                    jobId,
                     jobName: recurrenceData.title,
                     jobTime: recurrenceData.time,
                     data: encryptedRecurrenceData
