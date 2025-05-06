@@ -630,10 +630,8 @@ export class TransactionsController {
 
             const limitedTransactions = transactions.slice((page - 1) * pageSize, page * pageSize)
             const limitedTopUps = topups.slice((page - 1) * pageSize, page * pageSize)
-
             const allTransactions = [...limitedTransactions, ...limitedTopUps]
 
-            // sort by createdAt
             const sortedTransactions = allTransactions.sort((a: any, b: any) => {
                 return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             })
@@ -649,7 +647,7 @@ export class TransactionsController {
         try {
             await checkForProtectedRequests(context.req);
 
-            if (queueType === "topup") {
+            if (queueType === "topUp") {
                 const job = await topUpQueue.removeJobScheduler(repeatJobKey)
                 return job
             }
@@ -666,7 +664,7 @@ export class TransactionsController {
         try {
             await checkForProtectedRequests(context.req);
 
-            if (queueType === "topup") {
+            if (queueType === "topUp") {
                 const oldJob: any = await topUpQueue.getJobScheduler(repeatJobKey);
                 const decryptedData = await AES.decrypt(oldJob.template.data, ZERO_ENCRYPTION_KEY)
                 const data = JSON.parse(decryptedData)
@@ -680,7 +678,7 @@ export class TransactionsController {
                 })
                 const updatedEncryptedData = await AES.encrypt(JSON.stringify(updatedData), ZERO_ENCRYPTION_KEY)
                 const pattern = jobName === "biweekly" ? CRON_JOB_BIWEEKLY_PATTERN : jobName === "monthly" ? CRON_JOB_MONTHLY_PATTERN[jobTime as keyof typeof CRON_JOB_MONTHLY_PATTERN] : CRON_JOB_WEEKLY_PATTERN[jobTime as keyof typeof CRON_JOB_WEEKLY_PATTERN]
-                const job = await transactionQueue.upsertJobScheduler(repeatJobKey, { pattern }, {
+                const job = await topUpQueue.upsertJobScheduler(repeatJobKey, { pattern }, {
                     name: jobName,
                     data: updatedEncryptedData,
                     opts: {

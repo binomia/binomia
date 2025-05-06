@@ -9,8 +9,7 @@ const type = () => {
             neighbourhood: String
             sublocality: String
             municipality: String
-            fullArea: String
-            
+            fullArea: String            
         }  
 
         input TransactionInput {
@@ -144,8 +143,8 @@ const type = () => {
             jobTime: String
             jobName: String
             status: String
-            repeatedCount: Int
-            amount: Int
+            repeatedCount: Float
+            amount: Float
             data: JSON
             referenceData: JSON
             signature: String
@@ -162,8 +161,8 @@ const type = () => {
             queueType: String
             jobName: String
             status: String
-            repeatedCount: Int
-            amount: Int
+            repeatedCount: Float
+            amount: Float
             data: JSON
             user: OnlyUserType
             referenceData: JSON
