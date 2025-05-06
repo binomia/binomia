@@ -118,6 +118,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                     dispatch(fetchAccountLimit()),
                     dispatch(transactionActions.setTransaction(Object.assign({}, transaction, {
                         ...formatTransaction(Object.assign({}, transaction, {
+                            status: "pending",
                             to: receiver,
                             from: user
                         }))

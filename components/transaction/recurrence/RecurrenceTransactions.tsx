@@ -59,11 +59,10 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                 }
             })
 
-            setTransactions(data.accountRecurrentTransactions)
+            setTransactions(data.accountRecurrentTransactions)            
 
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-
+        } catch (error: any) {
+            console.error({ fetchAccountRecurrentTransactions: error });
         }
     }
 
@@ -94,7 +93,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                 await updateRecurrentTransactions({
                     variables: {
                         data: {
-                            repeatJobKey: transaction.repeatJobKey,
+                            repeatJobKey: transaction.jobId,
                             queueType: transaction.queueType,
                             jobName: recurrence,
                             jobTime: recurrenceDaySelected
@@ -146,6 +145,9 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
 
         setTransaction(data)
 
+        console.log(JSON.stringify(data, null, 2));
+
+
         const jobName = handleDefualtJobName(transaction.jobName, transaction.jobTime)
         setRecurrenceBiweeklyOptionSelected(jobName)
         setRecurrenceOptionSelected(jobName)
@@ -157,18 +159,20 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
 
     const onDelete = async () => {
         try {
+            console.log(JSON.stringify(transaction, null, 2));
+
             setStartDeleting(true)
-            const { repeatJobKey, queueType } = transaction
-            if (!repeatJobKey) return
+            const { jobId, queueType } = transaction
+            if (!jobId) return
 
             await deleteRecurrentTransactions({
                 variables: {
-                    repeatJobKey,
+                    repeatJobKey: jobId,
                     queueType
                 }
             })
 
-            setTransactions(transactions.filter((transaction) => transaction.repeatJobKey !== repeatJobKey))
+            setTransactions(transactions.filter((transaction) => transaction.jobId !== jobId))
             await onRefresh()
             setVisible(false)
             setStartDeleting(false)
@@ -343,7 +347,7 @@ const RecurrenceTransactions: React.FC<Props> = ({ open = false, onCloseFinish =
                                                     {item?.referenceData?.logo ?
                                                         <Image borderRadius={100} resizeMode='contain' alt='logo-image' w={scale(45)} h={scale(45)} source={{ uri: item?.referenceData?.logo }} />
                                                         :
-                                                        <Avatar borderRadius={100} w={"50px"} h={"50px"} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item?.referenceData?.fullName || "")}>
+                                                        <Avatar borderRadius={100} w={scale(45)} h={scale(45)} bg={GENERATE_RAMDOM_COLOR_BASE_ON_TEXT(item?.referenceData?.fullName || "")}>
                                                             <Heading size={"sm"} color={colors.white}>
                                                                 {EXTRACT_FIRST_LAST_INITIALS(item?.referenceData?.fullName || "0")}
                                                             </Heading>

@@ -71,7 +71,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 	const onCancelRequestedTransaction = async () => {
 		try {
 			setIsCancelLoading(true)
-			const { data } = await cancelRequestedTransaction({
+			await cancelRequestedTransaction({
 				variables: {
 					transactionId: transaction.transactionId
 				}
@@ -80,8 +80,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 			await dispatch(fetchRecentTransactions())
 			await dispatch(fetchAllTransactions({ page: 1, pageSize: 5 }))
 			await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, {
-				...data.cancelRequestedTransaction,
-				...formatTransaction(data.cancelRequestedTransaction)
+				status: "deleting",
 			})))
 
 			setIsCancelLoading(false)
@@ -141,7 +140,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 					<Image borderRadius={100} tintColor={colors.lightGray} alt='logo-image' w={"100%"} h={"100%"} source={checked} />
 				</ZStack>
 			)
-		} else if (status === "cancelled") {
+		} else if (status === "cancelled" || status === "deleting") {
 			return (
 				<ZStack w={"35px"} h={"35px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 					<HStack w={"80%"} h={"80%"} bg={colors.white} borderRadius={100} />

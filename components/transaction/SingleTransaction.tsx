@@ -202,9 +202,9 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 						<Heading textTransform={"capitalize"} fontSize={scale(38)} color={colors.white}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
 						<Text mb={"10px"} color={colors.lightSkyGray}>{moment(Date.now()).format("lll")}</Text>
 						{transaction.isFromMe ? <VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
-							<StatuIcon status={transaction?.status || ""} />
+							<StatuIcon status={"pending"} />
 							<VStack w={"80%"}>
-								<Text textAlign={"center"} fontSize={scale(14)} color={colors.white}>{transactionStatus(transaction.status || "")}</Text>
+								<Text textAlign={"center"} fontSize={scale(14)} color={colors.white}>{transactionStatus("pending")}</Text>
 							</VStack>
 						</VStack> : null}
 					</VStack>
@@ -271,9 +271,9 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 					</VStack> :
 					<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
 						<VStack my={"20px"} textAlign={"center"} space={1} alignItems={"center"}>
-							<StatuIcon status={transaction?.status || ""} />
+							<StatuIcon status={"pending"} />
 							<VStack w={"80%"}>
-								<Text textAlign={"center"} fontSize={scale(14)} color={colors.white}>{transactionStatus(transaction.status || "")}</Text>
+								<Text textAlign={"center"} fontSize={scale(14)} color={colors.white}>{transactionStatus("pending")}</Text>
 							</VStack>
 						</VStack>
 					</VStack>

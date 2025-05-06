@@ -45,7 +45,7 @@ const RecentTransactions: React.FC = () => {
 
 		let amountColor;
 
-		if ((transactionType === "request" && isFromMe && status === "requested")) {
+		if ((transactionType === "request" && isFromMe && status === "requested") || (transaction.status === "waiting")) {
 			amountColor = colors.pureGray
 
 		} else if ((transaction?.transactionType === "request" && isFromMe || transaction?.transactionType === "transfer" && !isFromMe) && transaction.status !== "cancelled") {
