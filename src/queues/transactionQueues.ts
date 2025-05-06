@@ -13,10 +13,11 @@ export default class TransactionsQueue {
     queue: Queue;
     constructor() {
         this.queue = new Queue("transactions", {
+            
             connection,
             telemetry: new BullMQOtel("queue-server-transactions")
         });
-
+        
         this.workers()
     }
 

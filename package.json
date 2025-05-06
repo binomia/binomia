@@ -34,7 +34,7 @@
     "@types/jsonwebtoken": "^9.0.7",
     "axios": "1.7.5",
     "bull": "^4.16.4",
-    "bullmq": "^5.25.6",
+    "bullmq": "5.40.2",
     "bullmq-otel": "^1.0.1",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",

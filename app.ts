@@ -10,9 +10,10 @@ import { initMethods } from "@/rpc";
 
 import { createBullBoard } from '@bull-board/api';
 import { ExpressAdapter } from '@bull-board/express';
-import { queuesBullAdapter, transactionsQueue } from "@/queues";
+import { queuesBullAdapter, topUpQueue, transactionsQueue } from "@/queues";
 import { dbConnection } from "@/config";
 import { initTracing } from "@/tracing";
+import { Queue } from "bullmq";
 
 const app: Express = express();
 const serverAdapter = new ExpressAdapter();
@@ -81,11 +82,18 @@ if (cluster.isPrimary) {
 } else {
     app.use(express.json());
     app.use('/', serverAdapter.getRouter());
+    app.use('/metrics', async (req, res) => {
+        const transactionsQueueMetrics = await transactionsQueue.queue.exportPrometheusMetrics();
+        const topUpQueueMetrics = await topUpQueue.queue.exportPrometheusMetrics();
+
+        res.set('Content-Type', 'text/plain');
+        res.send(transactionsQueueMetrics + "\n".repeat(2) + topUpQueueMetrics);
+    });
+    
+    
     app.use(cors({
         origin: "*",
     }));
-
-
     app.patch("*", unAuthorizedResponse);
     app.put("*", unAuthorizedResponse);
     app.delete("*", unAuthorizedResponse);
