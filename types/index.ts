@@ -4,6 +4,7 @@ import { UserAuthSchema } from "@/auth/userAuth"
 import z from "zod";
 import * as Notifications from 'expo-notifications';
 import { TopUpAuthSchema } from "@/auth/topUpAuth";
+import { SessionAuthSchema } from "@/auth/sessionAuth";
 
 
 export type SessionContextType = {
@@ -44,12 +45,12 @@ export type SessionPropsType = {
     sendVerificationCode: (to: string) => any
     setVerificationCode: (to: string) => any
     setVerificationData: (token: VerificationDataType) => any
-    setSessionVerificationData: (token: SessionVerificationDataType) => any
+    setSessionVerificationData: (token: z.infer<typeof SessionAuthSchema.verifySession>) => any
     setInvalidCredentials: (value: boolean) => void
     fetchSessionUser: () => Promise<void>
     invalidCredentials: boolean
     verificationData: VerificationDataType
-    sessionVerificationData: SessionVerificationDataType
+    sessionVerificationData: z.infer<typeof SessionAuthSchema.verifySession>
     verificationCode: string
     jwt: string
     applicationId: string

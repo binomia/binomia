@@ -4,8 +4,10 @@ export class SessionAuthSchema {
     static verifySession = z.object({
         token: z.string().min(1),
         sid: z.string().min(1),
-        code: z.string().min(1),
-        signature: z.string().min(1)
+        code: z.string().min(1).nullish(),
+        signature: z.string().min(1).nullish(),
+        needVerification: z.boolean(),
+        publicKey: z.string().nullish(),
     })
 
     static jwtDecoded = z.object({

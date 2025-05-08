@@ -45,9 +45,6 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
             await delay(2000)
             setLoading(false)
 
-            console.log({ onPressNext: code });
-
-
         } catch (error) {
             console.log({ onPressNext: error });
         }

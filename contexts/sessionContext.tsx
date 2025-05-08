@@ -1,14 +1,14 @@
+import * as Crypto from 'expo-crypto';
+import * as Network from 'expo-network';
+import useAsyncStorage from "@/hooks/useAsyncStorage";
 import { createContext, useEffect, useState } from "react";
-import { CreateUserDataType, SessionContextType, SessionPropsType, SessionVerificationDataType, VerificationDataType } from "@/types";
+import { CreateUserDataType, SessionContextType, SessionPropsType, VerificationDataType } from "@/types";
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { SessionApolloQueries, UserApolloQueries } from "@/apollo/query";
-import useAsyncStorage from "@/hooks/useAsyncStorage";
 import { useSelector, useDispatch } from "react-redux";
 import { globalActions } from "@/redux/slices/globalSlice";
 import { UserAuthSchema } from "@/auth/userAuth";
 import { router } from "expo-router";
-import * as Crypto from 'expo-crypto';
-import * as Network from 'expo-network';
 import { useLocation } from "@/hooks/useLocation";
 import { AccountAuthSchema } from "@/auth/accountAuth";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -19,6 +19,8 @@ import { topupActions } from "@/redux/slices/topupSlice";
 import { transactionActions } from "@/redux/slices/transactionSlice";
 import { useContacts } from "@/hooks/useContacts";
 import { HASH } from "cryptografia";
+import { z } from "zod";
+import { SessionAuthSchema } from "@/auth/sessionAuth";
 
 export const SessionContext = createContext<SessionPropsType>({
     onLogin: (_: { email: string, password: string }) => Promise.resolve({}),
@@ -27,12 +29,12 @@ export const SessionContext = createContext<SessionPropsType>({
     sendVerificationCode: (_: string) => { },
     setVerificationCode: (_: string) => { },
     setVerificationData: (_: VerificationDataType) => { },
-    setSessionVerificationData: (_: SessionVerificationDataType) => { },
+    setSessionVerificationData: (_: z.infer<typeof SessionAuthSchema.verifySession>) => { },
     setInvalidCredentials: (_: boolean) => { },
     fetchSessionUser: () => Promise.resolve(),
     invalidCredentials: false,
     verificationData: { token: "", signature: "", email: "" },
-    sessionVerificationData: { signature: "", token: "", code: "", sid: "" },
+    sessionVerificationData: { signature: null, needVerification: false, token: "", code: "", sid: "" },
     verificationCode: "",
     jwt: "",
     applicationId: "",
@@ -48,7 +50,13 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     const [jwt, setJwt] = useState<string>("");
     const [applicationId, setApplicationId] = useState<string>("");
     const [verificationData, setVerificationData] = useState<VerificationDataType>({ token: "", signature: "", email: "" });
-    const [sessionVerificationData, setSessionVerificationData] = useState<SessionVerificationDataType>({ signature: "", token: "", sid: "", code: "" });
+    const [sessionVerificationData, setSessionVerificationData] = useState<z.infer<typeof SessionAuthSchema.verifySession>>({
+        signature: "",
+        token: "",
+        sid: "",
+        code: "",
+        needVerification: false
+    });
     const [verificationCode, setVerificationCode] = useState<string>("");
     const [invalidCredentials, setInvalidCredentials] = useState<boolean>(false);
     const [login] = useMutation(SessionApolloQueries.login());
@@ -141,17 +149,15 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 }
             });
 
-            if (data.login.token) {
+            if (data.login.token && !data.login?.needVerification) {
                 await setItem("jwt", data.login.token)
                 await setItem("publicKey", data.login.publicKey)
 
-                if (!data.login.needVerification) {
-                    await fetchSessionUser()
-                    router.navigate("(home)")
-                }
-            }
+                await fetchSessionUser()
+                router.navigate("(home)")
+            } else
 
-            return data.login
+                return data.login
 
         } catch (error) {
             setInvalidCredentials(true)

@@ -1,12 +1,3 @@
-import { useContext, useEffect, useRef, useState } from 'react';
-import { VStack, Heading, HStack, Text, Stack } from 'native-base';
-import { SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
-import { SessionContext } from '@/contexts/sessionContext';
-import { SessionPropsType } from '@/types';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import colors from '@/colors';
-import { INPUT_HEIGHT, SCREEN_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
-import { VALIDATE_EMAIL } from '@/helpers';
 import PagerView from 'react-native-pager-view';
 import AccountRecovered from '@/components/signup/login/AccountRecovered';
 import Input from '@/components/global/Input';
@@ -15,11 +6,20 @@ import BottomSheet from '@/components/global/BottomSheet';
 import ForgotPassword from '@/components/signup/login/ForgotPassword';
 import VerifyCode from '@/components/signup/login/VerifyCode';
 import ChangePassword from '@/components/signup/login/ChangePassword';
+import useAsyncStorage from '@/hooks/useAsyncStorage';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import colors from '@/colors';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { VStack, Heading, HStack, Text, Stack } from 'native-base';
+import { SafeAreaView, TouchableOpacity, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
+import { SessionContext } from '@/contexts/sessionContext';
+import { SessionPropsType } from '@/types';
+import { INPUT_HEIGHT, SCREEN_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
+import { VALIDATE_EMAIL } from '@/helpers';
 import { router } from 'expo-router';
 import { SessionAuthSchema } from '@/auth/sessionAuth';
 import { useMutation } from '@apollo/client';
 import { SessionApolloQueries } from '@/apollo/query';
-import useAsyncStorage from '@/hooks/useAsyncStorage';
 import { UserAuthSchema } from '@/auth/userAuth';
 import { useDispatch } from 'react-redux';
 import { accountActions } from '@/redux/slices/accountSlice';
@@ -46,7 +46,7 @@ const LoginComponent: React.FC = (): JSX.Element => {
 
 
     const fetchSessionUser = async (user: any) => {
-        try {            
+        try {
             const userProfileData = await UserAuthSchema.userProfileData.parseAsync(user)
             const kycData = await UserAuthSchema.kycData.parseAsync(user.kyc)
             const accountsData = await UserAuthSchema.accountsData.parseAsync(user.account)
@@ -104,12 +104,13 @@ const LoginComponent: React.FC = (): JSX.Element => {
     const onLoginPress = async () => {
         try {
             setLoading(true)
-
             const loginData = await onLogin({ email: email.toLowerCase(), password })
             const sessionData = await SessionAuthSchema.verifySession.parseAsync(loginData)
 
+            console.log({ code: sessionData?.code });
+
             setSessionVerificationData(sessionData)
-            setVerificationCode(sessionData.code)
+            setVerificationCode(sessionData?.code ?? "")
 
             pageRef.current?.setPage(1)
             setLoading(false)

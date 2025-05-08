@@ -24,8 +24,8 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 
             if (message.includes("INVALID_SESSION")) {
                 await SecureStore.deleteItemAsync("jwt").then(async () => {
-                    Alert.alert("Your session has expired. Please login again.");
-                    //await Updates.reloadAsync();
+                    // Alert.alert("Your session has expired. Please login again.");
+                    // await Updates.reloadAsync();
                     router.navigate("/login");
                 });
             } else if (message.includes("no puede recibir pagos")) {
