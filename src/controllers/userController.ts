@@ -4,7 +4,7 @@ import KYCModel from '@/models/kycModel';
 import { AccountModel, UsersModel, kycModel, TransactionsModel, CardsModel, SessionModel } from '@/models'
 import { Op } from 'sequelize'
 import { getQueryResponseFields, checkForProtectedRequests, GENERATE_SIX_DIGIT_TOKEN } from '@/helpers'
-import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY } from '@/constants'
+import { ZERO_ENCRYPTION_KEY, ZERO_SIGN_PRIVATE_KEY, ZERO_SIGN_PUBLIC_KEY } from '@/constants'
 import { GraphQLError } from 'graphql';
 import { GlobalZodSchema, UserJoiSchema } from '@/auth';
 import { UserModelType, VerificationDataType } from '@/types';
@@ -139,7 +139,6 @@ export class UsersController {
         }
     }
 
-    // type instanceof PrometheusMetrics
     static sessionUser = async (_: unknown, ___: any, { metrics, req }: { metrics: PrometheusMetrics, req: any }) => {
         try {
             const session = await checkForProtectedRequests(req);
@@ -485,7 +484,6 @@ export class UsersController {
                     [Op.and]: [
                         { userId: user.toJSON().id },
                         { deviceId },
-                        { verified: true },
                         {
                             expires: {
                                 [Op.gt]: Date.now()
@@ -495,13 +493,40 @@ export class UsersController {
                 }
             })
 
-            if (session)
+            if (session) {
+                if(!session.toJSON().verified) {
+                    const code = GENERATE_SIX_DIGIT_TOKEN()
+                    const hash = await HASH.sha256Async(JSON.stringify({
+                        sid: session.toJSON().sid,
+                        code,
+                        ZERO_ENCRYPTION_KEY,
+                    }))
+
+                    const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+                    await notificationServer('sendVerificationCode', {
+                        email,
+                        code
+                    })
+
+                    console.log({ code });
+                    return {
+                        user: user.toJSON(),
+                        sid: session.toJSON().sid,
+                        token: session.toJSON().jwt,
+                        signature,
+                        code,
+                        needVerification: !session.toJSON().verified
+                    }
+                }
+
+
                 return {
                     user: user.toJSON(),
                     sid: session.toJSON().sid,
                     token: session.toJSON().jwt,
                     needVerification: !session.toJSON().verified
                 }
+            }
 
             const { privateKey, publicKey } = await RSA.generateKeysAsync()
             const encryptedPrivateKey = await AES.encrypt(privateKey, ZERO_ENCRYPTION_KEY)
@@ -525,21 +550,19 @@ export class UsersController {
             })
 
             const code = GENERATE_SIX_DIGIT_TOKEN()
-
             const hash = await HASH.sha256Async(JSON.stringify({
                 sid: sessionCreated.toJSON().sid,
                 code,
                 ZERO_ENCRYPTION_KEY,
             }))
 
-            const signature = RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
+            const signature = await RSA.sign(hash, ZERO_SIGN_PRIVATE_KEY)
             await notificationServer('sendVerificationCode', {
                 email,
                 code
             })
 
             console.log({ code });
-
             return {
                 sid: sessionCreated.toJSON().sid,
                 token,
@@ -593,8 +616,7 @@ export class UsersController {
                 ZERO_ENCRYPTION_KEY,
             }))
 
-            const verified = await RSA.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
-
+            const verified = await RSA.verify(hash, signature, ZERO_SIGN_PUBLIC_KEY)
             if (!verified)
                 throw new GraphQLError('Failed to verify session');
 
