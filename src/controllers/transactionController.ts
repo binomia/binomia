@@ -332,6 +332,21 @@ export default class TransactionController {
                 distance
             }
 
+
+            const features = await TransactionJoiSchema.transactionFeatures.parseAsync({
+                speed: lastTransactionJSON.status === "audited" ? 0 : +Number(speed).toFixed(2),
+                distance: lastTransactionJSON.status === "audited" ? 0 : +Number(distance).toFixed(2),
+                amount: +Number(transaction.amount).toFixed(2),
+                currency: ["dop","usd"].indexOf(transaction.currency.toLowerCase()),
+                transactionType: ["transfer", "request", "withdrawal", "deposit"].indexOf(transaction.transactionType.toLowerCase()),
+                platform: ["ios", "android", "web"].indexOf(device.platform.toLowerCase()),
+                isRecurring: transaction.isRecurring ? 1 : 0,
+            })
+
+            const detectedFraudulentTransaction = await anomalyRpcClient("detect_fraudulent_transaction", {
+                features: Object.values(features)
+            })
+
             const transactionCreated = await TransactionsModel.create(newTransactionData)
             const transactionData = await transactionCreated.reload({
                 include: [
@@ -352,20 +367,6 @@ export default class TransactionController {
                         }]
                     }
                 ]
-            })
-
-            const features = await TransactionJoiSchema.transactionFeatures.parseAsync({
-                speed: lastTransactionJSON.status === "audited" ? 0 : +Number(speed).toFixed(2),
-                distance: lastTransactionJSON.status === "audited" ? 0 : +Number(distance).toFixed(2),
-                amount: +Number(transaction.amount).toFixed(2),
-                currency: ["dop"].indexOf(transactionData.toJSON().currency.toLowerCase()),
-                transactionType: ["transfer"].indexOf(transactionData.toJSON().transactionType.toLowerCase()),
-                platform: ["ios", "android", "web"].indexOf(transactionData.toJSON().platform.toLowerCase()),
-                isRecurring: transaction.isRecurring ? 1 : 0,
-            })
-
-            const detectedFraudulentTransaction = await anomalyRpcClient("detect_fraudulent_transaction", {
-                features: Object.values(features)
             })
 
             if (detectedFraudulentTransaction.last_transaction_features)
