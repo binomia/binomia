@@ -1,4 +1,3 @@
-import json
 import cv2
 import numpy as np
 from pinecone import Pinecone, ServerlessSpec
@@ -16,11 +15,9 @@ class FaceRecognitionController:
         cloud: str = "aws",
         region: str = "us-east-1",
     ):
-        # Create Pinecone instance
         self.pc = Pinecone(api_key=pinecone_api_key)
-
-        # Create or connect to the index
         self.index_name = index_name
+
         if self.index_name not in self.pc.list_indexes().names():
             self.pc.create_index(
                 name=self.index_name,
@@ -31,7 +28,6 @@ class FaceRecognitionController:
 
         self.index = self.pc.Index(self.index_name)
 
-        # Initialize InsightFace for face embedding extraction
         self.face_app = FaceAnalysis(
             name="buffalo_l", providers=["CPUExecutionProvider"]
         )
@@ -55,48 +51,77 @@ class FaceRecognitionController:
             if not faces:
                 raise ValueError("No face detected in image.")
 
-            # This embedding is already based on the cropped and aligned face
             return faces[0].embedding
 
         except Exception as e:
             raise e
 
-    def register_person(self, person_id: str, image_path: str):
-        embedding = self.get_embedding(image_path)
-        vector_id = f"{person_id}_{uuid4()}"
+    def register_person(self, person_id: str, image_paths: list[str]):
+        all_embeddings = []
+
+        for path in image_paths:
+            embedding = self.get_embedding(path)
+            all_embeddings.append(embedding)
+
+            # Save each individual vector
+            vector_id = f"{person_id}_{uuid4()}"
+            self.index.upsert(
+                [
+                    (
+                        vector_id,
+                        embedding.tolist(),
+                        {"person_id": person_id, "type": "individual"},
+                    )
+                ]
+            )
+
+        # Calculate and store centroid vector
+        centroid = np.mean(all_embeddings, axis=0)
+        centroid_id = f"{person_id}_main"
+
         self.index.upsert(
-            vectors=[(vector_id, embedding.tolist(), {"person_id": person_id})]
+            [
+                (
+                    centroid_id,
+                    centroid.tolist(),
+                    {"person_id": person_id, "type": "centroid"},
+                )
+            ]
         )
 
-    def recognize_person(self, image_path: str):
+    def recognize_person(
+        self, image_path: str, top_k: int = 10, threshold: float = 0.8
+    ):
         try:
             embedding = self.get_embedding(image_path)
             result = self.index.query(
-                vector=embedding.tolist(), top_k=5, include_metadata=True
+                vector=embedding.tolist(), top_k=top_k, include_metadata=True
             )
             matches = result["matches"]
 
             if not matches:
                 return None
-                                  
-            print(
-                json.dumps(
-                    {
-                        "person_id": matches[0]["metadata"]["person_id"],
-                        "score": matches[0]["score"],
-                    },
-                    indent=2,
-                )
-            )
+            
+            person_best_score = {}
 
             for match in matches:
-                if round(match["score"], 2) >= 0.8:
-                    return {
-                        "person_id": match["metadata"]["person_id"],
-                        "score": match["score"],
-                    }
+                person_id = match["metadata"]["person_id"]
+                score = match["score"]
+                
+                print(f"Person ID: {person_id}, Score: {score}")
+                
+                if score >= threshold:
+                    if (person_id not in person_best_score or score > person_best_score[person_id]):
+                        person_best_score[person_id] = score
 
-            return None
+            if not person_best_score:
+                return None
+
+            # Return the best match overall
+            best_person_id = max(person_best_score, key=person_best_score.get)
+            best_score = person_best_score[best_person_id]
+
+            return {"person_id": best_person_id, "score": best_score}
 
         except Exception as e:
             print(f"Error during recognition: {e}")
