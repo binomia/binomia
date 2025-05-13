@@ -18,7 +18,6 @@ import { transactionActions } from '@/redux/slices/transactionSlice';
 import { useLocation } from '@/hooks/useLocation';
 import { AccountAuthSchema } from '@/auth/accountAuth';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { fetchAccountLimit, fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { router } from 'expo-router';
 import { AES } from 'cryptografia';
 import { ZERO_ENCRYPTION_KEY } from '@/constants';
@@ -109,26 +108,23 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
             const transaction = createdRequestTransaction?.createRequestTransaction
             if (transaction) {
                 const accountsData = await AccountAuthSchema.account.parseAsync(transaction.from)
-                await Promise.all([
-                    dispatch(accountActions.setAccount(accountsData ?? {})),
-                    dispatch(accountActions.setHaveAccountChanged(false)),
-                    dispatch(transactionActions.setHasNewTransaction(true)),
-                    dispatch(fetchRecentTransactions()),
-                    dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
-                    dispatch(fetchAccountLimit()),
-                    dispatch(transactionActions.setTransaction(Object.assign({}, transaction, {
-                        ...formatTransaction(Object.assign({}, transaction, {
-                            status: "pending",
-                            to: receiver,
-                            from: user
-                        }))
-                    })))
-                ])
 
+                await dispatch(accountActions.setAccount(accountsData))
+                await dispatch(transactionActions.setTransaction(Object.assign({}, transaction, {
+                    ...formatTransaction(Object.assign({}, transaction, {
+                        status: "pending",
+                        to: receiver,
+                        from: user
+                    }))
+                })))
+
+                setLoading(false)
                 goNext()
+                
+            } else {
+                router.navigate("/error?title=Transaction&message=Se ha producido un error al intentar crear la transacción. Por favor, inténtalo de nuevo.")
             }
 
-            setLoading(false)
 
         } catch (error: any) {
             setLoading(false)

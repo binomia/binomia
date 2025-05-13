@@ -16,7 +16,6 @@ import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { fetchAccountLimit} from '@/redux/fetchHelper';
 import { useLocation } from '@/hooks/useLocation'
 import { AccountAuthSchema } from '@/auth/accountAuth';
 import { router } from 'expo-router';
@@ -84,29 +83,27 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                     const accountsData = await AccountAuthSchema.account.parseAsync(transaction?.from)
                     const formatedTransaction = formatTransaction(transaction)
 
-                    await Promise.all([
-                        dispatch(transactionActions.setTransaction({
-                            ...transaction,
-                            amountColor: colors.red,
-                            fullName: formatedTransaction.fullName,
-                            profileImageUrl: formatedTransaction.profileImageUrl,
-                            username: formatedTransaction.username,
-                            isFromMe: true,
-                            to: receiver
-                        })),
-                        dispatch(accountActions.setAccount(accountsData ?? {})),
-                        dispatch(accountActions.setHaveAccountChanged(false)),
-                        dispatch(transactionActions.setHasNewTransaction(true)),
-                        dispatch(fetchAccountLimit()),
-                    ])
+                    await dispatch(accountActions.setAccount(accountsData))
+                    await dispatch(transactionActions.setTransaction({
+                        ...transaction,
+                        amountColor: colors.red,
+                        fullName: formatedTransaction.fullName,
+                        profileImageUrl: formatedTransaction.profileImageUrl,
+                        username: formatedTransaction.username,
+                        isFromMe: true,
+                        to: receiver
+                    }))
+                    setLoading(false)
+                    goNext()
+                } else {
+                    router.navigate("/error?title=Transaction&message=Se ha producido un error al intentar crear la transacción. Por favor, inténtalo de nuevo.")
                 }
 
-                setLoading(false)
-                goNext()
 
             } else {
                 onLogout()
             }
+
         } catch (error: any) {
             setLoading(false)
             console.error(error);
