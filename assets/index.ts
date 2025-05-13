@@ -34,6 +34,7 @@ import jcbLogo from './img/jcb.png';
 import vpnIcon from './img/vpn.png';
 import errorIcon from './icons/error.png';
 import waiting from './img/waiting.gif';
+import faceMask from './img/face_mask.gif';
 
 // icons
 import plusIconGreen from './icons/plus.png';
@@ -79,9 +80,12 @@ import allIcon from './icons/all.png';
 
 // lotties files
 import waitingLottie from './lottie/waiting.json';
+import facemaskLottie from './lottie/facemask.json';
 
 
 export {
+    faceMask,
+    facemaskLottie,
     waitingLottie,
     waiting,
     allIcon,

@@ -16,7 +16,7 @@ import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
 import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { fetchAccountLimit, fetchAllTransactions, fetchRecentTransactions } from '@/redux/fetchHelper';
+import { fetchAccountLimit} from '@/redux/fetchHelper';
 import { useLocation } from '@/hooks/useLocation'
 import { AccountAuthSchema } from '@/auth/accountAuth';
 import { router } from 'expo-router';
@@ -76,31 +76,33 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                 const { data: createedTransaction } = await createTransaction({
                     variables: { message }
                 })
+
+
+
                 const transaction = createedTransaction?.createTransaction
                 if (transaction) {
                     const accountsData = await AccountAuthSchema.account.parseAsync(transaction?.from)
+                    const formatedTransaction = formatTransaction(transaction)
+
                     await Promise.all([
-                        dispatch(accountActions.setAccount(accountsData ?? {})),
-                        dispatch(accountActions.setHaveAccountChanged(false)),
-                        dispatch(transactionActions.setHasNewTransaction(true)),
-                        dispatch(fetchRecentTransactions()),
-                        dispatch(fetchAllTransactions({ page: 1, pageSize: 10 })),
-                        dispatch(fetchAccountLimit()),
                         dispatch(transactionActions.setTransaction({
                             ...transaction,
                             amountColor: colors.red,
-                            fullName: formatTransaction(transaction).fullName,
-                            profileImageUrl: formatTransaction(transaction).profileImageUrl,
-                            username: formatTransaction(transaction).username,
+                            fullName: formatedTransaction.fullName,
+                            profileImageUrl: formatedTransaction.profileImageUrl,
+                            username: formatedTransaction.username,
                             isFromMe: true,
                             to: receiver
-                        }))
+                        })),
+                        dispatch(accountActions.setAccount(accountsData ?? {})),
+                        dispatch(accountActions.setHaveAccountChanged(false)),
+                        dispatch(transactionActions.setHasNewTransaction(true)),
+                        dispatch(fetchAccountLimit()),
                     ])
-
-                    goNext()
                 }
 
                 setLoading(false)
+                goNext()
 
             } else {
                 onLogout()

@@ -38,6 +38,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 	const { account, user }: { account: any, user: any, location: z.infer<typeof TransactionAuthSchema.transactionLocation> } = useSelector((state: any) => state.accountReducer)
 	const [isLoading, setIsLoading] = useState<boolean>(false)
 	const [isCancelLoading, setIsCancelLoading] = useState<boolean>(false)
+	const [isPaying, setIsPaying] = useState<boolean>(false)
 	const [payRequestTransaction] = useMutation(TransactionApolloQueries.payRequestTransaction());
 	const [cancelRequestedTransaction] = useMutation(TransactionApolloQueries.cancelRequestedTransaction());
 
@@ -98,7 +99,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				setIsLoading(paymentApproved)
 
 				if (authenticated.success) {
-
+					setIsPaying(true)
 					const { data } = await payRequestTransaction({
 						variables: {
 							transactionId: transaction.transactionId,
@@ -125,11 +126,16 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 			} finally {
 				setIsLoading(false)
 				setIsCancelLoading(false)
+				setIsPaying(false)
 			}
 
 		}
-		else
+		else {
+			setIsLoading(false)
+			setIsCancelLoading(false)
+			setIsPaying(false)
 			ref.current?.setPage(1)
+		}
 	}
 
 	const StatuIcon: React.FC<{ status: string }> = ({ status }: { status: string }) => {
@@ -159,7 +165,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 			return (
 				<ZStack w={"60px"} h={"60px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
 					<HStack w={"100%"} h={"100%"} bg={colors.lightGray} borderRadius={100} />
-					<Image borderRadius={100}  alt='logo-image' w={"100%"} h={"100%"} source={waiting} />
+					<Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={waiting} />
 				</ZStack>
 			)
 		} else if (status === "requested") {
@@ -244,7 +250,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 							disabled={isCancelLoading || account.balance < transaction.amount}
 							opacity={isCancelLoading || account.balance < transaction.amount ? 0.5 : 1}
 							onPress={() => onPress(true)}
-							spin={isLoading}
+							spin={isPaying}
 							w={showPayButton ? "49%" : "80%"}
 							bg={account.balance > transaction.amount ? colors.mainGreen : colors.lightGray}
 							color={account.balance > transaction.amount ? colors.white : colors.mainGreen}

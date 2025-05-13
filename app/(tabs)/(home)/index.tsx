@@ -116,7 +116,9 @@ const HomeScreen: React.FC = () => {
 			id: 3,
 			name: "Facturas",
 			image: bills,
-			onPress: async () => { }
+			onPress: async () => {	
+				router.navigate("/facemask")		
+			}
 		}
 	]
 

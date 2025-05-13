@@ -1,16 +1,16 @@
 import { StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import React, { useEffect, useRef, useState } from 'react'
-import BottomSheet from './BottomSheet'
-import { Camera, Frame, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera'
+import { Camera, DrawableFrame, useCameraDevice, useSkiaFrameProcessor } from 'react-native-vision-camera'
 import { Face, FaceDetectionOptions, useFaceDetector } from 'react-native-vision-camera-face-detector'
 import { Heading, HStack, VStack, ZStack } from 'native-base'
 import Fade from 'react-native-fade'
-import { useSharedValue, Worklets } from 'react-native-worklets-core'
 import colors from '@/colors'
 import { ImageEditor } from "expo-crop-image";
 import { useDispatch } from 'react-redux'
 import { registerActions } from '@/redux/slices/registerSlice'
-import Animated from 'react-native-reanimated'
+// import { Skia, Image as SkiaImage, useImage, PaintStyle, Canvas } from '@shopify/react-native-skia'
+import { runOnJS } from 'react-native-reanimated'
+import BottomSheet from './BottomSheet'
 
 type Props = {
     open?: boolean
@@ -22,11 +22,10 @@ type Props = {
     cameraType?: "front" | "back"
 }
 
-const { height, width } = Dimensions.get('window')
+const { width, height } = Dimensions.get('window')
 const CameraComponent: React.FC<Props> = ({ open, onCloseFinish, setVideo, setImage, cameraType = "back", video = false }: Props) => {
     const ref = useRef<Camera>(null);
     const dispatch = useDispatch()
-    const faceBox = useSharedValue({ x: 0, y: 0, width: 0, height: 0 })
 
     const [progress, setProgress] = useState<number>(5);
     const [recording, setRecording] = useState<boolean>(false);
@@ -38,24 +37,42 @@ const CameraComponent: React.FC<Props> = ({ open, onCloseFinish, setVideo, setIm
     const { detectFaces } = useFaceDetector(faceDetectionOptions)
 
 
-    const handleDetectedFaces = Worklets.createRunOnJS((faces: Face[]) => {
-        if (faces.length > 0) {
-        }
-    })
+    const handleDetectedFaces = (faces: Face[]) => {
+        if (faces.length > 0) { }
+    };
 
-    const frameProcessor = useFrameProcessor((frame: Frame) => {
+    const frameProcessor = useSkiaFrameProcessor(async (frame: DrawableFrame) => {
         'worklet'
-        const faces = detectFaces(frame)
-        
-        if (faces.length > 0) {
-            faceBox.value = faces[0].bounds
-            console.log("face detected", faces[0].bounds);
-        }
+        frame.render()
 
-        handleDetectedFaces(faces)
-        // faceBox.value = { x: 0, y: 0, width: 0, height: 0 }
+        const faces = detectFaces(frame)
+        if (faces.length > 0) {
+            // const face = faces[0]
+            // const { x, y, width, height } = face.bounds
+
+            // // Apply a slight horizontal skew to lean right
+            // const offsetX = width * 0.15
+            // const offsetY = height * 0.1
+            // const ovalX = x + offsetX
+            // const ovalY = y + offsetY
+            // const ovalWidth = width * 0.9
+            // const ovalHeight = height * 0.8
+
+            // const rect = Skia.XYWHRect(ovalX, ovalY, ovalWidth, ovalHeight)
+            // const paint = Skia.Paint()
+
+            // paint.setColor(Skia.Color('red'))
+            // paint.setStrokeWidth(4)
+            // paint.setStyle(PaintStyle.Stroke)
+
+            // frame.drawRect(rect, paint)
+
+        }
+        runOnJS(handleDetectedFaces)(faces);
 
     }, [])
+
+
 
     useEffect(() => {
         setPreviewUrl("")
@@ -124,8 +141,9 @@ const CameraComponent: React.FC<Props> = ({ open, onCloseFinish, setVideo, setIm
     return (
         <BottomSheet showDragIcon={false} height={height * 0.90} open={open} onCloseFinish={onCloseFinish}>
             {device &&
-                <ZStack flex={1}>
+                <ZStack w={"100%"} h={"100%"} flex={1}>
                     <Camera
+
                         preview={true}
                         ref={ref}
                         photo={true}
@@ -136,7 +154,6 @@ const CameraComponent: React.FC<Props> = ({ open, onCloseFinish, setVideo, setIm
                         pixelFormat="rgb"
                         isActive
                     />
-                    <Animated.View style={[faceBox.value, {borderWidth: 1, backgroundColor: "red"}]}/>
                     <VStack w={"100%"} h={"100%"}>
                         {previewUrl ?
                             <HStack w={"100%"} h={"90%"} bg={"black"} justifyContent={"center"} alignItems={"center"} p={"20px"}>
