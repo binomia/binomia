@@ -12,22 +12,43 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AccountApolloQueries } from '@/apollo/query';
 import { FORMAT_CURRENCY } from '@/helpers';
 import { scale } from 'react-native-size-matters';
-import { router, useNavigation } from 'expo-router';
+import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { RSA } from 'cryptografia';
+import { useSQLiteContext } from 'expo-sqlite';
+import { drizzle } from 'drizzle-orm/expo-sqlite';
+import * as schema from "@/db/schemas"
+import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
+
+
+
 
 const { width } = Dimensions.get('window');
 const HomeScreen: React.FC = () => {
 	const { account, user } = useSelector((state: any) => state.accountReducer)
+	const { recentTransactionsLoading } = useSelector((state: any) => state.transactionReducer)
+
 	const dispatch = useDispatch()
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
 	const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
 
-	const navigation = useNavigation()
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const [refreshing, setRefreshing] = useState(false);
+
+	const dbContext = useSQLiteContext();
+	const db = drizzle(dbContext, { schema });
+
+	useEffect(() => {
+		(async () => {
+			const users = await db.query.searchedUsersSchema.findMany({
+				limit: 10
+			})
+			console.log({ users });
+		})()
+
+	}, [])
 
 	const fetchAccount = async () => {
 		try {
@@ -116,8 +137,8 @@ const HomeScreen: React.FC = () => {
 			id: 3,
 			name: "Facturas",
 			image: bills,
-			onPress: async () => {	
-				router.navigate("/facemask")		
+			onPress: async () => {
+				router.navigate("/facemask")
 			}
 		}
 	]
@@ -140,16 +161,7 @@ const HomeScreen: React.FC = () => {
 		}
 	}
 
-	useEffect(() => {
-		navigation.addListener('focus', () => {
-			(async () => {
-				// await fetchSessionUser()
-				await onRefresh(false)
-			})()
-		})
-	}, [])
-
-	return (
+	return (!recentTransactionsLoading ? <TransactionSkeleton /> :
 		<VStack p={"20px"} w={width} bg={colors.darkGray} flex={1} alignItems={"center"}>
 			<ScrollView w={"100%"} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}>
 				<VStack w={"100%"} justifyContent={"center"} alignItems={"center"} borderRadius={"10px"}>

@@ -4,6 +4,7 @@ import { fetchAccountBankingTransactions, fetchAllTransactions, fetchRecentTrans
 
 const initialState = {
     loading: false,
+    recentTransactionsLoading: false,
     sender: {},
     receiver: {},
     transaction: {},
@@ -50,10 +51,17 @@ const transactionSlice = createSlice({
         // fetchRecentTransactions
         builder.addCase(fetchRecentTransactions.fulfilled, (state, action: any) => {
             state.recentTransactions = action.payload
+            state.recentTransactionsLoading = true
         })
         builder.addCase(fetchRecentTransactions.rejected, (state) => {
             state.recentTransactions = []
+            state.recentTransactionsLoading = true
+
         })
+        builder.addCase(fetchRecentTransactions.pending, (state) => {
+            state.recentTransactionsLoading = true
+        })
+        
 
         // searchAccountTransactions
         builder.addCase(searchAccountTransactions.fulfilled, (state, action) => {

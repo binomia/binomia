@@ -38,6 +38,7 @@ import faceMask from './img/face_mask.gif';
 
 // icons
 import plusIconGreen from './icons/plus.png';
+import splash from './img/splash.png';
 import icon from './img/icon.png';
 import qrIcon from './img/qr.png';
 import sendIcon from './img/sendIcon.png';
@@ -84,6 +85,7 @@ import facemaskLottie from './lottie/facemask.json';
 
 
 export {
+    splash,
     faceMask,
     facemaskLottie,
     waitingLottie,
