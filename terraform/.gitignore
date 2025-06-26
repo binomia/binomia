@@ -1,0 +1,5 @@
+terraform.tfvars
+*.csv
+.terraform.lock.hcl
+.terraform
+terraform.tfstate
