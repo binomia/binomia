@@ -5,12 +5,13 @@
 	"packageManager": "yarn@1.22.22",
 	"workspaces": [
 		"apps/clients/*",
-		"apps/packages/*",
-		"apps/servers/*"
+		"apps/servers/*",
+		"apps/packages/*"
 	],
 	"scripts": {
-		"pack": "turbo run pack --parallel",
-		"link": "turbo run link"
+		"start": "turbo run dev --parallel",
+		"mobile:dev": "turbo run dev --filter=mobile"
+
 	},
 	"devDependencies": {
 		"turbo": "^1.12.0"

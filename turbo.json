@@ -1,17 +1,10 @@
 {
     "pipeline": {
-        "pack": {
+        "dev": {
             "cache": false,
             "persistent": true,
             "dependsOn": [
-                "^pack"
-            ]
-        },
-        "link": {
-            "cache": false,
-            "persistent": true,
-            "dependsOn": [
-                "^link"
+                "^dev"
             ]
         }
     }
