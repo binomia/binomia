@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "812962095952",
+    "project_id": "binomia-56ea4",
+    "storage_bucket": "binomia-56ea4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:812962095952:android:29c8bb03e8c540f5fb4255",
+        "android_client_info": {
+          "package_name": "com.binomia.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4BXxc-nHMSjXtddAxW9sGlA_n0rg2_cs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
