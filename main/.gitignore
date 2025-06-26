@@ -1,0 +1,13 @@
+node_modules
+.vscode*
+
+.DS_Store
+
+*.env
+
+# Logs
+*.log
+*.log.*
+npm-debug.log*
+
+test.ts
