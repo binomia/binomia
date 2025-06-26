@@ -4,9 +4,9 @@
 	"private": true,
 	"packageManager": "yarn@1.22.22",
 	"workspaces": [
-		"apps/clients/*",
 		"apps/servers/*",
-		"apps/packages/*"
+		"apps/packages/*",
+		"apps/clients/*"
 	],
 	"scripts": {
 		"start": "turbo run dev --parallel",

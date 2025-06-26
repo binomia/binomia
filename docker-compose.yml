@@ -5,7 +5,7 @@ services:
     build:
       context: "./apps/servers/main/"
       dockerfile: Dockerfile
-    env_file: .env
+    env_file: "./apps/servers/main/.env"
     depends_on:
       - postgres
       - redis
@@ -23,7 +23,7 @@ services:
     build:
       context: "./apps//servers/notifications/"
       dockerfile: Dockerfile
-    env_file: .env
+    env_file: "./apps/servers/notifications/.env"
     depends_on:
       - postgres
       - redis
@@ -41,7 +41,7 @@ services:
     build:
       context: "./apps/servers/queues/"
       dockerfile: Dockerfile
-    env_file: .env
+    env_file: "./apps/servers/queues/.env"
     depends_on:
       - postgres
       - redis
@@ -60,7 +60,7 @@ services:
     build:
       context: "./apps/servers/anomalies/"
       dockerfile: Dockerfile
-    env_file: .env
+    env_file: "./apps/servers/anomalies/.env"
     volumes:
       - ./apps/servers/anomalies:/app
     command: python main.py
@@ -108,7 +108,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./postgres/data:/var/lib/postgresql/data
+      - ./utils/postgres/data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres

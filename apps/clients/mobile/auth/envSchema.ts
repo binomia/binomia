@@ -10,9 +10,6 @@ export class ENVSchema {
         NOTIFICATION_SERVER_URL: z.string().nullish().transform(v => v ?? ""),
         AUTHENTICATION_SERVER_URL: z.string().nullish().transform(v => v ?? ""),
 
-        AZURE_FACE_API_ENDPOINT: z.string().nullish().transform(v => v ?? ""),
-        AZURE_FACE_API_KEY: z.string().nullish().transform(v => v ?? ""),
-
         NODEMAILER_EMAIL: z.string().nullish().transform(v => v ?? ""),
         NODEMAILER_PASSWORD: z.string().nullish().transform(v => v ?? ""),
 
