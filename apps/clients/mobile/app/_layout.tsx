@@ -23,6 +23,7 @@ import { drizzle } from 'drizzle-orm/expo-sqlite';
 import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
 import migrations from '@/drizzle/migrations';
 import * as SQLite from 'expo-sqlite';
+import useAsyncStorage from '@/hooks/useAsyncStorage';
 
 
 
@@ -39,6 +40,7 @@ const db = drizzle(expo);
 
 const Layout = () => {
 	const { } = useMigrations(db, migrations);
+	const applicationId = useAsyncStorage().getItem("applicationId");
 
 
 	const cameraPermission = useCameraPermission()
@@ -51,6 +53,7 @@ const Layout = () => {
 
 	const onLayoutRootView = useCallback(async () => {
 		try {
+			applicationId.then((res) => console.log({ res }));
 			const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 			if (!cameraPermission.hasPermission) {
 				await cameraPermission.requestPermission();
