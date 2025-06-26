@@ -1,0 +1,23 @@
+# NodeJS
+node_modules
+.vscode*
+.DS_Store
+
+*.env
+*.log
+*.log.*
+*test.ts
+npm-debug.log*
+
+yarn.lock
+package-lock.json
+
+
+# Python 
+*__pycache__
+*.pyc
+*.vscode
+.DS_Store
+*venv
+*.ts
+*datasets/

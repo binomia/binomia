@@ -1,0 +1,17 @@
+database:
+  host: "postgres"
+  port: 5432
+  user: "postgres"
+  password: "postgres"
+  dbname: "postgres"
+  sslmode: "disable"
+  table: "metrics"
+  copyTable: "true"
+  maxOpenConns: 50
+  maxIdleConns: 10
+  pgPrometheusNormalize: true
+  pgPrometheusLogSamples: false
+  pgPrometheusChunkInterval: 43200000000000
+  useTimescaleDb: true
+  dbConnectRetries: 0
+  readOnly: false

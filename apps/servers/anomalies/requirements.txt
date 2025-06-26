@@ -1,0 +1,15 @@
+opencv-python-headless
+numpy
+pinecone
+insightface
+uvicorn
+gunicorn
+requests
+joblib
+pyod
+fastapi
+json-rpc
+river
+starlette
+onnxruntime
+numba
