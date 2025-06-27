@@ -39,9 +39,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 const setAuthorizationLink = setContext(async (_, previousContext) => {
     const jwt = await useAsyncStorage().getItem("jwt");
     const applicationId = await useAsyncStorage().getItem("applicationId");
-    const ipAddress = await Network.getIpAddressAsync();
-    console.log({applicationId});
-    
+    const ipAddress = await Network.getIpAddressAsync();    
 
     return {
         headers: {

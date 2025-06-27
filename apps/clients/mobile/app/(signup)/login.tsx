@@ -33,7 +33,7 @@ const LoginComponent: React.FC = (): JSX.Element => {
 
     const pageViewRef = useRef<PagerView>(null);
     const pageRef = useRef<PagerView>(null);
-    const { onLogin, onLogout, sessionVerificationData, setVerificationCode, setSessionVerificationData, invalidCredentials, setInvalidCredentials } = useContext<SessionPropsType>(SessionContext);
+    const { onLogin, sessionVerificationData, setVerificationCode, setSessionVerificationData, invalidCredentials, setInvalidCredentials } = useContext<SessionPropsType>(SessionContext);
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -64,7 +64,6 @@ const LoginComponent: React.FC = (): JSX.Element => {
             router.navigate("(home)")
 
         } catch (error) {
-            onLogout()
             console.error({ error });
         }
     }

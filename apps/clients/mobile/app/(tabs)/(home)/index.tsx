@@ -30,6 +30,7 @@ const HomeScreen: React.FC = () => {
 	const { account, user } = useSelector((state: any) => state.accountReducer)
 	const { recentTransactionsLoading } = useSelector((state: any) => state.transactionReducer)
 
+
 	const dispatch = useDispatch()
 	const [getAccount] = useLazyQuery(AccountApolloQueries.account());
 	const [accountStatus] = useLazyQuery(AccountApolloQueries.accountStatus())
@@ -42,10 +43,10 @@ const HomeScreen: React.FC = () => {
 
 	useEffect(() => {
 		(async () => {
-			const users = await db.query.searchedUsersSchema.findMany({
+			const _users = await db.query.searchedUsersSchema.findMany({
 				limit: 10
 			})
-			console.log({ users });
+			// console.log({ users });
 		})()
 
 	}, [])
@@ -105,7 +106,7 @@ const HomeScreen: React.FC = () => {
 			image: cars,
 			onPress: async () => {
 				const message = "seguro"
-				const encryptedMessage = await RSA.encryptAsync(message, user.publicKey);
+				const encryptedMessage = await RSA.encryptAsync(message, user.signingKey);
 
 				console.log("Encrypted Message:", encryptedMessage);
 			}
@@ -138,7 +139,8 @@ const HomeScreen: React.FC = () => {
 			name: "Facturas",
 			image: bills,
 			onPress: async () => {
-				router.navigate("/facemask")
+				console.log(JSON.stringify({user}, null, 2));
+				
 			}
 		}
 	]

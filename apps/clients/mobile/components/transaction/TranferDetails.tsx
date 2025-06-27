@@ -1,8 +1,7 @@
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 import colors from '@/colors'
 import Button from '@/components/global/Button';
 import BottomSheet from '../global/BottomSheet';
-import useAsyncStorage from '@/hooks/useAsyncStorage';
 import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, FlatList, Avatar } from 'native-base'
 import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
@@ -19,8 +18,8 @@ import { accountActions } from '@/redux/slices/accountSlice';
 import { useLocation } from '@/hooks/useLocation'
 import { AccountAuthSchema } from '@/auth/accountAuth';
 import { router } from 'expo-router';
-import { RSA } from 'cryptografia';
-import { SessionContext } from '@/contexts/sessionContext';
+import { AES } from 'cryptografia';
+import { ZERO_ENCRYPTION_KEY } from '@/constants';
 
 type Props = {
     goBack?: () => void
@@ -31,10 +30,7 @@ type Props = {
 const { width } = Dimensions.get("screen")
 const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () => { }, goBack = () => { } }) => {
     const { receiver } = useSelector((state: any) => state.transactionReducer)
-    const { location } = useSelector((state: any) => state.globalReducer)
     const { user } = useSelector((state: any) => state.accountReducer)
-
-    const { onLogout } = useContext(SessionContext)
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
@@ -51,67 +47,72 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
     const [loading, setLoading] = useState<boolean>(false)
     const [openOptions, setOpenOptions] = useState<string>("")
 
-    const { getItem } = useAsyncStorage()
-
-
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
-            const publicKey = await getItem("publicKey");
-            if (publicKey) {
-                if (!location) {
-                    await getLocation()
-                    onClose()
-                }
+            const location = await getLocation()
 
-                const data = await TransactionAuthSchema.createTransaction.parseAsync({
-                    receiver: receiver.username,
-                    amount: parseFloat(transactionDeytails.amount),
-                    location
-                })
+            console.log({ location });
 
-                const message = await RSA.encryptAsync(JSON.stringify({ data, recurrence }), user.publicKey)
-                const { data: createedTransaction } = await createTransaction({
-                    variables: { message }
-                })
+            const data = await TransactionAuthSchema.createTransaction.parseAsync({
+                receiver: receiver.username,
+                amount: parseFloat(transactionDeytails.amount),
+                location
+            })
+
+            const signingKey = await AES.decrypt(user.signingKey, ZERO_ENCRYPTION_KEY)
+            const message = await AES.encrypt(JSON.stringify({ data, recurrence }), signingKey)
+
+            console.log({ message });
 
 
+            const { data: createedTransaction } = await createTransaction({
+                variables: { message }
+            })
 
-                const transaction = createedTransaction?.createTransaction
-                if (transaction) {
-                    const accountsData = await AccountAuthSchema.account.parseAsync(transaction?.from)
-                    const formatedTransaction = formatTransaction(transaction)
+            const transaction = createedTransaction?.createTransaction
+            if (transaction) {
+                const accountsData = await AccountAuthSchema.account.parseAsync(transaction?.from)
+                const formatedTransaction = formatTransaction(transaction)
 
-                    await dispatch(accountActions.setAccount(accountsData))
-                    await dispatch(transactionActions.setTransaction({
-                        ...transaction,
-                        amountColor: colors.red,
-                        fullName: formatedTransaction.fullName,
-                        profileImageUrl: formatedTransaction.profileImageUrl,
-                        username: formatedTransaction.username,
-                        isFromMe: true,
-                        to: receiver
-                    }))
-                    setLoading(false)
-                    goNext()
-                } else {
-                    router.navigate("/error?title=Transaction&message=Se ha producido un error al intentar crear la transacción. Por favor, inténtalo de nuevo.")
-                }
-
-
+                await dispatch(accountActions.setAccount(accountsData))
+                await dispatch(transactionActions.setTransaction({
+                    ...transaction,
+                    amountColor: colors.red,
+                    fullName: formatedTransaction.fullName,
+                    profileImageUrl: formatedTransaction.profileImageUrl,
+                    username: formatedTransaction.username,
+                    isFromMe: true,
+                    to: receiver
+                }))
+                setLoading(false)
+                goNext()
             } else {
-                onLogout()
+                router.navigate("/error?title=Transaction&message=Se ha producido un error al intentar crear la transacción. Por favor, inténtalo de nuevo.")
             }
+
 
         } catch (error: any) {
             setLoading(false)
-            console.error(error);
+            console.error({ handleOnSend: error.message });
 
-            onClose()
-            await delay(1000).then(() => {
-                router.navigate("/error?title=Transaction&message=Se ha producido un error al intentar crear la transacción. Por favor, inténtalo de nuevo.")
-            })
+            let title = "Transaction"
+            let message = "Se ha producido un error al intentar crear la transacción. Por favor, inténtalo de nuevo."
+            if (error?.message.includes("LOCATION")) {
+                message = "Debe activar la ubicación para poder realizar la transacción."
+                title = "Ubicación"
+                onClose()
+                await delay(1000).then(() => {
+                    router.navigate(`/location`)
+                })
+            } else {
+                onClose()
+                await delay(1000).then(() => {
+                    router.navigate(`/error?title=${title}&message=${message}`)
+                })
+            }
+
         }
     }
 
@@ -145,8 +146,9 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
 
     const handleOnPress = async () => {
         try {
-            const authenticated = await authenticate()
-            if (authenticated.success) {
+
+            const { success } = await authenticate()
+            if (success) {
                 setLoading(true)
                 await handleOnSend({
                     title: recurrence,

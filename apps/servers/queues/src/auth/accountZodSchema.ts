@@ -14,7 +14,6 @@ export class AccountZodSchema {
         id: z.number(),
         balance: z.number().min(0.01),
         allowReceive: z.boolean(),
-        blacklisted: z.boolean(),
         allowWithdraw: z.boolean(),
         allowSend: z.boolean(),
         allowRequestMe: z.boolean(),

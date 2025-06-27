@@ -292,7 +292,10 @@ export default class TransactionController {
                 ]
             })
 
-            const lastTransactionJSON = lastTransaction?.toJSON() || null
+            const lastTransactionJSON = lastTransaction?.toJSON()
+
+            console.log(JSON.stringify({ lastTransactionJSON }, null, 2));
+
 
             const distance = !lastTransactionJSON ? 0 : calculateDistance(
                 lastTransactionJSON.location.latitude,
@@ -331,10 +334,10 @@ export default class TransactionController {
 
 
             const features = await TransactionJoiSchema.transactionFeatures.parseAsync({
-                speed: lastTransactionJSON.status === "audited" ? 0 : +Number(speed).toFixed(2),
-                distance: lastTransactionJSON.status === "audited" ? 0 : +Number(distance).toFixed(2),
+                speed: lastTransactionJSON?.status === "audited" ? 0 : +Number(speed).toFixed(2),
+                distance: lastTransactionJSON?.status === "audited" ? 0 : +Number(distance).toFixed(2),
                 amount: +Number(transaction.amount).toFixed(2),
-                currency: ["dop","usd"].indexOf(transaction.currency.toLowerCase()),
+                currency: ["dop", "usd"].indexOf(transaction.currency.toLowerCase()),
                 transactionType: ["transfer", "request", "withdrawal", "deposit"].indexOf(transaction.transactionType.toLowerCase()),
                 platform: ["ios", "android", "web"].indexOf(device.platform.toLowerCase()),
                 isRecurring: transaction.isRecurring ? 1 : 0,
@@ -394,8 +397,7 @@ export default class TransactionController {
             if (detectedFraudulentTransaction.is_fraud) {
                 await Promise.all([
                     senderAccount.update({
-                        status: "flagged",
-                        blacklisted: flaggedTransactionsCount >= 1
+                        status: flaggedTransactionsCount >= 1 ? "flagged" : senderAccount.toJSON().status
                     }),
                     transactionCreated.update({
                         status: "suspicious",
@@ -522,7 +524,9 @@ export default class TransactionController {
             }
 
         } catch (error: any) {
-            throw error.toString()
+            console.log({ createTransaction: error });
+            
+            throw error
         }
     }
 

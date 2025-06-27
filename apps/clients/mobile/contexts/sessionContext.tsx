@@ -97,7 +97,7 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
             ])
 
         } catch (error) {
-            await onLogout()
+            // await onLogout()
             console.error(error);
         }
     }
@@ -149,18 +149,27 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
                 }
             });
 
-            if (data.login.token && !data.login?.needVerification) {
-                await setItem("jwt", data.login.token)
-                await setItem("publicKey", data.login.publicKey)
+
+            const loginValidation = z.object({
+                needVerification: z.literal(false),
+                token: z.string(),
+
+            })
+
+            const { success, data: loginData } = loginValidation.safeParse(data.login)
+            if (success) {
+                await setItem("jwt", loginData.token)
+                await setItem("signingKey", data.login.signingKey)
 
                 await fetchSessionUser()
                 router.navigate("(home)")
             } else
-
                 return data.login
 
         } catch (error) {
             setInvalidCredentials(true)
+            console.log({ onLogin: error });
+
             return error
         }
     }
@@ -226,72 +235,35 @@ export const SessionContextProvider = ({ children }: SessionContextType) => {
     useEffect(() => {
         (async () => {
             try {
-                const _applicationId = await getItem("applicationId")
-
-                let applicationId = _applicationId;
-                if (!applicationId) {
-                    applicationId = HASH.stringToHex(HASH.sha256(Crypto.randomUUID()));
-                    setItem("applicationId", applicationId)
-                }
-
-                const [ip, network] = await Promise.all([Network.getIpAddressAsync(), Network.getNetworkStateAsync()])
-
                 const jwt = await getItem("jwt");
                 if (!jwt) {
-                    return;
-                };
+                    onLogout()
+                    return
+                }
+
 
                 setJwt(jwt);
-
-                await getLocation()
-                await dispatch(globalActions.setNetwork({ ...network, ip }))
-
-                await dispatch(globalActions.setApplicationId(applicationId))
-                await setNotifications();
-
-            } catch (error) {
-                console.log({ error });
-            }
-        })()
-    }, [])
-
-    useEffect(() => {
-        (async () => {
-            const jwt = await getItem("jwt");
-            const _applicationId = await getItem("applicationId")
-
-            let applicationId = _applicationId;
-            if (!applicationId) {
-                applicationId = await Crypto.digestStringAsync(Crypto.CryptoDigestAlgorithm.SHA256, Crypto.randomUUID().toString(), {
-                    encoding: Crypto.CryptoEncoding.HEX
-                })
-                setItem("applicationId", applicationId)
-            }
-
-            if (applicationId) {
-                await dispatch(globalActions.setApplicationId(applicationId))
-                setApplicationId(applicationId)
-            }
-
-            if (jwt) {
-                await dispatch(globalActions.setJwt(jwt))
-                await fetchSessionUser()
-
+                const _applicationId = await getItem("applicationId")
+                const applicationId = _applicationId || HASH.stringToHex(HASH.sha256(Crypto.randomUUID()));
                 const [ip, network] = await Promise.all([Network.getIpAddressAsync(), Network.getNetworkStateAsync()])
                 const location = await getLocation()
 
+                setItem("applicationId", applicationId)
+                setApplicationId(applicationId)
+
                 await Promise.all([
+                    dispatch(globalActions.setJwt(jwt)),
+                    dispatch(globalActions.setApplicationId(applicationId)),
                     dispatch(globalActions.setNetwork({ ...network, ip })),
-                    dispatch(globalActions.setLocation(location))
+                    dispatch(globalActions.setLocation(location)),
+
+                    getLocation(),
+                    setNotifications(),
+                    fetchSessionUser()
                 ])
 
-                await dispatch(globalActions.setApplicationId(applicationId))
-                await setNotifications();
-
-                setJwt(jwt)
-
-            } else {
-                onLogout()
+            } catch (error) {
+                console.log({ error });
             }
         })()
     }, [])

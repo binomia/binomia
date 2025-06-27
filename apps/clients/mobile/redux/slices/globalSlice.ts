@@ -4,7 +4,7 @@ import * as Device from 'expo-device';
 const globalSlice = createSlice({
     name: 'global',
     initialState: {
-        publicKey: "",
+        signingKey: "",
         appInBackgroundTime: 0,       
         applicationId: "",
         expoNotificationToken: "",
@@ -34,8 +34,8 @@ const globalSlice = createSlice({
         }
     },
     reducers: {
-        setPublicKey: (state, action) => {
-            state.publicKey = action.payload
+        setSigningKey: (state, action) => {
+            state.signingKey = action.payload
         },
         setContacts: (state, action) => {
             state.contacts = action.payload

@@ -4,7 +4,7 @@ export class UserAuthSchema {
     static userProfileData = z.object({
         id: z.number(),
         fullName: z.string(),
-        publicKey: z.string(),
+        signingKey: z.string(),
         username: z.string(),
         dniNumber: z.string(),
         phone: z.string().length(10),

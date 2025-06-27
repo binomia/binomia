@@ -85,7 +85,7 @@ services:
 
   # jaeger:
   jaeger:
-    image: docker.io/jaegertracing/all-in-one:latest
+    image: jaegertracing/jaeger:2.7.0
     ports:
       - "5775:5775/udp"
       - "6831:6831/udp"

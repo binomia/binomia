@@ -121,8 +121,6 @@ const CameraFaceMask: React.FC = () => {
 				pixelFormat="rgb"
 				isActive
 			/>
-
-
 		</ZStack>
 
 	)

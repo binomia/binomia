@@ -7,7 +7,7 @@ export class SessionAuthSchema {
         code: z.string().min(1).nullish(),
         signature: z.string().min(1).nullish(),
         needVerification: z.boolean(),
-        publicKey: z.string().nullish(),
+        signingKey: z.string().nullish(),
     })
 
     static jwtDecoded = z.object({

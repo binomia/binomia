@@ -6,6 +6,8 @@ import { ANOMALY_SERVER_URL } from "@/constants";
 
 export const anomalyRpcClient = async (method: string, params: any) => {
     try {
+        console.log({ ANOMALY_SERVER_URL });
+
         const { data } = await axios.post(ANOMALY_SERVER_URL, {
             id: shortUUID.generate(),
             jsonrpc: "2.0",

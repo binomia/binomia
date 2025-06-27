@@ -6,7 +6,6 @@ export class GlobalZodSchema {
         SESSION_SECRET_SECRET_KEY: z.string().nullish().transform(v => v ?? ''),
         ZERO_ENCRYPTION_KEY: z.string().nullish().transform(v => v ?? ''),
         QUEUE_SERVER_URL: z.string().nullish().transform(v => v ?? ''),
-        AUTH_SERVER_URL: z.string().nullish().transform(v => v ?? ''),
         ZERO_SIGN_PRIVATE_KEY: z.string().nullish().transform(v => v ?? ''),
         REDIS_HOST: z.string().nullish().transform(v => v ?? ''),
         REDIS_PORT: z.string().nullish().transform(v => v ?? ''),

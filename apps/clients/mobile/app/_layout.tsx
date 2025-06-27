@@ -19,12 +19,6 @@ import { RouterContextProvider } from '@/contexts/RouterContext';
 import * as Sentry from '@sentry/react-native';
 import { SQLiteProvider } from 'expo-sqlite';
 import { DATABASE_NAME } from '@/constants';
-import { drizzle } from 'drizzle-orm/expo-sqlite';
-import { useMigrations } from 'drizzle-orm/expo-sqlite/migrator';
-import migrations from '@/drizzle/migrations';
-import * as SQLite from 'expo-sqlite';
-import useAsyncStorage from '@/hooks/useAsyncStorage';
-
 
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -35,14 +29,7 @@ LogBox.ignoreLogs(['In React 18']);
 SplashScreen.preventAutoHideAsync();
 
 
-const expo = SQLite.openDatabaseSync(DATABASE_NAME);
-const db = drizzle(expo);
-
 const Layout = () => {
-	const { } = useMigrations(db, migrations);
-	const applicationId = useAsyncStorage().getItem("applicationId");
-
-
 	const cameraPermission = useCameraPermission()
 	const microphonePermission = useMicrophonePermission()
 
@@ -53,7 +40,6 @@ const Layout = () => {
 
 	const onLayoutRootView = useCallback(async () => {
 		try {
-			applicationId.then((res) => console.log({ res }));
 			const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 			if (!cameraPermission.hasPermission) {
 				await cameraPermission.requestPermission();
