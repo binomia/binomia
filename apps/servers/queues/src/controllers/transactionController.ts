@@ -294,9 +294,6 @@ export default class TransactionController {
 
             const lastTransactionJSON = lastTransaction?.toJSON()
 
-            console.log(JSON.stringify({ lastTransactionJSON }, null, 2));
-
-
             const distance = !lastTransactionJSON ? 0 : calculateDistance(
                 lastTransactionJSON.location.latitude,
                 lastTransactionJSON.location.longitude,

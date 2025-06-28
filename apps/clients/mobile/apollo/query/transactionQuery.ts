@@ -15,6 +15,7 @@ export class TransactionApolloQueries {
                     createdAt
                     updatedAt
                     location {
+                        uri
                         latitude
                         longitude
                         neighbourhood
@@ -113,6 +114,7 @@ export class TransactionApolloQueries {
                     createdAt
                     updatedAt
                     location {
+                        uri
                         latitude
                         longitude
                         neighbourhood
@@ -209,6 +211,7 @@ export class TransactionApolloQueries {
                     currency
                     status
                     location {
+                        uri
                         latitude
                         longitude
                         neighbourhood
@@ -322,6 +325,7 @@ export class TransactionApolloQueries {
                     createdAt
                     updatedAt
                     location {
+                        uri
                         latitude
                         longitude
                         neighbourhood
@@ -350,6 +354,7 @@ export class TransactionApolloQueries {
                     createdAt
                     updatedAt
                     location {
+                        uri
                         latitude
                         longitude
                         neighbourhood
@@ -446,6 +451,7 @@ export class TransactionApolloQueries {
                     currency
                     status
                     location {
+                        uri
                         latitude
                         longitude
                         neighbourhood
@@ -544,6 +550,7 @@ export class TransactionApolloQueries {
                         updatedAt
                     }
                     location {
+                        uri
                         latitude
                         longitude
                         neighbourhood
@@ -653,6 +660,7 @@ export class TransactionApolloQueries {
                     createdAt
                     updatedAt
                     location {
+                        uri
                         latitude
                         longitude
                         neighbourhood
@@ -749,6 +757,7 @@ export class TransactionApolloQueries {
                     currency
                     status
                     location {
+                        uri
                         latitude
                         longitude
                         neighbourhood

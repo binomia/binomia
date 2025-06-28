@@ -1,5 +1,5 @@
 services:
-  # main-server:
+  # main:
   main:
     hostname: main
     build:
@@ -18,7 +18,7 @@ services:
     networks:
       - binomia-network
 
-  # notification-server:
+  # notifications:
   notifications:
     build:
       context: "./apps//servers/notifications/"
@@ -36,7 +36,7 @@ services:
     networks:
       - binomia-network
 
-  # queue-server:
+  # queues:
   queues:
     build:
       context: "./apps/servers/queues/"
@@ -54,16 +54,15 @@ services:
     networks:
       - binomia-network
 
-  # anomaly-server:
+  # anomalies:
   anomalies:
-    platform: linux/amd64
     build:
       context: "./apps/servers/anomalies/"
       dockerfile: Dockerfile
     env_file: "./apps/servers/anomalies/.env"
     volumes:
       - ./apps/servers/anomalies:/app
-    command: python main.py
+    command: python3 main.py
     ports:
       - 8003:8003
     networks:

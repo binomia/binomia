@@ -56,7 +56,7 @@ const RecentTransactions: React.FC = () => {
 		}
 
 		return {
-			isFromMe,
+			isFromMe: isFromMe && transaction?.location?.uri,
 			isSuspicious: transaction.status === "suspicious",
 			showMap,
 			amountColor,
@@ -70,6 +70,9 @@ const RecentTransactions: React.FC = () => {
 
 	const onSelectTransaction = async (transaction: any) => {
 		const formatedTransaction = formatTransaction(transaction)
+
+		console.log(JSON.stringify({ formatedTransaction }, null, 2));
+
 
 		if (transaction?.status === "suspicious")
 			setBottomSheetHeught(!formatedTransaction.isFromMe ? height * 0.7 : height * 0.9)

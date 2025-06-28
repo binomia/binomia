@@ -14,6 +14,4 @@ COPY . .
 # Expose port
 EXPOSE 8003
 
-# Optional: default command (adjust to your entrypoint)
-CMD ["python", "main.py"]
 

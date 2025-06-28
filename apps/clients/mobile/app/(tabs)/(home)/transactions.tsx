@@ -84,7 +84,7 @@ const Transactions: React.FC = () => {
 		}
 
 		return {
-			isFromMe,
+			isFromMe: isFromMe && transaction.location?.uri,
 			showMap,
 			amountColor,
 			profileImageUrl: profileImageUrl || "",

@@ -12,7 +12,6 @@ import src.methods
 import uvicorn
 
 
-
 app = FastAPI()
 
 # Allow CORS for frontend clients
@@ -36,6 +35,10 @@ def test():
     except Exception as e:
         print(f"Error processing transaction: {e}")
         return False
+    
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
 
 # JSON-RPC Handler
@@ -43,7 +46,8 @@ def test():
 async def json_rpc_handler(request: Request):
     try:
         request_data = await request.json()
-        response = JSONRPCResponseManager.handle(json.dumps(request_data), dispatcher)
+        response = JSONRPCResponseManager.handle(
+            json.dumps(request_data), dispatcher)
 
         # Convert JSON response string to a dictionary
         response_dict = json.loads(response.json)
@@ -57,17 +61,4 @@ async def json_rpc_handler(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8004, reload=False)
-
-# if __name__ == "__main__":
-#     cores = multiprocessing.cpu_count()
-#     workers = (2 * cores) + 1
-#     threads = 2  # Adjust based on your workload
-
-#     subprocess.run([
-#         "gunicorn", "main:app",
-#         "-w", str(workers),
-#         "--threads", str(threads),
-#         "-k", "uvicorn.workers.UvicornWorker",
-#         "-b", "0.0.0.0:8003"
-#     ])
+    uvicorn.run("main:app", host="0.0.0.0", port=8003, reload=True)

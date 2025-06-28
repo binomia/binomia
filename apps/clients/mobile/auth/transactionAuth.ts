@@ -5,6 +5,7 @@ import { UserAuthSchema } from './userAuth'
 export class TransactionAuthSchema {
     static transactionLocation = z.object({
         latitude: z.number().default(0).transform(v => v ?? 0),
+        uri: z.string(),
         longitude: z.number().default(0).transform(v => v ?? 0),
         neighbourhood: z.string().nullish().transform(v => v ?? ""),
         sublocality: z.string().nullish().transform(v => v ?? ""),

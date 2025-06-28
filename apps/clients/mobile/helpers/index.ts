@@ -221,7 +221,6 @@ export const FORMAT_FULL_NAME = (fullName: string, length: number = 15) => {
 
 export const getMapLocationImage = ({ latitude, longitude }: { latitude: number, longitude: number }) => {
     return `https://maps.googleapis.com/maps/api/staticmap?center=${latitude},${longitude}&zoom=15&size=500x500&map_id=${"d5db1229935ffa0d"}&key=${GOOGLE_MAPS_API_KEY}`
-
 }
 
 

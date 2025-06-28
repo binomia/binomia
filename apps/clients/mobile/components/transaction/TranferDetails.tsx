@@ -4,7 +4,7 @@ import Button from '@/components/global/Button';
 import BottomSheet from '../global/BottomSheet';
 import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, FlatList, Avatar } from 'native-base'
-import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { recurenceMonthlyData, recurenceWeeklyData } from '@/mocks';
@@ -20,6 +20,7 @@ import { AccountAuthSchema } from '@/auth/accountAuth';
 import { router } from 'expo-router';
 import { AES } from 'cryptografia';
 import { ZERO_ENCRYPTION_KEY } from '@/constants';
+import { useCloudinary } from '@/hooks/useCloudinary';
 
 type Props = {
     goBack?: () => void
@@ -46,26 +47,29 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
     const [recurrenceBiweeklyOptionSelected, setRecurrenceBiweeklyOptionSelected] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false)
     const [openOptions, setOpenOptions] = useState<string>("")
+    const { uploadTransactionImages } = useCloudinary();
+
 
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
             const location = await getLocation()
+            const image = await uploadTransactionImages(getMapLocationImage({ latitude: location.latitude, longitude: location.longitude }))
 
-            console.log({ location });
+            console.log({ image });
+
 
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
-                location
+                location: Object.assign({}, location, {
+                    uri: image || ""
+                })
             })
 
             const signingKey = await AES.decrypt(user.signingKey, ZERO_ENCRYPTION_KEY)
             const message = await AES.encrypt(JSON.stringify({ data, recurrence }), signingKey)
-
-            console.log({ message });
-
 
             const { data: createedTransaction } = await createTransaction({
                 variables: { message }

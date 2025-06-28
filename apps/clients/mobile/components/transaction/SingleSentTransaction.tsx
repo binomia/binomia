@@ -5,7 +5,7 @@ import PagerView from 'react-native-pager-view';
 import * as Sharing from 'expo-sharing';
 import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, ZStack, Avatar } from 'native-base'
-import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CREATED_DATE, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CREATED_DATE, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMutation } from '@apollo/client';
@@ -41,6 +41,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 	const [isPaying, setIsPaying] = useState<boolean>(false)
 	const [payRequestTransaction] = useMutation(TransactionApolloQueries.payRequestTransaction());
 	const [cancelRequestedTransaction] = useMutation(TransactionApolloQueries.cancelRequestedTransaction());
+	const imageRef = useRef<typeof Image>(null)
 
 	const handleShare = async () => {
 		const isAvailableAsync = await Sharing.isAvailableAsync()
@@ -59,7 +60,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 		const amountColor = (transaction?.transactionType === "request" && isFromMe) ? colors.mainGreen : colors.red
 
 		return {
-			isFromMe,
+			isFromMe: isFromMe && transaction?.location?.uri,
 			amountColor,
 			profileImageUrl: profileImageUrl || "",
 			amount: transaction?.amount,
@@ -208,7 +209,7 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 					</Pressable>
 				</HStack>
 				<VStack>
-					<VStack mt={"30px"} alignItems={"center"}>
+					<VStack mt={"50px"} alignItems={"center"}>
 						<Heading textTransform={"capitalize"} fontSize={scale(34)} color={colors.white}>{FORMAT_CURRENCY(transaction?.amount)}</Heading>
 						<Text color={colors.lightSkyGray}>{FORMAT_CREATED_DATE(transaction?.createdAt)}</Text>
 						{transaction.isFromMe ? <VStack my={"15px"} textAlign={"center"} space={1} alignItems={"center"}>
@@ -260,21 +261,20 @@ const SingleSentTransaction: React.FC<Props> = ({ title = "Ver Detalles", onClos
 				</VStack>
 				: transaction.isFromMe ?
 					<VStack w={"100%"} justifyContent={"center"}>
-						<HStack w={"85%"} mb={"5px"}>
+						<HStack w={"85%"} mb={"10px"}>
 							<Heading fontSize={scale(16)} textTransform={"capitalize"} color={"white"}>{transaction?.location?.fullArea || "Ubicación"}</Heading>
 						</HStack>
-						<Image
+						{transaction?.location?.uri ? <Image
+							ref={imageRef}
 							alt='fine-location-image-alt'
 							resizeMode="cover"
 							w={"100%"}
 							h={height / 3.7}
-							source={{
-								uri: getMapLocationImage({ latitude: transaction?.location?.latitude, longitude: transaction?.location?.longitude })
-							}}
 							style={{
 								borderRadius: 10
 							}}
-						/>
+							source={{ uri: transaction?.location?.uri }}
+						/> : null}
 						{transaction.status === "requested" ? <HStack mt={"20px"} w={"100%"} justifyContent={"center"}>
 							<Button
 								onPress={onCancelRequestedTransaction}

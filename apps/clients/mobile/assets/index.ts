@@ -35,6 +35,7 @@ import vpnIcon from './img/vpn.png';
 import errorIcon from './icons/error.png';
 import waiting from './img/waiting.gif';
 import faceMask from './img/face_mask.gif';
+import drPlaceHolder from './img/dr.png';
 
 // icons
 import plusIconGreen from './icons/plus.png';
@@ -85,6 +86,7 @@ import facemaskLottie from './lottie/facemask.json';
 
 
 export {
+    drPlaceHolder,
     splash,
     faceMask,
     facemaskLottie,
