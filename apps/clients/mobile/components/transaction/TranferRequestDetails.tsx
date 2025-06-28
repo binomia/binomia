@@ -21,6 +21,7 @@ import { accountActions } from '@/redux/slices/accountSlice';
 import { router } from 'expo-router';
 import { AES } from 'cryptografia';
 import { ZERO_ENCRYPTION_KEY } from '@/constants';
+import { useCloudinary } from '@/hooks/useCloudinary';
 
 type Props = {
     goBack?: () => void
@@ -40,6 +41,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 
     const [createRequestTransaction] = useMutation(TransactionApolloQueries.createRequestTransaction())
     const [fetchSingleUser] = useLazyQuery(UserApolloQueries.singleUser())
+    const { uploadTransactionImages } = useCloudinary();
 
     const { transactionDeytails } = useSelector((state: any) => state.transactionReducer)
     const [recurrenceSelected, setRecurrenceSelected] = useState<string>("");
@@ -88,16 +90,16 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
-            if (!location) {
-                await getLocation()
-                onCloseFinish()
-            }
+            const _location = await getLocation()
+            const image = await uploadTransactionImages(getMapLocationImage({ latitude: _location.latitude, longitude: _location.longitude }))
 
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 transactionType: "request",
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
-                location
+                location: Object.assign({}, _location, {
+                    uri: image || ""
+                })
             })
 
             const message = await AES.encrypt(JSON.stringify({ data, recurrence }), ZERO_ENCRYPTION_KEY)
@@ -120,7 +122,7 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
 
                 setLoading(false)
                 goNext()
-                
+
             } else {
                 router.navigate("/error?title=Transaction&message=Se ha producido un error al intentar crear la transacción. Por favor, inténtalo de nuevo.")
             }
@@ -249,9 +251,9 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                         </HStack>
                         <Heading textTransform={"capitalize"} fontSize={scale(25)} color={"white"}>{MAKE_FULL_NAME_SHORTEN(transactionDeytails?.fullName || "")}</Heading>
                         <Text fontSize={scale(16)} color={colors.lightSkyGray}>{transactionDeytails?.username}</Text>
-                        <Heading textTransform={"capitalize"} fontSize={scale(40)} color={"mainGreen"}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
+                        <Heading textTransform={"capitalize"} mt={"20px"} fontSize={scale(40)} color={"mainGreen"}>{FORMAT_CURRENCY(transactionDeytails?.amount)}</Heading>
                     </VStack>
-                    <VStack px={"20px"} mt={"20px"} w={"100%"} justifyContent={"center"}>
+                    <VStack px={"10px"} mt={"20px"} w={"100%"} justifyContent={"center"}>
                         <HStack w={"85%"} mb={"5px"}>
                             <Heading fontSize={scale(15)} textTransform={"capitalize"} color={"white"}>{location?.fullArea || "Ubicación"}</Heading>
                         </HStack>
