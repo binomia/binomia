@@ -6,7 +6,7 @@ import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, ZStack } from 'native-base'
 import { FORMAT_CREATED_DATE, FORMAT_CURRENCY, FORMAT_PHONE_NUMBER } from '@/helpers'
 import { scale } from 'react-native-size-matters';
-import { cancelIcon, checked, pendingClock } from '@/assets';
+import { cancelIcon, checked, pendingClock, waiting } from '@/assets';
 import { TEXT_HEADING_FONT_SIZE } from '@/constants';
 import { transactionStatus } from '@/mocks';
 import { Entypo } from '@expo/vector-icons';
@@ -41,11 +41,11 @@ const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
                 </ZStack>
             )
 
-        } else if (status === "pending") {
+        } else if (status === "pending" || status === "waiting") {
             return (
-                <ZStack w={_w} h={_h} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
-                    <HStack w={"80%"} h={"80%"} bg={colors.gray} borderRadius={100} />
-                    <Image borderRadius={100} tintColor={colors.white} alt='logo-image3' w={"100%"} h={"100%"} source={pendingClock} />
+                <ZStack w={"50px"} h={"50px"} borderRadius={100} justifyContent={"center"} alignItems={"center"} >
+                    <HStack w={"100%"} h={"100%"} bg={colors.lightGray} borderRadius={100} />
+                    <Image borderRadius={100} alt='logo-image' w={"100%"} h={"100%"} source={waiting} />
                 </ZStack>
             )
         } else if (status === "requested") {
@@ -87,7 +87,7 @@ const SingleTopTup: React.FC<Props> = ({ topup, open, onClose }: Props) => {
                     </VStack>
                     <VStack mb={"20px"} ml={"10px"} alignItems={"center"} justifyContent={"center"}>
                         <StatuIcon status={topup.status} />
-                        <Text ml={"3px"} fontSize={scale(16)} color={colors.lightSkyGray}>{transactionStatus(topup.status)}</Text>
+                        <Text ml={"3px"} textAlign={"center"} fontSize={scale(16)} color={colors.lightSkyGray}>{transactionStatus(topup.status)}</Text>
                     </VStack>
                 </VStack>
             </VStack>

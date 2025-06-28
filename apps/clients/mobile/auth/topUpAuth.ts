@@ -33,6 +33,28 @@ export class TopUpAuthSchema {
         amount: z.number(),
         phone: z.string().length(10),
         companyId: z.number(),
-        location: TopUpAuthSchema.topUpLocation
+        location: TopUpAuthSchema.topUpLocation,
+        response: z.object({
+            userId: z.number(),
+            amount: z.number().positive(),
+            status: z.string(),
+            createdAt: z.string(),
+            updatedAt: z.string(),
+            user: z.object({
+                fullName: z.string(),
+            }),
+            company: z.object({
+                logo: z.string(),
+            }),
+            phone: z.object({
+                fullName: z.string(),
+                phone: z.string(),
+                lastUpdated: z.string(),
+                createdAt: z.string(),
+                updatedAt: z.string(),
+                companyId: z.number(),
+                userId: z.number()
+            })
+        })
     })
 }

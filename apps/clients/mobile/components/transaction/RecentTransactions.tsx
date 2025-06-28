@@ -71,9 +71,6 @@ const RecentTransactions: React.FC = () => {
 	const onSelectTransaction = async (transaction: any) => {
 		const formatedTransaction = formatTransaction(transaction)
 
-		console.log(JSON.stringify({ formatedTransaction }, null, 2));
-
-
 		if (transaction?.status === "suspicious")
 			setBottomSheetHeught(!formatedTransaction.isFromMe ? height * 0.7 : height * 0.9)
 		else

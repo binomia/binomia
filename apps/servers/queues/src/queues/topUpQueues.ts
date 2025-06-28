@@ -12,7 +12,7 @@ export default class TopUpQueue {
 
     constructor() {
         this.queue = new Queue("topups", { connection: { host: "redis", port: 6379 } });
-        this.workers()
+        // this.workers()
     }
 
     private executeJob = async (job: Job) => {
@@ -20,18 +20,7 @@ export default class TopUpQueue {
             const name = job.name.split("@")[0]
             switch (name) {
                 case "queueTopUp": {
-                    const { userId, referenceId } = await TopUpController.createTopUp(job.asJSON())
-
-                    const toptupsQueued = await redis.get(`queuedTopUps:${userId}`)
-                    const parsedTopUps: any[] = toptupsQueued ? JSON.parse(toptupsQueued) : []
-
-                    const filteredCachedQueuedTopUps = parsedTopUps.filter((toptup: any) => toptup.referenceId !== referenceId)
-                    if (filteredCachedQueuedTopUps.length === 0)
-                        await redis.del(`queuedTopUps:${userId}`)
-                    else
-                        await redis.set(`queuedTopUps:${userId}`, JSON.stringify(filteredCachedQueuedTopUps))
-
-                    // console.log(`Job ${job.id} completed:`, job.name.split("@")[0]);
+                    await TopUpController.createTopUp(job.asJSON())                
                     break;
                 }
                 case "pendingTopUp": {
@@ -77,46 +66,16 @@ export default class TopUpQueue {
     createJobs = async ({ jobId, jobName, jobTime, data }: { jobId: string, jobName: string, jobTime: string, data: string }) => {
         switch (jobName) {
             case "weekly": {
-                const job = await this.addJob(jobId, data, CRON_JOB_WEEKLY_PATTERN[jobTime as WeeklyQueueTitleType]);
-                // const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
-                //     queueType: "topup",
-                //     jobTime,
-                //     jobName,
-                //     userId,
-                //     amount,
-                //     data,
-                //     referenceData
-                // }))
-
-                // return transaction
+                await this.addJob(jobId, data, CRON_JOB_WEEKLY_PATTERN[jobTime as WeeklyQueueTitleType]);
+                break;
             }
             case "biweekly": {
-                const job = await this.addJob(jobId, data, CRON_JOB_BIWEEKLY_PATTERN);
-                // const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
-                //     queueType: "topup",
-                //     jobTime,
-                //     jobName,
-                //     userId,
-                //     amount,
-                //     data,
-                //     referenceData
-                // }))
-
-                // return transaction
+                await this.addJob(jobId, data, CRON_JOB_BIWEEKLY_PATTERN);
+                break;
             }
             case "monthly": {
-                const job = await this.addJob(jobId, data, CRON_JOB_MONTHLY_PATTERN[jobTime as MonthlyQueueTitleType]);
-                // const transaction = await MainController.createQueue(Object.assign(job.asJSON(), {
-                //     queueType: "topup",
-                //     jobTime,
-                //     jobName,
-                //     userId,
-                //     amount,
-                //     data,
-                //     referenceData
-                // }))
-
-                // return transaction
+                await this.addJob(jobId, data, CRON_JOB_MONTHLY_PATTERN[jobTime as MonthlyQueueTitleType]);
+                break;
             }
             case "pendingTopUp": {
                 const time = 1000 * 60 * 30 // 30 minutes

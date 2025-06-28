@@ -102,7 +102,9 @@ const TranferRequestDetails: React.FC<Props> = ({ goNext = () => { }, onCloseFin
                 })
             })
 
-            const message = await AES.encrypt(JSON.stringify({ data, recurrence }), ZERO_ENCRYPTION_KEY)
+
+            const signingKey = await AES.decrypt(user.signingKey, ZERO_ENCRYPTION_KEY)
+            const message = await AES.encrypt(JSON.stringify({ data, recurrence }), signingKey)
             const { data: createdRequestTransaction } = await createRequestTransaction({
                 variables: { message }
             })

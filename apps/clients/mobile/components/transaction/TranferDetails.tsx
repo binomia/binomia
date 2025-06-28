@@ -57,9 +57,6 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
             const location = await getLocation()
             const image = await uploadTransactionImages(getMapLocationImage({ latitude: location.latitude, longitude: location.longitude }))
 
-            console.log({ image });
-
-
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),

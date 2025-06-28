@@ -33,7 +33,7 @@ const TopTupDetails: React.FC<Props> = ({ goBack = () => { }, onClose = (_?: any
 
     const { newTopUp } = useSelector((state: any) => state.topupReducer)
     const { location } = useSelector((state: any) => state.globalReducer)
-    const { account } = useSelector((state: any) => state.accountReducer)
+    const { account, user } = useSelector((state: any) => state.accountReducer)
 
     const dispatch = useDispatch();
     const { authenticate } = useLocalAuthentication();
@@ -61,8 +61,32 @@ const TopTupDetails: React.FC<Props> = ({ goBack = () => { }, onClose = (_?: any
                 fullName: newTopUp.fullName?.trim(),
                 companyId: Number(newTopUp.company.id),
                 location,
+                response: {
+                    "userId": Number(user.id),
+                    amount: newTopUp.amount,
+                    status: "waiting",
+                    "createdAt": new Date().toISOString(),
+                    "updatedAt": new Date().toISOString(),
+                    user: {
+                        fullName: newTopUp.fullName?.trim(),
+                    },
+                    company: {
+                        logo: newTopUp.logo
+                    },
+                    "phone": {
+                        "fullName": newTopUp.fullName?.trim(),
+                        "phone": newTopUp.phone,
+                        "lastUpdated": new Date().toISOString(),
+                        "createdAt": new Date().toISOString(),
+                        "updatedAt": new Date().toISOString(),
+                        "companyId": Number(newTopUp.company.id),
+                        "userId": user.id
+                    }
+                }
             })
-            const message = await AES.encrypt(JSON.stringify({ data, recurrence }), ZERO_ENCRYPTION_KEY)            
+            const signingKey = await AES.decrypt(user.signingKey, ZERO_ENCRYPTION_KEY)
+            const message = await AES.encrypt(JSON.stringify({ data, recurrence }), signingKey)
+            
             await createTopUp({ variables: { message } })
             await onNext()
 
