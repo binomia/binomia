@@ -379,22 +379,12 @@ export default class TransactionController {
                     }
                 })
 
-            const flaggedTransactionsCount = await TransactionsModel.count({
-                where: {
-                    [Op.and]: [
-                        { fromAccount: senderAccount.toJSON().id },
-                        { status: "suspicious" },
-                        { createdAt: { [Op.gte]: new Date(new Date().getTime() - (1000 * 60 * 60 * 24 * 30)) } } // 30 days
-                    ]
-                }
-            })
-
-            console.log({ detectedFraudulentTransaction, timeDifference, time, flaggedTransactionsCount });
+            console.log({ detectedFraudulentTransaction, timeDifference, time });
 
             if (detectedFraudulentTransaction.is_fraud) {
                 await Promise.all([
                     senderAccount.update({
-                        status: flaggedTransactionsCount >= 1 ? "flagged" : senderAccount.toJSON().status
+                        status: "flagged"
                     }),
                     transactionCreated.update({
                         status: "suspicious",
@@ -522,7 +512,7 @@ export default class TransactionController {
 
         } catch (error: any) {
             console.log({ createTransaction: error });
-            
+
             throw error
         }
     }
