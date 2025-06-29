@@ -16,7 +16,6 @@ import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { RSA } from 'cryptografia';
 import { useSQLiteContext } from 'expo-sqlite';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import * as schema from "@/db/schemas"
@@ -104,12 +103,7 @@ const HomeScreen: React.FC = () => {
 			id: 1,
 			name: "Seguros",
 			image: cars,
-			onPress: async () => {
-				const message = "seguro"
-				const encryptedMessage = await RSA.encryptAsync(message, user.signingKey);
-
-				console.log("Encrypted Message:", encryptedMessage);
-			}
+			onPress: async () => router.navigate("/insurances")
 		},
 		{
 			id: 2,
