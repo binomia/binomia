@@ -191,7 +191,7 @@ const Request: React.FC = () => {
                         )}
                     />
                     <BottomSheet height={height * 0.9} open={openRequest} onCloseFinish={onCloseFinish}>
-                        <PagerView style={{ flex: 1 }} onPageSelected={onPageSelected} ref={ref} initialPage={currentPage}>
+                        <PagerView style={{ flex: 1 }} scrollEnabled={false} onPageSelected={onPageSelected} ref={ref} initialPage={currentPage}>
                             <HStack h={"95%"}>
                                 <CreateTransaction nextPage={nextPage} title='Solicitar' showBalance={false} setInput={setInput} input={input} />
                             </HStack>

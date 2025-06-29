@@ -28,6 +28,10 @@ const evironmentVariables = {
     GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY
 }
 
+export enum CLOUDINARY {
+    TRANSACTIONS_IMAGES_PRESET = "transactions_fraasyxj",
+}
+
 export const {
     ZERO_ENCRYPTION_KEY,
     SUPPORT_PHONE_NUMBER,

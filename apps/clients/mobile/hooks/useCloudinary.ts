@@ -1,4 +1,4 @@
-import { CLOUDINARY_API_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_ID_UPLOAD_PRESET, CLOUDINARY_VIDEO_UPLOAD_PRESET } from "@/constants";
+import { CLOUDINARY, CLOUDINARY_API_URL, CLOUDINARY_CLOUD_NAME, CLOUDINARY_ID_UPLOAD_PRESET, CLOUDINARY_VIDEO_UPLOAD_PRESET } from "@/constants";
 import axios from "axios"
 import { useState } from "react";
 
@@ -47,7 +47,7 @@ export const useCloudinary = (): UseCloudinaryType => {
 
             const data = new FormData()
             data.append("file", imageData)
-            data.append("upload_preset", CLOUDINARY_ID_UPLOAD_PRESET)
+            data.append("upload_preset", CLOUDINARY.TRANSACTIONS_IMAGES_PRESET)
             data.append("cloud_name", CLOUDINARY_CLOUD_NAME)
             data.append("public_id", `${Date.now()}`)
 
