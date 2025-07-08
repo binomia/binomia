@@ -1,8 +1,9 @@
 import json
+import os
 import uuid
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from jsonrpc import JSONRPCResponseManager, dispatcher
+from jsonrpc import dispatcher, JSONRPCResponseManager
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from src.controllers.TransactionController import TransactionController
@@ -10,6 +11,9 @@ import multiprocessing
 import subprocess
 import src.methods
 import uvicorn
+
+os.environ["ORT_LOG_SEVERITY_LEVEL"] = "4"
+
 
 
 app = FastAPI()
@@ -35,7 +39,8 @@ def test():
     except Exception as e:
         print(f"Error processing transaction: {e}")
         return False
-    
+
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}

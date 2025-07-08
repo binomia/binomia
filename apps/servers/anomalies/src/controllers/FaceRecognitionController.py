@@ -1,3 +1,9 @@
+import onnx
+import onnxruntime as ort
+
+# disable logging
+ort.set_default_logger_severity(4)
+
 import cv2
 import numpy as np
 from pinecone import Pinecone, ServerlessSpec

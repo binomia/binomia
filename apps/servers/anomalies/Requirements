@@ -1,0 +1,18 @@
+name: anomalies
+
+scripts:
+  start: python main.py
+
+dependencies:
+  fastapi: 0.116.0
+  uvicorn: 0.35.0
+  faker: 37.4.0
+  tqdm: 4.67.1
+  numpy: 2.3.1
+  pinecone: 7.3.0
+  insightface: 0.7.3
+  pyod: 2.0.5
+  river: 0.22.0
+  json-rpc: 1.15.0
+  fastapi-jsonrpc: 3.4.1
+  onnxruntime: 1.22.0
