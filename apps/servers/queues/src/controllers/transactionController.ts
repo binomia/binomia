@@ -180,9 +180,6 @@ export default class TransactionController {
             // [TODO]: implement pending transaction
             const newStatus = "completed"
             const decryptedData = await AES.decrypt(JSON.parse(data), ZERO_ENCRYPTION_KEY)
-
-            console.log({ decryptedData });
-
             const { transactionId } = JSON.parse(decryptedData)
 
             const transaction = await TransactionsModel.findOne({
@@ -303,7 +300,6 @@ export default class TransactionController {
 
             const timeDifference = !lastTransactionJSON ? 0 : new Date().getTime() - new Date(lastTransactionJSON.createdAt).getTime()
             const speed = calculateSpeed(distance, timeDifference)
-            const time = calcularTime(speed, distance)
 
             const newTransactionData = {
                 transactionId: transaction.transactionId,
@@ -378,8 +374,6 @@ export default class TransactionController {
                         last_transaction_features: JSON.stringify(detectedFraudulentTransaction.last_transaction_features)
                     }
                 })
-
-            console.log({ detectedFraudulentTransaction, timeDifference, time });
 
             if (detectedFraudulentTransaction.is_fraud) {
                 await Promise.all([
