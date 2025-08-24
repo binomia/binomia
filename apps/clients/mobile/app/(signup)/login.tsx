@@ -120,7 +120,7 @@ const LoginComponent: React.FC = (): JSX.Element => {
     }
 
     const onVerifyNextPress = async () => {
-        try {
+        try {            
             const { data } = await verifySession({ variables: { ...sessionVerificationData } })
 
             if (data.verifySession) {

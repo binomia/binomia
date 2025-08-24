@@ -74,9 +74,10 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             <Heading fontSize={`${TEXT_HEADING_FONT_SIZE - 10}px`} mb={"5px"} color={"white"}>Verificar Código</Heading>
                             <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"85%"} color={"white"}>Ingrese el código de verificación de 6 digitos enviado a su correo electronico.</Text>
                         </VStack>
-                        <CodeField
+                        <CodeField                     
                             ref={ref}
                             {...props}
+                            
                             value={code}
                             onChangeText={setCode}
                             cellCount={CELL_COUNT}
