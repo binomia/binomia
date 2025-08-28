@@ -1,11 +1,11 @@
 import { useContext, useEffect, useState } from 'react';
 import { VStack, Heading, Text, HStack } from 'native-base';
-import { SafeAreaView, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
+import { SafeAreaView, TextInput, TouchableWithoutFeedback, Keyboard, StyleSheet } from 'react-native';
 import { SessionContext } from '@/contexts/sessionContext';
 import { SessionPropsType } from '@/types';
 import colors from '@/colors';
 import { INPUT_CODE_HEIGHT, TEXT_HEADING_FONT_SIZE, TEXT_PARAGRAPH_FONT_SIZE } from '@/constants';
-import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell, } from 'react-native-confirmation-code-field';
+import { CodeField, Cursor,  useClearByFocusCell, } from 'react-native-confirmation-code-field';
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Button from '@/components/global/Button';
@@ -25,7 +25,7 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
     const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     const [code, setCode] = useState('');
-    const ref = useBlurOnFulfill({ value: code, cellCount: 6 });
+    // const ref = useBlurOnFulfill({ value: code, cellCount: 6 });
     const [props, getCellOnLayoutHandler] = useClearByFocusCell({
         value: code,
         setValue: setCode,
@@ -75,9 +75,9 @@ const VerifyCode: React.FC<Props> = ({ nextPage, prevPage }: Props): JSX.Element
                             <Text fontSize={`${TEXT_PARAGRAPH_FONT_SIZE}px`} w={"85%"} color={"white"}>Ingrese el código de verificación de 6 digitos enviado a su correo electronico.</Text>
                         </VStack>
                         <CodeField                     
-                            ref={ref}
+                            // ref={ref}
                             {...props}
-                            
+                            InputComponent={TextInput}
                             value={code}
                             onChangeText={setCode}
                             cellCount={CELL_COUNT}

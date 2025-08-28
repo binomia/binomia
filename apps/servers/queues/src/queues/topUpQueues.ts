@@ -12,7 +12,7 @@ export default class TopUpQueue {
 
     constructor() {
         this.queue = new Queue("topups", { connection: { host: "redis", port: 6379 } });
-        // this.workers()
+        this.workers()
     }
 
     private executeJob = async (job: Job) => {

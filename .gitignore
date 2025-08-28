@@ -4,6 +4,7 @@ node_modules
 .DS_Store
 .turbo
 
+certs
 grafana
 postgres
 Packages
@@ -16,9 +17,6 @@ npm-debug.log*
 
 yarn.lock
 package-lock.json
-
-*makefile
-
 
 # Python 
 *__pycache__

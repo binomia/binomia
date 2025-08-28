@@ -37,6 +37,7 @@
     "bullmq": "5.40.2",
     "bullmq-otel": "^1.0.1",
     "cors": "^2.8.5",
+    "cromio": "^0.0.8",
     "crypto-js": "^4.2.0",
     "cryptografia": "^0.0.11",
     "date-fns": "^4.1.0",

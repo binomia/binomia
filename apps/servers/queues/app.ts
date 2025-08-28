@@ -13,7 +13,7 @@ import { ExpressAdapter } from '@bull-board/express';
 import { queuesBullAdapter, topUpQueue, transactionsQueue } from "@/queues";
 import { dbConnection } from "@/config";
 import { initTracing } from "@/tracing";
-import { Queue } from "bullmq";
+
 
 const app: Express = express();
 const serverAdapter = new ExpressAdapter();
@@ -89,8 +89,7 @@ if (cluster.isPrimary) {
         res.set('Content-Type', 'text/plain');
         res.send(transactionsQueueMetrics + "\n".repeat(2) + topUpQueueMetrics);
     });
-    
-    
+
     app.use(cors({
         origin: "*",
     }));
@@ -136,8 +135,8 @@ if (cluster.isPrimary) {
             const metrics = await transactionsQueue.queue.getMetrics("completed");
             res.send(metrics);
 
-        } catch (err) {
-            // res.status(500).send(err.message);
+        } catch (err: any) {
+            res.status(500).send(err.message);
         }
     });
 

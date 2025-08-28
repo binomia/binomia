@@ -12,12 +12,14 @@ import { NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL } from "@/constants";
 import { ip } from "address"
 import { initMethods } from "@/rpc";
 import { JSONRPCServer } from "json-rpc-2.0";
-
+import { collectDefaultMetrics, register } from 'prom-client';
 
 const PORT = process.env.PORT || 8001;
 const app: Express = express();
 const server = new JSONRPCServer();
 const httpServer = http.createServer(app);
+
+collectDefaultMetrics();
 
 if (cluster.isPrimary) {
     console.log(`Master ${process.pid} started on http://localhost:${PORT}`);
@@ -63,6 +65,11 @@ if (cluster.isPrimary) {
     const io = new Server(httpServer);
 
     app.use(express.json());
+
+    app.get('/metrics', async (req, res) => {
+        res.set('Content-Type', register.contentType);
+        res.end(await register.metrics());
+    });
 
     app.post("/", async (req: Request, res: Response) => {
         try {

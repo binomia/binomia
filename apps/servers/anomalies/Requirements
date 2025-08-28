@@ -4,15 +4,25 @@ scripts:
   start: python main.py
 
 dependencies:
-  fastapi: 0.116.0
-  uvicorn: 0.35.0
-  faker: 37.4.0
-  tqdm: 4.67.1
-  numpy: 2.3.1
-  pinecone: 7.3.0
+  fastapi: 0.115.8
+  fastapi-jsonrpc: 3.3.0
   insightface: 0.7.3
-  pyod: 2.0.5
-  river: 0.22.0
+  joblib: 1.4.2
   json-rpc: 1.15.0
-  fastapi-jsonrpc: 3.4.1
-  onnxruntime: 1.22.0
+  numba: 0.61.2
+  numpy: 1.26.4
+  numpydoc: 1.7.0
+  onnxruntime: 1.21.1
+  opencv-python-headless: 4.11.0.86
+  pinecone-plugin-interface: 0.0.7
+  requests-file: 1.5.1
+  requests-toolbelt: 1.0.0
+  pinecone: 6.0.2
+  pyod: 2.0.3
+  pyodbc: 5.0.1
+  requests: 2.32.2
+  river: 0.22.0
+  starlette: 0.45.3
+  uvicorn: 0.34.0
+  albumentations: 2.0.8
+  starlette-prometheus: 0.10.0

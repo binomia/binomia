@@ -1,22 +1,29 @@
 import json
 import os
 import uuid
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 from jsonrpc import dispatcher, JSONRPCResponseManager
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from src.controllers.TransactionController import TransactionController
+from starlette_prometheus import PrometheusMiddleware
+from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
+
 import multiprocessing
 import subprocess
 import src.methods
 import uvicorn
 
+
+PORT = 8003
+
+
 os.environ["ORT_LOG_SEVERITY_LEVEL"] = "4"
-
-
-
 app = FastAPI()
+
+# Add prometheus middleware
+app.add_middleware(PrometheusMiddleware)
 
 # Allow CORS for frontend clients
 app.add_middleware(
@@ -39,6 +46,12 @@ def test():
     except Exception as e:
         print(f"Error processing transaction: {e}")
         return False
+
+
+# Create metrics endpoint manually
+@app.get("/metrics")
+async def metrics():
+    return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
 @app.get("/")
@@ -66,4 +79,4 @@ async def json_rpc_handler(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8003, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=True)

@@ -19,3 +19,4 @@ river==0.22.0
 starlette==0.45.3
 uvicorn==0.34.0
 albumentations==2.0.8
+starlette-prometheus==0.10.0

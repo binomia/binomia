@@ -12,6 +12,7 @@ export const createQueue = (name: string): Queue => {
 export const transactionsQueue = new TransactionsQueue()
 export const topUpQueue = new TopUpQueue()
 
+
 export const queuesBullAdapter = [
     new BullMQAdapter(transactionsQueue.queue),
     new BullMQAdapter(topUpQueue.queue)

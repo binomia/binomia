@@ -1,4 +1,4 @@
-import { GlobalZodSchema } from "@/auth";
+
 
 export const NODEMAILER_EMAIL: string = process.env.NODEMAILER_EMAIL || "";
 export const NODEMAILER_PASSWORD: string = process.env.NODEMAILER_PASSWORD || "";

@@ -64,10 +64,7 @@ export const fetchRecentTopUps = createAsyncThunk('fetchRecentTopUps', async () 
 export const fetchAllTransactions = createAsyncThunk('fetchAllTransactions', async ({ page, pageSize }: { page: number, pageSize: number }): Promise<any> => {
     try {
         const { data: { recentTopUps } } = await apolloClient.query({ query: TopUpApolloQueries.recentTopUps(), variables: { page, pageSize } });
-        console.log({ recentTopUps });
         const { data: { accountTransactions } } = await apolloClient.query({ query: TransactionApolloQueries.accountTransactions(), variables: { page, pageSize } });
-
-
 
         const topupsMapped = recentTopUps?.map((topup: any) => {
             const date = Number(topup.createdAt);

@@ -9,7 +9,7 @@ export const initSocket = async (io: Server) => {
             console.log("a user connected:", socket.handshake.query.username);
         }
 
-        socket.on("disconnect", () => {            
+        socket.on("disconnect", () => {
             console.log("user disconnected");
         });
     });
