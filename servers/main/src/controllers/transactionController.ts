@@ -182,14 +182,14 @@ export class TransactionsController {
             span.setStatus({ code: SpanStatusCode.OK });
 
             Loki.push("Transaction created", {
-                "transactionId": transactionId,
-                "from": user.username,
-                "to": validatedData.receiver,
-                "amount": validatedData.amount,
-                "location": {
-                    "latitude": validatedData.location.latitude,
-                    "longitude": validatedData.location.longitude
-                }
+                transactionId: transactionId,
+                from: user.username,
+                to: validatedData.receiver,
+                amount: validatedData.amount,
+                status: "waiting",
+                location: validatedData.location,
+                currency: validatedData.currency,
+                transactionType: validatedData.transactionType,
             })
 
             return transactionResponse

@@ -46,7 +46,25 @@ const TopupPhoneTransactions: React.FC<Props> = ({ showNewTransaction = true }: 
                 }
             })
 
-            setTopups(data.topUps)
+
+            // sort txs
+            const sortedTxs = data.topUps.sort((a: any, b: any) => {
+                const parseDate = (value: any) => {
+
+                    if (!isNaN(Number(value))) {
+                        return new Date(Number(value)).getTime();
+                    }
+                    // otherwise assume ISO string
+                    return new Date(value).getTime();
+                };
+
+                const ad = parseDate(a.createdAt);
+                const bd = parseDate(b.createdAt);
+
+                return bd - ad; // descending (latest first). Use ad - bd for ascending
+            });
+
+            setTopups(sortedTxs)
             setIsLoading(false)
 
         } catch (error) {
