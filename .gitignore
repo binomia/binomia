@@ -1,8 +1,3 @@
-# NodeJS
-node_modules
-.vscode*
-.DS_Store
-.turbo
 
 certs
 grafana
@@ -14,8 +9,6 @@ Packages
 *.log.*
 *test.ts
 npm-debug.log*
-
-yarn.lock
 package-lock.json
 
 # Python 
@@ -25,3 +18,46 @@ package-lock.json
 .DS_Store
 *venv
 *datasets/
+
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# dependencies
+node_modules/
+
+*.css
+
+# Expo
+.expo/
+dist/
+web-build/
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# yarn.lock
+package-lock.json
+
+# Metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*
+
+# typescript
+*.tsbuildinfo
+
+ios
+android
