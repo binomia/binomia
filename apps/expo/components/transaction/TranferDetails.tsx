@@ -72,6 +72,9 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                 variables: { message }
             })
 
+            console.log({ createedTransaction });
+            
+
             const transaction = createedTransaction?.createTransaction
             if (transaction) {
                 const accountsData = await AccountAuthSchema.account.parseAsync(transaction?.from)
