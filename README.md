@@ -1,1 +1,1 @@
-# Bitnomia
+# Binomia
