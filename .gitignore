@@ -2,7 +2,7 @@
 certs
 grafana
 postgres
-Packages
+/apps/Packages/
 
 *.env
 *.log
