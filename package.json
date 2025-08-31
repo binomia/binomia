@@ -1,0 +1,17 @@
+{
+	"name": "binomia",
+	"version": "0.0.1",
+	"private": true,
+	"packageManager": "yarn@1.22.22",
+	"workspaces": [
+		"apps/servers/*"
+	],
+	"scripts": {
+		"start": "turbo run dev --parallel",
+		"mobile:dev": "turbo run dev --filter=mobile"
+
+	},
+	"devDependencies": {
+		"turbo": "^1.12.0"
+	}
+}

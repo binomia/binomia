@@ -3,14 +3,14 @@ services:
   main:
     hostname: main
     build:
-      context: "./servers/main/"
+      context: "./apps/servers/main/"
       dockerfile: Dockerfile
-    env_file: "./servers/main/.env"
+    env_file: "./apps/servers/main/.env"
     depends_on:
       - postgres
       - redis
     volumes:
-      - ./servers/main:/app
+      - ./apps/servers/main:/app
       - /app/node_modules
     command: npm run dev
     ports:
@@ -21,14 +21,14 @@ services:
   # notifications:
   notifications:
     build:
-      context: ".//servers/notifications/"
+      context: "./apps/servers/notifications/"
       dockerfile: Dockerfile
-    env_file: "./servers/notifications/.env"
+    env_file: "./apps/servers/notifications/.env"
     depends_on:
       - postgres
       - redis
     volumes:
-      - ./servers/notifications:/app
+      - ./apps/servers/notifications:/app
       - /app/node_modules
     command: npm run dev
     ports:
@@ -39,15 +39,15 @@ services:
   # queues:
   queues:
     build:
-      context: "./servers/queues/"
+      context: "./apps/servers/queues/"
       dockerfile: Dockerfile
-    env_file: "./servers/queues/.env"
+    env_file: "./apps/servers/queues/.env"
     depends_on:
       - postgres
       - redis
     volumes:
-      - ./servers/queues:/app
-      - ./servers/queues/src/certs:/app/certs:ro
+      - ./apps/servers/queues:/app
+      - ./apps/servers/queues/src/certs:/app/certs:ro
       - /app/node_modules
     command: npm run dev
     ports:
@@ -58,11 +58,11 @@ services:
   # anomalies:
   anomalies:
     build:
-      context: "./servers/anomalies/"
+      context: "./apps/servers/anomalies/"
       dockerfile: Dockerfile
-    env_file: "./servers/anomalies/.env"
+    env_file: "./apps/servers/anomalies/.env"
     volumes:
-      - ./servers/anomalies:/app
+      - ./apps/servers/anomalies:/app
     command: python3 main.py
     ports:
       - 8003:8003
