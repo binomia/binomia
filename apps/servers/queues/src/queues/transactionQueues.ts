@@ -25,7 +25,7 @@ export default class TransactionsQueue {
         try {
             switch (true) {
                 case job.name.includes("queueTransaction"): {
-                    const decryptedData = await AES.decrypt(JSON.parse(job.data), ZERO_ENCRYPTION_KEY)
+                    const decryptedData = await AES.decryptAsync(JSON.parse(job.data), ZERO_ENCRYPTION_KEY)
                     const data: CreateQueueedTransactionType = JSON.parse(decryptedData)
 
                     await TransactionController.createQueuedTransaction(data)
@@ -33,7 +33,7 @@ export default class TransactionsQueue {
                     break;
                 }
                 case job.name.includes("queueRequestTransaction"): {
-                    const decryptedData = await AES.decrypt(JSON.parse(job.data), ZERO_ENCRYPTION_KEY)
+                    const decryptedData = await AES.decryptAsync(JSON.parse(job.data), ZERO_ENCRYPTION_KEY)
                     const data: CreateRequestQueueedTransactionType = JSON.parse(decryptedData)
 
                     await TransactionController.createRequestQueueedTransaction(data)

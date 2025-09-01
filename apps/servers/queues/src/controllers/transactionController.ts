@@ -9,7 +9,7 @@ import { CancelRequestedTransactionType, CreateBankingTransactionType, CreateReq
 import { Job, JobJson } from "bullmq"
 import { Op } from "sequelize"
 import shortUUID from "short-uuid"
-import { AES, HASH, RSA } from "cryptografia"
+import { AES, ECC, HASH, RSA } from "cryptografia"
 
 export default class TransactionController {
     static createTransaction = async (data: CreateTransactionType) => {
@@ -111,7 +111,7 @@ export default class TransactionController {
 
     static updateTransactionStatus = async (job: Job) => {
         try {
-            const decryptedData = await AES.decrypt(job.data, ZERO_ENCRYPTION_KEY)
+            const decryptedData = await AES.decryptAsync(job.data, ZERO_ENCRYPTION_KEY)
             const { transactionId } = JSON.parse(decryptedData)
 
             const transaction = await TransactionsModel.findOne({
@@ -158,7 +158,7 @@ export default class TransactionController {
 
             const verify = await RSA.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
             if (verify) {
-                const decryptedData = await AES.decrypt(data, ZERO_ENCRYPTION_KEY)
+                const decryptedData = await AES.decryptAsync(data, ZERO_ENCRYPTION_KEY)
                 await TransactionController.createQueuedTransaction(JSON.parse(decryptedData))
 
                 await queueTransaction.update({
@@ -179,7 +179,7 @@ export default class TransactionController {
         try {
             // [TODO]: implement pending transaction
             const newStatus = "completed"
-            const decryptedData = await AES.decrypt(JSON.parse(data), ZERO_ENCRYPTION_KEY)
+            const decryptedData = await AES.decryptAsync(JSON.parse(data), ZERO_ENCRYPTION_KEY)
             const { transactionId } = JSON.parse(decryptedData)
 
             const transaction = await TransactionsModel.findOne({
@@ -221,31 +221,31 @@ export default class TransactionController {
                 throw "receiver account not found";
 
             const ledgerData = {
-                    sender: {
-                        amount: transactionJSON.amount,
-                        currency: transactionJSON.currency,
-                        accountId: transactionJSON.fromAccount,
-                        transactionId: transactionJSON.transactionId,
-                        type: "debit".toUpperCase(),
-                        status: "completed".toUpperCase(),
-                        beforeBalance: senderAccount.dataValues.pendingBalance || 0.00,
-                        afterBalance: senderAccount.dataValues.balance - transactionJSON.amount || 0.00,
-                        latitude: transactionJSON.location.latitude,
-                        longitude: transactionJSON.location.longitude,                        
-                    },
-                    receiver: {
-                        amount: transactionJSON.amount,
-                        currency: transactionJSON.currency,
-                        accountId: transactionJSON.fromAccount,
-                        transactionId: transactionJSON.transactionId,
-                        type: "credit".toUpperCase(),
-                        status: "executed".toUpperCase(),
-                        beforeBalance: receiverAccount.dataValues.balance || 0.00,
-                        afterBalance: receiverAccount.dataValues.balance + transactionJSON.amount  || 0.00,
-                        latitude: transactionJSON.location.latitude,
-                        longitude: transactionJSON.location.longitude, 
-                    }
+                sender: {
+                    amount: transactionJSON.amount,
+                    currency: transactionJSON.currency,
+                    accountId: transactionJSON.fromAccount,
+                    transactionId: transactionJSON.transactionId,
+                    type: "debit".toUpperCase(),
+                    status: "completed".toUpperCase(),
+                    beforeBalance: senderAccount.dataValues.pendingBalance || 0.00,
+                    afterBalance: senderAccount.dataValues.balance - transactionJSON.amount || 0.00,
+                    latitude: transactionJSON.location.latitude,
+                    longitude: transactionJSON.location.longitude,
+                },
+                receiver: {
+                    amount: transactionJSON.amount,
+                    currency: transactionJSON.currency,
+                    accountId: transactionJSON.fromAccount,
+                    transactionId: transactionJSON.transactionId,
+                    type: "credit".toUpperCase(),
+                    status: "executed".toUpperCase(),
+                    beforeBalance: receiverAccount.dataValues.balance || 0.00,
+                    afterBalance: receiverAccount.dataValues.balance + transactionJSON.amount || 0.00,
+                    latitude: transactionJSON.location.latitude,
+                    longitude: transactionJSON.location.longitude,
                 }
+            }
 
             await insertLadger(ledgerData)
             return newStatus
@@ -292,7 +292,7 @@ export default class TransactionController {
 
             const messageToSign = `${receiverUsername}&${sender.username}@${transaction.amount}@${ZERO_ENCRYPTION_KEY}`
             const hash = await HASH.sha256Async(messageToSign)
-            const verify = await RSA.verify(hash, transaction.signature, ZERO_SIGN_PUBLIC_KEY)
+            const verify = await ECC.verifyAsync(hash, transaction.signature, ZERO_SIGN_PUBLIC_KEY)
 
             if (!verify)
                 throw "error signing transaction"
@@ -500,7 +500,7 @@ export default class TransactionController {
 
                 await insertLadger(ledgerData)
 
-                const encryptedData = await AES.encrypt(JSON.stringify({ transactionId: transactionData.toJSON().transactionId }), ZERO_ENCRYPTION_KEY);
+                const encryptedData = await AES.encryptAsync(JSON.stringify({ transactionId: transactionData.toJSON().transactionId }), ZERO_ENCRYPTION_KEY);
                 await Promise.all([
                     notificationServer("socketEventEmitter", {
                         data: transactionData.toJSON(),
@@ -556,7 +556,7 @@ export default class TransactionController {
                         response: transactionResponse
                     })
 
-                    const encryptedData = await AES.encrypt(JSON.stringify(recurrenceQueueData), ZERO_ENCRYPTION_KEY);
+                    const encryptedData = await AES.encryptAsync(JSON.stringify(recurrenceQueueData), ZERO_ENCRYPTION_KEY);
                     await Promise.all([
                         transactionsQueue.createJobs({
                             jobId,
@@ -914,7 +914,7 @@ export default class TransactionController {
                     ]
                 })
 
-                const encryptedData = await AES.encrypt(JSON.stringify({ transactionId: transactionData.toJSON().transactionId }), ZERO_ENCRYPTION_KEY);
+                const encryptedData = await AES.encryptAsync(JSON.stringify({ transactionId: transactionData.toJSON().transactionId }), ZERO_ENCRYPTION_KEY);
 
                 await Promise.all([
                     notificationServer("socketEventEmitter", {
@@ -966,7 +966,7 @@ export default class TransactionController {
             // if (!card)
             //     throw 'The given card is not linked to the user account'
 
-            // const decryptedCardData = await AES.decrypt(card.toJSON().data, ZERO_ENCRYPTION_KEY)
+            // const decryptedCardData = await AES.decryptAsync(card.toJSON().data, ZERO_ENCRYPTION_KEY)
             // const cardData = Object.assign({}, card.toJSON(), JSON.parse(decryptedCardData))
 
             //[TODO]: Need Payment Gateway Integration

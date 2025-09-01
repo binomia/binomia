@@ -4,7 +4,7 @@ import Button from '@/components/global/Button';
 import BottomSheet from '../global/BottomSheet';
 import { Dimensions } from 'react-native'
 import { Heading, Image, Text, VStack, HStack, Pressable, FlatList, Avatar } from 'native-base'
-import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, getMapLocationImage, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
+import { EXTRACT_FIRST_LAST_INITIALS, FORMAT_CURRENCY, GENERATE_RAMDOM_COLOR_BASE_ON_TEXT, MAKE_FULL_NAME_SHORTEN } from '@/helpers'
 import { scale } from 'react-native-size-matters';
 import { useDispatch, useSelector } from 'react-redux';
 import { recurenceMonthlyData, recurenceWeeklyData } from '@/mocks';
@@ -12,7 +12,7 @@ import { useLocalAuthentication } from '@/hooks/useLocalAuthentication';
 import { TransactionAuthSchema } from '@/auth/transactionAuth';
 import { useMutation } from '@apollo/client';
 import { TransactionApolloQueries } from '@/apollo/query/transactionQuery';
-import { transactionActions } from '@/redux/slices/transactionSlice';
+// import { transactionActions } from '@/redux/slices/transactionSlice';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { accountActions } from '@/redux/slices/accountSlice';
 import { useLocation } from '@/hooks/useLocation'
@@ -20,8 +20,7 @@ import { AccountAuthSchema } from '@/auth/accountAuth';
 import { router } from 'expo-router';
 import { AES } from 'cryptografia';
 import { ZERO_ENCRYPTION_KEY } from '@/constants';
-import { useCloudinary } from '@/hooks/useCloudinary';
-
+import { transactionActions } from '@/redux/slices/transactionSlice';
 type Props = {
     goBack?: () => void
     goNext?: () => void
@@ -47,33 +46,31 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
     const [recurrenceBiweeklyOptionSelected, setRecurrenceBiweeklyOptionSelected] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false)
     const [openOptions, setOpenOptions] = useState<string>("")
-    const { uploadTransactionImages } = useCloudinary();
+    // const { uploadTransactionImages } = useCloudinary();
 
 
     const delay = async (ms: number) => new Promise(res => setTimeout(res, ms))
 
+
+
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
             const location = await getLocation()
-            const image = await uploadTransactionImages(getMapLocationImage({ latitude: location.latitude, longitude: location.longitude }))
-
+            // const image = await uploadTransactionImages(getMapLocationImage({ latitude: location.latitude, longitude: location.longitude }))
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
-                location: Object.assign({}, location, {
-                    uri: image || ""
-                })
+                location: Object.assign({}, location, {})
             })
 
-            const signingKey = await AES.decrypt(user.signingKey, ZERO_ENCRYPTION_KEY)
-            const message = await AES.encrypt(JSON.stringify({ data, recurrence }), signingKey)
+            const signingKey = await AES.decryptAsync(user.signingKey, ZERO_ENCRYPTION_KEY)
+            const message = await AES.encryptAsync(JSON.stringify({ data, recurrence }), signingKey)
 
+            const start = Date.now()
             const { data: createedTransaction } = await createTransaction({
                 variables: { message }
             })
 
-            console.log({ createedTransaction });
-            
 
             const transaction = createedTransaction?.createTransaction
             if (transaction) {
@@ -90,8 +87,11 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                     isFromMe: true,
                     to: receiver
                 }))
+
                 setLoading(false)
                 goNext()
+                const end = Date.now()
+                console.log({ handleOnSend: (end - start) / 1000 + "s" });
             } else {
                 router.navigate("/error?title=Transaction&message=Se ha producido un error al intentar crear la transacción. Por favor, inténtalo de nuevo.")
             }

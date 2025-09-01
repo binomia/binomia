@@ -22,7 +22,7 @@ export const initMethods = (server: JSONRPCServer) => {
                 getJobs.map(async job => {
                     const jsonData = job.asJSON()
 
-                    const decryptedData = await AES.decrypt(JSON.parse(jsonData.data), ZERO_ENCRYPTION_KEY)
+                    const decryptedData = await AES.decryptAsync(JSON.parse(jsonData.data), ZERO_ENCRYPTION_KEY)
                     const response = JSON.parse(decryptedData).response
 
                     if (response?.userId === userId && response.isRecurrence)
@@ -49,7 +49,7 @@ export const initMethods = (server: JSONRPCServer) => {
                 getJobs.map(async job => {
                     const jsonData = job.asJSON()
 
-                    const decryptedData = await AES.decrypt(JSON.parse(jsonData.data), ZERO_ENCRYPTION_KEY)
+                    const decryptedData = await AES.decryptAsync(JSON.parse(jsonData.data), ZERO_ENCRYPTION_KEY)
                     const response = JSON.parse(decryptedData).response
 
                     if (response?.userId === userId && response.isRecurrence)

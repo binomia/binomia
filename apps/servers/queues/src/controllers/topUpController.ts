@@ -36,7 +36,7 @@ export default class TopUpController {
 
             const verify = await RSA.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
             if (verify) {
-                const decryptedData = await AES.decrypt(data, ZERO_ENCRYPTION_KEY)
+                const decryptedData = await AES.decryptAsync(data, ZERO_ENCRYPTION_KEY)
                 const topUpData = await TopUpSchema.createFromQueueTopUp.parseAsync(decryptedData)
 
                 await TopUpsModel.create({
@@ -61,7 +61,7 @@ export default class TopUpController {
 
     static pendingTopUp = async ({ data }: JobJson): Promise<string> => {
         try {
-            const decryptedData = await AES.decrypt(JSON.parse(data), ZERO_ENCRYPTION_KEY)
+            const decryptedData = await AES.decryptAsync(JSON.parse(data), ZERO_ENCRYPTION_KEY)
 
             // [TODO]: implement pending transaction
             const newStatus = "completed"
@@ -97,7 +97,7 @@ export default class TopUpController {
 
     static createTopUp = async (job: JobJson) => {
         try {
-            const decryptedData = await AES.decrypt(JSON.parse(job.data), ZERO_ENCRYPTION_KEY)
+            const decryptedData = await AES.decryptAsync(JSON.parse(job.data), ZERO_ENCRYPTION_KEY)
             const { fullName, amount, companyId, phoneNumber, location, senderUsername, recurrenceData, userId, referenceId } = JSON.parse(decryptedData)
 
             const [phone] = await TopUpPhonesModel.findOrCreate({
@@ -187,7 +187,7 @@ export default class TopUpController {
                 ]
             })
 
-            const encryptedData = await AES.encrypt(JSON.stringify({
+            const encryptedData = await AES.encryptAsync(JSON.stringify({
                 id: topUp.toJSON().id,
                 phone: phoneNumber,
                 amount: amount,
@@ -196,12 +196,12 @@ export default class TopUpController {
             }), ZERO_ENCRYPTION_KEY)
 
 
-            await topUpQueue.createJobs({
-                jobId: `pendingTopUp@${shortUUID.generate()}${shortUUID.generate()}`,
-                jobName: "pendingTopUp",
-                jobTime: "everyThirtyMinutes",
-                data: encryptedData
-            });
+                await topUpQueue.createJobs({
+                    jobId: `pendingTopUp@${shortUUID.generate()}${shortUUID.generate()}`,
+                    jobName: "pendingTopUp",
+                    jobTime: "everyThirtyMinutes",
+                    data: encryptedData
+                });
 
             if (recurrenceData.time !== "oneTime") {
                 const jobId = `${recurrenceData.title}@${recurrenceData.time}@${shortUUID.generate()}${shortUUID.generate()}`
@@ -222,7 +222,7 @@ export default class TopUpController {
                     updatedAt: Date.now(),
                 }
 
-                const encryptedRecurrenceData = await AES.encrypt(JSON.stringify({
+                const encryptedRecurrenceData = await AES.encryptAsync(JSON.stringify({
                     id: topUp.toJSON().id,
                     phone: phoneNumber,
                     amount: amount,
@@ -230,12 +230,12 @@ export default class TopUpController {
                     response: responseData
                 }), ZERO_ENCRYPTION_KEY)
 
-                await topUpQueue.createJobs({
-                    jobId,
-                    jobName: recurrenceData.title,
-                    jobTime: recurrenceData.time,
-                    data: encryptedRecurrenceData
-                });
+                    await topUpQueue.createJobs({
+                        jobId,
+                        jobName: recurrenceData.title,
+                        jobTime: recurrenceData.time,
+                        data: encryptedRecurrenceData
+                    });
             }
 
             return {
