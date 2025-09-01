@@ -5408,10 +5408,10 @@ crypto-js@^4.2.0:
   resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-4.2.0.tgz#4d931639ecdfd12ff80e8186dba6af2c2e856631"
   integrity sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==
 
-cryptografia@^0.0.11:
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/cryptografia/-/cryptografia-0.0.11.tgz#9d41eae42a8e7d16c8e91b9c43f5071090488471"
-  integrity sha512-D3CTsPUPIliNOaGw0rrV9lv8rblTE2Pp2jE8A5qS1mfQmX4P2EocPaguqToMmb9+oJtk6EUCez2r9kGaXysvxA==
+cryptografia@^0.0.16:
+  version "0.0.16"
+  resolved "https://registry.yarnpkg.com/cryptografia/-/cryptografia-0.0.16.tgz#ffb53783ce8e2e73d6ad615e4f8d89b67b9b657e"
+  integrity sha512-nTfvHrp5mJC+UVDnnwihYrKre1soCTrinWw2Sv9BNM/HV5p/DcVO/PTAyN/QndFtcKHE1Yj5kEQ718jQMAGBDQ==
   dependencies:
     "@types/crypto-js" "^4.2.2"
     "@types/elliptic" "^6.4.18"

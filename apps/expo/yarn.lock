@@ -7354,10 +7354,10 @@ crypto-random-string@^4.0.0:
   dependencies:
     type-fest "^1.0.1"
 
-cryptografia@^0.0.10:
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/cryptografia/-/cryptografia-0.0.10.tgz#dcd462cb48282a2d70b69fcf865f52186384fe91"
-  integrity sha512-BdCZGUapBXYnbul3pLganbym5s1sJ3g36wWERjb9LIdasLcJuHhrTrgjbtx7B7dhbVjPHe43ajN+rXb0TtLD6g==
+cryptografia@^0.0.16:
+  version "0.0.16"
+  resolved "https://registry.yarnpkg.com/cryptografia/-/cryptografia-0.0.16.tgz#ffb53783ce8e2e73d6ad615e4f8d89b67b9b657e"
+  integrity sha512-nTfvHrp5mJC+UVDnnwihYrKre1soCTrinWw2Sv9BNM/HV5p/DcVO/PTAyN/QndFtcKHE1Yj5kEQ718jQMAGBDQ==
   dependencies:
     "@types/crypto-js" "^4.2.2"
     "@types/elliptic" "^6.4.18"
