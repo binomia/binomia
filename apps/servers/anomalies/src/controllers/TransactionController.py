@@ -24,6 +24,7 @@ class TransactionController:
         """
         Extract numerical features from a transaction for fraud detection.
         """
+        # [speed, distance, amount, currency, is_transfer, is_mobile, is_pending]
         return [
             transaction["speed"],
             transaction["distance"],
