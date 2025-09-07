@@ -17,9 +17,6 @@ import { SocketContextProvider } from '@/contexts/socketContext';
 import { TopUpContextProvider } from '@/contexts/topUpContext';
 import { RouterContextProvider } from '@/contexts/RouterContext';
 import * as Sentry from '@sentry/react-native';
-import { SQLiteProvider } from 'expo-sqlite';
-import { DATABASE_NAME } from '@/constants';
-
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const SpaceMono = require('../fonts/SpaceMono-Regular.ttf');
@@ -78,26 +75,24 @@ const Layout = () => {
 
 
 	return (
-		<Suspense fallback={<ActivityIndicator size={"large"}/>}>
-			<SQLiteProvider databaseName={DATABASE_NAME}>
-				<NativeBaseProvider theme={theme}>
-					<Provider store={store}>
-						<ApolloProvider client={apolloClient}>
-							<SessionContextProvider>
-								<GlobalContextProvider>
-									<SocketContextProvider>
-										<TopUpContextProvider>
-											<View onLayout={onLayoutRootView} style={{ flex: 1 }}>
-												<RouterContextProvider />
-											</View>
-										</TopUpContextProvider>
-									</SocketContextProvider>
-								</GlobalContextProvider>
-							</SessionContextProvider>
-						</ApolloProvider>
-					</Provider >
-				</NativeBaseProvider>
-			</SQLiteProvider>
+		<Suspense fallback={<ActivityIndicator size={"large"} />}>
+			<NativeBaseProvider theme={theme}>
+				<Provider store={store}>
+					<ApolloProvider client={apolloClient}>
+						<SessionContextProvider>
+							<GlobalContextProvider>
+								<SocketContextProvider>
+									<TopUpContextProvider>
+										<View onLayout={onLayoutRootView} style={{ flex: 1 }}>
+											<RouterContextProvider />
+										</View>
+									</TopUpContextProvider>
+								</SocketContextProvider>
+							</GlobalContextProvider>
+						</SessionContextProvider>
+					</ApolloProvider>
+				</Provider >
+			</NativeBaseProvider>
 		</Suspense>
 	);
 }

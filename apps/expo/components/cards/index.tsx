@@ -9,7 +9,6 @@ import { VStack, Text, HStack, FlatList, Heading, Image, Pressable } from 'nativ
 import { scale } from 'react-native-size-matters'
 import { Dimensions, SafeAreaView } from 'react-native'
 import { useDispatch, useSelector } from 'react-redux'
-import { FlagsList } from 'aws-sdk/clients/guardduty'
 import { CardType } from '@/types'
 import { americanExpressLogo, jcbLogo, mastercardLogo, noCard, visaLogo } from '@/assets'
 import { useMutation } from '@apollo/client';
@@ -27,7 +26,7 @@ type Props = {
 const { height } = Dimensions.get('window')
 
 const Cards: React.FC<Props> = ({ open = false, onCloseFinish = () => { }, justSelecting = false }) => {
-    const ref = useRef<FlagsList>(null);
+    const ref = useRef<typeof FlatList>(null);
     const pagerRef = useRef<PagerView>(null);
     const dispatch = useDispatch()
     const [showCardModification, setShowCardModification] = useState<boolean>(false)

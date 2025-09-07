@@ -56,7 +56,6 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
     const handleOnSend = async (recurrence: { title: string, time: string }) => {
         try {
             const location = await getLocation()
-            // const image = await uploadTransactionImages(getMapLocationImage({ latitude: location.latitude, longitude: location.longitude }))
             const data = await TransactionAuthSchema.createTransaction.parseAsync({
                 receiver: receiver.username,
                 amount: parseFloat(transactionDeytails.amount),
@@ -87,7 +86,6 @@ const TransactionDetails: React.FC<Props> = ({ onClose = () => { }, goNext = () 
                     isFromMe: true,
                     to: receiver
                 }))
-
                 setLoading(false)
                 goNext()
                 const end = Date.now()

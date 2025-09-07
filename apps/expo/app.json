@@ -13,8 +13,8 @@
       "backgroundColor": "#1D9B48"
     },
     "ios": {
-      "buildNumber": "1",
-      "supportsTablet": true,
+      "supportsTablet": false,
+      "developmentTeam": "QYTMGGLSQ3", 
       "bundleIdentifier": "com.binomia.com",
       "infoPlist": {
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera.",
@@ -49,10 +49,13 @@
     },
     "extra": {
       "eas": {
-        "projectId": "81aae9d0-025a-4c2c-b773-576219463b70"
+        "projectId": "c0aa455f-245f-46f3-bb6d-6f51cae86e72"
+      },
+      "router": {
+        "origin": false
       }
     },
-    "owner": "brayhandeaza",
+    "owner": "binomia",
     "plugins": [
       "react-native-document-scanner-plugin",
       [
@@ -142,7 +145,8 @@
           "project": "binomia",
           "organization": "brayhan-qo"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "runtimeVersion": {
       "policy": "appVersion"

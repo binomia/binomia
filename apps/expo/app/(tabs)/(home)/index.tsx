@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import colors from '@/colors';
 import Button from '@/components/global/Button';
 import QRScannerScreen from '@/components/global/QRScanner';
@@ -16,12 +16,7 @@ import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { fetchRecentTopUps, fetchRecentTransactions } from '@/redux/fetchHelper';
 import { accountActions } from '@/redux/slices/accountSlice';
-import { useSQLiteContext } from 'expo-sqlite';
-import { drizzle } from 'drizzle-orm/expo-sqlite';
-import * as schema from "@/db/schemas"
 import TransactionSkeleton from '@/components/transaction/transactionSkeleton';
-
-
 
 
 const { width } = Dimensions.get('window');
@@ -37,18 +32,7 @@ const HomeScreen: React.FC = () => {
 	const [showBottomSheet, setShowBottomSheet] = useState(false)
 	const [refreshing, setRefreshing] = useState(false);
 
-	const dbContext = useSQLiteContext();
-	const db = drizzle(dbContext, { schema });
 
-	useEffect(() => {
-		(async () => {
-			const _users = await db.query.searchedUsersSchema.findMany({
-				limit: 10
-			})
-			// console.log({ users });
-		})()
-
-	}, [])
 
 	const fetchAccount = async () => {
 		try {

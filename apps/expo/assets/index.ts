@@ -80,17 +80,11 @@ import location from './icons/location.png';
 import allIcon from './icons/all.png';
 
 
-// lotties files
-import waitingLottie from './lottie/waiting.json';
-import facemaskLottie from './lottie/facemask.json';
-
 
 export {
     drPlaceHolder,
     splash,
     faceMask,
-    facemaskLottie,
-    waitingLottie,
     waiting,
     allIcon,
     errorIcon,

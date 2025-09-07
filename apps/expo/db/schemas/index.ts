@@ -1,1 +1,0 @@
-export { searchedUsersSchema } from "./usersSchema"
