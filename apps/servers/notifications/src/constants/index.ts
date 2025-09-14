@@ -19,4 +19,3 @@ export const NOTIFICATION_REDIS_SUBSCRIPTION_CHANNEL = {
 
 
 export const evironmentVariables = GlobalZodSchema.evironmentVariables.parse(process.env)
- 

@@ -29,6 +29,7 @@ def detect_fraudulent_transaction(features: list):
         print(f"Error processing transaction: {e}")
         return False
 
+
 @dispatcher.add_method
 def retrain_model(features: list):
     try:
@@ -40,6 +41,8 @@ def retrain_model(features: list):
         return False
 
 # text :
+
+
 @dispatcher.add_method
 def add(a: int, b: int) -> int:
     return a + b

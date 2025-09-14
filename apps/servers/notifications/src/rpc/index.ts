@@ -17,7 +17,6 @@ export const initMethods = (server: JSONRPCServer, io: Server) => {
             await Email.send({ to, subject, text, html })
             return {
                 token,
-                // signature
             }
 
         } catch (error) {
@@ -49,7 +48,7 @@ export const initMethods = (server: JSONRPCServer, io: Server) => {
 
     server.addMethod("socketEventEmitter", async ({ data, channel, senderSocketRoom, recipientSocketRoom }: { data: any, channel: string, senderSocketRoom: string, recipientSocketRoom: string }) => {
         try {
-            io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
+            // io.to([recipientSocketRoom, senderSocketRoom]).emit(channel, data)
             return true
 
         } catch (error) {

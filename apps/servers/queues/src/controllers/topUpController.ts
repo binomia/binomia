@@ -5,7 +5,7 @@ import { JobJson } from "bullmq";
 import { Op } from "sequelize";
 import { TopUpSchema } from "@/auth/topUpSchema";
 import { topUpQueue } from "@/queues";
-import { AES, HASH, RSA } from "cryptografia";
+import { AES, HASH, RSA, ECC } from "cryptografia";
 
 
 export default class TopUpController {
@@ -34,7 +34,7 @@ export default class TopUpController {
             }))
 
 
-            const verify = await RSA.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
+            const verify = await ECC.verifyAsync(hash, signature, ZERO_SIGN_PRIVATE_KEY)
             if (verify) {
                 const decryptedData = await AES.decryptAsync(data, ZERO_ENCRYPTION_KEY)
                 const topUpData = await TopUpSchema.createFromQueueTopUp.parseAsync(decryptedData)

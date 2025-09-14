@@ -156,7 +156,7 @@ export default class TransactionController {
                 ZERO_ENCRYPTION_KEY
             }))
 
-            const verify = await RSA.verify(hash, signature, ZERO_SIGN_PRIVATE_KEY)
+            const verify = await ECC.verifyAsync(hash, signature, ZERO_SIGN_PRIVATE_KEY)
             if (verify) {
                 const decryptedData = await AES.decryptAsync(data, ZERO_ENCRYPTION_KEY)
                 await TransactionController.createQueuedTransaction(JSON.parse(decryptedData))
@@ -619,7 +619,7 @@ export default class TransactionController {
         try {
             const message = `${transaction.transactionId}&${transaction.amount}@${ZERO_ENCRYPTION_KEY}`
             const hash = await HASH.sha256Async(message)
-            const verify = await RSA.verify(hash, transaction.signature, ZERO_SIGN_PUBLIC_KEY)
+            const verify = await ECC.verifyAsync(hash, transaction.signature, ZERO_SIGN_PUBLIC_KEY)
 
             if (!verify)
                 throw "Transaction signature verification failed"
@@ -805,7 +805,7 @@ export default class TransactionController {
             const message = `${transactionId}&${transaction.toJSON().amount}@${ZERO_ENCRYPTION_KEY}`
             const hash = await HASH.sha256Async(message)
 
-            const verify = await RSA.verify(hash, transaction.toJSON().signature, ZERO_SIGN_PUBLIC_KEY)
+            const verify = await ECC.verifyAsync(hash, transaction.toJSON().signature, ZERO_SIGN_PUBLIC_KEY)
             if (!verify)
                 throw "error verificando transacción"
 
@@ -975,7 +975,7 @@ export default class TransactionController {
             const messageToSign = `${validatedData.accountId}&${validatedData.userId}@${validatedData.amount}@${ZERO_ENCRYPTION_KEY}`
             const hash = await HASH.sha256Async(messageToSign)
 
-            const verifySignature = await RSA.verify(hash, validatedData.signature, ZERO_SIGN_PUBLIC_KEY)
+            const verifySignature = await ECC.verifyAsync(hash, validatedData.signature, ZERO_SIGN_PUBLIC_KEY)
             if (!verifySignature)
                 throw "invalid signature"
 

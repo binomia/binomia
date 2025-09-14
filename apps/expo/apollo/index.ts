@@ -7,6 +7,8 @@ import { Alert, Platform } from 'react-native';
 import * as Network from 'expo-network';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
+import * as Application from 'expo-application';
+import { HASH } from 'cryptografia';
 
 const httpLink = createHttpLink({
     uri: MAIN_SERVER_URL,
@@ -38,14 +40,14 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 
 const setAuthorizationLink = setContext(async (_, previousContext) => {
     const jwt = await useAsyncStorage().getItem("jwt");
-    const applicationId = await useAsyncStorage().getItem("applicationId");
-    const ipAddress = await Network.getIpAddressAsync();    
+    const ipAddress = await Network.getIpAddressAsync();
+    const deviceId = await Application.getInstallationTimeAsync();
 
     return {
         headers: {
             ipAddress,
             platform: Platform.OS,
-            "deviceId": applicationId,
+            "deviceId": HASH.sha256(deviceId.toString()),
             "authorization": `Bearer ${jwt}`,
             ...previousContext.headers
         },

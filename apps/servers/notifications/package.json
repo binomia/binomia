@@ -18,7 +18,7 @@
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
-    "cromio": "^0.0.8",
+    "cromio": "^0.0.14",
     "cryptografia": "^0.0.16",
     "dotenv": "^16.4.5",
     "expo-server-sdk": "^3.13.0",
@@ -34,7 +34,7 @@
     "short-uuid": "^5.2.0",
     "socket.io": "^4.8.1",
     "socket.io-redis": "^6.1.1",
-    "sticky-session": "^1.1.2",
+    "sticky-session": "^0.1.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.6.3",
@@ -47,7 +47,7 @@
     ]
   },
   "scripts": {
-    "dev": "nodemon --exec ts-node -r tsconfig-paths/register app.ts",
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register server.ts",
     "start": "nodemon --exec ts-node -r tsconfig-paths/register index.ts"
   },
   "devDependencies": {

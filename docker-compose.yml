@@ -33,6 +33,7 @@ services:
     command: npm run dev
     ports:
       - 8001:8001
+      - 7001:7001
     networks:
       - binomia-network
 
@@ -52,6 +53,8 @@ services:
     command: npm run dev
     ports:
       - 8002:8002
+      - 7002:7002
+
     networks:
       - binomia-network
 
@@ -66,6 +69,8 @@ services:
     command: python3 main.py
     ports:
       - 8003:8003
+      - 7003:7003
+
     networks:
       - binomia-network
 

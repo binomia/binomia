@@ -18,6 +18,7 @@ import { TopUpContextProvider } from '@/contexts/topUpContext';
 import { RouterContextProvider } from '@/contexts/RouterContext';
 import * as Sentry from '@sentry/react-native';
 
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const SpaceMono = require('../fonts/SpaceMono-Regular.ttf');
 
