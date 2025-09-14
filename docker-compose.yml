@@ -76,12 +76,12 @@ services:
   # anomaly:
   anomaly:
     build:
-      context: "./apps/servers/anomaly/"
+      context: "./apps/servers/onnx/"
       dockerfile: Dockerfile
-    env_file: "./apps/servers/anomaly/.env"
+    env_file: "./apps/servers/onnx/.env"
     volumes:
-      - ./apps/servers/anomaly:/app
-    command: npx ts-node index.ts
+      - ./apps/servers/onnx:/app
+    command: node index.js
     ports:
       - 8003:8003
       - 7003:7003

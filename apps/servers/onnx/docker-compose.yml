@@ -1,0 +1,25 @@
+services:
+  anomaly:
+    build:
+      context: "."
+      dockerfile: Dockerfile
+    env_file: ".env"
+    volumes:
+      - .:/app
+    command: node index.js
+    ports:
+      - 8003:8003
+      - 7003:7003
+
+    networks:
+      - binomia-network
+
+networks:
+  binomia-network:
+    driver: bridge
+
+volumes:
+  tempo-data:
+    driver: local
+  grafana-data:
+    driver: local

@@ -2,9 +2,8 @@
 #include <algorithm>
 #include <memory>
 #include <vector>
-#include "fraud_detection_pretrained_model.h"
+#include "fraud_detection_rf.h" // Embedded JSON header generated via xxd
 #include "json.hpp" // nlohmann/json.hpp
-
 
 using json = nlohmann::json;
 
