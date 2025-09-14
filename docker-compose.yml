@@ -58,15 +58,30 @@ services:
     networks:
       - binomia-network
 
+  # # anomalies:
   # anomalies:
-  anomalies:
+  #   build:
+  #     context: "./apps/servers/anomalies/"
+  #     dockerfile: Dockerfile
+  #   env_file: "./apps/servers/anomalies/.env"
+  #   volumes:
+  #     - ./apps/servers/anomalies:/app
+  #   command: python3 main.py
+  #   ports:
+  #     - 8003:8003
+  #     - 7003:7003
+  #   networks:
+  #     - binomia-network
+
+  # anomaly:
+  anomaly:
     build:
-      context: "./apps/servers/anomalies/"
+      context: "./apps/servers/anomaly/"
       dockerfile: Dockerfile
-    env_file: "./apps/servers/anomalies/.env"
+    env_file: "./apps/servers/anomaly/.env"
     volumes:
-      - ./apps/servers/anomalies:/app
-    command: python3 main.py
+      - ./apps/servers/anomaly:/app
+    command: npx ts-node index.ts
     ports:
       - 8003:8003
       - 7003:7003

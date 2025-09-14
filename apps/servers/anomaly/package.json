@@ -1,0 +1,23 @@
+{
+  "name": "anomaly",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "dev": "nodemon index.ts"
+  },
+  "keywords": [],
+  "author": "Brayhan De Aza",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.3.1",
+    "ts-node": "^10.9.2"
+  },
+  "dependencies": {
+    "http": "^0.0.1-security",
+    "node-addon-api": "^8.0.0",
+    "typescript": "^5.9.2",
+    "cromio": "^0.0.14"
+  }
+}
