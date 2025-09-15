@@ -6,7 +6,9 @@ services:
     env_file: ".env"
     volumes:
       - .:/app
-    command: node index.js
+      - /app/node_modules
+      - /app/build 
+    command: npm run dev
     ports:
       - 8003:8003
       - 7003:7003
@@ -17,9 +19,3 @@ services:
 networks:
   binomia-network:
     driver: bridge
-
-volumes:
-  tempo-data:
-    driver: local
-  grafana-data:
-    driver: local

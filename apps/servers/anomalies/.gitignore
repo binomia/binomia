@@ -1,1 +1,5 @@
 Packages/
+data/
+fraud_detection.onnx
+package-lock.json
+build/

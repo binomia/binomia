@@ -1,7 +1,25 @@
 {
-    "name": "anomalies",
-    "version": "1.0.0",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    }
+  "name": "anomalies",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "type": "commonjs",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "build": "node-gyp rebuild",
+    "dev": "nodemon index.ts"
+  },
+  "dependencies": {
+    "cromio": "^0.0.14",
+    "dotenv": "^17.2.2",
+    "fastify": "^5.6.0",
+    "node-addon-api": "^8.5.0",
+    "node-gyp": "^11.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.4.0",
+    "nodemon": "^3.1.10"
+  }
 }

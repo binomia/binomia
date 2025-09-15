@@ -1,1 +1,0 @@
-cmd_Release/iforest.node := c++ -bundle -framework Accelerate -Wl,-rpath,@loader_path -undefined dynamic_lookup -Wl,-search_paths_first -mmacosx-version-min=10.15 -arch arm64 -L./Release -stdlib=libc++  -o Release/iforest.node Release/obj.target/iforest/addon.o Release/nothing.a 
